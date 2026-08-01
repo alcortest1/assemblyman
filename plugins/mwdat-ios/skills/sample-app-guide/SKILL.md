@@ -7,7 +7,7 @@ description: Building a complete DAT app with camera streaming and photo capture
 
 Build an iOS DAT app with camera streaming and photo capture.
 
-This walkthrough covers app setup, registration, streaming, and capture. Pair it with the [CameraAccess sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples).
+This walkthrough covers app setup, registration, streaming, and capture. Pair it with the [AssemblyMan sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples).
 
 ## Project setup
 
@@ -204,6 +204,6 @@ Your DAT app should only depend on:
 
 ## Links
 
-- [CameraAccess sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples)
+- [AssemblyMan sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples)
 - [Full integration guide](https://wearables.developer.meta.com/docs/build-integration-ios)
 - [Developer documentation](https://wearables.developer.meta.com/docs/develop/)

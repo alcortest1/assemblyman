@@ -109,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [API] `MockDeviceKitInterface`, `MockDevice`, `MockCameraKit`, and related protocols no longer require `@MainActor` and now conform to `Sendable`, making them safe to use from any thread.
 - [API] `MockCameraKit.setCameraFeed(fileURL:)` and `setCapturedImage(fileURL:)` are no longer `async`.
-- Improved the Camera Access App MockDevice UI.
+- Improved the AssemblyMan App MockDevice UI.
 
 ### Fixed
 
@@ -135,7 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [API] `HingeState` enum.
 - [API] `DeviceState` struct.
 - [Dependency] `nanopb` library dependency which was blocking Apple review for iOS apps.
-- [CameraAccess] Removed timer functionality.
+- [AssemblyMan] Removed timer functionality.
 
 ### Fixed
 
@@ -143,7 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- [CameraAccess] Improved photo capture flow.
+- [AssemblyMan] Improved photo capture flow.
 
 ## [0.4.0] - 2026-02-03
 
@@ -172,14 +172,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [API] In `PermissionError`, `companionAppNotInstalled` has been renamed to `metaAINotInstalled`.
 - Relaxed constraints to API methods, allowing some to run outside `@MainActor`.
-- The Camera Access app streaming UI reflects device availability.
-- The Camera Access app shows errors when incompatible glasses are found.
-- The Camera Access app can now run in background mode, without interrupting streaming (but stopping video decoding).
+- The AssemblyMan app streaming UI reflects device availability.
+- The AssemblyMan app shows errors when incompatible glasses are found.
+- The AssemblyMan app can now run in background mode, without interrupting streaming (but stopping video decoding).
 
 ### Fixed
 
 - Streaming status is set to `stopped` if permission is not granted.
-- Fixed UI issues in the Camera Access app.
+- Fixed UI issues in the AssemblyMan app.
 
 ## [0.2.1] - 2025-12-04
 
@@ -219,7 +219,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `StreamingResolution.Medium` from 540x960 to 504x896 to match Android.
 - `AutoDeviceSelector` now selects or drops devices based on connectivity state.
 - Adaptive Bit Rate (streaming) now works with the provided resolution and frame rate hints.
-- Camera Access app redesigned and updated to the current SDK version.
+- AssemblyMan app redesigned and updated to the current SDK version.
 
 ### Removed
 

@@ -16,14 +16,14 @@ four separable systems:
 | System | Location | Consumed by |
 |--------|----------|-------------|
 | SDK distribution | Git tags resolved over Swift Package Manager | Xcode projects |
-| Reference apps | `samples/CameraAccess`, `samples/DisplayAccess` | Developers reading real integration code |
+| Reference apps | `samples/AssemblyMan`, `samples/DisplayAccess` | Developers reading real integration code |
 | AI knowledge base | `plugins/mwdat-ios/skills/` → five published surfaces | Claude Code, Codex, Copilot, Cursor, AGENTS.md readers |
 | Installer | `install-skills.sh` | Anyone wiring the knowledge base into their own project |
 
 The Swift sources for `MWDATCore`/`MWDATCamera`/`MWDATDisplay`/`MWDATMockDevice` are not in
 the tree; the working copy contains no `Package.swift` or `.xcframework`. Consumers resolve
 a tagged release from `https://github.com/facebook/meta-wearables-dat-ios`, which is how the
-sample apps themselves depend on it — `samples/CameraAccess/.../Package.resolved` pins
+sample apps themselves depend on it — `samples/AssemblyMan/.../Package.resolved` pins
 version `0.8.0` at revision `2e30f125`.
 
 Per [`CONTRIBUTING.md`](../CONTRIBUTING.md), the GitHub repo is **generated from an internal
@@ -73,13 +73,13 @@ Registration is an out-of-process handshake that leaves and re-enters the app vi
 URL scheme:
 
 1. `try Wearables.configure()` in the `App` initializer
-   (`samples/CameraAccess/CameraAccess/CameraAccessApp.swift:37`). Configuration reads the
+   (`samples/AssemblyMan/AssemblyMan/AssemblyManApp.swift:37`). Configuration reads the
    `MWDAT` dictionary from `Info.plist`; failures are logged, not fatal.
 2. `Wearables.shared.startRegistration()` hands off to the Meta AI app.
 3. Meta AI returns control by opening `<scheme>://…?metaWearablesAction=…`.
 4. An always-mounted, invisible `RegistrationView` catches it with `.onOpenURL`, filters on
    the `metaWearablesAction` query item, and forwards to
-   `Wearables.shared.handleUrl(url)` (`samples/CameraAccess/CameraAccess/Views/RegistrationView.swift:27`).
+   `Wearables.shared.handleUrl(url)` (`samples/AssemblyMan/AssemblyMan/Views/RegistrationView.swift:27`).
 5. `registrationStateStream()` emits the new `RegistrationState`; the UI switches on it.
 
 The URL handler must be mounted independently of whatever screen is showing — both samples
@@ -102,7 +102,7 @@ Wearables.shared
   and `Display.start()/stop()` are synchronous.
 - `DeviceSessionState.stopped` is **terminal** — a stopped session is discarded and a new one
   created, never restarted (`DeviceSessionManager.startStateObserver`,
-  `samples/CameraAccess/CameraAccess/ViewModels/DeviceSessionManager.swift:175`).
+  `samples/AssemblyMan/AssemblyMan/ViewModels/DeviceSessionManager.swift:175`).
 
 ### 2.4 Observation
 
@@ -127,10 +127,10 @@ of the integration.
 
 Both samples are SwiftUI + `@Observable` MVVM, `@MainActor` throughout, targeting iOS 17.
 
-### CameraAccess
+### AssemblyMan
 
 ```
-CameraAccessApp                    configure() • MockDeviceKit wiring (DEBUG) • alerts
+AssemblyManApp                    configure() • MockDeviceKit wiring (DEBUG) • alerts
  ├─ MainAppView                    routes on registrationState
  │   ├─ HomeScreenView             unregistered → connect flow
  │   └─ StreamSessionView          registered → StreamView / NonStreamView
@@ -183,9 +183,9 @@ Testing without hardware is a first-class path, not an afterthought.
 - **UI tests**: the app hosts an **in-process HTTP test server** so the test process can
   drive mock devices across the process boundary. On launch with `--ui-testing`, the app
   enables MockDeviceKit and calls `MockDeviceKit.shared.startTestServer(portFilePath:)`
-  (`CameraAccessApp.swift:52`). The server writes its port to the file named by
+  (`AssemblyManApp.swift:52`). The server writes its port to the file named by
   `MWDAT_TEST_SERVER_PORT_FILE`; `MockDeviceTestClient` in the test target polls that file
-  and issues commands (`CameraAccessUITests.swift:34`).
+  and issues commands (`AssemblyManUITests.swift:34`).
   Stale port files are deleted in `setUp` so the client can't latch onto a previous run.
 - **Debug menu**: a shake/overlay-driven `MockDeviceKitView` for manual simulation, compiled
   out of release builds by `#if DEBUG`.
@@ -249,7 +249,7 @@ An app that skips any of this fails at runtime, usually with an unhelpful sympto
 
 | Key | Purpose |
 |-----|---------|
-| `AppLinkURLScheme` | Scheme Meta AI calls back on, e.g. `cameraaccess://`. Must match `CFBundleURLTypes`. |
+| `AppLinkURLScheme` | Scheme Meta AI calls back on, e.g. `assemblyman://`. Must match `CFBundleURLTypes`. |
 | `MetaAppID` | App ID from Wearables Developer Center. Required **without** Developer Mode. |
 | `ClientToken` | Client token from the same. Required without Developer Mode. |
 | `TeamID` | Apple Developer Team ID (`$(DEVELOPMENT_TEAM)`). |
@@ -260,7 +260,7 @@ An app that skips any of this fails at runtime, usually with an unhelpful sympto
 `NSLocalNetworkUsageDescription` + `NSBonjourServices` (`_bonjour._tcp`) for the Wi-Fi
 transport added in 0.8.0.
 
-**Entitlements**: keychain access group; CameraAccess additionally declares
+**Entitlements**: keychain access group; AssemblyMan additionally declares
 `com.apple.developer.networking.HotspotConfiguration` and
 `com.apple.developer.networking.wifi-info`.
 
@@ -289,9 +289,9 @@ unset is the classic "forgot Developer Mode" symptom.
 
 ```bash
 # Samples
-open samples/CameraAccess/CameraAccess.xcodeproj
-xcodebuild -scheme CameraAccess -destination 'platform=iOS Simulator,name=iPhone 16'
-xcodebuild test -scheme CameraAccess -destination 'platform=iOS Simulator,name=iPhone 16'
+open samples/AssemblyMan/AssemblyMan.xcodeproj
+xcodebuild -scheme AssemblyMan -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild test -scheme AssemblyMan -destination 'platform=iOS Simulator,name=iPhone 16'
 
 # Knowledge base into another project
 ./install-skills.sh all
