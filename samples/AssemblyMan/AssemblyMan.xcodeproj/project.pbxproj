@@ -45,6 +45,8 @@
 		DE000000000000000000000B /* IndustryControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000A /* IndustryControls.swift */; };
 		DE000000000000000000000D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000C /* SettingsView.swift */; };
 		DE000000000000000000000F /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000E /* AppSettings.swift */; };
+		DF0000000000000000000001 /* SegmentMaskOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0000000000000000000000 /* SegmentMaskOverlay.swift */; };
+		DF0000000000000000000003 /* DeveloperSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0000000000000000000002 /* DeveloperSection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,6 +119,8 @@
 		DE000000000000000000000A /* IndustryControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndustryControls.swift; sourceTree = "<group>"; };
 		DE000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DE000000000000000000000E /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		DF0000000000000000000000 /* SegmentMaskOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentMaskOverlay.swift; sourceTree = "<group>"; };
+		DF0000000000000000000002 /* DeveloperSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -202,6 +206,7 @@
 				E6FD3BCD2EB4D53A00E7FE5D /* NonStreamView.swift */,
 				DE000000000000000000000C /* SettingsView.swift */,
 				DD00000000000000000001 /* DesignSystem */,
+				DF0000000000000000000002 /* DeveloperSection.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -263,6 +268,7 @@
 		DD00000000000000000001 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				DF0000000000000000000000 /* SegmentMaskOverlay.swift */,
 				DE0000000000000000000000 /* Theme.swift */,
 				DE0000000000000000000002 /* OperatorGlyph.swift */,
 				DE0000000000000000000004 /* BlueprintFrame.swift */,
@@ -440,6 +446,8 @@
 				8FFD5FF52E8422580035E446 /* CircleButton.swift in Sources */,
 				8FFD5FF62E8422580035E446 /* CustomButton.swift in Sources */,
 				E6FD3BCE2EB4D53A00E7FE5D /* NonStreamView.swift in Sources */,
+				DF0000000000000000000001 /* SegmentMaskOverlay.swift in Sources */,
+				DF0000000000000000000003 /* DeveloperSection.swift in Sources */,
 				DE0000000000000000000001 /* Theme.swift in Sources */,
 				DE0000000000000000000003 /* OperatorGlyph.swift in Sources */,
 				DE0000000000000000000005 /* BlueprintFrame.swift in Sources */,

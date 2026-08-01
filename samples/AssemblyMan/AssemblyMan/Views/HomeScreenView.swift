@@ -18,6 +18,7 @@ import SwiftUI
 
 struct HomeScreenView: View {
   var viewModel: WearablesViewModel
+  var openSettings: () -> Void
 
   private var isConnecting: Bool {
     viewModel.registrationState == .registering
@@ -69,8 +70,17 @@ struct HomeScreenView: View {
           .overlineStyle(color: Theme.neutral500)
       }
 
-      Text("AssemblyMan")
-        .headingStyle(38)
+      HStack(alignment: .top, spacing: 10) {
+        Text("AssemblyMan")
+          .headingStyle(38)
+        Spacer(minLength: 0)
+        IconButton(
+          glyph: .slidersHorizontal,
+          accessibilityLabel: "Settings",
+          action: openSettings
+        )
+        .accessibilityIdentifier("settings_button")
+      }
 
       Text("A camera link for Ray-Ban Meta glasses.")
         .font(Theme.body(13))

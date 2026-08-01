@@ -18,8 +18,15 @@ import SwiftUI
 
 struct SettingsView: View {
   @Bindable var settings: AppSettings
+  /// Hidden when settings was opened before the glasses were linked — there is nothing to
+  /// disconnect from yet.
+  var showsDisconnect: Bool = true
   var onBack: () -> Void
   var onDisconnect: () -> Void
+
+  #if DEBUG
+  var mockKit: MockDeviceKitView.ViewModel?
+  #endif
 
   var body: some View {
     ZStack {
@@ -35,9 +42,17 @@ struct SettingsView: View {
             sessionSection
             captureSection
 
-            OutlineButton(title: "Disconnect glasses", action: onDisconnect)
-              .accessibilityIdentifier("disconnect_button")
-              .padding(.bottom, 8)
+            #if DEBUG
+            if let mockKit {
+              DeveloperSection(mockKit: mockKit)
+            }
+            #endif
+
+            if showsDisconnect {
+              OutlineButton(title: "Disconnect glasses", action: onDisconnect)
+                .accessibilityIdentifier("disconnect_button")
+                .padding(.bottom, 8)
+            }
           }
           .padding(.horizontal, Theme.screenPadding)
           .padding(.top, 16)
@@ -129,6 +144,12 @@ struct SettingsView: View {
           label: "Thirds grid",
           detail: "Rule-of-thirds guides over the feed",
           isOn: $settings.showsThirdsGrid
+        )
+        Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+        ToggleRow(
+          label: "Segment Anything",
+          detail: "SAM masks and labels over detected objects",
+          isOn: $settings.showsSegmentMasks
         )
         Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
         ToggleRow(

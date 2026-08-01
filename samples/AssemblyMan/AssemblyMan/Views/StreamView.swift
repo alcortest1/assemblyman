@@ -36,6 +36,12 @@ struct StreamView: View {
       if settings.showsViewfinderMarks {
         viewfinder
       }
+      if settings.showsSegmentMasks {
+        SegmentMaskOverlay()
+          .padding(.horizontal, 18)
+          .padding(.top, 74)
+          .padding(.bottom, 118)
+      }
       if settings.showsThirdsGrid {
         thirdsGrid
       }

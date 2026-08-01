@@ -4,6 +4,33 @@ Running log of changes, newest first.
 
 ---
 
+## Second design import — Developer section, SAM overlay, settings from Connect
+
+The Claude Design source had moved on since the first import. Re-read
+`AssemblyMan.dc.html` and picked up four additions:
+
+- **Developer / MockDeviceKit section in Settings** (`Views/DeveloperSection.swift`, DEBUG
+  only). Enable toggle with a paired count, "Pair Ray-Ban Meta" capped at three devices, and
+  a plate per device: identity, Unpair, Power / Donned / Unfolded toggles, Captouch tap and
+  tap-and-hold, and a Front / Back / Video file camera-source picker. Wired to the existing
+  `MockDeviceKitView.ViewModel` and `MockDeviceCardView.ViewModel` — this is the
+  Industry-styled home for what previously lived behind the floating debug button.
+- **Segment Anything overlay** (`Views/DesignSystem/SegmentMaskOverlay.swift`) — dashed
+  masks with confidence chips over the live feed, plus its Overlays toggle. The SDK exposes
+  no segmentation, so the masks are the design's indicative shapes normalised to the
+  viewport; swapping in a real segmenter means replacing the mask data only.
+- **Settings reachable from the Connect screen** — a settings button now sits beside the
+  masthead. This required hoisting settings ownership from `StreamSessionView` up to
+  `MainAppView`, which also keeps it above both branches so opening it never unmounts the
+  screen underneath.
+- **Disconnect is hidden** when settings is opened before the glasses are linked.
+
+Also read the remaining imported files: `ios-frame.jsx` is the prototype's device-frame
+scaffold, `support.js` is the Claude Design template runtime, and `_ds_bundle.js` is empty
+(the Industry system is pure CSS). None carry app content.
+
+---
+
 ## Industry redesign of the AssemblyMan sample app
 
 Branch: `industry-redesign` — in progress, not yet committed.

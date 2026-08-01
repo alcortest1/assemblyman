@@ -64,6 +64,9 @@ final class AppSettings {
 
   var showsViewfinderMarks: Bool = true
   var showsThirdsGrid: Bool = false
+  /// Segment Anything masks over detected objects. Presentation-only — the SDK surfaces no
+  /// segmentation, so the overlay draws indicative masks rather than live inference.
+  var showsSegmentMasks: Bool = false
   var showsStatusChip: Bool = true
   var showsElapsedTimer: Bool = true
 
