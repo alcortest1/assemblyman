@@ -44,8 +44,10 @@ struct AssemblyManApp: App {
     #if DEBUG
     // Start the test server when launched by XCUITests so tests can control
     // mock device setup via HTTP commands from the test process.
-    if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
-      MockDeviceKit.shared.enable(config: MockDeviceKitConfig(initiallyRegistered: false))
+    if ProcessInfo.processInfo.arguments.contains("--ui-testing")
+      || ProcessInfo.processInfo.arguments.contains("--design-preview") {
+      let registered = ProcessInfo.processInfo.arguments.contains("--design-preview")
+      MockDeviceKit.shared.enable(config: MockDeviceKitConfig(initiallyRegistered: registered))
 
       let portFilePath = ProcessInfo.processInfo.environment["MWDAT_TEST_SERVER_PORT_FILE"]
       Task {

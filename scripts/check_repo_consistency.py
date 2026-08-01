@@ -226,6 +226,9 @@ NON_SAMPLE_SCHEMES = re.compile(r"^MWDAT")
 
 DOC_GLOBS = ["*.md", ".github/*.md", ".cursor/rules/*.mdc", "docs/*.md", "plugins/**/*.md"]
 
+# Historical records name things as they were at the time; a rename must not rewrite them.
+HISTORY_DOCS = {"CHANGELOG.md", "docs/changelist.md"}
+
 
 def check_sample_references() -> None:
     """Every sample app named in documentation must actually exist.
@@ -238,6 +241,8 @@ def check_sample_references() -> None:
 
     docs = sorted({path for glob in DOC_GLOBS for path in REPO.glob(glob) if path.is_file()})
     for doc in docs:
+        if str(doc.relative_to(REPO)) in HISTORY_DOCS:
+            continue
         content = doc.read_text(encoding="utf-8")
         referenced = {name for p in SAMPLE_REFERENCE_PATTERNS for name in p.findall(content)}
         for name in sorted(referenced - known):

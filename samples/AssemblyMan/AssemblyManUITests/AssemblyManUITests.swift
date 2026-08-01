@@ -30,6 +30,19 @@ final class AssemblyManUITests: XCTestCase {
     app.launchEnvironment["MWDAT_TEST_SERVER_PORT_FILE"] = portFilePath
     app.launch()
 
+    // System permission dialogs (local network, photos) steal first responder and
+    // invalidate whatever element a tap was aimed at. Dismiss them as they arrive.
+    addUIInterruptionMonitor(withDescription: "System permission dialog") { alert in
+      for label in ["Allow", "Allow Once", "While Using the App", "OK", "Continue"] {
+        let button = alert.buttons[label]
+        if button.exists {
+          button.tap()
+          return true
+        }
+      }
+      return false
+    }
+
     // Initialize the client *after* launch so the server has time to write the port file.
     mockClient = MockDeviceTestClient(portFilePath: portFilePath)
     XCTAssertTrue(mockClient.waitForServer(timeout: 10), "Test server should be running")
@@ -42,13 +55,46 @@ final class AssemblyManUITests: XCTestCase {
     }
   }
 
+
+  /// Taps an element, retrying if a system dialog invalidated the first attempt.
+  private func tapWithRetry(
+    _ element: XCUIElement,
+    timeout: TimeInterval = 10,
+    file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    XCTAssertTrue(
+      element.waitForExistence(timeout: timeout),
+      "element should exist before tapping",
+      file: file,
+      line: line
+    )
+    element.tap()
+
+    // Nudge the app so any queued interruption monitor runs, then retry once if the tap
+    // did not take because a dialog was in the way.
+    if !element.exists { return }
+    app.tap()
+    if element.exists && element.isHittable {
+      element.tap()
+    }
+  }
+
+  /// Looks an element up by accessibility identifier regardless of its resolved type.
+  ///
+  /// Uppercase styling is a display transform, so matching on visible text is unreliable;
+  /// combined accessibility elements also do not always resolve as static text.
+  private func element(_ identifier: String) -> XCUIElement {
+    app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+  }
+
   // MARK: - Helpers
 
-  /// Taps "Connect my glasses" to trigger registration via the fake handler,
+  /// Taps "Connect glasses" to trigger registration via the fake handler,
   /// dismisses the getting-started sheet, and waits for the streaming screen
   /// to be fully ready for device connections.
   private func registerViaUI() {
-    let connectButton = app.buttons["Connect my glasses"]
+    let connectButton = app.buttons["connect_glasses_button"]
     XCTAssertTrue(connectButton.waitForExistence(timeout: 10), "Should start on HomeScreenView")
     connectButton.tap()
 
@@ -61,7 +107,7 @@ final class AssemblyManUITests: XCTestCase {
     }
 
     // Wait for the NonStreamView to be fully rendered with device monitoring active
-    let waitingText = app.staticTexts["Waiting for an active device"]
+    let waitingText = element("link_status_waiting")
     XCTAssertTrue(waitingText.waitForExistence(timeout: 15), "Should show waiting state before a device is paired")
   }
 
@@ -77,11 +123,11 @@ final class AssemblyManUITests: XCTestCase {
     mockClient.setCapturedImage(deviceId: pairedDeviceId, resourceName: "plant", ext: "png")
   }
 
-  /// Waits for the "Start streaming" button to exist and be enabled (mock device active).
+  /// Waits for the "Start session" button to exist and be enabled (mock device active).
   @discardableResult
   private func waitForStartStreamingEnabled(timeout: TimeInterval = 15) -> XCUIElement {
-    let startButton = app.buttons["Start streaming"]
-    XCTAssertTrue(startButton.waitForExistence(timeout: timeout), "Start streaming button should appear")
+    let startButton = app.buttons["start_streaming_button"]
+    XCTAssertTrue(startButton.waitForExistence(timeout: timeout), "Start session button should appear")
 
     let predicate = NSPredicate(format: "isEnabled == true")
     expectation(for: predicate, evaluatedWith: startButton)
@@ -90,11 +136,11 @@ final class AssemblyManUITests: XCTestCase {
     return startButton
   }
 
-  /// Waits for the "Start streaming" button to exist and be disabled (device inactive).
+  /// Waits for the "Start session" button to exist and be disabled (device inactive).
   @discardableResult
   private func waitForStartStreamingDisabled(timeout: TimeInterval = 15) -> XCUIElement {
-    let startButton = app.buttons["Start streaming"]
-    XCTAssertTrue(startButton.waitForExistence(timeout: timeout), "Start streaming button should appear")
+    let startButton = app.buttons["start_streaming_button"]
+    XCTAssertTrue(startButton.waitForExistence(timeout: timeout), "Start session button should appear")
 
     let predicate = NSPredicate(format: "isEnabled == false")
     expectation(for: predicate, evaluatedWith: startButton)
@@ -108,8 +154,8 @@ final class AssemblyManUITests: XCTestCase {
     let startButton = waitForStartStreamingEnabled(timeout: timeout)
     startButton.tap()
 
-    let stopButton = app.buttons["Stop streaming"]
-    XCTAssertTrue(stopButton.waitForExistence(timeout: timeout), "Stop streaming button should appear after starting")
+    let stopButton = app.buttons["stop_streaming_button"]
+    XCTAssertTrue(stopButton.waitForExistence(timeout: timeout), "Stop session button should appear after starting")
   }
 
   // MARK: - Device Pairing & Navigation Tests
@@ -117,7 +163,7 @@ final class AssemblyManUITests: XCTestCase {
   /// Verifies that launching without pairing a device shows the home screen.
   @MainActor
   func testLaunchWithoutDeviceShowsHomeScreen() {
-    let connectButton = app.buttons["Connect my glasses"]
+    let connectButton = app.buttons["connect_glasses_button"]
     XCTAssertTrue(
       connectButton.waitForExistence(timeout: 10),
       "HomeScreenView should show 'Connect my glasses' when no device is paired"
@@ -201,13 +247,13 @@ final class AssemblyManUITests: XCTestCase {
     startStreaming()
 
     // Stop streaming
-    let stopButton = app.buttons["Stop streaming"]
+    let stopButton = app.buttons["stop_streaming_button"]
     stopButton.tap()
 
     // Should return to NonStreamView
-    let startButton = app.buttons["Start streaming"]
+    let startButton = app.buttons["start_streaming_button"]
     XCTAssertTrue(startButton.waitForExistence(timeout: 10), "Should return to NonStreamView after stopping")
-    XCTAssertTrue(app.staticTexts["Stream Your Glasses Camera"].exists, "NonStreamView title should reappear")
+    XCTAssertTrue(element("ready_title").exists, "Ready screen title should reappear")
   }
 
   /// Verifies photo capture shows a preview and can be dismissed while continuing to stream.
@@ -230,14 +276,14 @@ final class AssemblyManUITests: XCTestCase {
     closeButton.tap()
 
     // Should still be streaming after dismissing preview
-    let stopButton = app.buttons["Stop streaming"]
+    let stopButton = app.buttons["stop_streaming_button"]
     XCTAssertTrue(stopButton.waitForExistence(timeout: 10), "Should still be streaming after dismissing photo preview")
 
     // Stop streaming
     stopButton.tap()
 
     // Should return to NonStreamView
-    let startButton = app.buttons["Start streaming"]
+    let startButton = app.buttons["start_streaming_button"]
     XCTAssertTrue(startButton.waitForExistence(timeout: 10), "Should return to NonStreamView after stopping")
   }
 
@@ -258,5 +304,126 @@ final class AssemblyManUITests: XCTestCase {
 
     // Should return to NonStreamView with the button disabled (device is folded).
     waitForStartStreamingDisabled()
+  }
+
+  // MARK: - Settings Tests
+
+  /// Opening settings mid-session and coming back must leave the stream running.
+  ///
+  /// Regression: settings used to replace the live screen, which unmounted it and tore the
+  /// stream down, so returning showed a dead viewfinder that never recovered.
+  // TestRail: pending
+  @MainActor
+  func testOpeningSettingsDuringStreamingKeepsStreamAlive() {
+    pairDeviceWithCameraResources()
+    startStreaming()
+
+    let settingsButton = app.buttons["settings_button"]
+    XCTAssertTrue(settingsButton.waitForExistence(timeout: 10), "Settings button should be visible while streaming")
+    tapWithRetry(settingsButton)
+
+    let backButton = app.buttons["settings_back_button"]
+    XCTAssertTrue(backButton.waitForExistence(timeout: 10), "Settings screen should open")
+    tapWithRetry(backButton)
+
+    // The live controls coming back means the stream survived the trip.
+    let stopButton = app.buttons["stop_streaming_button"]
+    XCTAssertTrue(
+      stopButton.waitForExistence(timeout: 10),
+      "Should return to the live session after closing settings"
+    )
+    XCTAssertTrue(
+      app.buttons["capture_photo_button"].waitForExistence(timeout: 10),
+      "Shutter should still be available, meaning the stream is still live"
+    )
+
+    stopButton.tap()
+    waitForStartStreamingEnabled()
+  }
+
+  /// Settings opened from the ready screen returns to the ready screen.
+  @MainActor
+  func testOpeningSettingsFromReadyScreenReturns() {
+    pairDeviceWithCameraResources()
+    waitForStartStreamingEnabled()
+
+    tapWithRetry(app.buttons["settings_button"])
+
+    let backButton = app.buttons["settings_back_button"]
+    XCTAssertTrue(backButton.waitForExistence(timeout: 10), "Settings screen should open")
+    tapWithRetry(backButton)
+
+    XCTAssertTrue(
+      element("ready_title").waitForExistence(timeout: 10),
+      "Should return to the ready screen"
+    )
+  }
+
+  /// Turning on the Wi-Fi tier offers 1080p and carries it into the session spec.
+  @MainActor
+  func testWiFiTierOffersHigherQuality() {
+    pairDeviceWithCameraResources()
+    waitForStartStreamingEnabled()
+
+    // Ready screen reports the default Bluetooth spec.
+    XCTAssertTrue(
+      element("session_spec").waitForExistence(timeout: 10),
+      "Ready screen should show the session spec"
+    )
+    XCTAssertEqual(
+      element("session_spec").label,
+      "720p · 30 fps · Bluetooth",
+      "Should start on the default Bluetooth tier"
+    )
+
+    tapWithRetry(app.buttons["settings_button"])
+    XCTAssertTrue(
+      app.buttons["settings_back_button"].waitForExistence(timeout: 10),
+      "Settings screen should open"
+    )
+
+    // 1080p is gated behind the Wi-Fi tier.
+    XCTAssertFalse(app.buttons["1080p"].exists, "1080p should not be offered on Bluetooth")
+
+    tapWithRetry(app.buttons["Stream over Wi-Fi"].firstMatch)
+
+    let highQuality = app.buttons["1080p"]
+    XCTAssertTrue(highQuality.waitForExistence(timeout: 5), "1080p should be offered once Wi-Fi is on")
+    tapWithRetry(highQuality)
+
+    tapWithRetry(app.buttons["settings_back_button"])
+
+    XCTAssertTrue(element("session_spec").waitForExistence(timeout: 10), "Spec row should be visible")
+    XCTAssertEqual(
+      element("session_spec").label,
+      "1080p · 30 fps · Wi-Fi",
+      "Ready screen should reflect the selected quality and transport"
+    )
+  }
+
+  /// Changing quality mid-session rebuilds the stream and keeps it live.
+  @MainActor
+  func testChangingQualityDuringStreamingKeepsStreamAlive() {
+    pairDeviceWithCameraResources()
+    startStreaming()
+
+    tapWithRetry(app.buttons["settings_button"])
+    XCTAssertTrue(
+      app.buttons["settings_back_button"].waitForExistence(timeout: 10),
+      "Settings screen should open"
+    )
+
+    // Drop to the lower tier; the stream should rebuild rather than die.
+    let lowQuality = app.buttons["480p"]
+    if lowQuality.waitForExistence(timeout: 5) {
+      tapWithRetry(lowQuality)
+    }
+
+    tapWithRetry(app.buttons["settings_back_button"])
+
+    XCTAssertTrue(
+      app.buttons["stop_streaming_button"].waitForExistence(timeout: 20),
+      "Stream should come back up after a quality change"
+    )
   }
 }
