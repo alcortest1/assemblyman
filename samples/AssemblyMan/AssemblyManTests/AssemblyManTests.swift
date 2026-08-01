@@ -35,6 +35,7 @@ final class ViewModelIntegrationTests: XCTestCase {
     // Power on and unfold the device to make it available
     pairedMockDevice.powerOn()
     pairedMockDevice.unfold()
+    pairedMockDevice.don()
 
     // Wait for device to be available in Wearables
     try await Task.sleep(nanoseconds: 1_000_000_000)

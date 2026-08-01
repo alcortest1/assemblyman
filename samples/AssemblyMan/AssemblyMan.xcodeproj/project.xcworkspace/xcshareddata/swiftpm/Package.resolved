@@ -1,5 +1,5 @@
 {
-  "originHash" : "9dd38f857db7479f1816015771b37a83ed7849590400ca2677a9c5f1b5014407",
+  "originHash" : "d39b39e243acf9e4d116a625ac8c683f5426d373584aa2cf1195f40176a4d327",
   "pins" : [
     {
       "identity" : "meta-wearables-dat-ios",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "2e30f1253ab76ee3c448a29dce39114ab09763c3",
         "version" : "0.8.0"
+      }
+    },
+    {
+      "identity" : "yolo-ios-app",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ultralytics/yolo-ios-app.git",
+      "state" : {
+        "revision" : "7bb1b4b01f5f592e13c039f45b85cf8f89057dfe",
+        "version" : "8.9.11"
       }
     }
   ],

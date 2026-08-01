@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000012FA1000100000001 /* MobileSAMProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000112FA1000100000001 /* MobileSAMProcessor.swift */; };
+		A10000022FA1000100000002 /* MobileSAMPreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000122FA1000100000002 /* MobileSAMPreprocessor.swift */; };
+		A10000032FA1000100000003 /* MobileSAMPromptEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000132FA1000100000003 /* MobileSAMPromptEncoder.swift */; };
+		A10000042FA1000100000004 /* mobile_sam_encoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = A10000142FA1000100000004 /* mobile_sam_encoder.mlpackage */; };
+		A10000052FA1000100000005 /* mobile_sam_decoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = A10000152FA1000100000005 /* mobile_sam_decoder.mlpackage */; };
+		A10000062FA1000100000006 /* mobile_sam_prompt_encoder_weights.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000162FA1000100000006 /* mobile_sam_prompt_encoder_weights.json */; };
+		B20000012FB2000100000001 /* YOLOProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000112FB2000100000001 /* YOLOProcessor.swift */; };
+		B20000022FB2000100000002 /* yolo26n.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = B20000122FB2000100000002 /* yolo26n.mlpackage */; };
+		B20000032FB2000100000003 /* yolo26n-seg.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = B20000132FB2000100000003 /* yolo26n-seg.mlpackage */; };
+		B20000042FB2000100000004 /* yolo26n-sem.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = B20000142FB2000100000004 /* yolo26n-sem.mlpackage */; };
+		B20000052FB2000100000005 /* UltralyticsYOLO in Frameworks */ = {isa = PBXBuildFile; productRef = B20000412FB2000100000001 /* UltralyticsYOLO */; };
 		8F2D23802E856711002D0588 /* DebugMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2D237F2E856711002D0588 /* DebugMenuViewModel.swift */; };
 		8F8F00782E8ACB4600A4BDAF /* WearablesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8F00772E8ACB4500A4BDAF /* WearablesViewModel.swift */; };
 		8FD96B7F2E6F0A9800F56AB1 /* AssemblyManApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD96B792E6F0A9800F56AB1 /* AssemblyManApp.swift */; };
@@ -79,6 +90,16 @@
 
 /* Begin PBXFileReference section */
 		3A3A3A3A3A3A3A3A3A3A3A3A /* AssemblyMan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AssemblyMan.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000112FA1000100000001 /* MobileSAMProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSAMProcessor.swift; sourceTree = "<group>"; };
+		A10000122FA1000100000002 /* MobileSAMPreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSAMPreprocessor.swift; sourceTree = "<group>"; };
+		A10000132FA1000100000003 /* MobileSAMPromptEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSAMPromptEncoder.swift; sourceTree = "<group>"; };
+		A10000142FA1000100000004 /* mobile_sam_encoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = mobile_sam_encoder.mlpackage; sourceTree = "<group>"; };
+		A10000152FA1000100000005 /* mobile_sam_decoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = mobile_sam_decoder.mlpackage; sourceTree = "<group>"; };
+		A10000162FA1000100000006 /* mobile_sam_prompt_encoder_weights.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = mobile_sam_prompt_encoder_weights.json; sourceTree = "<group>"; };
+		B20000112FB2000100000001 /* YOLOProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YOLOProcessor.swift; sourceTree = "<group>"; };
+		B20000122FB2000100000002 /* yolo26n.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = yolo26n.mlpackage; sourceTree = "<group>"; };
+		B20000132FB2000100000003 /* yolo26n-seg.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = "yolo26n-seg.mlpackage"; sourceTree = "<group>"; };
+		B20000142FB2000100000004 /* yolo26n-sem.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = "yolo26n-sem.mlpackage"; sourceTree = "<group>"; };
 		8F2D237F2E856711002D0588 /* DebugMenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenuViewModel.swift; sourceTree = "<group>"; };
 		8F8F00772E8ACB4500A4BDAF /* WearablesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearablesViewModel.swift; sourceTree = "<group>"; };
 		8FD96B6F2E6F0A9800F56AB1 /* StreamSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSessionViewModel.swift; sourceTree = "<group>"; };
@@ -132,6 +153,7 @@
 				8FD96B952E6F0F7D00F56AB1 /* MWDATCore in Frameworks */,
 				8FD96B952E6F0F7D00F56AB2 /* MWDATCamera in Frameworks */,
 				8FD96B952E6F0F7D00F56AB3 /* MWDATMockDevice in Frameworks */,
+				B20000052FB2000100000005 /* UltralyticsYOLO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +168,46 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A10000212FA1000100000001 /* MobileSAM */ = {
+			isa = PBXGroup;
+			children = (
+				A10000222FA1000100000002 /* Models */,
+				A10000112FA1000100000001 /* MobileSAMProcessor.swift */,
+				A10000122FA1000100000002 /* MobileSAMPreprocessor.swift */,
+				A10000132FA1000100000003 /* MobileSAMPromptEncoder.swift */,
+			);
+			path = MobileSAM;
+			sourceTree = "<group>";
+		};
+		A10000222FA1000100000002 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10000142FA1000100000004 /* mobile_sam_encoder.mlpackage */,
+				A10000152FA1000100000005 /* mobile_sam_decoder.mlpackage */,
+				A10000162FA1000100000006 /* mobile_sam_prompt_encoder_weights.json */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B20000212FB2000100000001 /* YOLO */ = {
+			isa = PBXGroup;
+			children = (
+				B20000222FB2000100000002 /* Models */,
+				B20000112FB2000100000001 /* YOLOProcessor.swift */,
+			);
+			path = YOLO;
+			sourceTree = "<group>";
+		};
+		B20000222FB2000100000002 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B20000122FB2000100000002 /* yolo26n.mlpackage */,
+				B20000132FB2000100000003 /* yolo26n-seg.mlpackage */,
+				B20000142FB2000100000004 /* yolo26n-sem.mlpackage */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		5A5A5A5A5A5A5A5A5A5A5A5A = {
 			isa = PBXGroup;
 			children = (
@@ -209,6 +271,8 @@
 		8FD96B7D2E6F0A9800F56AB1 /* AssemblyMan */ = {
 			isa = PBXGroup;
 			children = (
+				A10000212FA1000100000001 /* MobileSAM */,
+				B20000212FB2000100000001 /* YOLO */,
 				E66CC01A2F3E1A9300B07379 /* TestResources */,
 				8FD96B702E6F0A9800F56AB1 /* ViewModels */,
 				8FD96B762E6F0A9800F56AB1 /* Views */,
@@ -290,6 +354,9 @@
 			dependencies = (
 			);
 			name = AssemblyMan;
+			packageProductDependencies = (
+				B20000412FB2000100000001 /* UltralyticsYOLO */,
+			);
 			productName = AssemblyMan;
 			productReference = 3A3A3A3A3A3A3A3A3A3A3A3A /* AssemblyMan.app */;
 			productType = "com.apple.product-type.application";
@@ -373,6 +440,7 @@
 			mainGroup = 5A5A5A5A5A5A5A5A5A5A5A5A;
 			packageReferences = (
 				95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
+				B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */,
 			);
 			productRefGroup = 7A7A7A7A7A7A7A7A7A7A7A7A /* Products */;
 			projectDirPath = "";
@@ -390,6 +458,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000062FA1000100000006 /* mobile_sam_prompt_encoder_weights.json in Resources */,
 				E66CC01B2F3E1A9300B07379 /* plant.png in Resources */,
 				E66CC01C2F3E1A9300B07379 /* plant.mp4 in Resources */,
 				8FD96B8D2E6F0A9800F56AB1 /* Assets.xcassets in Resources */,
@@ -417,6 +486,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000012FA1000100000001 /* MobileSAMProcessor.swift in Sources */,
+				A10000022FA1000100000002 /* MobileSAMPreprocessor.swift in Sources */,
+				A10000032FA1000100000003 /* MobileSAMPromptEncoder.swift in Sources */,
+				A10000042FA1000100000004 /* mobile_sam_encoder.mlpackage in Sources */,
+				A10000052FA1000100000005 /* mobile_sam_decoder.mlpackage in Sources */,
+				B20000012FB2000100000001 /* YOLOProcessor.swift in Sources */,
+				B20000022FB2000100000002 /* yolo26n.mlpackage in Sources */,
+				B20000032FB2000100000003 /* yolo26n-seg.mlpackage in Sources */,
+				B20000042FB2000100000004 /* yolo26n-sem.mlpackage in Sources */,
 				8FD96B7F2E6F0A9800F56AB1 /* AssemblyManApp.swift in Sources */,
 				8FD96B812E6F0A9800F56AB1 /* HomeScreenView.swift in Sources */,
 				8F2D23802E856711002D0588 /* DebugMenuViewModel.swift in Sources */,
@@ -812,6 +890,14 @@
 				version = 0.8.0;
 			};
 		};
+		B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ultralytics/yolo-ios-app.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.9.11;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -834,6 +920,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;
 			productName = MWDATMockDeviceTestClient;
+		};
+		B20000412FB2000100000001 /* UltralyticsYOLO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */;
+			productName = UltralyticsYOLO;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

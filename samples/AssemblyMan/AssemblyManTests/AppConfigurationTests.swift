@@ -158,4 +158,169 @@ final class AppConfigurationTests: XCTestCase {
       XCTAssertNotNil(UIImage(resource: asset), "Asset \(asset) did not resolve")
     }
   }
+  // MARK: - MobileSAM
+
+  func testMobileSAMResourcesAreBundled() {
+    XCTAssertNotNil(
+      Bundle.main.url(forResource: "mobile_sam_encoder", withExtension: "mlmodelc")
+    )
+    XCTAssertNotNil(
+      Bundle.main.url(forResource: "mobile_sam_decoder", withExtension: "mlmodelc")
+    )
+    XCTAssertNotNil(
+      Bundle.main.url(
+        forResource: "mobile_sam_prompt_encoder_weights",
+        withExtension: "json"
+      )
+    )
+  }
+
+  func testMobileSAMProducesReticleAndFullFrameOverlays() async throws {
+    let imageURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "plant", withExtension: "png")
+    )
+    let sourceImage = try XCTUnwrap(
+      UIImage(contentsOfFile: imageURL.path)?.cgImage
+    )
+
+    let processor = MobileSAMProcessor()
+    for targetMode in MobileSAMTargetMode.allCases {
+      let result = await processor.makeOverlay(
+        for: sourceImage,
+        targetMode: targetMode
+      )
+      switch result {
+      case .success(let overlay, let inferenceMilliseconds):
+        XCTAssertGreaterThan(overlay.size.width, 0, targetMode.label)
+        XCTAssertGreaterThan(overlay.size.height, 0, targetMode.label)
+        XCTAssertGreaterThanOrEqual(inferenceMilliseconds, 0, targetMode.label)
+      case .failure(let message):
+        XCTFail("MobileSAM \(targetMode.label) inference failed: \(message)")
+      }
+    }
+  }
+
+  func testMobileSAMTargetModesCoverCenterAndFullFrameGrid() throws {
+    let reticlePoints = MobileSAMTargetMode.reticle.promptPoints(
+      imageWidth: 600,
+      imageHeight: 900
+    )
+    let reticlePoint = try XCTUnwrap(reticlePoints.first)
+    XCTAssertEqual(reticlePoints.count, 1)
+    XCTAssertEqual(reticlePoint.x, 300, accuracy: 0.001)
+    XCTAssertEqual(reticlePoint.y, 450, accuracy: 0.001)
+
+    let fullFramePoints = MobileSAMTargetMode.fullFrame.promptPoints(
+      imageWidth: 600,
+      imageHeight: 900
+    )
+    XCTAssertEqual(fullFramePoints.count, 9)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.x).min()), 100, accuracy: 0.001)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.x).max()), 500, accuracy: 0.001)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.y).min()), 150, accuracy: 0.001)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.y).max()), 750, accuracy: 0.001)
+  }
+
+  func testMobileSAMFrameRatesMapToProcessingIntervals() {
+    XCTAssertEqual(VisionFrameRate.half.interval, .seconds(2))
+    XCTAssertEqual(VisionFrameRate.one.interval, .seconds(1))
+    XCTAssertEqual(VisionFrameRate.two.interval, .milliseconds(500))
+    XCTAssertEqual(VisionFrameRate.five.interval, .milliseconds(200))
+    XCTAssertEqual(VisionFrameRate.ten.interval, .milliseconds(100))
+    XCTAssertEqual(VisionFrameRate.fifteen.interval, .milliseconds(67))
+  }
+
+  // MARK: - Ultralytics YOLO
+
+  func testYOLONanoModelsAreBundled() {
+    for resource in ["yolo26n", "yolo26n-seg", "yolo26n-sem"] {
+      XCTAssertNotNil(
+        Bundle.main.url(forResource: resource, withExtension: "mlmodelc"),
+        "\(resource) is missing from the app bundle"
+      )
+    }
+  }
+
+  func testYOLOColorMapIncludesCuratedSceneAndObjectClasses() {
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "road"), .floor)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "sidewalk"), .floor)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "terrain"), .floor)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "wall"), .wall)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "person"), .person)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "laptop"), .laptop)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "dining table"), .table)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "building"), .building)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "traffic sign"), .trafficSign)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "car"), .car)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "chair"), .chair)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "tv"), .display)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "cell phone"), .phone)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "potted plant"), .plant)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "refrigerator"), .refrigerator)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "  SOFA  "), .couch)
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "dog"))
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "pizza"))
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "background"))
+  }
+
+  func testYOLOColorMapHasUniqueColorsAndModeSpecificLegends() {
+    let colorKeys = YOLOOverlayClass.allCases.map {
+      "\($0.rgb.red)-\($0.rgb.green)-\($0.rgb.blue)"
+    }
+    XCTAssertEqual(Set(colorKeys).count, YOLOOverlayClass.allCases.count)
+
+    XCTAssertEqual(YOLOOverlayClass.legendClasses(for: .mobileSAM), [])
+    XCTAssertTrue(YOLOOverlayClass.legendClasses(for: .yoloObjects).contains(.chair))
+    XCTAssertFalse(YOLOOverlayClass.legendClasses(for: .yoloObjects).contains(.wall))
+    XCTAssertTrue(YOLOOverlayClass.legendClasses(for: .yoloScene).contains(.wall))
+    XCTAssertTrue(YOLOOverlayClass.legendClasses(for: .yoloScene).contains(.chair))
+  }
+
+  func testYOLOLegendsMatchMappedBundledModelClasses() {
+    let semanticModelLabels = [
+      "road", "sidewalk", "building", "wall", "fence", "pole",
+      "traffic light", "traffic sign", "vegetation", "terrain", "sky",
+      "person", "rider", "car", "truck", "bus", "train", "motorcycle",
+      "bicycle",
+    ]
+    let objectModelLabels = [
+      "person", "bicycle", "car", "motorcycle", "bus", "train", "truck",
+      "traffic light", "stop sign", "bench", "backpack", "suitcase",
+      "bottle", "cup", "chair", "couch", "potted plant", "bed",
+      "dining table", "toilet", "tv", "laptop", "mouse", "keyboard",
+      "cell phone", "microwave", "oven", "sink", "refrigerator",
+    ]
+
+    XCTAssertEqual(
+      Set(semanticModelLabels.compactMap(YOLOOverlayClass.mappedClass(for:))),
+      Set(YOLOOverlayClass.semanticClasses)
+    )
+    XCTAssertEqual(
+      Set(objectModelLabels.compactMap(YOLOOverlayClass.mappedClass(for:))),
+      Set(YOLOOverlayClass.objectClasses)
+    )
+  }
+
+  func testYOLOProducesOverlaysForEachLiveTask() async throws {
+    let imageURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "plant", withExtension: "png")
+    )
+    let sourceImage = try XCTUnwrap(
+      UIImage(contentsOfFile: imageURL.path)?.cgImage
+    )
+    let processor = YOLOProcessor()
+
+    for mode in VisionOverlayMode.allCases where !mode.usesMobileSAM {
+      let result = await processor.makeOverlay(for: sourceImage, mode: mode)
+      switch result {
+      case .success(let overlay, let inferenceMilliseconds, let coloredRegions):
+        XCTAssertEqual(Int(overlay.size.width), sourceImage.width, mode.label)
+        XCTAssertEqual(Int(overlay.size.height), sourceImage.height, mode.label)
+        XCTAssertGreaterThanOrEqual(inferenceMilliseconds, 0, mode.label)
+        XCTAssertGreaterThanOrEqual(coloredRegions, 0, mode.label)
+      case .failure(let message):
+        XCTFail("\(mode.label) inference failed: \(message)")
+      }
+    }
+  }
 }

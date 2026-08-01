@@ -35,6 +35,51 @@ final class StreamSessionViewModel {
   var showPhotoCaptureError: Bool = false
   var isCapturingPhoto: Bool = false
 
+  var isSegmentationOverlayEnabled: Bool = false {
+    didSet {
+      if !isSegmentationOverlayEnabled {
+        segmentationTask?.cancel()
+        segmentationOverlay = nil
+        isGeneratingSegmentation = false
+        segmentationInferenceMilliseconds = nil
+        segmentationColoredRegions = nil
+        lastSegmentationTime = nil
+      }
+    }
+  }
+  var visionOverlayMode: VisionOverlayMode = .mobileSAM {
+    didSet {
+      guard visionOverlayMode != oldValue else { return }
+      segmentationTask?.cancel()
+      segmentationOverlay = nil
+      segmentationInferenceMilliseconds = nil
+      segmentationColoredRegions = nil
+      lastSegmentationTime = nil
+    }
+  }
+  var segmentationTargetMode: MobileSAMTargetMode = .reticle {
+    didSet {
+      guard segmentationTargetMode != oldValue else { return }
+      segmentationTask?.cancel()
+      segmentationOverlay = nil
+      segmentationInferenceMilliseconds = nil
+      segmentationColoredRegions = nil
+      lastSegmentationTime = nil
+    }
+  }
+  var segmentationFrameRate: VisionFrameRate = .one {
+    didSet {
+      guard segmentationFrameRate != oldValue else { return }
+      lastSegmentationTime = nil
+    }
+  }
+  var isReticleOverlayEnabled: Bool = true
+  var segmentationOverlay: UIImage?
+  var isGeneratingSegmentation: Bool = false
+  var segmentationInferenceMilliseconds: Int?
+  var segmentationColoredRegions: Int?
+  var segmentationRevision: UInt = 0
+
   var hasActiveDevice: Bool { sessionManager.hasActiveDevice }
   var isDeviceSessionReady: Bool { sessionManager.isReady }
 
@@ -51,7 +96,6 @@ final class StreamSessionViewModel {
   private var videoFrameListenerToken: AnyListenerToken?
   private var errorListenerToken: AnyListenerToken?
   private var photoDataListenerToken: AnyListenerToken?
-
   /// Set when a stop is only a step towards restarting with a new configuration.
   @ObservationIgnored private var wantsRestart = false
 
@@ -62,6 +106,11 @@ final class StreamSessionViewModel {
   var elapsedText: String {
     String(format: "%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
   }
+
+  private var segmentationTask: Task<Void, Never>?
+  private var lastSegmentationTime: ContinuousClock.Instant?
+  private let mobileSAMProcessor = MobileSAMProcessor()
+  private let yoloProcessor = YOLOProcessor()
 
   // MARK: - Init
 
@@ -116,6 +165,7 @@ final class StreamSessionViewModel {
     streamingStatus = .stopped
     currentVideoFrame = nil
     hasReceivedFirstFrame = false
+    resetSegmentation()
     sessionManager.cleanup()
   }
 
@@ -221,6 +271,7 @@ final class StreamSessionViewModel {
       clearListeners()
       hasReceivedFirstFrame = false
       stopElapsedClock()
+      resetSegmentation()
       sessionManager.stopCurrentSession()
 
       if wantsRestart {
@@ -259,6 +310,83 @@ final class StreamSessionViewModel {
       if !hasReceivedFirstFrame {
         hasReceivedFirstFrame = true
       }
+      scheduleSegmentation(for: image)
+    }
+  }
+
+  private func scheduleSegmentation(for image: UIImage) {
+    guard
+      isSegmentationOverlayEnabled,
+      segmentationTask == nil,
+      let cgImage = image.cgImage
+    else {
+      return
+    }
+
+    let now = ContinuousClock.now
+    if let lastSegmentationTime,
+      now - lastSegmentationTime < segmentationFrameRate.interval
+    {
+      return
+    }
+
+    let overlayMode = visionOverlayMode
+    let targetMode = segmentationTargetMode
+    lastSegmentationTime = now
+    isGeneratingSegmentation = true
+    segmentationTask = Task { [weak self] in
+      guard let self else { return }
+      let inferenceResult: VisionInferenceResult
+      if overlayMode.usesMobileSAM {
+        let result = await self.mobileSAMProcessor.makeOverlay(
+          for: cgImage,
+          targetMode: targetMode
+        )
+        switch result {
+        case .success(let overlay, let inferenceMilliseconds):
+          inferenceResult = .success(
+            image: overlay,
+            inferenceMilliseconds: inferenceMilliseconds,
+            coloredRegions: nil
+          )
+        case .failure(let message):
+          inferenceResult = .failure(message: message)
+        }
+      } else {
+        let result = await self.yoloProcessor.makeOverlay(
+          for: cgImage,
+          mode: overlayMode
+        )
+        switch result {
+        case .success(let overlay, let inferenceMilliseconds, let coloredRegions):
+          inferenceResult = .success(
+            image: overlay,
+            inferenceMilliseconds: inferenceMilliseconds,
+            coloredRegions: coloredRegions
+          )
+        case .failure(let message):
+          inferenceResult = .failure(message: message)
+        }
+      }
+
+      if !Task.isCancelled,
+        self.isSegmentationOverlayEnabled,
+        self.visionOverlayMode == overlayMode,
+        self.segmentationTargetMode == targetMode
+      {
+        switch inferenceResult {
+        case .success(let overlay, let inferenceMilliseconds, let coloredRegions):
+          self.segmentationOverlay = overlay
+          self.segmentationInferenceMilliseconds = inferenceMilliseconds
+          self.segmentationColoredRegions = coloredRegions
+          self.segmentationRevision &+= 1
+        case .failure(let message):
+          self.isSegmentationOverlayEnabled = false
+          self.showError("\(overlayMode.label) overlay failed: \(message)")
+        }
+      }
+      self.isGeneratingSegmentation = false
+      self.segmentationTask = nil
     }
   }
 
@@ -282,4 +410,22 @@ final class StreamSessionViewModel {
     showError = true
   }
 
+  private func resetSegmentation() {
+    segmentationTask?.cancel()
+    segmentationOverlay = nil
+    isGeneratingSegmentation = false
+    segmentationInferenceMilliseconds = nil
+    segmentationColoredRegions = nil
+    segmentationRevision = 0
+    lastSegmentationTime = nil
+    Task {
+      await mobileSAMProcessor.reset()
+      await yoloProcessor.reset()
+    }
+  }
+}
+
+private enum VisionInferenceResult {
+  case success(image: UIImage, inferenceMilliseconds: Int, coloredRegions: Int?)
+  case failure(message: String)
 }
