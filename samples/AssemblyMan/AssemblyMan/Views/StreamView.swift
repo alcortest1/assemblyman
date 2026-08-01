@@ -11,7 +11,7 @@
 //
 // Live session. Full-bleed feed from the glasses on a dark ground, framed as a viewfinder,
 // with the stop and shutter controls beneath. Overlay elements are individually
-// switchable from Settings.
+// switchable from Settings or the in-stream overlay panel.
 //
 
 import MWDATCore
@@ -25,12 +25,29 @@ struct StreamView: View {
 
   /// White frame shown for a beat after the shutter fires.
   @State private var isFlashing = false
+  @State private var showsOverlayControls = false
 
   var body: some View {
     ZStack {
       Theme.accent900.ignoresSafeArea()
 
       feed
+
+      if viewModel.isSegmentationOverlayEnabled,
+        let segmentationOverlay = viewModel.segmentationOverlay
+      {
+        GeometryReader { geometry in
+          Image(uiImage: segmentationOverlay)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .clipped()
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+      }
+
       scrims
 
       if settings.showsViewfinderMarks {
@@ -39,9 +56,21 @@ struct StreamView: View {
       if settings.showsThirdsGrid {
         thirdsGrid
       }
+      if viewModel.isReticleOverlayEnabled {
+        CenterReticleOverlay()
+      }
 
-      VStack {
+      VStack(spacing: 10) {
         topBar
+
+        if showsOverlayControls {
+          HStack {
+            Spacer()
+            OverlayControlsView(viewModel: viewModel, settings: settings)
+              .transition(.move(edge: .top).combined(with: .opacity))
+          }
+        }
+
         Spacer()
         controls
       }
@@ -173,6 +202,21 @@ struct StreamView: View {
         }
 
         IconButton(
+          glyph: .circleDot,
+          accessibilityLabel: "Overlay controls",
+          edge: 28,
+          iconSize: 14,
+          tint: .white,
+          border: .white.opacity(0.25),
+          background: Theme.accent900.opacity(0.65)
+        ) {
+          withAnimation(.snappy(duration: 0.2)) {
+            showsOverlayControls.toggle()
+          }
+        }
+        .accessibilityIdentifier("overlay_controls_button")
+
+        IconButton(
           glyph: .slidersHorizontal,
           accessibilityLabel: "Settings",
           edge: 28,
@@ -231,5 +275,103 @@ struct StreamView: View {
       try? await Task.sleep(nanoseconds: 170_000_000)
       isFlashing = false
     }
+  }
+}
+
+private struct OverlayControlsView: View {
+  @Bindable var viewModel: StreamSessionViewModel
+  @Bindable var settings: AppSettings
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 10) {
+      OverlayToggle(
+        title: "MobileSAM",
+        systemImage: "person.crop.rectangle.stack",
+        isOn: $viewModel.isSegmentationOverlayEnabled,
+        showsActivity: viewModel.isGeneratingSegmentation,
+        detail: viewModel.segmentationInferenceMilliseconds.map { "\($0) ms" },
+        accessibilityIdentifier: "mobile_sam_overlay_toggle"
+      )
+      OverlayToggle(
+        title: "Grid",
+        systemImage: "grid",
+        isOn: $settings.showsThirdsGrid
+      )
+      OverlayToggle(
+        title: "Reticle",
+        systemImage: "scope",
+        isOn: $viewModel.isReticleOverlayEnabled
+      )
+    }
+    .padding(14)
+    .frame(width: 220)
+    .background(Theme.accent900.opacity(0.88))
+    .overlay {
+      Rectangle().strokeBorder(.white.opacity(0.28), lineWidth: Theme.hairline)
+    }
+    .foregroundStyle(.white)
+    .accessibilityIdentifier("overlay_controls_panel")
+  }
+}
+
+private struct OverlayToggle: View {
+  let title: String
+  let systemImage: String
+  @Binding var isOn: Bool
+  var showsActivity = false
+  var detail: String?
+  var accessibilityIdentifier: String?
+
+  var body: some View {
+    HStack(spacing: 9) {
+      Image(systemName: systemImage)
+        .frame(width: 20)
+
+      Text(title)
+        .font(Theme.body(13, weight: .semibold))
+        .tracking(0.6)
+
+      if showsActivity {
+        ProgressView()
+          .controlSize(.mini)
+          .tint(.white)
+      } else if let detail {
+        Text(detail)
+          .font(Theme.body(10).monospacedDigit())
+          .foregroundStyle(.white.opacity(0.65))
+      }
+
+      Spacer()
+
+      Toggle("", isOn: $isOn)
+        .labelsHidden()
+        .tint(Theme.accent500)
+        .accessibilityIdentifier(accessibilityIdentifier ?? "\(title)_overlay_toggle")
+    }
+  }
+}
+
+private struct CenterReticleOverlay: View {
+  var body: some View {
+    ZStack {
+      Circle()
+        .stroke(.white.opacity(0.85), lineWidth: 1.5)
+        .frame(width: 34, height: 34)
+
+      Rectangle()
+        .fill(.white.opacity(0.85))
+        .frame(width: 50, height: 1)
+
+      Rectangle()
+        .fill(.white.opacity(0.85))
+        .frame(width: 1, height: 50)
+
+      Circle()
+        .fill(Theme.accent300)
+        .frame(width: 5, height: 5)
+    }
+    .shadow(color: .black.opacity(0.5), radius: 2)
+    .allowsHitTesting(false)
+    .accessibilityHidden(true)
   }
 }

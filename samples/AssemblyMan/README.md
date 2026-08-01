@@ -6,6 +6,8 @@ A sample iOS application demonstrating integration with Meta Wearables Device Ac
 
 - Connect to Meta AI glasses
 - Stream camera feed from the device
+- Segment the object under the center reticle with an on-device MobileSAM overlay
+- Toggle the segmentation mask, composition grid, and center reticle while streaming
 - Capture photos from glasses
 - Share captured photos
 - Open firmware and glasses app update flows when required
@@ -35,11 +37,23 @@ A sample iOS application demonstrating integration with Meta Wearables Device Ac
 1. Press the "Connect" button to complete app registration.
 1. Once connected, the camera stream from the device will be displayed
 1. Use the on-screen controls to:
+   - Open **Overlays** and toggle **MobileSAM**, **Grid**, or **Reticle**
    - Capture photos
    - View and save captured photos
    - Disconnect from the device
 1. If a firmware update is required, tap "Update firmware" from the connection screen.
 1. If session start reports that the app on the glasses is outdated, tap "Update app on glasses" from the connection screen.
+
+## MobileSAM live overlay
+
+MobileSAM runs entirely on the iPhone using Core ML; streamed frames are not
+sent to a server. The cyan mask targets the object beneath the center reticle.
+Only one inference is allowed at a time, so incoming frames are dropped while
+the model is busy instead of building a processing backlog. The overlay panel
+shows the most recent inference time.
+
+The Core ML models and prompt weights are bundled with the app. See the
+repository's `THIRD_PARTY_NOTICES.md` for their sources and license.
 
 ## Troubleshooting
 

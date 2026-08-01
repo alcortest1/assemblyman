@@ -35,6 +35,20 @@ final class StreamSessionViewModel {
   var showPhotoCaptureError: Bool = false
   var isCapturingPhoto: Bool = false
 
+  var isSegmentationOverlayEnabled: Bool = false {
+    didSet {
+      if !isSegmentationOverlayEnabled {
+        segmentationTask?.cancel()
+        segmentationOverlay = nil
+        isGeneratingSegmentation = false
+      }
+    }
+  }
+  var isReticleOverlayEnabled: Bool = true
+  var segmentationOverlay: UIImage?
+  var isGeneratingSegmentation: Bool = false
+  var segmentationInferenceMilliseconds: Int?
+
   var hasActiveDevice: Bool { sessionManager.hasActiveDevice }
   var isDeviceSessionReady: Bool { sessionManager.isReady }
 
@@ -51,7 +65,6 @@ final class StreamSessionViewModel {
   private var videoFrameListenerToken: AnyListenerToken?
   private var errorListenerToken: AnyListenerToken?
   private var photoDataListenerToken: AnyListenerToken?
-
   /// Set when a stop is only a step towards restarting with a new configuration.
   @ObservationIgnored private var wantsRestart = false
 
@@ -62,6 +75,12 @@ final class StreamSessionViewModel {
   var elapsedText: String {
     String(format: "%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
   }
+
+  private var segmentationTask: Task<Void, Never>?
+  private var lastSegmentationTime: ContinuousClock.Instant?
+  private let segmentationProcessor = MobileSAMProcessor()
+
+  private let segmentationInterval: Duration = .milliseconds(100)
 
   // MARK: - Init
 
@@ -116,6 +135,7 @@ final class StreamSessionViewModel {
     streamingStatus = .stopped
     currentVideoFrame = nil
     hasReceivedFirstFrame = false
+    resetSegmentation()
     sessionManager.cleanup()
   }
 
@@ -221,6 +241,7 @@ final class StreamSessionViewModel {
       clearListeners()
       hasReceivedFirstFrame = false
       stopElapsedClock()
+      resetSegmentation()
       sessionManager.stopCurrentSession()
 
       if wantsRestart {
@@ -259,6 +280,44 @@ final class StreamSessionViewModel {
       if !hasReceivedFirstFrame {
         hasReceivedFirstFrame = true
       }
+      scheduleSegmentation(for: image)
+    }
+  }
+
+  private func scheduleSegmentation(for image: UIImage) {
+    guard
+      isSegmentationOverlayEnabled,
+      segmentationTask == nil,
+      let cgImage = image.cgImage
+    else {
+      return
+    }
+
+    let now = ContinuousClock.now
+    if let lastSegmentationTime,
+      now - lastSegmentationTime < segmentationInterval
+    {
+      return
+    }
+
+    lastSegmentationTime = now
+    isGeneratingSegmentation = true
+    segmentationTask = Task { [weak self] in
+      guard let self else { return }
+      let result = await self.segmentationProcessor.makeOverlay(for: cgImage)
+
+      if !Task.isCancelled, self.isSegmentationOverlayEnabled {
+        switch result {
+        case .success(let overlay, let inferenceMilliseconds):
+          self.segmentationOverlay = overlay
+          self.segmentationInferenceMilliseconds = inferenceMilliseconds
+        case .failure(let message):
+          self.isSegmentationOverlayEnabled = false
+          self.showError("MobileSAM overlay failed: \(message)")
+        }
+      }
+      self.isGeneratingSegmentation = false
+      self.segmentationTask = nil
     }
   }
 
@@ -282,4 +341,15 @@ final class StreamSessionViewModel {
     showError = true
   }
 
+  private func resetSegmentation() {
+    segmentationTask?.cancel()
+    segmentationTask = nil
+    segmentationOverlay = nil
+    isGeneratingSegmentation = false
+    segmentationInferenceMilliseconds = nil
+    lastSegmentationTime = nil
+    Task {
+      await segmentationProcessor.reset()
+    }
+  }
 }

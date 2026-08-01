@@ -158,4 +158,39 @@ final class AppConfigurationTests: XCTestCase {
       XCTAssertNotNil(UIImage(resource: asset), "Asset \(asset) did not resolve")
     }
   }
+  // MARK: - MobileSAM
+
+  func testMobileSAMResourcesAreBundled() {
+    XCTAssertNotNil(
+      Bundle.main.url(forResource: "mobile_sam_encoder", withExtension: "mlmodelc")
+    )
+    XCTAssertNotNil(
+      Bundle.main.url(forResource: "mobile_sam_decoder", withExtension: "mlmodelc")
+    )
+    XCTAssertNotNil(
+      Bundle.main.url(
+        forResource: "mobile_sam_prompt_encoder_weights",
+        withExtension: "json"
+      )
+    )
+  }
+
+  func testMobileSAMProducesAnOverlayForBundledFrame() async throws {
+    let imageURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "plant", withExtension: "png")
+    )
+    let sourceImage = try XCTUnwrap(
+      UIImage(contentsOfFile: imageURL.path)?.cgImage
+    )
+
+    let result = await MobileSAMProcessor().makeOverlay(for: sourceImage)
+    switch result {
+    case .success(let overlay, let inferenceMilliseconds):
+      XCTAssertGreaterThan(overlay.size.width, 0)
+      XCTAssertGreaterThan(overlay.size.height, 0)
+      XCTAssertGreaterThanOrEqual(inferenceMilliseconds, 0)
+    case .failure(let message):
+      XCTFail("MobileSAM inference failed: \(message)")
+    }
+  }
 }

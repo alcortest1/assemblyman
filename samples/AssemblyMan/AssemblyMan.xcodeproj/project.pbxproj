@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000012FA1000100000001 /* MobileSAMProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000112FA1000100000001 /* MobileSAMProcessor.swift */; };
+		A10000022FA1000100000002 /* MobileSAMPreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000122FA1000100000002 /* MobileSAMPreprocessor.swift */; };
+		A10000032FA1000100000003 /* MobileSAMPromptEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000132FA1000100000003 /* MobileSAMPromptEncoder.swift */; };
+		A10000042FA1000100000004 /* mobile_sam_encoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = A10000142FA1000100000004 /* mobile_sam_encoder.mlpackage */; };
+		A10000052FA1000100000005 /* mobile_sam_decoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = A10000152FA1000100000005 /* mobile_sam_decoder.mlpackage */; };
+		A10000062FA1000100000006 /* mobile_sam_prompt_encoder_weights.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000162FA1000100000006 /* mobile_sam_prompt_encoder_weights.json */; };
 		8F2D23802E856711002D0588 /* DebugMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2D237F2E856711002D0588 /* DebugMenuViewModel.swift */; };
 		8F8F00782E8ACB4600A4BDAF /* WearablesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8F00772E8ACB4500A4BDAF /* WearablesViewModel.swift */; };
 		8FD96B7F2E6F0A9800F56AB1 /* AssemblyManApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD96B792E6F0A9800F56AB1 /* AssemblyManApp.swift */; };
@@ -79,6 +85,12 @@
 
 /* Begin PBXFileReference section */
 		3A3A3A3A3A3A3A3A3A3A3A3A /* AssemblyMan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AssemblyMan.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000112FA1000100000001 /* MobileSAMProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSAMProcessor.swift; sourceTree = "<group>"; };
+		A10000122FA1000100000002 /* MobileSAMPreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSAMPreprocessor.swift; sourceTree = "<group>"; };
+		A10000132FA1000100000003 /* MobileSAMPromptEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileSAMPromptEncoder.swift; sourceTree = "<group>"; };
+		A10000142FA1000100000004 /* mobile_sam_encoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = mobile_sam_encoder.mlpackage; sourceTree = "<group>"; };
+		A10000152FA1000100000005 /* mobile_sam_decoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = mobile_sam_decoder.mlpackage; sourceTree = "<group>"; };
+		A10000162FA1000100000006 /* mobile_sam_prompt_encoder_weights.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = mobile_sam_prompt_encoder_weights.json; sourceTree = "<group>"; };
 		8F2D237F2E856711002D0588 /* DebugMenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenuViewModel.swift; sourceTree = "<group>"; };
 		8F8F00772E8ACB4500A4BDAF /* WearablesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WearablesViewModel.swift; sourceTree = "<group>"; };
 		8FD96B6F2E6F0A9800F56AB1 /* StreamSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSessionViewModel.swift; sourceTree = "<group>"; };
@@ -146,6 +158,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A10000212FA1000100000001 /* MobileSAM */ = {
+			isa = PBXGroup;
+			children = (
+				A10000222FA1000100000002 /* Models */,
+				A10000112FA1000100000001 /* MobileSAMProcessor.swift */,
+				A10000122FA1000100000002 /* MobileSAMPreprocessor.swift */,
+				A10000132FA1000100000003 /* MobileSAMPromptEncoder.swift */,
+			);
+			path = MobileSAM;
+			sourceTree = "<group>";
+		};
+		A10000222FA1000100000002 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10000142FA1000100000004 /* mobile_sam_encoder.mlpackage */,
+				A10000152FA1000100000005 /* mobile_sam_decoder.mlpackage */,
+				A10000162FA1000100000006 /* mobile_sam_prompt_encoder_weights.json */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		5A5A5A5A5A5A5A5A5A5A5A5A = {
 			isa = PBXGroup;
 			children = (
@@ -209,6 +242,7 @@
 		8FD96B7D2E6F0A9800F56AB1 /* AssemblyMan */ = {
 			isa = PBXGroup;
 			children = (
+				A10000212FA1000100000001 /* MobileSAM */,
 				E66CC01A2F3E1A9300B07379 /* TestResources */,
 				8FD96B702E6F0A9800F56AB1 /* ViewModels */,
 				8FD96B762E6F0A9800F56AB1 /* Views */,
@@ -390,6 +424,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000062FA1000100000006 /* mobile_sam_prompt_encoder_weights.json in Resources */,
 				E66CC01B2F3E1A9300B07379 /* plant.png in Resources */,
 				E66CC01C2F3E1A9300B07379 /* plant.mp4 in Resources */,
 				8FD96B8D2E6F0A9800F56AB1 /* Assets.xcassets in Resources */,
@@ -417,6 +452,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000012FA1000100000001 /* MobileSAMProcessor.swift in Sources */,
+				A10000022FA1000100000002 /* MobileSAMPreprocessor.swift in Sources */,
+				A10000032FA1000100000003 /* MobileSAMPromptEncoder.swift in Sources */,
+				A10000042FA1000100000004 /* mobile_sam_encoder.mlpackage in Sources */,
+				A10000052FA1000100000005 /* mobile_sam_decoder.mlpackage in Sources */,
 				8FD96B7F2E6F0A9800F56AB1 /* AssemblyManApp.swift in Sources */,
 				8FD96B812E6F0A9800F56AB1 /* HomeScreenView.swift in Sources */,
 				8F2D23802E856711002D0588 /* DebugMenuViewModel.swift in Sources */,
