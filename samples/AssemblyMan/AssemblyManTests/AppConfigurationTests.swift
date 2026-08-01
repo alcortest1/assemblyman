@@ -222,9 +222,58 @@ final class AppConfigurationTests: XCTestCase {
   }
 
   func testMobileSAMFrameRatesMapToProcessingIntervals() {
-    XCTAssertEqual(MobileSAMFrameRate.half.interval, .seconds(2))
-    XCTAssertEqual(MobileSAMFrameRate.one.interval, .seconds(1))
-    XCTAssertEqual(MobileSAMFrameRate.two.interval, .milliseconds(500))
-    XCTAssertEqual(MobileSAMFrameRate.five.interval, .milliseconds(200))
+    XCTAssertEqual(VisionFrameRate.half.interval, .seconds(2))
+    XCTAssertEqual(VisionFrameRate.one.interval, .seconds(1))
+    XCTAssertEqual(VisionFrameRate.two.interval, .milliseconds(500))
+    XCTAssertEqual(VisionFrameRate.five.interval, .milliseconds(200))
+    XCTAssertEqual(VisionFrameRate.ten.interval, .milliseconds(100))
+    XCTAssertEqual(VisionFrameRate.fifteen.interval, .milliseconds(67))
+  }
+
+  // MARK: - Ultralytics YOLO
+
+  func testYOLONanoModelsAreBundled() {
+    for resource in ["yolo26n", "yolo26n-seg", "yolo26n-sem"] {
+      XCTAssertNotNil(
+        Bundle.main.url(forResource: resource, withExtension: "mlmodelc"),
+        "\(resource) is missing from the app bundle"
+      )
+    }
+  }
+
+  func testYOLOColorMapIncludesRequestedClassesOnly() {
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "road"), .floor)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "sidewalk"), .floor)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "terrain"), .floor)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "wall"), .wall)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "person"), .person)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "laptop"), .laptop)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "dining table"), .table)
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "chair"))
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "car"))
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "background"))
+  }
+
+  func testYOLOProducesOverlaysForEachLiveTask() async throws {
+    let imageURL = try XCTUnwrap(
+      Bundle.main.url(forResource: "plant", withExtension: "png")
+    )
+    let sourceImage = try XCTUnwrap(
+      UIImage(contentsOfFile: imageURL.path)?.cgImage
+    )
+    let processor = YOLOProcessor()
+
+    for mode in VisionOverlayMode.allCases where !mode.usesMobileSAM {
+      let result = await processor.makeOverlay(for: sourceImage, mode: mode)
+      switch result {
+      case .success(let overlay, let inferenceMilliseconds, let coloredRegions):
+        XCTAssertEqual(Int(overlay.size.width), sourceImage.width, mode.label)
+        XCTAssertEqual(Int(overlay.size.height), sourceImage.height, mode.label)
+        XCTAssertGreaterThanOrEqual(inferenceMilliseconds, 0, mode.label)
+        XCTAssertGreaterThanOrEqual(coloredRegions, 0, mode.label)
+      case .failure(let message):
+        XCTFail("\(mode.label) inference failed: \(message)")
+      }
+    }
   }
 }

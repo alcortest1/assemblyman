@@ -42,8 +42,19 @@ final class StreamSessionViewModel {
         segmentationOverlay = nil
         isGeneratingSegmentation = false
         segmentationInferenceMilliseconds = nil
+        segmentationColoredRegions = nil
         lastSegmentationTime = nil
       }
+    }
+  }
+  var visionOverlayMode: VisionOverlayMode = .mobileSAM {
+    didSet {
+      guard visionOverlayMode != oldValue else { return }
+      segmentationTask?.cancel()
+      segmentationOverlay = nil
+      segmentationInferenceMilliseconds = nil
+      segmentationColoredRegions = nil
+      lastSegmentationTime = nil
     }
   }
   var segmentationTargetMode: MobileSAMTargetMode = .reticle {
@@ -52,10 +63,11 @@ final class StreamSessionViewModel {
       segmentationTask?.cancel()
       segmentationOverlay = nil
       segmentationInferenceMilliseconds = nil
+      segmentationColoredRegions = nil
       lastSegmentationTime = nil
     }
   }
-  var segmentationFrameRate: MobileSAMFrameRate = .one {
+  var segmentationFrameRate: VisionFrameRate = .one {
     didSet {
       guard segmentationFrameRate != oldValue else { return }
       lastSegmentationTime = nil
@@ -65,6 +77,7 @@ final class StreamSessionViewModel {
   var segmentationOverlay: UIImage?
   var isGeneratingSegmentation: Bool = false
   var segmentationInferenceMilliseconds: Int?
+  var segmentationColoredRegions: Int?
   var segmentationRevision: UInt = 0
 
   var hasActiveDevice: Bool { sessionManager.hasActiveDevice }
@@ -96,7 +109,8 @@ final class StreamSessionViewModel {
 
   private var segmentationTask: Task<Void, Never>?
   private var lastSegmentationTime: ContinuousClock.Instant?
-  private let segmentationProcessor = MobileSAMProcessor()
+  private let mobileSAMProcessor = MobileSAMProcessor()
+  private let yoloProcessor = YOLOProcessor()
 
   // MARK: - Init
 
@@ -316,28 +330,59 @@ final class StreamSessionViewModel {
       return
     }
 
+    let overlayMode = visionOverlayMode
     let targetMode = segmentationTargetMode
     lastSegmentationTime = now
     isGeneratingSegmentation = true
     segmentationTask = Task { [weak self] in
       guard let self else { return }
-      let result = await self.segmentationProcessor.makeOverlay(
-        for: cgImage,
-        targetMode: targetMode
-      )
+      let inferenceResult: VisionInferenceResult
+      if overlayMode.usesMobileSAM {
+        let result = await self.mobileSAMProcessor.makeOverlay(
+          for: cgImage,
+          targetMode: targetMode
+        )
+        switch result {
+        case .success(let overlay, let inferenceMilliseconds):
+          inferenceResult = .success(
+            image: overlay,
+            inferenceMilliseconds: inferenceMilliseconds,
+            coloredRegions: nil
+          )
+        case .failure(let message):
+          inferenceResult = .failure(message: message)
+        }
+      } else {
+        let result = await self.yoloProcessor.makeOverlay(
+          for: cgImage,
+          mode: overlayMode
+        )
+        switch result {
+        case .success(let overlay, let inferenceMilliseconds, let coloredRegions):
+          inferenceResult = .success(
+            image: overlay,
+            inferenceMilliseconds: inferenceMilliseconds,
+            coloredRegions: coloredRegions
+          )
+        case .failure(let message):
+          inferenceResult = .failure(message: message)
+        }
+      }
 
       if !Task.isCancelled,
         self.isSegmentationOverlayEnabled,
+        self.visionOverlayMode == overlayMode,
         self.segmentationTargetMode == targetMode
       {
-        switch result {
-        case .success(let overlay, let inferenceMilliseconds):
+        switch inferenceResult {
+        case .success(let overlay, let inferenceMilliseconds, let coloredRegions):
           self.segmentationOverlay = overlay
           self.segmentationInferenceMilliseconds = inferenceMilliseconds
+          self.segmentationColoredRegions = coloredRegions
           self.segmentationRevision &+= 1
         case .failure(let message):
           self.isSegmentationOverlayEnabled = false
-          self.showError("MobileSAM overlay failed: \(message)")
+          self.showError("\(overlayMode.label) overlay failed: \(message)")
         }
       }
       self.isGeneratingSegmentation = false
@@ -371,10 +416,17 @@ final class StreamSessionViewModel {
     segmentationOverlay = nil
     isGeneratingSegmentation = false
     segmentationInferenceMilliseconds = nil
+    segmentationColoredRegions = nil
     segmentationRevision = 0
     lastSegmentationTime = nil
     Task {
-      await segmentationProcessor.reset()
+      await mobileSAMProcessor.reset()
+      await yoloProcessor.reset()
     }
   }
+}
+
+private enum VisionInferenceResult {
+  case success(image: UIImage, inferenceMilliseconds: Int, coloredRegions: Int?)
+  case failure(message: String)
 }

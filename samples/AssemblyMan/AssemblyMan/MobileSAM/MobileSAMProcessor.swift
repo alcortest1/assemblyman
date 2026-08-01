@@ -56,28 +56,6 @@ enum MobileSAMTargetMode: String, CaseIterable, Identifiable {
   }
 }
 
-enum MobileSAMFrameRate: Double, CaseIterable, Identifiable {
-  case half = 0.5
-  case one = 1
-  case two = 2
-  case five = 5
-
-  var id: Self { self }
-
-  var label: String {
-    switch self {
-    case .half: return "0.5"
-    case .one: return "1"
-    case .two: return "2"
-    case .five: return "5"
-    }
-  }
-
-  var interval: Duration {
-    .milliseconds(Int((1_000 / rawValue).rounded()))
-  }
-}
-
 /// Serializes MobileSAM work so stream frames are dropped instead of queued.
 actor MobileSAMProcessor {
   private var runtime: MobileSAMRuntime?

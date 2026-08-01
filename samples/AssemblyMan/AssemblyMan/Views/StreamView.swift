@@ -60,6 +60,7 @@ struct StreamView: View {
         thirdsGrid
       }
       if viewModel.isReticleOverlayEnabled,
+        viewModel.visionOverlayMode.usesMobileSAM,
         viewModel.segmentationTargetMode == .reticle
       {
         CenterReticleOverlay()
@@ -290,21 +291,28 @@ private struct OverlayControlsView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       OverlayToggle(
-        title: "MobileSAM",
+        title: "Vision overlay",
         systemImage: "person.crop.rectangle.stack",
         isOn: $viewModel.isSegmentationOverlayEnabled,
         showsActivity: viewModel.isGeneratingSegmentation,
-        detail: viewModel.segmentationInferenceMilliseconds.map { "\($0) ms" },
-        accessibilityIdentifier: "mobile_sam_overlay_toggle"
+        detail: inferenceDetail,
+        accessibilityIdentifier: "vision_overlay_toggle"
       )
-      MobileSAMTargetPicker(selection: $viewModel.segmentationTargetMode)
-      MobileSAMFrameRatePicker(selection: $viewModel.segmentationFrameRate)
+      VisionModePicker(selection: $viewModel.visionOverlayMode)
+      if viewModel.visionOverlayMode.usesMobileSAM {
+        MobileSAMTargetPicker(selection: $viewModel.segmentationTargetMode)
+      } else {
+        YOLOColorLegend(mode: viewModel.visionOverlayMode)
+      }
+      VisionFrameRatePicker(selection: $viewModel.segmentationFrameRate)
       OverlayToggle(
         title: "Grid",
         systemImage: "grid",
         isOn: $settings.showsThirdsGrid
       )
-      if viewModel.segmentationTargetMode == .reticle {
+      if viewModel.visionOverlayMode.usesMobileSAM,
+        viewModel.segmentationTargetMode == .reticle
+      {
         OverlayToggle(
           title: "Reticle",
           systemImage: "scope",
@@ -320,6 +328,36 @@ private struct OverlayControlsView: View {
     }
     .foregroundStyle(.white)
     .accessibilityIdentifier("overlay_controls_panel")
+  }
+
+  private var inferenceDetail: String? {
+    guard let milliseconds = viewModel.segmentationInferenceMilliseconds else {
+      return nil
+    }
+    if let regions = viewModel.segmentationColoredRegions {
+      return "\(milliseconds) ms · \(regions)"
+    }
+    return "\(milliseconds) ms"
+  }
+}
+
+private struct VisionModePicker: View {
+  @Binding var selection: VisionOverlayMode
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Model / task")
+        .overlineStyle(size: 9, color: .white.opacity(0.7))
+
+      Picker("Model and task", selection: $selection) {
+        ForEach(VisionOverlayMode.allCases) { mode in
+          Text(mode.label).tag(mode)
+        }
+      }
+      .pickerStyle(.menu)
+      .tint(.white)
+      .accessibilityIdentifier("vision_mode_picker")
+    }
   }
 }
 
@@ -343,13 +381,13 @@ private struct MobileSAMTargetPicker: View {
   }
 }
 
-private struct MobileSAMFrameRatePicker: View {
-  @Binding var selection: MobileSAMFrameRate
+private struct VisionFrameRatePicker: View {
+  @Binding var selection: VisionFrameRate
 
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       HStack {
-        Text("SAM processing rate")
+        Text("Processing rate")
           .overlineStyle(size: 9, color: .white.opacity(0.7))
         Spacer()
         Text("\(selection.label) FPS")
@@ -357,14 +395,56 @@ private struct MobileSAMFrameRatePicker: View {
           .foregroundStyle(.white.opacity(0.72))
       }
 
-      Picker("SAM processing rate", selection: $selection) {
-        ForEach(MobileSAMFrameRate.allCases) { rate in
-          Text(rate.label).tag(rate)
+      Picker("Vision processing rate", selection: $selection) {
+        ForEach(VisionFrameRate.allCases) { rate in
+          Text("\(rate.label) FPS").tag(rate)
         }
       }
-      .pickerStyle(.segmented)
-      .tint(Theme.accent500)
-      .accessibilityIdentifier("mobile_sam_fps_picker")
+      .pickerStyle(.menu)
+      .tint(.white)
+      .accessibilityIdentifier("vision_fps_picker")
+    }
+  }
+}
+
+private struct YOLOColorLegend: View {
+  let mode: VisionOverlayMode
+
+  private var visibleClasses: [YOLOOverlayClass] {
+    switch mode {
+    case .yoloScene:
+      return YOLOOverlayClass.allCases
+    case .yoloObjects, .yoloDetect:
+      return [.person, .laptop, .table]
+    case .mobileSAM:
+      return []
+    }
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Color map")
+        .overlineStyle(size: 9, color: .white.opacity(0.7))
+
+      LazyVGrid(
+        columns: [
+          GridItem(.flexible(), alignment: .leading),
+          GridItem(.flexible(), alignment: .leading),
+        ],
+        alignment: .leading,
+        spacing: 5
+      ) {
+        ForEach(visibleClasses) { overlayClass in
+          HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 2)
+              .fill(Color(uiColor: overlayClass.color))
+              .frame(width: 10, height: 10)
+            Text(overlayClass.label)
+              .font(Theme.body(10))
+              .foregroundStyle(.white.opacity(0.82))
+          }
+        }
+      }
     }
   }
 }
