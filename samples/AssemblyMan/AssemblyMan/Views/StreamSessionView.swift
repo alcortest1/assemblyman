@@ -9,6 +9,12 @@
 //
 // StreamSessionView.swift
 //
+// Routes between the ready and live screens once the app is registered, and owns the toast
+// used for non-blocking feedback.
+//
+// Settings is layered over the current screen rather than replacing it. Swapping the live
+// screen out would unmount it mid-session and tear the stream down, so the stream stays
+// mounted underneath while settings is open.
 //
 
 import MWDATCore
@@ -17,24 +23,71 @@ import SwiftUI
 struct StreamSessionView: View {
   let wearables: WearablesInterface
   var wearablesViewModel: WearablesViewModel
+  var settings: AppSettings
   @State private var viewModel: StreamSessionViewModel
 
-  init(wearables: WearablesInterface, wearablesVM: WearablesViewModel) {
+  @State private var showingSettings = false
+  @State private var toast: String?
+
+  init(wearables: WearablesInterface, wearablesVM: WearablesViewModel, settings: AppSettings) {
     self.wearables = wearables
     self.wearablesViewModel = wearablesVM
-    self._viewModel = State(wrappedValue: StreamSessionViewModel(wearables: wearables))
+    self.settings = settings
+    self._viewModel = State(
+      wrappedValue: StreamSessionViewModel(wearables: wearables, settings: settings)
+    )
   }
 
   var body: some View {
     ZStack {
+      // The base screen follows the view model rather than a separate navigation flag, so
+      // the two can never disagree about whether a session is live.
       if viewModel.isStreaming {
-        // Full-screen video view with streaming controls
-        StreamView(viewModel: viewModel, wearablesVM: wearablesViewModel)
+        StreamView(
+          viewModel: viewModel,
+          wearablesVM: wearablesViewModel,
+          settings: settings,
+          openSettings: { showingSettings = true }
+        )
       } else {
-        // Pre-streaming setup view with permissions and start button
-        NonStreamView(viewModel: viewModel, wearablesVM: wearablesViewModel)
+        NonStreamView(
+          viewModel: viewModel,
+          wearablesVM: wearablesViewModel,
+          settings: settings,
+          openSettings: { showingSettings = true }
+        )
+      }
+
+      if showingSettings {
+        SettingsView(
+          settings: settings,
+          onBack: { showingSettings = false },
+          onDisconnect: {
+            showingSettings = false
+            viewModel.endSession()
+            wearablesViewModel.disconnectGlasses()
+          }
+        )
+        .transition(.opacity)
+        .zIndex(1)
+      }
+
+      if let toast {
+        VStack {
+          Spacer()
+          ToastView(message: toast)
+            .padding(.bottom, 96)
+        }
+        .allowsHitTesting(false)
+        .zIndex(2)
       }
     }
+    .animation(.easeOut(duration: 0.2), value: showingSettings)
+    .animation(.easeOut(duration: 0.2), value: toast)
+    // Quality and frame rate are baked into the stream at creation, so a change mid-session
+    // only takes effect once the stream is rebuilt.
+    .onChange(of: settings.quality) { _, _ in applySessionSettings() }
+    .onChange(of: settings.frameRate) { _, _ in applySessionSettings() }
     .alert("Error", isPresented: $viewModel.showError) {
       Button("OK") {
         viewModel.dismissError()
@@ -48,6 +101,21 @@ struct StreamSessionView: View {
       }
     } message: {
       Text("Unable to capture photo. This may be due to low storage on device or another capture already in progress. Please try again in a few moments.")
+    }
+  }
+
+  private func applySessionSettings() {
+    guard viewModel.isStreaming else { return }
+    viewModel.restartStream()
+    show(toast: "Restarting at \(settings.quality.label) · \(settings.frameRate.label)")
+  }
+
+  /// Shows a transient message at the bottom of the screen.
+  private func show(toast message: String) {
+    toast = message
+    Task {
+      try? await Task.sleep(nanoseconds: 2_200_000_000)
+      if toast == message { toast = nil }
     }
   }
 }

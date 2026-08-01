@@ -9,23 +9,18 @@
 //
 // NonStreamView.swift
 //
-// Default screen to show getting started tips after app connection
-// Initiates streaming
+// Ready screen. Reports the state of the link and starts a session. Also hosts the
+// first-run checklist sheet and the firmware/app update prompts.
 //
 
 import MWDATCore
 import SwiftUI
 
-private let updateRequiredBackgroundColor = Color(red: 1.0, green: 0.957, blue: 0.839)
-private let updateRequiredForegroundColor = Color(red: 0.541, green: 0.294, blue: 0.0)
-private let updateRequiredTitle = "Update required"
-private let waitingForActiveDeviceText = "Waiting for an active device"
-
 struct NonStreamView: View {
   var viewModel: StreamSessionViewModel
   @Bindable var wearablesVM: WearablesViewModel
-  @State private var sheetHeight: CGFloat = 300
-  @State private var showSettingsMenu: Bool = false
+  var settings: AppSettings
+  var openSettings: () -> Void
 
   private var isUpdateRequired: Bool {
     wearablesVM.requiresFirmwareUpdate || viewModel.requiresDATAppUpdate
@@ -33,144 +28,135 @@ struct NonStreamView: View {
 
   var body: some View {
     ZStack {
-      Color.black.edgesIgnoringSafeArea(.all)
+      Theme.bg.ignoresSafeArea()
 
-      // Dismiss overlay when tapping outside the settings menu (placed first so it's behind content)
-      if showSettingsMenu {
-        Color.clear
-          .contentShape(Rectangle())
-          .onTapGesture {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-              showSettingsMenu = false
+      VStack(spacing: 14) {
+        header
+        statusPlate
+
+        Spacer(minLength: 0)
+        readyBlock
+        Spacer(minLength: 0)
+
+        if isUpdateRequired {
+          UpdateRequiredCard(
+            showFirmwareUpdate: wearablesVM.requiresFirmwareUpdate,
+            showDATAppUpdate: viewModel.requiresDATAppUpdate,
+            onUpdateFirmware: {
+              Task { await wearablesVM.openFirmwareUpdate() }
+            },
+            onUpdateGlassesApp: {
+              Task { await wearablesVM.openDATGlassesAppUpdate() }
             }
-          }
-          .edgesIgnoringSafeArea(.all)
+          )
+        }
+
+        PrimaryButton(
+          title: "Start session",
+          isDisabled: !viewModel.hasActiveDevice || isUpdateRequired
+        ) {
+          Task { await viewModel.handleStartStreaming() }
+        }
+        .accessibilityIdentifier("start_streaming_button")
       }
-
-      VStack {
-        HStack {
-          Spacer()
-          Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-              showSettingsMenu.toggle()
-            }
-          } label: {
-            Image(systemName: "gearshape")
-              .resizable()
-              .aspectRatio(contentMode: .fit)
-              .foregroundStyle(.white)
-              .frame(width: 24, height: 24)
-          }
-          .overlay(alignment: .trailing) {
-            if showSettingsMenu {
-              CustomButton(
-                title: "Disconnect",
-                style: .destructive,
-                isDisabled: wearablesVM.registrationState != .registered
-              ) {
-                wearablesVM.disconnectGlasses()
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                  showSettingsMenu = false
-                }
-              }
-              .frame(width: 120)
-              .transition(.scale(scale: 0.01, anchor: .trailing).combined(with: .opacity))
-            }
-          }
-        }
-
-        Spacer()
-
-        VStack(spacing: 12) {
-          Image(.assemblyManIcon)
-            .resizable()
-            .renderingMode(.template)
-            .foregroundStyle(.white)
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 120)
-
-          Text("Stream Your Glasses Camera")
-            .font(.system(size: 20, weight: .semibold))
-            .foregroundStyle(.white)
-
-          Text("Tap the Start streaming button to stream video from your glasses or use the camera button to take a photo from your glasses.")
-            .font(.system(size: 15))
-            .multilineTextAlignment(.center)
-            .foregroundStyle(.white)
-        }
-        .padding(.horizontal, 12)
-
-        Spacer()
-
-        VStack(spacing: 12) {
-          HStack(spacing: 8) {
-            Image(systemName: "hourglass")
-              .resizable()
-              .aspectRatio(contentMode: .fit)
-              .foregroundStyle(Color.white.opacity(0.7))
-              .frame(width: 16, height: 16)
-
-            Text(waitingForActiveDeviceText)
-              .font(.system(size: 14))
-              .foregroundStyle(Color.white.opacity(0.7))
-          }
-          .opacity(viewModel.hasActiveDevice ? 0 : 1)
-
-          if isUpdateRequired {
-            UpdateRequiredMessage(
-              showFirmwareUpdate: wearablesVM.requiresFirmwareUpdate,
-              showDATAppUpdate: viewModel.requiresDATAppUpdate
-            )
-          }
-
-          if wearablesVM.requiresFirmwareUpdate {
-            CustomButton(
-              title: "Update firmware",
-              style: .primary,
-              isDisabled: false
-            ) {
-              Task {
-                await wearablesVM.openFirmwareUpdate()
-              }
-            }
-          }
-
-          if viewModel.requiresDATAppUpdate {
-            CustomButton(
-              title: "Update app on glasses",
-              style: .primary,
-              isDisabled: false
-            ) {
-              Task {
-                await wearablesVM.openDATGlassesAppUpdate()
-              }
-            }
-          }
-
-          CustomButton(
-            title: "Start streaming",
-            style: .primary,
-            isDisabled: !viewModel.hasActiveDevice || isUpdateRequired
-          ) {
-            Task {
-              await viewModel.handleStartStreaming()
-            }
-          }
-        }
-      }
-      .padding(.all, 24)
+      .padding(.horizontal, Theme.screenPadding)
+      .padding(.top, 26)
+      .padding(.bottom, 24)
     }
     .sheet(isPresented: $wearablesVM.showGettingStartedSheet) {
-      GettingStartedSheetView(height: $sheetHeight)
-        .presentationDetents([.height(sheetHeight)])
-        .presentationDragIndicator(.visible)
+      GettingStartedSheetView()
+        .presentationDetents([.height(430)])
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(Theme.bg)
     }
+  }
+
+  // MARK: - Sections
+
+  private var header: some View {
+    HStack(spacing: 8) {
+      OperatorLockup(glyphSize: 22, textSize: 20)
+      Tag(text: "Linked")
+      Spacer()
+      IconButton(glyph: .slidersHorizontal, accessibilityLabel: "Settings", action: openSettings)
+        .accessibilityIdentifier("settings_button")
+    }
+    .padding(.bottom, 10)
+    .overlay(alignment: .bottom) {
+      Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+    }
+  }
+
+  /// Spec table describing the link, in the manner of a drawing's title block.
+  private var statusPlate: some View {
+    VStack(spacing: 0) {
+      SpecRow(label: "Device", isFirst: true) {
+        Text("Ray-Ban Meta")
+          .font(Theme.body(13, weight: .semibold))
+          .foregroundStyle(Theme.text)
+      }
+      SpecRow(label: "Link") {
+        // Identified rather than matched on text: the uppercase treatment is a display
+        // transform, so the accessibility label is not reliably the rendered string.
+        Group {
+          if viewModel.hasActiveDevice {
+            Tag.online()
+          } else {
+            Tag.waiting()
+          }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(
+          viewModel.hasActiveDevice ? "link_status_online" : "link_status_waiting"
+        )
+      }
+      SpecRow(label: "Session") {
+        Text(settings.streamSpec)
+          .font(Theme.body(13))
+          .foregroundStyle(Theme.neutral700)
+          .accessibilityIdentifier("session_spec")
+      }
+      SpecRow(label: "Agent") {
+        Text(settings.agent.name)
+          .font(Theme.body(13))
+          .foregroundStyle(Theme.neutral700)
+      }
+    }
+    .blueprintFrame()
+  }
+
+  private var readyBlock: some View {
+    VStack(spacing: 14) {
+      OperatorGlyph(size: 48)
+        .frame(width: 84, height: 84)
+        .blueprintFrame()
+
+      Text("Camera link ready")
+        .headingStyle(26)
+        .accessibilityIdentifier("ready_title")
+
+      Text("Start a session to mirror the glasses camera here. Capture a still any time — the LED on the frames tells people nearby.")
+        .font(Theme.body(13))
+        .foregroundStyle(Theme.neutral600)
+        .multilineTextAlignment(.center)
+        .lineSpacing(4)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: 290)
+    }
+    .frame(maxWidth: .infinity)
+    .padding(.horizontal, 8)
   }
 }
 
-struct UpdateRequiredMessage: View {
+// MARK: - Update prompt
+
+/// Blueprint card on an accent tint, shown when the glasses need software before a session
+/// can start.
+struct UpdateRequiredCard: View {
   let showFirmwareUpdate: Bool
   let showDATAppUpdate: Bool
+  let onUpdateFirmware: () -> Void
+  let onUpdateGlassesApp: () -> Void
 
   private var message: String {
     if showFirmwareUpdate && showDATAppUpdate {
@@ -183,100 +169,125 @@ struct UpdateRequiredMessage: View {
   }
 
   var body: some View {
-    HStack(alignment: .top, spacing: 12) {
-      Image(systemName: "exclamationmark.triangle.fill")
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .foregroundStyle(updateRequiredForegroundColor)
-        .frame(width: 24, height: 24)
-        .accessibilityHidden(true)
+    HStack(alignment: .top, spacing: 10) {
+      Icon(glyph: .triangleAlert, size: 20, color: Theme.accent800)
+        .padding(.top, 1)
 
-      VStack(alignment: .leading, spacing: 4) {
-        Text(updateRequiredTitle)
-          .font(.system(size: 16, weight: .semibold))
-          .foregroundStyle(updateRequiredForegroundColor)
+      VStack(alignment: .leading, spacing: 6) {
+        Text("Update required")
+          .font(Theme.body(12, weight: .semibold))
+          .tracking(12 * 0.08)
+          .textCase(.uppercase)
+          .foregroundStyle(Theme.accent800)
 
         Text(message)
-          .font(.system(size: 15))
-          .foregroundStyle(updateRequiredForegroundColor)
+          .font(Theme.body(12.5))
+          .foregroundStyle(Theme.accent900)
+          .lineSpacing(3)
           .fixedSize(horizontal: false, vertical: true)
+
+        if showFirmwareUpdate {
+          OutlineButton(
+            title: "Update firmware",
+            height: 34,
+            fontSize: 12,
+            fillsWidth: false,
+            background: Theme.bg,
+            action: onUpdateFirmware
+          )
+        }
+
+        if showDATAppUpdate {
+          OutlineButton(
+            title: "Update app on glasses",
+            height: 34,
+            fontSize: 12,
+            fillsWidth: false,
+            background: Theme.bg,
+            action: onUpdateGlassesApp
+          )
+        }
       }
 
       Spacer(minLength: 0)
     }
-    .padding(.all, 16)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(updateRequiredBackgroundColor)
-    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    .padding(12)
+    .background(Theme.accent100)
+    .blueprintFrame()
   }
 }
+
+// MARK: - First-run checklist
 
 struct GettingStartedSheetView: View {
   @Environment(\.dismiss) var dismiss
-  @Binding var height: CGFloat
 
   var body: some View {
-    VStack(spacing: 24) {
-      Text("Getting started")
-        .font(.system(size: 18, weight: .semibold))
-        .foregroundStyle(.primary)
+    VStack(alignment: .leading, spacing: 16) {
+      Rectangle()
+        .fill(Theme.neutral300)
+        .frame(width: 44, height: 3)
+        .frame(maxWidth: .infinity)
 
-      VStack(spacing: 12) {
-        TipItemView(
-          resource: .videoIcon,
-          text: "First, AssemblyMan needs permission to use your glasses camera."
+      VStack(alignment: .leading, spacing: 2) {
+        Text("Checklist")
+          .overlineStyle(color: Theme.accent700)
+        Text("Before your first session")
+          .headingStyle(22)
+      }
+
+      VStack(spacing: 0) {
+        ChecklistRow(
+          glyph: .video,
+          text: "AssemblyMan asks once for permission to use the glasses camera."
         )
-        TipItemView(
-          resource: .tapIcon,
-          text: "Capture photos by tapping the camera button."
+        ChecklistRow(
+          glyph: .camera,
+          text: "Tap the shutter button to capture a still from the live session."
         )
-        TipItemView(
-          resource: .smartGlassesIcon,
-          text: "The capture LED lets others know when you're capturing content or going live."
+        ChecklistRow(
+          glyph: .circleDot,
+          text: "The capture LED on the frames stays lit whenever the camera is live.",
+          isLast: true
         )
       }
-      .padding(.bottom, 16)
 
-      CustomButton(
-        title: "Continue",
-        style: .primary,
-        isDisabled: false
-      ) {
+      PrimaryButton(title: "Continue", height: 48, fontSize: 13) {
         dismiss()
       }
     }
-    .padding(.all, 24)
-    .background(
-      GeometryReader { geo -> Color in
-        DispatchQueue.main.async {
-          height = geo.size.height
-        }
-        return Color.clear
-      }
-    )
+    .padding(.horizontal, Theme.screenPadding)
+    .padding(.top, 20)
+    .padding(.bottom, 32)
+    .frame(maxHeight: .infinity, alignment: .top)
   }
 }
 
-struct TipItemView: View {
-  let resource: ImageResource
+private struct ChecklistRow: View {
+  let glyph: Icon.Glyph
   let text: String
+  var isLast: Bool = false
 
   var body: some View {
     HStack(alignment: .top, spacing: 12) {
-      Image(resource)
-        .resizable()
-        .renderingMode(.template)
-        .foregroundStyle(.primary)
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 24)
-        .padding(.leading, 4)
-        .padding(.top, 4)
+      Icon(glyph: glyph, size: 20)
 
       Text(text)
-        .font(.system(size: 15))
-        .foregroundStyle(.primary)
+        .font(Theme.body(13))
+        .foregroundStyle(Theme.neutral700)
+        .lineSpacing(3)
         .fixedSize(horizontal: false, vertical: true)
+
+      Spacer(minLength: 0)
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
+    .padding(.vertical, 10)
+    .overlay(alignment: .top) {
+      Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+    }
+    .overlay(alignment: .bottom) {
+      if isLast {
+        Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+      }
+    }
   }
 }

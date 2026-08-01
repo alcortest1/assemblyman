@@ -21,9 +21,13 @@ struct MainAppView: View {
   let wearables: WearablesInterface
   var viewModel: WearablesViewModel
 
+  /// Session and overlay preferences, held above the routed screens so they survive
+  /// navigation between ready, live, and settings.
+  @State private var settings = AppSettings()
+
   var body: some View {
     if viewModel.registrationState == .registered {
-      StreamSessionView(wearables: wearables, wearablesVM: viewModel)
+      StreamSessionView(wearables: wearables, wearablesVM: viewModel, settings: settings)
     } else {
       // User not registered - show registration/onboarding flow
       HomeScreenView(viewModel: viewModel)

@@ -37,6 +37,14 @@
 		E6DA451F2E79A63100E3F688 /* MockDeviceKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6DA451A2E79A63100E3F688 /* MockDeviceKitView.swift */; };
 		E6FD3BCE2EB4D53A00E7FE5D /* NonStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FD3BCD2EB4D53A00E7FE5D /* NonStreamView.swift */; };
 		FEEE00012F95000100000001 /* DeviceSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEE00002F95000100000001 /* DeviceSessionManager.swift */; };
+		DE0000000000000000000001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0000000000000000000000 /* Theme.swift */; };
+		DE0000000000000000000003 /* OperatorGlyph.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0000000000000000000002 /* OperatorGlyph.swift */; };
+		DE0000000000000000000005 /* BlueprintFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0000000000000000000004 /* BlueprintFrame.swift */; };
+		DE0000000000000000000007 /* VectorPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0000000000000000000006 /* VectorPath.swift */; };
+		DE0000000000000000000009 /* Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0000000000000000000008 /* Icon.swift */; };
+		DE000000000000000000000B /* IndustryControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000A /* IndustryControls.swift */; };
+		DE000000000000000000000D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000C /* SettingsView.swift */; };
+		DE000000000000000000000F /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000E /* AppSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +109,14 @@
 		E6DA451A2E79A63100E3F688 /* MockDeviceKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDeviceKitView.swift; sourceTree = "<group>"; };
 		E6FD3BCD2EB4D53A00E7FE5D /* NonStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonStreamView.swift; sourceTree = "<group>"; };
 		FEEE00002F95000100000001 /* DeviceSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSessionManager.swift; sourceTree = "<group>"; };
+		DE0000000000000000000000 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		DE0000000000000000000002 /* OperatorGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatorGlyph.swift; sourceTree = "<group>"; };
+		DE0000000000000000000004 /* BlueprintFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintFrame.swift; sourceTree = "<group>"; };
+		DE0000000000000000000006 /* VectorPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VectorPath.swift; sourceTree = "<group>"; };
+		DE0000000000000000000008 /* Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Icon.swift; sourceTree = "<group>"; };
+		DE000000000000000000000A /* IndustryControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndustryControls.swift; sourceTree = "<group>"; };
+		DE000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DE000000000000000000000E /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -166,6 +182,7 @@
 				FEEE00002F95000100000001 /* DeviceSessionManager.swift */,
 				8FD96B6F2E6F0A9800F56AB1 /* StreamSessionViewModel.swift */,
 				8F8F00772E8ACB4500A4BDAF /* WearablesViewModel.swift */,
+				DE000000000000000000000E /* AppSettings.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -183,6 +200,8 @@
 				8FD96B752E6F0A9800F56AB1 /* StreamSessionView.swift */,
 				E6A188472EB918740097D0E1 /* StreamView.swift */,
 				E6FD3BCD2EB4D53A00E7FE5D /* NonStreamView.swift */,
+				DE000000000000000000000C /* SettingsView.swift */,
+				DD00000000000000000001 /* DesignSystem */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -239,6 +258,19 @@
 				E66D30232E7DA71900470B48 /* MockDeviceKitButton.swift */,
 			);
 			path = MockDeviceKit;
+			sourceTree = "<group>";
+		};
+		DD00000000000000000001 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				DE0000000000000000000000 /* Theme.swift */,
+				DE0000000000000000000002 /* OperatorGlyph.swift */,
+				DE0000000000000000000004 /* BlueprintFrame.swift */,
+				DE0000000000000000000006 /* VectorPath.swift */,
+				DE0000000000000000000008 /* Icon.swift */,
+				DE000000000000000000000A /* IndustryControls.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -408,6 +440,14 @@
 				8FFD5FF52E8422580035E446 /* CircleButton.swift in Sources */,
 				8FFD5FF62E8422580035E446 /* CustomButton.swift in Sources */,
 				E6FD3BCE2EB4D53A00E7FE5D /* NonStreamView.swift in Sources */,
+				DE0000000000000000000001 /* Theme.swift in Sources */,
+				DE0000000000000000000003 /* OperatorGlyph.swift in Sources */,
+				DE0000000000000000000005 /* BlueprintFrame.swift in Sources */,
+				DE0000000000000000000007 /* VectorPath.swift in Sources */,
+				DE0000000000000000000009 /* Icon.swift in Sources */,
+				DE000000000000000000000B /* IndustryControls.swift in Sources */,
+				DE000000000000000000000D /* SettingsView.swift in Sources */,
+				DE000000000000000000000F /* AppSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

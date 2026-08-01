@@ -9,8 +9,8 @@
 //
 // HomeScreenView.swift
 //
-// Welcome screen that guides users through the DAT SDK registration process.
-// This view is displayed when the app is not yet registered.
+// Connect screen. Shown until the app is registered with the DAT SDK; connecting hands off
+// to the Meta AI app to authorize the link.
 //
 
 import MWDATCore
@@ -19,87 +19,151 @@ import SwiftUI
 struct HomeScreenView: View {
   var viewModel: WearablesViewModel
 
+  private var isConnecting: Bool {
+    viewModel.registrationState == .registering
+  }
+
   var body: some View {
     ZStack {
-      Color.white.edgesIgnoringSafeArea(.all)
+      Theme.bg.ignoresSafeArea()
 
-      VStack(spacing: 12) {
-        Spacer()
+      VStack(alignment: .leading, spacing: 16) {
+        masthead
+        figure
+        features
 
-        Image(.assemblyManIcon)
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 120)
+        Spacer(minLength: 8)
 
-        VStack(spacing: 12) {
-          HomeTipItemView(
-            resource: .smartGlassesIcon,
-            title: "Video Capture",
-            text: "Record videos directly from your glasses, from your point of view."
-          )
-          HomeTipItemView(
-            resource: .soundIcon,
-            title: "Open-Ear Audio",
-            text: "Hear notifications while keeping your ears open to the world around you."
-          )
-          HomeTipItemView(
-            resource: .walkingIcon,
-            title: "Enjoy On-the-Go",
-            text: "Stay hands-free while you move through your day. Move freely, stay connected."
-          )
+        Text("Connecting opens the Meta AI app to authorize the link. Nothing streams until you say so.")
+          .font(Theme.body(11.5))
+          .foregroundStyle(Theme.neutral500)
+          .multilineTextAlignment(.center)
+          .lineSpacing(3)
+          .fixedSize(horizontal: false, vertical: true)
+          .frame(maxWidth: .infinity)
+          .padding(.horizontal, 10)
+
+        PrimaryButton(
+          title: isConnecting ? "Contacting Meta AI…" : "Connect glasses",
+          isBusy: isConnecting
+        ) {
+          viewModel.connectGlasses()
         }
-
-        Spacer()
-
-        VStack(spacing: 20) {
-          Text("You'll be redirected to the Meta AI app to confirm your connection.")
-            .font(.system(size: 14))
-            .foregroundStyle(.gray)
-            .multilineTextAlignment(.center)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 12)
-
-          CustomButton(
-            title: viewModel.registrationState == .registering ? "Connecting..." : "Connect my glasses",
-            style: .primary,
-            isDisabled: viewModel.registrationState == .registering
-          ) {
-            viewModel.connectGlasses()
-          }
-        }
+        .accessibilityIdentifier("connect_glasses_button")
       }
-      .padding(.all, 24)
+      .padding(.horizontal, Theme.screenPadding)
+      .padding(.top, 28)
+      .padding(.bottom, 24)
     }
   }
 
+  // MARK: - Sections
+
+  private var masthead: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(alignment: .firstTextBaseline) {
+        Text("Meta Wearables DAT")
+          .overlineStyle(color: Theme.accent700)
+        Spacer()
+        Text("Sample 01")
+          .overlineStyle(color: Theme.neutral500)
+      }
+
+      Text("AssemblyMan")
+        .headingStyle(38)
+
+      Text("A camera link for Ray-Ban Meta glasses.")
+        .font(Theme.body(13))
+        .foregroundStyle(Theme.neutral600)
+    }
+  }
+
+  /// Framed plate presenting the brand mark as a technical figure.
+  private var figure: some View {
+    VStack(spacing: 0) {
+      OperatorGlyph(size: 88)
+        .frame(height: 132)
+        .frame(maxWidth: .infinity)
+
+      Text("Fig. 01 — Operator glyph")
+        .overlineStyle(size: 9, color: Theme.neutral500)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .overlay(alignment: .top) {
+          Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+        }
+    }
+    .frame(width: 200)
+    .blueprintFrame()
+    .frame(maxWidth: .infinity)
+    .padding(.vertical, 4)
+  }
+
+  private var features: some View {
+    VStack(spacing: 0) {
+      FeatureRow(
+        index: "01",
+        glyph: .video,
+        title: "Point-of-view capture",
+        detail: "Stream and photograph exactly what you see, straight from the frames."
+      )
+      FeatureRow(
+        index: "02",
+        glyph: .volume,
+        title: "Open-ear audio",
+        detail: "Capture cues play through the frames without closing off the room."
+      )
+      FeatureRow(
+        index: "03",
+        glyph: .hand,
+        title: "Hands-free by default",
+        detail: "Both hands stay on the work. The camera rides along.",
+        isLast: true
+      )
+    }
+  }
 }
 
-struct HomeTipItemView: View {
-  let resource: ImageResource
+/// Numbered, hairline-separated capability row.
+private struct FeatureRow: View {
+  let index: String
+  let glyph: Icon.Glyph
   let title: String
-  let text: String
+  let detail: String
+  var isLast: Bool = false
 
   var body: some View {
     HStack(alignment: .top, spacing: 12) {
-      Image(resource)
-        .resizable()
-        .renderingMode(.template)
-        .foregroundStyle(.black)
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 24)
-        .padding(.leading, 4)
-        .padding(.top, 4)
+      Text(index)
+        .font(Theme.body(10))
+        .foregroundStyle(Theme.neutral500)
+        .padding(.top, 3)
 
-      VStack(alignment: .leading, spacing: 6) {
+      Icon(glyph: glyph, size: 22)
+        .padding(.top, 1)
+
+      VStack(alignment: .leading, spacing: 2) {
         Text(title)
-          .font(.system(size: 18, weight: .semibold))
-          .foregroundStyle(.black)
-
-        Text(text)
-          .font(.system(size: 15))
-          .foregroundStyle(.gray)
+          .font(Theme.body(14, weight: .semibold))
+          .foregroundStyle(Theme.text)
+        Text(detail)
+          .font(Theme.body(12.5))
+          .foregroundStyle(Theme.neutral600)
+          .lineSpacing(3)
+          .fixedSize(horizontal: false, vertical: true)
       }
-      Spacer()
+
+      Spacer(minLength: 0)
+    }
+    .padding(.vertical, 12)
+    .overlay(alignment: .top) {
+      Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+    }
+    .overlay(alignment: .bottom) {
+      if isLast {
+        Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+      }
     }
   }
 }

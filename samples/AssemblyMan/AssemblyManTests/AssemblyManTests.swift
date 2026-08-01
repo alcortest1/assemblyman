@@ -66,7 +66,7 @@ final class ViewModelIntegrationTests: XCTestCase {
     // Setup camera feed
     camera.setCameraFeed(fileURL: videoURL)
 
-    let viewModel = StreamSessionViewModel(wearables: Wearables.shared)
+    let viewModel = StreamSessionViewModel(wearables: Wearables.shared, settings: AppSettings())
     self.viewModel = viewModel
 
     // Wait for the mock device to be detected
@@ -122,7 +122,7 @@ final class ViewModelIntegrationTests: XCTestCase {
     camera.setCameraFeed(fileURL: videoURL)
     camera.setCapturedImage(fileURL: imageURL)
 
-    let viewModel = StreamSessionViewModel(wearables: Wearables.shared)
+    let viewModel = StreamSessionViewModel(wearables: Wearables.shared, settings: AppSettings())
     self.viewModel = viewModel
 
     // Wait for the mock device to be detected

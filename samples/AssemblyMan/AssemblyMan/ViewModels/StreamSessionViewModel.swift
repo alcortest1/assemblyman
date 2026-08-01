@@ -44,16 +44,30 @@ final class StreamSessionViewModel {
 
   private let sessionManager: DeviceSessionManager
   private let wearables: WearablesInterface
+  private let settings: AppSettings
   private var stream: MWDATCamera.Stream?
 
   private var stateListenerToken: AnyListenerToken?
   private var videoFrameListenerToken: AnyListenerToken?
   private var errorListenerToken: AnyListenerToken?
   private var photoDataListenerToken: AnyListenerToken?
+
+  /// Set when a stop is only a step towards restarting with a new configuration.
+  @ObservationIgnored private var wantsRestart = false
+
+  /// Seconds since the current session started streaming, shown in the overlay clock.
+  var elapsedSeconds: Int = 0
+  @ObservationIgnored private var elapsedTask: Task<Void, Never>?
+
+  var elapsedText: String {
+    String(format: "%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
+  }
+
   // MARK: - Init
 
-  init(wearables: WearablesInterface) {
+  init(wearables: WearablesInterface, settings: AppSettings) {
     self.wearables = wearables
+    self.settings = settings
     self.sessionManager = DeviceSessionManager(wearables: wearables)
   }
 
@@ -79,13 +93,26 @@ final class StreamSessionViewModel {
   }
 
   func stopSession() {
+    wantsRestart = false
+    stream?.stop()
+  }
+
+  /// Rebuilds the stream so a changed `StreamConfiguration` takes effect.
+  ///
+  /// A stopped session is terminal, so this cannot mutate the running stream — it stops the
+  /// current one and starts a fresh session once the SDK reports `.stopped`.
+  func restartStream() {
+    guard isStreaming else { return }
+    wantsRestart = true
     stream?.stop()
   }
 
   /// Stops both the stream and the underlying device session. Call in test tearDown.
   func endSession() {
+    wantsRestart = false
     stream = nil
     clearListeners()
+    stopElapsedClock()
     streamingStatus = .stopped
     currentVideoFrame = nil
     hasReceivedFirstFrame = false
@@ -142,8 +169,8 @@ final class StreamSessionViewModel {
 
     let config = StreamConfiguration(
       videoCodec: VideoCodec.raw,
-      resolution: StreamingResolution.low,
-      frameRate: 24
+      resolution: settings.quality.streamingResolution,
+      frameRate: UInt(settings.frameRate.rawValue)
     )
 
     do {
@@ -193,12 +220,37 @@ final class StreamSessionViewModel {
       stream = nil
       clearListeners()
       hasReceivedFirstFrame = false
+      stopElapsedClock()
       sessionManager.stopCurrentSession()
+
+      if wantsRestart {
+        wantsRestart = false
+        Task { await handleStartStreaming() }
+      }
     case .waitingForDevice, .starting, .stopping, .paused:
       streamingStatus = .waiting
     case .streaming:
       streamingStatus = .streaming
+      startElapsedClock()
     }
+  }
+
+  /// Runs the session clock from 00:00 while the stream is live.
+  private func startElapsedClock() {
+    guard elapsedTask == nil else { return }
+    elapsedSeconds = 0
+    elapsedTask = Task { [weak self] in
+      while !Task.isCancelled {
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        guard !Task.isCancelled else { return }
+        self?.elapsedSeconds += 1
+      }
+    }
+  }
+
+  private func stopElapsedClock() {
+    elapsedTask?.cancel()
+    elapsedTask = nil
   }
 
   private func handleVideoFrame(_ frame: VideoFrame) {
