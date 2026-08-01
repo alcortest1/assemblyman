@@ -1,0 +1,25 @@
+# Only web/ is deployed (see outputDirectory in vercel.json). Everything below
+# is either irrelevant to the static portal or must never leave this machine.
+
+# Secrets — also gitignored, listed again so a CLI deploy can't upload them.
+livekit.txt
+.env.local
+**/.env.local
+
+# The realtime agent is a long-running LiveKit worker, not a serverless
+# function — it cannot run on Vercel. Deploy it somewhere that keeps a process
+# alive (LiveKit Cloud Agents, Fly, Render, a container).
+agent/
+
+# iOS sample apps, vendored SDK, docs, and AI-tooling payloads.
+samples/
+client-sdk-swift/
+docs/
+plugins/
+.cursor/
+.claude-plugin/
+.github/
+
+__pycache__/
+*.pyc
+.venv/

@@ -1,1 +1,8 @@
 livekit.txt
+
+# Agent credentials — never commit
+.env.local
+agent/.env.local
+agent/.venv/
+__pycache__/
+*.pyc

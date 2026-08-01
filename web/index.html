@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssemblyMan Portal</title>
+<meta name="description" content="Companion web portal for AssemblyMan — join a live session by room code, stage any participant's screen, and build agents in the Studio.">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="styles/industry.css">
+<link rel="stylesheet" href="styles/portal.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── header ─────────────────────────────────────────────────────────── -->
+  <header class="hdr">
+    <svg class="hdr-mark" width="20" height="20" viewBox="0 0 48 48" fill="none" stroke-linecap="square" aria-hidden="true">
+      <path d="M13 19 a11 11 0 0 1 22 0" stroke="var(--color-accent)" stroke-width="3"></path>
+      <path d="M8.5 19.5 H39.5" stroke="var(--color-accent)" stroke-width="3"></path>
+      <rect x="12" y="27" width="10" height="8" stroke="var(--color-text)" stroke-width="3"></rect>
+      <rect x="26" y="27" width="10" height="8" stroke="var(--color-text)" stroke-width="3"></rect>
+      <path d="M22 30.5 H26" stroke="var(--color-text)" stroke-width="3"></path>
+    </svg>
+    <span class="hdr-wordmark">AssemblyMan</span>
+    <span class="tag tag-accent hdr-badge">PORTAL</span>
+
+    <div class="tabs" role="tablist" aria-label="Portal sections" data-when="joined">
+      <button class="tab" role="tab" id="tab-room" aria-controls="screen-session" data-tab="room" type="button">Session</button>
+      <button class="tab" role="tab" id="tab-studio" aria-controls="screen-studio" data-tab="studio" type="button">Agent Studio</button>
+    </div>
+
+    <span class="spacer"></span>
+
+    <span class="hdr-room" data-when="joined">ROOM<b id="hdr-room-code">K7F-3QD9</b></span>
+    <button class="btn-outline" id="leave" type="button" data-when="joined">Leave session</button>
+    <span class="hdr-idle" data-when="not-joined">Viewer · No session</span>
+  </header>
+
+  <!-- ── join ───────────────────────────────────────────────────────────── -->
+  <main class="join" id="screen-join">
+    <div class="join-inner">
+      <div class="blueprint join-mark">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <svg width="42" height="42" viewBox="0 0 48 48" fill="none" stroke-linecap="square" aria-hidden="true">
+          <path d="M13 19 a11 11 0 0 1 22 0" stroke="var(--color-accent)" stroke-width="2.5"></path>
+          <path d="M8.5 19.5 H39.5" stroke="var(--color-accent)" stroke-width="2.5"></path>
+          <rect x="12" y="27" width="10" height="8" stroke="var(--color-text)" stroke-width="2.5"></rect>
+          <rect x="26" y="27" width="10" height="8" stroke="var(--color-text)" stroke-width="2.5"></rect>
+          <path d="M22 30.5 H26" stroke="var(--color-text)" stroke-width="2.5"></path>
+        </svg>
+      </div>
+
+      <div class="join-copy">
+        <span class="section-label">Session portal</span>
+        <h1 class="join-title">Join a live session</h1>
+        <span class="join-sub">Enter the room code from the operator's app. Codes are generated per session and rotate when it ends.</span>
+      </div>
+
+      <form class="join-form" id="join-form" novalidate>
+        <div class="join-row">
+          <input class="join-input" id="code" name="code" placeholder="K7F-3QD9" spellcheck="false"
+                 autocomplete="off" autocapitalize="characters" aria-label="Room code"
+                 aria-describedby="code-err" inputmode="text">
+          <button class="btn btn-primary blueprint join-submit" type="submit">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            Join session
+          </button>
+        </div>
+        <span class="join-err" id="code-err" role="alert" hidden>Enter the full code — two groups, like K7F-3QD9.</span>
+      </form>
+
+      <div class="join-steps">
+        <div class="join-step"><span class="join-step-n">01</span><span class="join-step-t">Ask the operator for the room code on their live session screen.</span></div>
+        <div class="join-step"><span class="join-step-n">02</span><span class="join-step-t">Stage anyone's screen — the operator's POV or an agent's board.</span></div>
+        <div class="join-step"><span class="join-step-n">03</span><span class="join-step-t">Create agents in the Studio and deploy them into the room.</span></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── session ────────────────────────────────────────────────────────── -->
+  <main class="session" id="screen-session" role="tabpanel" aria-labelledby="tab-room" hidden>
+
+    <div class="stage">
+
+      <!-- operator POV -->
+      <div id="stage-op">
+        <img class="stage-media" src="assets/plant.png" alt="Live feed from the operator's glasses">
+        <div class="stage-scrim"></div>
+
+        <div class="blueprint overlay overlay-marks" id="ov-marks">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        </div>
+
+        <div class="overlay" id="ov-sam">
+          <svg class="sam-svg" width="100%" height="100%" viewBox="0 0 366 620" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M70 180 Q120 120 190 150 Q240 175 225 250 Q205 320 130 305 Q60 285 70 180 Z" fill="rgba(181,217,253,0.28)" stroke="#b5d9fd" stroke-width="1.5" stroke-dasharray="5 3"></path>
+            <path d="M230 330 Q300 310 330 370 Q345 430 290 460 Q230 480 205 425 Q190 365 230 330 Z" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-dasharray="5 3"></path>
+            <path d="M90 420 Q140 395 175 440 Q200 490 155 525 Q100 545 75 495 Q60 450 90 420 Z" fill="rgba(181,217,253,0.28)" stroke="#b5d9fd" stroke-width="1.5" stroke-dasharray="5 3"></path>
+          </svg>
+          <span class="sam-label" style="left:24%;top:22%">MASK 01 · 0.97</span>
+          <span class="sam-label alt" style="left:64%;top:58%">MASK 02 · 0.91</span>
+          <span class="sam-label" style="left:22%;top:76%">MASK 03 · 0.84</span>
+        </div>
+
+        <div class="overlay" id="ov-grid">
+          <div class="grid-line v" style="left:33.33%"></div>
+          <div class="grid-line v" style="left:66.66%"></div>
+          <div class="grid-line h" style="top:33.33%"></div>
+          <div class="grid-line h" style="top:66.66%"></div>
+        </div>
+
+        <span class="stage-chip stage-source">OPERATOR POV · RAY-BAN META</span>
+      </div>
+
+      <!-- staged viewer -->
+      <div class="stage-viewer" id="stage-viewer" hidden>
+        <span class="stage-viewer-avatar" id="staged-initials">DR</span>
+        <span class="stage-viewer-note">No video — viewers watch, they don't broadcast</span>
+      </div>
+
+      <!-- staged agent board -->
+      <div class="stage-agent" id="stage-agent" hidden>
+        <div class="blueprint board">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="board-head">
+            <span class="board-dot"></span>
+            <span class="board-name" id="staged-name">Assembly Assistant</span>
+            <span class="board-kind">AGENT BOARD</span>
+            <span class="spacer"></span>
+            <span class="board-watching">WATCHING OPERATOR POV</span>
+          </div>
+          <div class="board-stats">
+            <span class="board-stat">STEP 4 / 9</span>
+            <span class="board-stat">2 FLAGS</span>
+            <span class="board-stat">3 STILLS FILED</span>
+          </div>
+          <div class="board-log">
+            <div class="board-line"><span class="board-time">12:18</span><span class="board-text">Step 4 confirmed — torque check on the rear bracket passed.</span></div>
+            <div class="board-line"><span class="board-time">12:31</span><span class="board-text flag">MASK 02 flagged — thread wear on the M6 fastener. Still filed to the rail.</span></div>
+            <div class="board-line"><span class="board-time">12:47</span><span class="board-text">Read step 5 aloud to the operator — align the housing before seating.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-bar">
+        <span class="stage-chip stage-live"><span class="blink"></span>LIVE · 720P 30FPS</span>
+        <span class="stage-chip stage-elapsed" id="elapsed">12:34</span>
+      </div>
+    </div>
+
+    <aside class="rail">
+      <div class="rail-group">
+        <div class="section-head">
+          <span class="section-label">Participants</span>
+          <span class="section-count" id="participant-count">5 in room</span>
+        </div>
+        <div class="participants">
+          <div id="participants"></div>
+          <button class="btn-add" id="add-agent" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            Add agent
+          </button>
+        </div>
+      </div>
+
+      <div class="rail-group">
+        <span class="section-label" id="overlays-label">Your overlays</span>
+        <div class="blueprint" id="overlays" role="group" aria-labelledby="overlays-label">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        </div>
+      </div>
+
+      <div class="rail-group">
+        <div class="section-head">
+          <span class="section-label">Captures</span>
+          <span class="section-count">3 this session</span>
+        </div>
+        <div class="captures">
+          <div class="blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><img src="assets/plant.png" alt="Capture 001"></div>
+          <div class="blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><img src="assets/plant.png" alt="Capture 002" style="object-position:20% 60%"></div>
+          <div class="blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><img src="assets/plant.png" alt="Capture 003" style="object-position:80% 30%"></div>
+        </div>
+      </div>
+
+      <span class="spacer"></span>
+      <span class="rail-note">View only — capture stays with the operator</span>
+    </aside>
+  </main>
+
+  <!-- ── agent studio ───────────────────────────────────────────────────── -->
+  <main class="studio" id="screen-studio" role="tabpanel" aria-labelledby="tab-studio" hidden>
+
+    <aside class="library">
+      <div class="section-head">
+        <span class="section-label">Agent library</span>
+        <span class="section-count" id="agent-count">3 agents</span>
+      </div>
+      <div class="library-list" id="library"></div>
+      <button class="btn-add" id="new-agent" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        New agent
+      </button>
+      <span class="library-note">Built-ins are editable copies. Deployed agents join the room as participants.</span>
+    </aside>
+
+    <section class="editor">
+      <div class="editor-head">
+        <span class="editor-kicker">AGENT</span>
+        <span class="editor-name" id="sel-name">Assembly Assistant</span>
+        <span class="tag tag-accent editor-badge" id="sel-in-room" hidden>IN ROOM</span>
+        <span class="spacer"></span>
+        <button class="btn-outline" id="delete-agent" type="button" hidden>Delete</button>
+      </div>
+
+      <div class="editor-cols">
+        <div class="editor-main">
+          <div class="field-group">
+            <label class="section-label" for="agent-name">Name</label>
+            <input class="text-input" id="agent-name" autocomplete="off">
+          </div>
+
+          <div class="field-group">
+            <label class="section-label" for="agent-instructions">Instructions</label>
+            <textarea class="textarea" id="agent-instructions" rows="5"></textarea>
+            <span class="field-hint">What the agent watches for and how it responds. It sees the POV feed and SAM masks.</span>
+          </div>
+
+          <div class="field-group">
+            <span class="section-label" id="voice-label">Voice</span>
+            <div class="voice" id="voice" role="group" aria-labelledby="voice-label"></div>
+            <span class="field-hint">Spoken through the frames' open-ear audio. Muted keeps the agent text-only.</span>
+          </div>
+        </div>
+
+        <div class="editor-side">
+          <div class="field-group">
+            <span class="section-label" id="triggers-label">Triggers</span>
+            <div class="blueprint" id="triggers" role="group" aria-labelledby="triggers-label">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            </div>
+          </div>
+
+          <div class="blueprint deploy-card">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="deploy-inner">
+              <span class="deploy-label">Deployment</span>
+              <span class="deploy-hint" id="deploy-hint"></span>
+              <button class="btn-recall" id="recall" type="button" hidden>Recall from room</button>
+              <button class="btn btn-primary blueprint btn-deploy" id="deploy" type="button" hidden>
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                Deploy to room
+              </button>
+            </div>
+          </div>
+
+          <div class="blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="preview-head">Preview — agent board</div>
+            <div>
+              <div class="preview-line"><span class="preview-time">12:31</span><span class="preview-text" id="preview-line"></span></div>
+              <div class="preview-foot">Output lands on this agent's tile in the session rail.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
