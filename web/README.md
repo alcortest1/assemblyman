@@ -16,6 +16,27 @@ python3 -m http.server 8777
 # → http://localhost:8777
 ```
 
+## Deployment
+
+Vercel, via the GitHub integration on `alcortest1/assemblyman`.
+
+`vercel.json` at the repo root drives it: no framework, no build step,
+`outputDirectory: "web"`. Everything else in the repo — the iOS samples, the
+vendored SDK, and the LiveKit agent — is excluded by `.vercelignore`, along with
+the credential files.
+
+| Branch | Environment | URL |
+|---|---|---|
+| `main` | Production | `assemblyman.vercel.app` |
+| any other branch | Preview | per-branch URL |
+
+`main` does not yet contain `web/` or `vercel.json`, so the production URL will
+not serve the portal until this branch merges.
+
+Cache headers are set so `index.html`, `app.js` and `styles/` always revalidate —
+none of them are content-hashed, so a redeploy would otherwise serve stale
+assets. Only `assets/` is cached (24h).
+
 ## Files
 
 | Path | What it is |
