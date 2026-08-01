@@ -175,7 +175,7 @@ final class AppConfigurationTests: XCTestCase {
     )
   }
 
-  func testMobileSAMProducesAnOverlayForBundledFrame() async throws {
+  func testMobileSAMProducesReticleAndFullFrameOverlays() async throws {
     let imageURL = try XCTUnwrap(
       Bundle.main.url(forResource: "plant", withExtension: "png")
     )
@@ -183,14 +183,48 @@ final class AppConfigurationTests: XCTestCase {
       UIImage(contentsOfFile: imageURL.path)?.cgImage
     )
 
-    let result = await MobileSAMProcessor().makeOverlay(for: sourceImage)
-    switch result {
-    case .success(let overlay, let inferenceMilliseconds):
-      XCTAssertGreaterThan(overlay.size.width, 0)
-      XCTAssertGreaterThan(overlay.size.height, 0)
-      XCTAssertGreaterThanOrEqual(inferenceMilliseconds, 0)
-    case .failure(let message):
-      XCTFail("MobileSAM inference failed: \(message)")
+    let processor = MobileSAMProcessor()
+    for targetMode in MobileSAMTargetMode.allCases {
+      let result = await processor.makeOverlay(
+        for: sourceImage,
+        targetMode: targetMode
+      )
+      switch result {
+      case .success(let overlay, let inferenceMilliseconds):
+        XCTAssertGreaterThan(overlay.size.width, 0, targetMode.label)
+        XCTAssertGreaterThan(overlay.size.height, 0, targetMode.label)
+        XCTAssertGreaterThanOrEqual(inferenceMilliseconds, 0, targetMode.label)
+      case .failure(let message):
+        XCTFail("MobileSAM \(targetMode.label) inference failed: \(message)")
+      }
     }
+  }
+
+  func testMobileSAMTargetModesCoverCenterAndFullFrameGrid() throws {
+    let reticlePoints = MobileSAMTargetMode.reticle.promptPoints(
+      imageWidth: 600,
+      imageHeight: 900
+    )
+    let reticlePoint = try XCTUnwrap(reticlePoints.first)
+    XCTAssertEqual(reticlePoints.count, 1)
+    XCTAssertEqual(reticlePoint.x, 300, accuracy: 0.001)
+    XCTAssertEqual(reticlePoint.y, 450, accuracy: 0.001)
+
+    let fullFramePoints = MobileSAMTargetMode.fullFrame.promptPoints(
+      imageWidth: 600,
+      imageHeight: 900
+    )
+    XCTAssertEqual(fullFramePoints.count, 9)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.x).min()), 100, accuracy: 0.001)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.x).max()), 500, accuracy: 0.001)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.y).min()), 150, accuracy: 0.001)
+    XCTAssertEqual(try XCTUnwrap(fullFramePoints.map(\.y).max()), 750, accuracy: 0.001)
+  }
+
+  func testMobileSAMFrameRatesMapToProcessingIntervals() {
+    XCTAssertEqual(MobileSAMFrameRate.half.interval, .seconds(2))
+    XCTAssertEqual(MobileSAMFrameRate.one.interval, .seconds(1))
+    XCTAssertEqual(MobileSAMFrameRate.two.interval, .milliseconds(500))
+    XCTAssertEqual(MobileSAMFrameRate.five.interval, .milliseconds(200))
   }
 }

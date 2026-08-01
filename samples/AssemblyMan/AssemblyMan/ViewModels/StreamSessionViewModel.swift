@@ -41,13 +41,31 @@ final class StreamSessionViewModel {
         segmentationTask?.cancel()
         segmentationOverlay = nil
         isGeneratingSegmentation = false
+        segmentationInferenceMilliseconds = nil
+        lastSegmentationTime = nil
       }
+    }
+  }
+  var segmentationTargetMode: MobileSAMTargetMode = .reticle {
+    didSet {
+      guard segmentationTargetMode != oldValue else { return }
+      segmentationTask?.cancel()
+      segmentationOverlay = nil
+      segmentationInferenceMilliseconds = nil
+      lastSegmentationTime = nil
+    }
+  }
+  var segmentationFrameRate: MobileSAMFrameRate = .one {
+    didSet {
+      guard segmentationFrameRate != oldValue else { return }
+      lastSegmentationTime = nil
     }
   }
   var isReticleOverlayEnabled: Bool = true
   var segmentationOverlay: UIImage?
   var isGeneratingSegmentation: Bool = false
   var segmentationInferenceMilliseconds: Int?
+  var segmentationRevision: UInt = 0
 
   var hasActiveDevice: Bool { sessionManager.hasActiveDevice }
   var isDeviceSessionReady: Bool { sessionManager.isReady }
@@ -79,8 +97,6 @@ final class StreamSessionViewModel {
   private var segmentationTask: Task<Void, Never>?
   private var lastSegmentationTime: ContinuousClock.Instant?
   private let segmentationProcessor = MobileSAMProcessor()
-
-  private let segmentationInterval: Duration = .milliseconds(100)
 
   // MARK: - Init
 
@@ -295,22 +311,30 @@ final class StreamSessionViewModel {
 
     let now = ContinuousClock.now
     if let lastSegmentationTime,
-      now - lastSegmentationTime < segmentationInterval
+      now - lastSegmentationTime < segmentationFrameRate.interval
     {
       return
     }
 
+    let targetMode = segmentationTargetMode
     lastSegmentationTime = now
     isGeneratingSegmentation = true
     segmentationTask = Task { [weak self] in
       guard let self else { return }
-      let result = await self.segmentationProcessor.makeOverlay(for: cgImage)
+      let result = await self.segmentationProcessor.makeOverlay(
+        for: cgImage,
+        targetMode: targetMode
+      )
 
-      if !Task.isCancelled, self.isSegmentationOverlayEnabled {
+      if !Task.isCancelled,
+        self.isSegmentationOverlayEnabled,
+        self.segmentationTargetMode == targetMode
+      {
         switch result {
         case .success(let overlay, let inferenceMilliseconds):
           self.segmentationOverlay = overlay
           self.segmentationInferenceMilliseconds = inferenceMilliseconds
+          self.segmentationRevision &+= 1
         case .failure(let message):
           self.isSegmentationOverlayEnabled = false
           self.showError("MobileSAM overlay failed: \(message)")
@@ -347,6 +371,7 @@ final class StreamSessionViewModel {
     segmentationOverlay = nil
     isGeneratingSegmentation = false
     segmentationInferenceMilliseconds = nil
+    segmentationRevision = 0
     lastSegmentationTime = nil
     Task {
       await segmentationProcessor.reset()

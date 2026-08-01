@@ -6,7 +6,8 @@ A sample iOS application demonstrating integration with Meta Wearables Device Ac
 
 - Connect to Meta AI glasses
 - Stream camera feed from the device
-- Segment the object under the center reticle with an on-device MobileSAM overlay
+- Segment the center-reticle object or multiple regions across the full frame with MobileSAM
+- Set MobileSAM to 0.5, 1, 2, or 5 processing FPS while streaming
 - Toggle the segmentation mask, composition grid, and center reticle while streaming
 - Capture photos from glasses
 - Share captured photos
@@ -37,7 +38,9 @@ A sample iOS application demonstrating integration with Meta Wearables Device Ac
 1. Press the "Connect" button to complete app registration.
 1. Once connected, the camera stream from the device will be displayed
 1. Use the on-screen controls to:
-   - Open **Overlays** and toggle **MobileSAM**, **Grid**, or **Reticle**
+   - Open **Overlays**, toggle **MobileSAM**, and choose **Reticle** or **Full frame**
+   - Set the SAM processing rate to 0.5, 1, 2, or 5 FPS
+   - Toggle **Grid** or **Reticle**
    - Capture photos
    - View and save captured photos
    - Disconnect from the device
@@ -47,10 +50,12 @@ A sample iOS application demonstrating integration with Meta Wearables Device Ac
 ## MobileSAM live overlay
 
 MobileSAM runs entirely on the iPhone using Core ML; streamed frames are not
-sent to a server. The cyan mask targets the object beneath the center reticle.
-Only one inference is allowed at a time, so incoming frames are dropped while
-the model is busy instead of building a processing backlog. The overlay panel
-shows the most recent inference time.
+sent to a server. **Reticle** mode targets the center object. **Full frame**
+mode reuses one image encoding with a 3×3 grid of independent point prompts,
+then merges their best masks for broader scene coverage. Only one inference is
+allowed at a time, so incoming frames are dropped while the model is busy
+instead of building a processing backlog. The overlay panel sets a maximum
+processing rate of 0.5, 1, 2, or 5 FPS and shows the latest inference time.
 
 The Core ML models and prompt weights are bundled with the app. See the
 repository's `THIRD_PARTY_NOTICES.md` for their sources and license.

@@ -46,6 +46,9 @@ struct StreamView: View {
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+        .id(viewModel.segmentationRevision)
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.18), value: viewModel.segmentationRevision)
       }
 
       scrims
@@ -56,7 +59,9 @@ struct StreamView: View {
       if settings.showsThirdsGrid {
         thirdsGrid
       }
-      if viewModel.isReticleOverlayEnabled {
+      if viewModel.isReticleOverlayEnabled,
+        viewModel.segmentationTargetMode == .reticle
+      {
         CenterReticleOverlay()
       }
 
@@ -292,25 +297,75 @@ private struct OverlayControlsView: View {
         detail: viewModel.segmentationInferenceMilliseconds.map { "\($0) ms" },
         accessibilityIdentifier: "mobile_sam_overlay_toggle"
       )
+      MobileSAMTargetPicker(selection: $viewModel.segmentationTargetMode)
+      MobileSAMFrameRatePicker(selection: $viewModel.segmentationFrameRate)
       OverlayToggle(
         title: "Grid",
         systemImage: "grid",
         isOn: $settings.showsThirdsGrid
       )
-      OverlayToggle(
-        title: "Reticle",
-        systemImage: "scope",
-        isOn: $viewModel.isReticleOverlayEnabled
-      )
+      if viewModel.segmentationTargetMode == .reticle {
+        OverlayToggle(
+          title: "Reticle",
+          systemImage: "scope",
+          isOn: $viewModel.isReticleOverlayEnabled
+        )
+      }
     }
     .padding(14)
-    .frame(width: 220)
+    .frame(width: 260)
     .background(Theme.accent900.opacity(0.88))
     .overlay {
       Rectangle().strokeBorder(.white.opacity(0.28), lineWidth: Theme.hairline)
     }
     .foregroundStyle(.white)
     .accessibilityIdentifier("overlay_controls_panel")
+  }
+}
+
+private struct MobileSAMTargetPicker: View {
+  @Binding var selection: MobileSAMTargetMode
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Segmentation target")
+        .overlineStyle(size: 9, color: .white.opacity(0.7))
+
+      Picker("Segmentation target", selection: $selection) {
+        ForEach(MobileSAMTargetMode.allCases) { mode in
+          Text(mode.label).tag(mode)
+        }
+      }
+      .pickerStyle(.segmented)
+      .tint(Theme.accent500)
+      .accessibilityIdentifier("mobile_sam_target_picker")
+    }
+  }
+}
+
+private struct MobileSAMFrameRatePicker: View {
+  @Binding var selection: MobileSAMFrameRate
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack {
+        Text("SAM processing rate")
+          .overlineStyle(size: 9, color: .white.opacity(0.7))
+        Spacer()
+        Text("\(selection.label) FPS")
+          .font(Theme.body(10).monospacedDigit())
+          .foregroundStyle(.white.opacity(0.72))
+      }
+
+      Picker("SAM processing rate", selection: $selection) {
+        ForEach(MobileSAMFrameRate.allCases) { rate in
+          Text(rate.label).tag(rate)
+        }
+      }
+      .pickerStyle(.segmented)
+      .tint(Theme.accent500)
+      .accessibilityIdentifier("mobile_sam_fps_picker")
+    }
   }
 }
 

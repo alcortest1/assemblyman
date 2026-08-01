@@ -18,17 +18,80 @@ enum MobileSAMInferenceResult {
   case failure(message: String)
 }
 
+enum MobileSAMTargetMode: String, CaseIterable, Identifiable {
+  case reticle
+  case fullFrame
+
+  var id: Self { self }
+
+  var label: String {
+    switch self {
+    case .reticle: return "Reticle"
+    case .fullFrame: return "Full frame"
+    }
+  }
+
+  func promptPoints(imageWidth: Int, imageHeight: Int) -> [SamPoint] {
+    switch self {
+    case .reticle:
+      return [
+        SamPoint(
+          x: CGFloat(imageWidth) / 2,
+          y: CGFloat(imageHeight) / 2,
+          label: .positive
+        )
+      ]
+    case .fullFrame:
+      let fractions: [CGFloat] = [1.0 / 6.0, 0.5, 5.0 / 6.0]
+      return fractions.flatMap { yFraction in
+        fractions.map { xFraction in
+          SamPoint(
+            x: CGFloat(imageWidth) * xFraction,
+            y: CGFloat(imageHeight) * yFraction,
+            label: .positive
+          )
+        }
+      }
+    }
+  }
+}
+
+enum MobileSAMFrameRate: Double, CaseIterable, Identifiable {
+  case half = 0.5
+  case one = 1
+  case two = 2
+  case five = 5
+
+  var id: Self { self }
+
+  var label: String {
+    switch self {
+    case .half: return "0.5"
+    case .one: return "1"
+    case .two: return "2"
+    case .five: return "5"
+    }
+  }
+
+  var interval: Duration {
+    .milliseconds(Int((1_000 / rawValue).rounded()))
+  }
+}
+
 /// Serializes MobileSAM work so stream frames are dropped instead of queued.
 actor MobileSAMProcessor {
   private var runtime: MobileSAMRuntime?
 
-  func makeOverlay(for image: CGImage) -> MobileSAMInferenceResult {
+  func makeOverlay(
+    for image: CGImage,
+    targetMode: MobileSAMTargetMode = .reticle
+  ) -> MobileSAMInferenceResult {
     let start = ContinuousClock.now
 
     do {
       let runtime = try runtime ?? MobileSAMRuntime()
       self.runtime = runtime
-      let overlay = try runtime.segmentCenterObject(in: image)
+      let overlay = try runtime.segment(in: image, targetMode: targetMode)
       let elapsed = start.duration(to: .now)
       let components = elapsed.components
       let milliseconds =
@@ -57,6 +120,11 @@ private final class MobileSAMRuntime {
   private let preprocessor = Preprocessor(modelSize: modelSize)
   private let promptEncoder: PromptEncoder
 
+  private struct MaskPrediction {
+    let masks: MLMultiArray
+    let scores: MLMultiArray
+  }
+
   init(bundle: Bundle = .main) throws {
     guard
       let encoderURL = bundle.url(
@@ -84,7 +152,10 @@ private final class MobileSAMRuntime {
     promptEncoder = try PromptEncoder(weightsURL: promptWeightsURL)
   }
 
-  func segmentCenterObject(in image: CGImage) throws -> CGImage {
+  func segment(
+    in image: CGImage,
+    targetMode: MobileSAMTargetMode
+  ) throws -> CGImage {
     let (processedImage, transform) = try preprocessor.process(image)
     let batchedImage = try addBatchDimension(to: processedImage)
 
@@ -101,13 +172,39 @@ private final class MobileSAMRuntime {
       throw MobileSAMError.invalidModelOutput("encoder image_embeddings")
     }
 
-    let centerPoint = SamPoint(
-      x: CGFloat(image.width) / 2,
-      y: CGFloat(image.height) / 2,
-      label: .positive
+    let promptPoints = targetMode.promptPoints(
+      imageWidth: image.width,
+      imageHeight: image.height
     )
+    var predictions: [MaskPrediction] = []
+    predictions.reserveCapacity(promptPoints.count)
+
+    // Full-frame mode deliberately decodes each point independently and unions
+    // the masks. Passing every point in one prompt asks SAM for one object that
+    // contains all points, which does not provide whole-frame coverage.
+    for point in promptPoints {
+      predictions.append(
+        try predictMask(
+          imageEmbedding: imageEmbedding,
+          point: point,
+          transform: transform
+        )
+      )
+    }
+
+    return try makeOverlay(
+      predictions: predictions,
+      transform: transform
+    )
+  }
+
+  private func predictMask(
+    imageEmbedding: MLMultiArray,
+    point: SamPoint,
+    transform: TransformParams
+  ) throws -> MaskPrediction {
     let (sparseEmbedding, denseEmbedding) = try promptEncoder.encode(
-      points: [centerPoint],
+      points: [point],
       transform: transform
     )
     let decoderInput = try MLDictionaryFeatureProvider(dictionary: [
@@ -127,10 +224,9 @@ private final class MobileSAMRuntime {
       throw MobileSAMError.invalidModelOutput("decoder masks or scores")
     }
 
-    return try makeOverlay(
+    return MaskPrediction(
       masks: masks,
-      scores: scores,
-      transform: transform
+      scores: scores
     )
   }
 
@@ -150,28 +246,50 @@ private final class MobileSAMRuntime {
   }
 
   private func makeOverlay(
-    masks: MLMultiArray,
-    scores: MLMultiArray,
+    predictions: [MaskPrediction],
     transform: TransformParams
   ) throws -> CGImage {
-    guard
-      masks.shape.count == 4,
-      masks.shape[2].intValue == Self.maskSize,
-      masks.shape[3].intValue == Self.maskSize
-    else {
-      throw MobileSAMError.invalidModelOutput("unexpected mask shape \(masks.shape)")
-    }
-
-    let maskCount = masks.shape[1].intValue
-    guard maskCount > 0 else {
+    guard !predictions.isEmpty else {
       throw MobileSAMError.invalidModelOutput("empty mask output")
     }
 
-    let bestMask =
-      (0..<maskCount).max {
-        scores[[0, $0] as [NSNumber]].floatValue
-          < scores[[0, $1] as [NSNumber]].floatValue
-      } ?? 0
+    let selectedPredictions = try predictions.map { prediction -> (
+      pointer: UnsafeMutablePointer<Float32>,
+      baseOffset: Int,
+      rowStride: Int,
+      columnStride: Int
+    ) in
+      let masks = prediction.masks
+      guard
+        masks.dataType == .float32,
+        masks.shape.count == 4,
+        masks.shape[2].intValue == Self.maskSize,
+        masks.shape[3].intValue == Self.maskSize
+      else {
+        throw MobileSAMError.invalidModelOutput("unexpected mask shape \(masks.shape)")
+      }
+
+      let maskCount = masks.shape[1].intValue
+      guard maskCount > 0 else {
+        throw MobileSAMError.invalidModelOutput("empty mask output")
+      }
+
+      let bestMask =
+        (0..<maskCount).max {
+          prediction.scores[[0, $0] as [NSNumber]].floatValue
+            < prediction.scores[[0, $1] as [NSNumber]].floatValue
+        } ?? 0
+
+      let maskStride = masks.strides[1].intValue
+      let rowStride = masks.strides[2].intValue
+      let columnStride = masks.strides[3].intValue
+      return (
+        pointer: masks.dataPointer.bindMemory(to: Float32.self, capacity: masks.count),
+        baseOffset: bestMask * maskStride,
+        rowStride: rowStride,
+        columnStride: columnStride
+      )
+    }
 
     let maskScale = Float(Self.maskSize) / Float(Self.modelSize)
     let cropX = max(0, Int((transform.padX * maskScale).rounded(.down)))
@@ -188,9 +306,17 @@ private final class MobileSAMRuntime {
     var pixels = [UInt8](repeating: 0, count: cropWidth * cropHeight * 4)
     for y in 0..<cropHeight {
       for x in 0..<cropWidth {
-        let logit = masks[
-          [0, bestMask, cropY + y, cropX + x] as [NSNumber]
-        ].floatValue
+        var logit = -Float.infinity
+        for prediction in selectedPredictions {
+          logit = max(
+            logit,
+            prediction.pointer[
+              prediction.baseOffset
+                + (cropY + y) * prediction.rowStride
+                + (cropX + x) * prediction.columnStride
+            ]
+          )
+        }
 
         // SAM's default decision boundary is logit 0. Preserve a little
         // softness at the boundary to avoid a visibly jagged live overlay.
