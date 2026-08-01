@@ -412,7 +412,6 @@ final class StreamSessionViewModel {
 
   private func resetSegmentation() {
     segmentationTask?.cancel()
-    segmentationTask = nil
     segmentationOverlay = nil
     isGeneratingSegmentation = false
     segmentationInferenceMilliseconds = nil

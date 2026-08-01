@@ -241,7 +241,7 @@ final class AppConfigurationTests: XCTestCase {
     }
   }
 
-  func testYOLOColorMapIncludesRequestedClassesOnly() {
+  func testYOLOColorMapIncludesCuratedSceneAndObjectClasses() {
     XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "road"), .floor)
     XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "sidewalk"), .floor)
     XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "terrain"), .floor)
@@ -249,9 +249,56 @@ final class AppConfigurationTests: XCTestCase {
     XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "person"), .person)
     XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "laptop"), .laptop)
     XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "dining table"), .table)
-    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "chair"))
-    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "car"))
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "building"), .building)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "traffic sign"), .trafficSign)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "car"), .car)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "chair"), .chair)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "tv"), .display)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "cell phone"), .phone)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "potted plant"), .plant)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "refrigerator"), .refrigerator)
+    XCTAssertEqual(YOLOOverlayClass.mappedClass(for: "  SOFA  "), .couch)
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "dog"))
+    XCTAssertNil(YOLOOverlayClass.mappedClass(for: "pizza"))
     XCTAssertNil(YOLOOverlayClass.mappedClass(for: "background"))
+  }
+
+  func testYOLOColorMapHasUniqueColorsAndModeSpecificLegends() {
+    let colorKeys = YOLOOverlayClass.allCases.map {
+      "\($0.rgb.red)-\($0.rgb.green)-\($0.rgb.blue)"
+    }
+    XCTAssertEqual(Set(colorKeys).count, YOLOOverlayClass.allCases.count)
+
+    XCTAssertEqual(YOLOOverlayClass.legendClasses(for: .mobileSAM), [])
+    XCTAssertTrue(YOLOOverlayClass.legendClasses(for: .yoloObjects).contains(.chair))
+    XCTAssertFalse(YOLOOverlayClass.legendClasses(for: .yoloObjects).contains(.wall))
+    XCTAssertTrue(YOLOOverlayClass.legendClasses(for: .yoloScene).contains(.wall))
+    XCTAssertTrue(YOLOOverlayClass.legendClasses(for: .yoloScene).contains(.chair))
+  }
+
+  func testYOLOLegendsMatchMappedBundledModelClasses() {
+    let semanticModelLabels = [
+      "road", "sidewalk", "building", "wall", "fence", "pole",
+      "traffic light", "traffic sign", "vegetation", "terrain", "sky",
+      "person", "rider", "car", "truck", "bus", "train", "motorcycle",
+      "bicycle",
+    ]
+    let objectModelLabels = [
+      "person", "bicycle", "car", "motorcycle", "bus", "train", "truck",
+      "traffic light", "stop sign", "bench", "backpack", "suitcase",
+      "bottle", "cup", "chair", "couch", "potted plant", "bed",
+      "dining table", "toilet", "tv", "laptop", "mouse", "keyboard",
+      "cell phone", "microwave", "oven", "sink", "refrigerator",
+    ]
+
+    XCTAssertEqual(
+      Set(semanticModelLabels.compactMap(YOLOOverlayClass.mappedClass(for:))),
+      Set(YOLOOverlayClass.semanticClasses)
+    )
+    XCTAssertEqual(
+      Set(objectModelLabels.compactMap(YOLOOverlayClass.mappedClass(for:))),
+      Set(YOLOOverlayClass.objectClasses)
+    )
   }
 
   func testYOLOProducesOverlaysForEachLiveTask() async throws {

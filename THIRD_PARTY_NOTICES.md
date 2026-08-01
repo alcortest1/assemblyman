@@ -25,6 +25,7 @@ semantic segmentation:
 - Model release: https://github.com/ultralytics/yolo-ios-app/releases/tag/v8.3.0
 - License: GNU Affero General Public License v3.0 (AGPL-3.0)
 
-Ultralytics also offers an Enterprise license for commercial use. The full
-AGPL-3.0 license is distributed with the Swift package dependency and is
-available at https://github.com/ultralytics/yolo-ios-app/blob/v8.9.11/LICENSE.
+Commercial distribution must comply with the AGPL-3.0; Ultralytics offers an
+Enterprise license for proprietary distribution. The full AGPL-3.0 license is
+distributed with the Swift package dependency and is available at
+https://github.com/ultralytics/yolo-ios-app/blob/v8.9.11/LICENSE.

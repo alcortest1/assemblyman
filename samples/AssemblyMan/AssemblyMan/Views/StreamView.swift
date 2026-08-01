@@ -411,14 +411,7 @@ private struct YOLOColorLegend: View {
   let mode: VisionOverlayMode
 
   private var visibleClasses: [YOLOOverlayClass] {
-    switch mode {
-    case .yoloScene:
-      return YOLOOverlayClass.allCases
-    case .yoloObjects, .yoloDetect:
-      return [.person, .laptop, .table]
-    case .mobileSAM:
-      return []
-    }
+    YOLOOverlayClass.legendClasses(for: mode)
   }
 
   var body: some View {
@@ -426,25 +419,29 @@ private struct YOLOColorLegend: View {
       Text("Color map")
         .overlineStyle(size: 9, color: .white.opacity(0.7))
 
-      LazyVGrid(
-        columns: [
-          GridItem(.flexible(), alignment: .leading),
-          GridItem(.flexible(), alignment: .leading),
-        ],
-        alignment: .leading,
-        spacing: 5
-      ) {
-        ForEach(visibleClasses) { overlayClass in
-          HStack(spacing: 6) {
-            RoundedRectangle(cornerRadius: 2)
-              .fill(Color(uiColor: overlayClass.color))
-              .frame(width: 10, height: 10)
-            Text(overlayClass.label)
-              .font(Theme.body(10))
-              .foregroundStyle(.white.opacity(0.82))
+      ScrollView(.horizontal, showsIndicators: false) {
+        LazyHGrid(
+          rows: [
+            GridItem(.fixed(15), alignment: .leading),
+            GridItem(.fixed(15), alignment: .leading),
+          ],
+          alignment: .top,
+          spacing: 5
+        ) {
+          ForEach(visibleClasses) { overlayClass in
+            HStack(spacing: 6) {
+              RoundedRectangle(cornerRadius: 2)
+                .fill(Color(uiColor: overlayClass.color))
+                .frame(width: 10, height: 10)
+              Text(overlayClass.label)
+                .font(Theme.body(10))
+                .foregroundStyle(.white.opacity(0.82))
+            }
+            .fixedSize(horizontal: true, vertical: false)
           }
         }
       }
+      .frame(height: 35)
     }
   }
 }

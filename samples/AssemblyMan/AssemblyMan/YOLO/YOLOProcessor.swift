@@ -1,7 +1,7 @@
 /*
  * Ultralytics YOLO integration for AssemblyMan.
  *
- * Ultralytics YOLO is licensed under AGPL-3.0. Commercial distribution
+ * Ultralytics YOLO is licensed under AGPL-3.0. Proprietary distribution
  * requires an Ultralytics Enterprise license. See THIRD_PARTY_NOTICES.md.
  */
 
@@ -68,11 +68,47 @@ enum YOLOOverlayClass: String, CaseIterable, Identifiable {
   case person
   case laptop
   case table
+  case building
+  case fence
+  case pole
+  case vegetation
+  case sky
+  case rider
+  case bicycle
+  case car
+  case motorcycle
+  case bus
+  case train
+  case truck
+  case trafficLight
+  case trafficSign
+  case bench
+  case chair
+  case couch
+  case bed
+  case display
+  case keyboard
+  case mouse
+  case phone
+  case backpack
+  case suitcase
+  case bottle
+  case cup
+  case plant
+  case toilet
+  case microwave
+  case oven
+  case sink
+  case refrigerator
 
   var id: Self { self }
 
   var label: String {
-    rawValue.capitalized
+    switch self {
+    case .trafficLight: return "Traffic light"
+    case .trafficSign: return "Traffic sign"
+    default: return rawValue.capitalized
+    }
   }
 
   var color: UIColor {
@@ -86,6 +122,8 @@ enum YOLOOverlayClass: String, CaseIterable, Identifiable {
   }
 
   var rgb: (red: UInt8, green: UInt8, blue: UInt8) {
+    // Keep the original five approved colors, then use a perceptually
+    // separated categorical palette for the expanded model classes.
     switch self {
     case .floor:
       return (255, 212, 59)
@@ -97,16 +135,70 @@ enum YOLOOverlayClass: String, CaseIterable, Identifiable {
       return (0, 214, 214)
     case .table:
       return (255, 122, 51)
-    }
-  }
-
-  var bit: UInt8 {
-    switch self {
-    case .floor: return 1 << 0
-    case .wall: return 1 << 1
-    case .person: return 1 << 2
-    case .laptop: return 1 << 3
-    case .table: return 1 << 4
+    case .building:
+      return (140, 115, 63)
+    case .fence:
+      return (140, 73, 63)
+    case .pole:
+      return (63, 109, 140)
+    case .vegetation:
+      return (0, 140, 37)
+    case .sky:
+      return (0, 187, 255)
+    case .rider:
+      return (255, 115, 218)
+    case .bicycle:
+      return (0, 255, 170)
+    case .car:
+      return (255, 0, 51)
+    case .motorcycle:
+      return (178, 119, 0)
+    case .bus:
+      return (145, 0, 217)
+    case .train:
+      return (0, 56, 140)
+    case .truck:
+      return (140, 21, 21)
+    case .trafficLight:
+      return (255, 0, 170)
+    case .trafficSign:
+      return (159, 217, 0)
+    case .bench:
+      return (131, 140, 0)
+    case .chair:
+      return (0, 255, 0)
+    case .couch:
+      return (63, 140, 104)
+    case .bed:
+      return (180, 115, 255)
+    case .display:
+      return (0, 85, 255)
+    case .keyboard:
+      return (94, 0, 140)
+    case .mouse:
+      return (255, 180, 115)
+    case .phone:
+      return (178, 0, 131)
+    case .backpack:
+      return (140, 63, 109)
+    case .suitcase:
+      return (126, 80, 178)
+    case .bottle:
+      return (0, 0, 255)
+    case .cup:
+      return (185, 217, 98)
+    case .plant:
+      return (65, 217, 75)
+    case .toilet:
+      return (255, 124, 115)
+    case .microwave:
+      return (255, 38, 241)
+    case .oven:
+      return (217, 98, 137)
+    case .sink:
+      return (98, 217, 161)
+    case .refrigerator:
+      return (178, 0, 178)
     }
   }
 
@@ -122,8 +214,97 @@ enum YOLOOverlayClass: String, CaseIterable, Identifiable {
       return .laptop
     case "table", "dining table":
       return .table
+    case "building":
+      return .building
+    case "fence":
+      return .fence
+    case "pole":
+      return .pole
+    case "vegetation":
+      return .vegetation
+    case "sky":
+      return .sky
+    case "rider":
+      return .rider
+    case "bicycle":
+      return .bicycle
+    case "car":
+      return .car
+    case "motorcycle":
+      return .motorcycle
+    case "bus":
+      return .bus
+    case "train":
+      return .train
+    case "truck":
+      return .truck
+    case "traffic light":
+      return .trafficLight
+    case "traffic sign", "stop sign":
+      return .trafficSign
+    case "bench":
+      return .bench
+    case "chair":
+      return .chair
+    case "couch", "sofa":
+      return .couch
+    case "bed":
+      return .bed
+    case "tv", "television", "monitor":
+      return .display
+    case "keyboard":
+      return .keyboard
+    case "mouse":
+      return .mouse
+    case "cell phone", "phone":
+      return .phone
+    case "backpack":
+      return .backpack
+    case "suitcase":
+      return .suitcase
+    case "bottle":
+      return .bottle
+    case "cup":
+      return .cup
+    case "potted plant", "plant":
+      return .plant
+    case "toilet":
+      return .toilet
+    case "microwave":
+      return .microwave
+    case "oven":
+      return .oven
+    case "sink":
+      return .sink
+    case "refrigerator", "fridge":
+      return .refrigerator
     default:
       return nil
+    }
+  }
+
+  static let semanticClasses: [Self] = [
+    .floor, .building, .wall, .fence, .pole, .vegetation, .sky,
+    .person, .rider, .bicycle, .car, .motorcycle, .bus, .train,
+    .truck, .trafficLight, .trafficSign,
+  ]
+
+  static let objectClasses: [Self] = [
+    .person, .bicycle, .car, .motorcycle, .bus, .train, .truck,
+    .trafficLight, .trafficSign, .bench, .backpack, .suitcase,
+    .bottle, .cup, .chair, .couch, .plant, .bed, .table, .toilet,
+    .display, .laptop, .mouse, .keyboard, .phone, .microwave, .oven,
+    .sink, .refrigerator,
+  ]
+
+  static func legendClasses(for mode: VisionOverlayMode) -> [Self] {
+    switch mode {
+    case .mobileSAM:
+      return []
+    case .yoloObjects, .yoloDetect:
+      return objectClasses
+    case .yoloScene:
+      return semanticClasses + objectClasses.filter { !semanticClasses.contains($0) }
     }
   }
 }
@@ -220,6 +401,7 @@ actor YOLOProcessor {
       return model
     }
 
+    var loadingModel: YOLO?
     let loadedModel: YOLO = try await withCheckedThrowingContinuation { continuation in
       let pendingModel = YOLO(
         kind.resourceName,
@@ -230,8 +412,9 @@ actor YOLOProcessor {
         continuation.resume(with: result)
       }
       pendingModel.setConfidenceThreshold(0.35)
-      models[kind] = pendingModel
+      loadingModel = pendingModel
     }
+    withExtendedLifetime(loadingModel) {}
     models[kind] = loadedModel
     return loadedModel
   }
@@ -303,7 +486,7 @@ actor YOLOProcessor {
 
     let classLookup = names.map(YOLOOverlayClass.mappedClass(for:))
     var pixels = [UInt8](repeating: 0, count: mask.classMap.count * 4)
-    var visibleClassBits: UInt8 = 0
+    var visibleClasses: Set<YOLOOverlayClass> = []
     for (pixelIndex, classIndex) in mask.classMap.enumerated() {
       let labelIndex = Int(classIndex)
       guard
@@ -312,13 +495,13 @@ actor YOLOProcessor {
       else {
         continue
       }
-      visibleClassBits |= overlayClass.bit
+      visibleClasses.insert(overlayClass)
       write(overlayClass, to: &pixels, at: pixelIndex, alpha: 112)
     }
 
     return (
       image: try makeImage(pixels: pixels, width: mask.width, height: mask.height),
-      coloredRegions: visibleClassBits.nonzeroBitCount
+      coloredRegions: visibleClasses.count
     )
   }
 

@@ -11,6 +11,25 @@ import Foundation
 /// `index_put_` incompatibility), so encoding is performed in Swift
 /// using weights exported from the PyTorch model.
 final class PromptEncoder {
+  private struct Weights: Decodable {
+    let embedDim: Int
+    let imageEmbeddingSize: [Int]
+    let inputImageSize: [Int]
+    let gaussianMatrix: [[Double]]
+    let pointEmbeddings: [[Double]]
+    let notAPointEmbed: [Double]
+    let noMaskEmbed: [Double]
+
+    enum CodingKeys: String, CodingKey {
+      case embedDim = "embed_dim"
+      case imageEmbeddingSize = "image_embedding_size"
+      case inputImageSize = "input_image_size"
+      case gaussianMatrix = "gaussian_matrix"
+      case pointEmbeddings = "point_embeddings"
+      case notAPointEmbed = "not_a_point_embed"
+      case noMaskEmbed = "no_mask_embed"
+    }
+  }
 
   // MARK: - Properties
 
@@ -38,23 +57,44 @@ final class PromptEncoder {
   /// Load prompt encoder weights from a JSON file.
   init(weightsURL: URL) throws {
     let data = try Data(contentsOf: weightsURL)
-    let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+    let weights = try JSONDecoder().decode(Weights.self, from: data)
 
-    self.embedDim = json["embed_dim"] as! Int
-    let ies = json["image_embedding_size"] as! [Int]
+    guard
+      weights.embedDim > 0,
+      weights.imageEmbeddingSize.count == 2,
+      weights.imageEmbeddingSize.allSatisfy({ $0 > 0 }),
+      weights.inputImageSize.count == 2,
+      weights.inputImageSize.allSatisfy({ $0 > 0 }),
+      weights.gaussianMatrix.count == 2,
+      let numPosFeats = weights.gaussianMatrix.first?.count,
+      numPosFeats > 0,
+      weights.gaussianMatrix.allSatisfy({ $0.count == numPosFeats }),
+      numPosFeats * 2 == weights.embedDim,
+      weights.pointEmbeddings.count == 4,
+      weights.pointEmbeddings.allSatisfy({ $0.count == weights.embedDim }),
+      weights.notAPointEmbed.count == weights.embedDim,
+      weights.noMaskEmbed.count == weights.embedDim
+    else {
+      throw PromptEncoderError.invalidWeights
+    }
+
+    self.embedDim = weights.embedDim
+    let ies = weights.imageEmbeddingSize
     self.imageEmbeddingSize = (ies[0], ies[1])
-    let iis = json["input_image_size"] as! [Int]
+    let iis = weights.inputImageSize
     self.inputImageSize = (iis[0], iis[1])
 
-    let gm = json["gaussian_matrix"] as! [[Double]]
-    self.numPosFeats = gm[0].count  // 128
-    self.gaussianMatrix = gm.flatMap { $0.map { Float($0) } }  // [2 * 128]
+    self.numPosFeats = numPosFeats
+    self.gaussianMatrix = weights.gaussianMatrix.flatMap {
+      $0.map { Float($0) }
+    }
 
-    let pe = json["point_embeddings"] as! [[Double]]
-    self.pointEmbeddings = pe.map { $0.map { Float($0) } }
+    self.pointEmbeddings = weights.pointEmbeddings.map {
+      $0.map { Float($0) }
+    }
 
-    self.notAPointEmbed = (json["not_a_point_embed"] as! [Double]).map { Float($0) }
-    self.noMaskEmbed = (json["no_mask_embed"] as! [Double]).map { Float($0) }
+    self.notAPointEmbed = weights.notAPointEmbed.map { Float($0) }
+    self.noMaskEmbed = weights.noMaskEmbed.map { Float($0) }
 
     // Pre-build cached dense embedding [1, embedDim, H, W]
     let h = ies[0]
@@ -211,4 +251,12 @@ final class PromptEncoder {
     return result
   }
 
+}
+
+private enum PromptEncoderError: LocalizedError {
+  case invalidWeights
+
+  var errorDescription: String? {
+    "MobileSAM prompt encoder weights are invalid."
+  }
 }
