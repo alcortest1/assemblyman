@@ -91,10 +91,10 @@ xcodebuild test -scheme MWDATCoreTests -destination 'platform=iOS Simulator,name
 For sample apps:
 ```bash
 # Open the sample app workspace
-open ExternalSampleApps/CameraAccess/CameraAccess.xcodeproj
+open ExternalSampleApps/AssemblyMan/AssemblyMan.xcodeproj
 
 # Build and run on simulator (uses MockDeviceKit - no glasses needed)
-xcodebuild -scheme CameraAccess -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild -scheme AssemblyMan -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
 ## Development Workflow
@@ -633,9 +633,9 @@ class MockDeviceKitTestCase: XCTestCase {
 }
 ```
 
-## Using MockDeviceKit in the CameraAccess sample
+## Using MockDeviceKit in the AssemblyMan sample
 
-The CameraAccess sample app includes a Debug menu for MockDeviceKit:
+The AssemblyMan sample app includes a Debug menu for MockDeviceKit:
 
 1. Tap the **Debug icon** to open the MockDeviceKit menu
 2. Tap **Pair RayBan Meta** to create a simulated device
@@ -764,7 +764,7 @@ For production, get your `APPLICATION_ID` from the [Wearables Developer Center](
 
 Build an iOS DAT app with camera streaming and photo capture.
 
-This walkthrough covers app setup, registration, streaming, and capture. Pair it with the [CameraAccess sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples).
+This walkthrough covers app setup, registration, streaming, and capture. Pair it with the [AssemblyMan sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples).
 
 ## Project setup
 
@@ -962,7 +962,7 @@ Your DAT app should only depend on:
 
 ## Links
 
-- [CameraAccess sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples)
+- [AssemblyMan sample](https://github.com/facebook/meta-wearables-dat-ios/tree/main/samples)
 - [Full integration guide](https://wearables.developer.meta.com/docs/build-integration-ios)
 - [Developer documentation](https://wearables.developer.meta.com/docs/develop/)
 

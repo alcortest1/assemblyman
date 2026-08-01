@@ -106,9 +106,9 @@ class MockDeviceKitTestCase: XCTestCase {
 }
 ```
 
-## Using MockDeviceKit in the CameraAccess sample
+## Using MockDeviceKit in the AssemblyMan sample
 
-The CameraAccess sample app includes a Debug menu for MockDeviceKit:
+The AssemblyMan sample app includes a Debug menu for MockDeviceKit:
 
 1. Tap the **Debug icon** to open the MockDeviceKit menu
 2. Tap **Pair RayBan Meta** to create a simulated device

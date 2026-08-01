@@ -88,10 +88,10 @@ xcodebuild test -scheme MWDATCoreTests -destination 'platform=iOS Simulator,name
 For sample apps:
 ```bash
 # Open the sample app workspace
-open ExternalSampleApps/CameraAccess/CameraAccess.xcodeproj
+open ExternalSampleApps/AssemblyMan/AssemblyMan.xcodeproj
 
 # Build and run on simulator (uses MockDeviceKit - no glasses needed)
-xcodebuild -scheme CameraAccess -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild -scheme AssemblyMan -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
 ## Development Workflow
