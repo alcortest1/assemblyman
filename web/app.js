@@ -513,7 +513,7 @@
       : false;
     video.hidden = !playing;
     // The demo still belongs only to the offline operator — never to a live room.
-    still.hidden = playing || !r.isOp || state.live.connected;
+    still.hidden = playing || !r.isOp || isLiveRoom();
     glyph.hidden = playing || !still.hidden;
     if (!glyph.hidden) {
       glyph.innerHTML = r.isAgent ? ICON_AGENT_TILE : '';

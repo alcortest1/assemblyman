@@ -1,7 +1,7 @@
 # AssemblyMan Portal
 
-The companion web portal: join a live session by room code, watch any
-participant's screen — people or agents — and build agents in the Studio.
+The companion web portal: join a live session by room code, watch the
+operator or another participant, and configure local agent prototypes in the Studio.
 
 Implemented from the Claude Design source `AssemblyMan Portal.dc.html`, on the
 Industry design system. The browser loads the LiveKit client from a pinned CDN URL, so
@@ -36,7 +36,8 @@ not serve the portal until this branch merges.
 
 The Vercel project needs `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and
 `LIVEKIT_API_SECRET` environment variables. `api/token.js` reads them in the serverless
-runtime and returns a room-scoped viewer token; the secret never reaches browser code.
+runtime and returns a room-scoped participant token; the secret never reaches browser code.
+The grant permits only camera and microphone publishing.
 
 Cache headers are set so `index.html`, `app.js` and `styles/` always revalidate —
 none of them are content-hashed, so a redeploy would otherwise serve stale
@@ -48,7 +49,7 @@ assets. Only `assets/` is cached (24h).
 |---|---|
 | `index.html` | Markup for all three screens, mounted once and toggled |
 | `app.js` | State and DOM syncing, ported from the design's component |
-| `livekit-bridge.js` | LiveKit room lifecycle, roster, remote audio, and operator video |
+| `livekit-bridge.js` | LiveKit room lifecycle, roster, participant media, and local audio controls |
 | `../api/token.js` | Vercel token endpoint; generates viewer identities server-side |
 | `styles/industry.css` | The Industry design system — tokens and component classes, copied verbatim from the design project's `_ds` bundle |
 | `styles/portal.css` | Portal screens, built only from Industry tokens |
@@ -63,15 +64,16 @@ there and re-sync it from the design project rather than editing token values in
 - **Join** (`#/join`) — room code entry. An empty field joins the demo room
   `K7F-3QD`; a partial code is rejected as a typo.
 - **Session** (`#/room/<code>`) — staged screen plus the participants rail.
-  Clicking a tile stages that participant: the operator's POV, a viewer
-  placeholder (viewers watch, they never broadcast), or an agent's board.
-  Viewer-side overlays — viewfinder marks, thirds grid, Segment Anything masks —
-  toggle locally and change nothing for anyone else.
+  Clicking a tile stages that participant. A participant can share camera and
+  microphone after joining; muting another participant affects only this browser.
+  Viewer-side viewfinder and thirds-grid overlays toggle locally and change
+  nothing for anyone else.
 - **Agent Studio** (`#/agents`) — create, edit, deploy and recall agents.
-  A deployed agent shows up in the participants rail and can be staged like any
-  person.
+  These controls are a local interaction prototype; the actual runtime under
+  `agent/` is started separately and appears through the LiveKit roster.
 
 Each screen has its own URL, so a `#/room/<code>` link joins that room directly.
+Opening a shared room URL does not automatically enable camera or microphone.
 
 ## State
 
