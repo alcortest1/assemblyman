@@ -150,6 +150,12 @@
   function staged() {
     var list = roster();
     var hit = list.filter(function (r) { return r.id === state.stage; })[0];
+    if (!hit && state.live.connected && state.stage === 'waiting-op') {
+      return {
+        id: 'waiting-op', name: 'Operator', role: 'Waiting for POV',
+        isOp: true, isViewer: false, isAgent: false, speaking: false, initials: 'OP'
+      };
+    }
     return hit || list[0];
   }
 
@@ -287,7 +293,9 @@
   /* Stage the operator when there is one — that is what a viewer came to watch. */
   function defaultStage() {
     var op = roster().filter(function (r) { return r.isOp; })[0];
-    return op ? op.id : (roster()[0] || {}).id || 'op';
+    if (op) return op.id;
+    if (state.live.connected) return 'waiting-op';
+    return (roster()[0] || {}).id || 'op';
   }
 
   /* Called by the bridge whenever the room changes: someone joins, a track starts, a
@@ -383,17 +391,29 @@
     show($('stage-viewer'), !!st && st.isViewer);
     show($('stage-agent'), !!st && st.isAgent);
 
-    // Swap the stand-in still for the operator's track once one is actually subscribed.
+    // Three states, deliberately distinct: a real track, a live room with nobody publishing,
+    // and the offline demo. The middle one must never borrow the demo's still — a stand-in
+    // frame on a live connection is indistinguishable from a working feed.
     var liveVideo = state.live.connected && state.live.hasOperatorVideo;
+    var liveWaiting = state.live.connected && !state.live.hasOperatorVideo;
+
     show($('stage-video'), liveVideo);
-    show($('stage-img'), !liveVideo);
+    show($('stage-img'), !state.live.connected);
+    show($('stage-waiting'), liveWaiting && !!st && st.isOp);
     if (liveVideo) window.PortalLive.attachOperatorVideo($('stage-video'));
+
+    if (liveWaiting) {
+      var others = state.live.roster.filter(function (r) { return !/^portal-/.test(r.id); });
+      $('stage-waiting-note').textContent = others.length
+        ? 'Operator is here but not publishing yet…'
+        : 'Waiting for the operator to join ' + roomCode() + '…';
+    }
 
     var source = $('screen-session').querySelector('.stage-source');
     if (source) {
       source.textContent = state.live.connected
-        ? (liveVideo ? 'OPERATOR POV · LIVE' : 'WAITING FOR THE OPERATOR’S CAMERA')
-        : 'OPERATOR POV · RAY-BAN META';
+        ? (liveVideo ? 'OPERATOR POV · LIVE' : 'ROOM ' + roomCode() + ' · NO FEED YET')
+        : 'OPERATOR POV · RAY-BAN META (DEMO)';
     }
 
     if (st && st.isViewer) $('staged-initials').textContent = st.initials;
