@@ -11,7 +11,7 @@
 //
 // Live session. Full-bleed feed from the glasses on a dark ground, framed as a viewfinder,
 // with the stop and shutter controls beneath. Overlay elements are individually
-// switchable from Settings.
+// switchable from Settings or the in-stream overlay panel.
 //
 
 import MWDATCore
@@ -25,6 +25,7 @@ struct StreamView: View {
 
   /// White frame shown for a beat after the shutter fires.
   @State private var isFlashing = false
+  @State private var showsOverlayControls = false
 
   /// Hands the room code to the iOS share sheet so a viewer can be sent it.
   @State private var isSharingRoomCode = false
@@ -34,6 +35,25 @@ struct StreamView: View {
       Theme.accent900.ignoresSafeArea()
 
       feed
+
+      if viewModel.isSegmentationOverlayEnabled,
+        let segmentationOverlay = viewModel.segmentationOverlay
+      {
+        GeometryReader { geometry in
+          Image(uiImage: segmentationOverlay)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .clipped()
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .id(viewModel.segmentationRevision)
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.18), value: viewModel.segmentationRevision)
+      }
+
       scrims
 
       if settings.showsViewfinderMarks {
@@ -48,13 +68,27 @@ struct StreamView: View {
       if settings.showsThirdsGrid {
         thirdsGrid
       }
+      if viewModel.isReticleOverlayEnabled,
+        viewModel.visionOverlayMode.usesMobileSAM,
+        viewModel.segmentationTargetMode == .reticle
+      {
+        CenterReticleOverlay()
+      }
 
-      VStack {
+      VStack(spacing: 10) {
         topBar
-        if let roomCode = viewModel.relay.roomCode {
-          HStack {
-            roomChip(roomCode)
-            Spacer(minLength: 0)
+        // Session identity on the left, vision controls on the right — they never compete
+        // for the same edge, so both sit under the status row rather than stacking.
+        if viewModel.relay.roomCode != nil || showsOverlayControls {
+          HStack(alignment: .top) {
+            if let roomCode = viewModel.relay.roomCode {
+              roomChip(roomCode)
+            }
+            Spacer(minLength: 12)
+            if showsOverlayControls {
+              OverlayControlsView(viewModel: viewModel, settings: settings)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
           }
         }
 
@@ -203,6 +237,21 @@ struct StreamView: View {
         }
 
         IconButton(
+          glyph: .circleDot,
+          accessibilityLabel: "Overlay controls",
+          edge: 28,
+          iconSize: 14,
+          tint: .white,
+          border: .white.opacity(0.25),
+          background: Theme.accent900.opacity(0.65)
+        ) {
+          withAnimation(.snappy(duration: 0.2)) {
+            showsOverlayControls.toggle()
+          }
+        }
+        .accessibilityIdentifier("overlay_controls_button")
+
+        IconButton(
           glyph: .slidersHorizontal,
           accessibilityLabel: "Settings",
           edge: 28,
@@ -336,5 +385,229 @@ struct StreamView: View {
       try? await Task.sleep(nanoseconds: 170_000_000)
       isFlashing = false
     }
+  }
+}
+
+private struct OverlayControlsView: View {
+  @Bindable var viewModel: StreamSessionViewModel
+  @Bindable var settings: AppSettings
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 10) {
+      OverlayToggle(
+        title: "Vision overlay",
+        systemImage: "person.crop.rectangle.stack",
+        isOn: $viewModel.isSegmentationOverlayEnabled,
+        showsActivity: viewModel.isGeneratingSegmentation,
+        detail: inferenceDetail,
+        accessibilityIdentifier: "vision_overlay_toggle"
+      )
+      VisionModePicker(selection: $viewModel.visionOverlayMode)
+      if viewModel.visionOverlayMode.usesMobileSAM {
+        MobileSAMTargetPicker(selection: $viewModel.segmentationTargetMode)
+      } else {
+        YOLOColorLegend(mode: viewModel.visionOverlayMode)
+      }
+      VisionFrameRatePicker(selection: $viewModel.segmentationFrameRate)
+      OverlayToggle(
+        title: "Grid",
+        systemImage: "grid",
+        isOn: $settings.showsThirdsGrid
+      )
+      if viewModel.visionOverlayMode.usesMobileSAM,
+        viewModel.segmentationTargetMode == .reticle
+      {
+        OverlayToggle(
+          title: "Reticle",
+          systemImage: "scope",
+          isOn: $viewModel.isReticleOverlayEnabled
+        )
+      }
+    }
+    .padding(14)
+    .frame(width: 260)
+    .background(Theme.accent900.opacity(0.88))
+    .overlay {
+      Rectangle().strokeBorder(.white.opacity(0.28), lineWidth: Theme.hairline)
+    }
+    .foregroundStyle(.white)
+    .accessibilityIdentifier("overlay_controls_panel")
+  }
+
+  private var inferenceDetail: String? {
+    guard let milliseconds = viewModel.segmentationInferenceMilliseconds else {
+      return nil
+    }
+    if let regions = viewModel.segmentationColoredRegions {
+      return "\(milliseconds) ms · \(regions)"
+    }
+    return "\(milliseconds) ms"
+  }
+}
+
+private struct VisionModePicker: View {
+  @Binding var selection: VisionOverlayMode
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Model / task")
+        .overlineStyle(size: 9, color: .white.opacity(0.7))
+
+      Picker("Model and task", selection: $selection) {
+        ForEach(VisionOverlayMode.allCases) { mode in
+          Text(mode.label).tag(mode)
+        }
+      }
+      .pickerStyle(.menu)
+      .tint(.white)
+      .accessibilityIdentifier("vision_mode_picker")
+    }
+  }
+}
+
+private struct MobileSAMTargetPicker: View {
+  @Binding var selection: MobileSAMTargetMode
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Segmentation target")
+        .overlineStyle(size: 9, color: .white.opacity(0.7))
+
+      Picker("Segmentation target", selection: $selection) {
+        ForEach(MobileSAMTargetMode.allCases) { mode in
+          Text(mode.label).tag(mode)
+        }
+      }
+      .pickerStyle(.segmented)
+      .tint(Theme.accent500)
+      .accessibilityIdentifier("mobile_sam_target_picker")
+    }
+  }
+}
+
+private struct VisionFrameRatePicker: View {
+  @Binding var selection: VisionFrameRate
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack {
+        Text("Processing rate")
+          .overlineStyle(size: 9, color: .white.opacity(0.7))
+        Spacer()
+        Text("\(selection.label) FPS")
+          .font(Theme.body(10).monospacedDigit())
+          .foregroundStyle(.white.opacity(0.72))
+      }
+
+      Picker("Vision processing rate", selection: $selection) {
+        ForEach(VisionFrameRate.allCases) { rate in
+          Text("\(rate.label) FPS").tag(rate)
+        }
+      }
+      .pickerStyle(.menu)
+      .tint(.white)
+      .accessibilityIdentifier("vision_fps_picker")
+    }
+  }
+}
+
+private struct YOLOColorLegend: View {
+  let mode: VisionOverlayMode
+
+  private var visibleClasses: [YOLOOverlayClass] {
+    YOLOOverlayClass.legendClasses(for: mode)
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text("Color map")
+        .overlineStyle(size: 9, color: .white.opacity(0.7))
+
+      ScrollView(.horizontal, showsIndicators: false) {
+        LazyHGrid(
+          rows: [
+            GridItem(.fixed(15), alignment: .leading),
+            GridItem(.fixed(15), alignment: .leading),
+          ],
+          alignment: .top,
+          spacing: 5
+        ) {
+          ForEach(visibleClasses) { overlayClass in
+            HStack(spacing: 6) {
+              RoundedRectangle(cornerRadius: 2)
+                .fill(Color(uiColor: overlayClass.color))
+                .frame(width: 10, height: 10)
+              Text(overlayClass.label)
+                .font(Theme.body(10))
+                .foregroundStyle(.white.opacity(0.82))
+            }
+            .fixedSize(horizontal: true, vertical: false)
+          }
+        }
+      }
+      .frame(height: 35)
+    }
+  }
+}
+
+private struct OverlayToggle: View {
+  let title: String
+  let systemImage: String
+  @Binding var isOn: Bool
+  var showsActivity = false
+  var detail: String?
+  var accessibilityIdentifier: String?
+
+  var body: some View {
+    HStack(spacing: 9) {
+      Image(systemName: systemImage)
+        .frame(width: 20)
+
+      Text(title)
+        .font(Theme.body(13, weight: .semibold))
+        .tracking(0.6)
+
+      if showsActivity {
+        ProgressView()
+          .controlSize(.mini)
+          .tint(.white)
+      } else if let detail {
+        Text(detail)
+          .font(Theme.body(10).monospacedDigit())
+          .foregroundStyle(.white.opacity(0.65))
+      }
+
+      Spacer()
+
+      Toggle("", isOn: $isOn)
+        .labelsHidden()
+        .tint(Theme.accent500)
+        .accessibilityIdentifier(accessibilityIdentifier ?? "\(title)_overlay_toggle")
+    }
+  }
+}
+
+private struct CenterReticleOverlay: View {
+  var body: some View {
+    ZStack {
+      Circle()
+        .stroke(.white.opacity(0.85), lineWidth: 1.5)
+        .frame(width: 34, height: 34)
+
+      Rectangle()
+        .fill(.white.opacity(0.85))
+        .frame(width: 50, height: 1)
+
+      Rectangle()
+        .fill(.white.opacity(0.85))
+        .frame(width: 1, height: 50)
+
+      Circle()
+        .fill(Theme.accent300)
+        .frame(width: 5, height: 5)
+    }
+    .shadow(color: .black.opacity(0.5), radius: 2)
+    .allowsHitTesting(false)
+    .accessibilityHidden(true)
   }
 }
