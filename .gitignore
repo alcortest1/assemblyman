@@ -13,3 +13,5 @@ client-sdk-swift/
 # iOS relay credentials — never commit. The committed LiveKit.xcconfig carries
 # empty defaults and optionally includes this file.
 LiveKit.local.xcconfig
+.vercel
+.env*

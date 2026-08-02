@@ -21,6 +21,7 @@
 // room delegate instead.
 //
 
+import AVFAudio
 import Foundation
 import LiveKit
 import Observation
@@ -48,6 +49,12 @@ final class LiveKitRelay {
   private(set) var roomCode: RoomCode?
   private(set) var isVideoPublishing = false
   private(set) var isMicrophoneEnabled = false
+  /// Why the microphone is not live, when it should be.
+  ///
+  /// Worth surfacing rather than logging: a relay with no audio still looks entirely healthy
+  /// — video flows, the assistant greets the operator — and the only symptom is that talking
+  /// to it does nothing.
+  private(set) var microphoneIssue: String?
   private(set) var remoteParticipantCount = 0
   private(set) var isAgentPresent = false
   private(set) var diagnostics: LiveKitFrameSink.Diagnostics = .empty
@@ -284,16 +291,29 @@ final class LiveKitRelay {
       status = .live
       diagnostics = frameSink.diagnostics
 
-      do {
-        _ = try await room.localParticipant.setMicrophone(enabled: true)
-        try Task.checkCancellation()
-        guard lifecycleID == self.lifecycleID else { throw CancellationError() }
-        isMicrophoneEnabled = true
-      } catch is CancellationError {
-        throw CancellationError()
-      } catch {
+      // Ask before publishing. Without permission iOS hands the capturer a silent input and
+      // the track publishes happily, so the failure is invisible from here — the operator
+      // hears the assistant greet them and then talks to something that cannot hear.
+      let hasMicrophonePermission = await Self.requestMicrophonePermission()
+      if !hasMicrophonePermission {
         isMicrophoneEnabled = false
-        note("video is live, but the microphone could not start: \(describe(error))")
+        microphoneIssue = "Microphone access is off. Enable it in Settings › AssemblyMan."
+        note("microphone permission denied — the assistant will not hear the operator")
+      } else {
+        do {
+          _ = try await room.localParticipant.setMicrophone(enabled: true)
+          try Task.checkCancellation()
+          guard lifecycleID == self.lifecycleID else { throw CancellationError() }
+          isMicrophoneEnabled = true
+          microphoneIssue = nil
+          note("microphone live — \(Self.audioRouteDescription())")
+        } catch is CancellationError {
+          throw CancellationError()
+        } catch {
+          isMicrophoneEnabled = false
+          microphoneIssue = describe(error)
+          note("video is live, but the microphone could not start: \(describe(error))")
+        }
       }
 
       note("LIVE in room \(code.display)")
@@ -376,6 +396,36 @@ final class LiveKitRelay {
       remoteParticipantCount = count
       isAgentPresent = hasAgent
     }
+  }
+
+  /// Grants, or asks once, for microphone access.
+  ///
+  /// The relay is the app's only user of the microphone, so nothing else prompts. iOS returns
+  /// a silent input rather than an error when access is missing, which is why this is checked
+  /// explicitly instead of relying on the publish to fail.
+  private static func requestMicrophonePermission() async -> Bool {
+    switch AVAudioApplication.shared.recordPermission {
+    case .granted:
+      return true
+    case .denied:
+      return false
+    case .undetermined:
+      return await AVAudioApplication.requestRecordPermission()
+    @unknown default:
+      return false
+    }
+  }
+
+  /// What the audio session is actually doing, for the log.
+  ///
+  /// An empty input list is the signature of the silent-microphone failure: the track
+  /// publishes, the level stays flat, and nothing else says why.
+  private static func audioRouteDescription() -> String {
+    let session = AVAudioSession.sharedInstance()
+    let inputs = session.currentRoute.inputs.map(\.portType.rawValue)
+    let outputs = session.currentRoute.outputs.map(\.portType.rawValue)
+    return "category=\(session.category.rawValue) mode=\(session.mode.rawValue) "
+      + "in=[\(inputs.joined(separator: ","))] out=[\(outputs.joined(separator: ","))]"
   }
 
   private func describe(_ error: Error) -> String {
