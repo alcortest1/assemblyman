@@ -86,6 +86,7 @@ final class StreamSessionViewModel {
   @ObservationIgnored private let previewGate = PreviewFrameGate()
   /// Reset by a frame arriving, so a session that recovers gets its full budget back.
   @ObservationIgnored private var feedRecoveryAttempts = 0
+  @ObservationIgnored private var lastRecoveryAt: Date?
   /// The vision overlay drawn over the feed.
   ///
   /// Also handed to the relay, so a remote viewer sees the same overlay rather than the bare
@@ -203,6 +204,7 @@ final class StreamSessionViewModel {
     lastFrameAt = nil
     secondsSinceLastFrame = 0
     feedRecoveryAttempts = 0
+    lastRecoveryAt = nil
     previewGate.reset()
     resetSegmentation()
     sessionManager.cleanup()
@@ -383,8 +385,17 @@ final class StreamSessionViewModel {
     guard let image = previewGate.take() else { return }
     lastFrameAt = Date()
     if secondsSinceLastFrame != 0 { secondsSinceLastFrame = 0 }
-    // Frames are flowing again, so a later stall gets a fresh recovery budget.
-    if feedRecoveryAttempts != 0 { feedRecoveryAttempts = 0 }
+
+    // The budget resets only after the feed has been healthy for a while, not on the first
+    // frame back. Resetting immediately meant a feed that recovered for a second and stalled
+    // again got a fresh set of attempts every time, so the cap never bound and the stream
+    // rebuilt itself in a loop — worse than the stall it was meant to fix.
+    if feedRecoveryAttempts != 0,
+      let lastRecoveryAt,
+      Date().timeIntervalSince(lastRecoveryAt) >= Self.healthyStreakSeconds {
+      feedRecoveryAttempts = 0
+      self.lastRecoveryAt = nil
+    }
 
     currentVideoFrame = image
     if !hasReceivedFirstFrame {
@@ -415,11 +426,16 @@ final class StreamSessionViewModel {
     // the glasses or the link, and retrying forever would hide that behind a loop while
     // burning battery on both devices.
     feedRecoveryAttempts += 1
+    lastRecoveryAt = Date()
     self.lastFrameAt = Date()
-    showError(
-      "The glasses stopped sending video. Restarting the stream "
-        + "(attempt \(feedRecoveryAttempts) of \(Self.maxFeedRecoveryAttempts))."
-    )
+    // Reported once the budget is spent rather than on every attempt. An alert per restart
+    // interrupts the operator more than the stall does, and the badge already shows the gap.
+    if feedRecoveryAttempts >= Self.maxFeedRecoveryAttempts {
+      showError(
+        "The glasses keep dropping the video feed. Stopping the automatic restarts — "
+          + "try Wi-Fi in Settings, or restart the session."
+      )
+    }
     restartStream()
   }
 
@@ -427,6 +443,8 @@ final class StreamSessionViewModel {
   /// enough to sit out a Bluetooth hiccup, short enough that nobody stares at a dead picture.
   private static let stallRecoverySeconds = 8
   private static let maxFeedRecoveryAttempts = 3
+  /// How long the feed must run cleanly before a fresh set of restarts is allowed.
+  private static let healthyStreakSeconds: TimeInterval = 60
 
   private func scheduleSegmentation(for image: UIImage) {
     guard
