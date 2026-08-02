@@ -74,7 +74,16 @@ final class StreamSessionViewModel {
     }
   }
   var isReticleOverlayEnabled: Bool = true
-  var segmentationOverlay: UIImage?
+  /// The vision overlay drawn over the feed.
+  ///
+  /// Also handed to the relay, so a remote viewer sees the same overlay rather than the bare
+  /// camera. Every path that hides it on screen sets this to nil, so mirroring it here keeps
+  /// the two in step without a second switch to forget.
+  var segmentationOverlay: UIImage? {
+    didSet {
+      relay.frameSink.compositor.setOverlay(segmentationOverlay?.cgImage)
+    }
+  }
   var isGeneratingSegmentation: Bool = false
   var segmentationInferenceMilliseconds: Int?
   var segmentationColoredRegions: Int?
@@ -84,6 +93,11 @@ final class StreamSessionViewModel {
   var isDeviceSessionReady: Bool { sessionManager.isReady }
 
   var isStreaming: Bool { streamingStatus != .stopped }
+
+  /// Mirrors the glasses feed into a LiveKit room. Owned here because the relay must live
+  /// exactly as long as the streaming session — surviving the Settings screen, which layers
+  /// above this view rather than replacing it, and ending when the session does.
+  let relay: LiveKitRelay
 
   // MARK: - Private
 
@@ -114,9 +128,17 @@ final class StreamSessionViewModel {
 
   // MARK: - Init
 
-  init(wearables: WearablesInterface, settings: AppSettings) {
+  /// `relay` is injectable for tests. It defaults to nil rather than to `LiveKitRelay()`
+  /// because a default argument is evaluated outside the actor, and the relay is
+  /// main-actor-isolated — building it in the body keeps that isolation intact.
+  init(
+    wearables: WearablesInterface,
+    settings: AppSettings,
+    relay: LiveKitRelay? = nil
+  ) {
     self.wearables = wearables
     self.settings = settings
+    self.relay = relay ?? LiveKitRelay()
     self.sessionManager = DeviceSessionManager(wearables: wearables)
   }
 
@@ -159,6 +181,7 @@ final class StreamSessionViewModel {
   /// Stops both the stream and the underlying device session. Call in test tearDown.
   func endSession() {
     wantsRestart = false
+    relay.stop()
     stream = nil
     clearListeners()
     stopElapsedClock()
@@ -232,6 +255,13 @@ final class StreamSessionViewModel {
       streamingStatus = .waiting
       setupListeners(for: newStream)
       newStream.start()
+
+      // Fire-and-forget: the room connects alongside the glasses stream rather than behind
+      // it. Idempotent, so the restart path below re-enters this without disturbing a room
+      // that is already up.
+      if settings.relaysToLiveKit {
+        relay.start(agent: settings.agent)
+      }
     } catch {
       showError("Failed to start stream: \(error.localizedDescription)")
     }
@@ -242,7 +272,18 @@ final class StreamSessionViewModel {
       Task { @MainActor in self?.handleStateChange(state) }
     }
 
+    // Resolved here, on the main actor, so the background closure below captures a plain
+    // Sendable value instead of reaching through main-actor-isolated `self` on the frame
+    // delivery thread.
+    let sink = relay.frameSink
+
     videoFrameListenerToken = stream.videoFramePublisher.listen { [weak self] frame in
+      // The relay is fed on the delivery thread, before the hop: handing the buffer to
+      // WebRTC is a non-blocking enqueue, and going by way of the main actor would put a
+      // 30-per-second workload behind SwiftUI layout with no ordering guarantee.
+      sink.capture(frame.sampleBuffer)
+
+      // The on-device preview still needs the main actor.
       Task { @MainActor in self?.handleVideoFrame(frame) }
     }
 
@@ -275,8 +316,14 @@ final class StreamSessionViewModel {
       sessionManager.stopCurrentSession()
 
       if wantsRestart {
+        // A configuration change rebuilds the DAT session but deliberately leaves the room
+        // alone: the code stays valid and anyone watching keeps their connection, seeing
+        // only a brief freeze. Tearing the relay down here would mint a new code and drop
+        // every viewer on each settings change.
         wantsRestart = false
         Task { await handleStartStreaming() }
+      } else {
+        relay.stop()
       }
     case .waitingForDevice, .starting, .stopping, .paused:
       streamingStatus = .waiting

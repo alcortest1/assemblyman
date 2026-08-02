@@ -61,11 +61,25 @@ struct AssemblyManApp: App {
     self._wearablesViewModel = State(wrappedValue: WearablesViewModel(wearables: wearables))
   }
 
+  /// Built separately so the DEBUG-only MockDeviceKit wiring does not interrupt the
+  /// modifier chain in `body`.
+  private var mainAppView: some View {
+    #if DEBUG
+    MainAppView(
+      wearables: Wearables.shared,
+      viewModel: wearablesViewModel,
+      mockKit: debugMenuViewModel.mockDeviceKitViewModel
+    )
+    #else
+    MainAppView(wearables: Wearables.shared, viewModel: wearablesViewModel)
+    #endif
+  }
+
   var body: some Scene {
     WindowGroup {
       // Main app view with access to the shared Wearables SDK instance
       // The Wearables.shared singleton provides the core DAT API
-      MainAppView(wearables: Wearables.shared, viewModel: wearablesViewModel)
+      mainAppView
         // Show error alerts for view model failures
         .alert("Error", isPresented: $wearablesViewModel.showError) {
           Button("OK") {

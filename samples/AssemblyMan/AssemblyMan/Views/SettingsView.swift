@@ -18,8 +18,15 @@ import SwiftUI
 
 struct SettingsView: View {
   @Bindable var settings: AppSettings
+  /// Hidden when settings was opened before the glasses were linked — there is nothing to
+  /// disconnect from yet.
+  var showsDisconnect: Bool = true
   var onBack: () -> Void
   var onDisconnect: () -> Void
+
+  #if DEBUG
+  var mockKit: MockDeviceKitView.ViewModel?
+  #endif
 
   var body: some View {
     ZStack {
@@ -35,9 +42,17 @@ struct SettingsView: View {
             sessionSection
             captureSection
 
-            OutlineButton(title: "Disconnect glasses", action: onDisconnect)
-              .accessibilityIdentifier("disconnect_button")
-              .padding(.bottom, 8)
+            #if DEBUG
+            if let mockKit {
+              DeveloperSection(mockKit: mockKit)
+            }
+            #endif
+
+            if showsDisconnect {
+              OutlineButton(title: "Disconnect glasses", action: onDisconnect)
+                .accessibilityIdentifier("disconnect_button")
+                .padding(.bottom, 8)
+            }
           }
           .padding(.horizontal, Theme.screenPadding)
           .padding(.top, 16)
@@ -132,6 +147,12 @@ struct SettingsView: View {
         )
         Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
         ToggleRow(
+          label: "Segment Anything",
+          detail: "SAM masks and labels over detected objects",
+          isOn: $settings.showsSegmentMasks
+        )
+        Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+        ToggleRow(
           label: "Live status chip",
           detail: "REC dot, resolution and frame rate",
           isOn: $settings.showsStatusChip
@@ -150,6 +171,14 @@ struct SettingsView: View {
   private var sessionSection: some View {
     Section(title: "Session") {
       VStack(spacing: 0) {
+        ToggleRow(
+          label: "Relay to a room",
+          detail: "Mirror the session so remote viewers and the assistant can watch and talk.",
+          isOn: $settings.relaysToLiveKit
+        )
+
+        Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+
         ToggleRow(
           label: "Stream over Wi-Fi",
           detail: "Higher-resolution video than Bluetooth. Uses more battery.",

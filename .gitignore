@@ -1,1 +1,15 @@
 livekit.txt
+
+# Agent credentials — never commit
+.env.local
+agent/.env.local
+agent/.venv/
+__pycache__/
+*.pyc
+
+# Optional local LiveKit SDK checkout. The Xcode project uses a pinned remote revision.
+client-sdk-swift/
+
+# iOS relay credentials — never commit. The committed LiveKit.xcconfig carries
+# empty defaults and optionally includes this file.
+LiveKit.local.xcconfig

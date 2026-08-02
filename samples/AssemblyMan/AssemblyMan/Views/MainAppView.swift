@@ -9,9 +9,12 @@
 //
 // MainAppView.swift
 //
-// Central navigation hub that displays different views based on DAT SDK registration and device states.
-// When unregistered, shows the registration flow. When registered, shows the device selection screen
-// for choosing which Meta wearable device to stream from.
+// Central navigation hub. Shows the connect flow until the app is registered with the DAT
+// SDK, and the session flow afterwards.
+//
+// Settings is owned here rather than inside either branch: it is reachable from both, and
+// hosting it above them means opening it never unmounts the screen underneath — which
+// would tear down a live session.
 //
 
 import MWDATCore
@@ -21,16 +24,72 @@ struct MainAppView: View {
   let wearables: WearablesInterface
   var viewModel: WearablesViewModel
 
+  #if DEBUG
+  var mockKit: MockDeviceKitView.ViewModel?
+  #endif
+
   /// Session and overlay preferences, held above the routed screens so they survive
-  /// navigation between ready, live, and settings.
+  /// navigation between connect, ready, live, and settings.
   @State private var settings = AppSettings()
+  @State private var showingSettings = false
+
+  private var isRegistered: Bool {
+    viewModel.registrationState == .registered
+  }
 
   var body: some View {
-    if viewModel.registrationState == .registered {
-      StreamSessionView(wearables: wearables, wearablesVM: viewModel, settings: settings)
-    } else {
-      // User not registered - show registration/onboarding flow
-      HomeScreenView(viewModel: viewModel)
+    ZStack {
+      if isRegistered {
+        StreamSessionView(
+          wearables: wearables,
+          wearablesVM: viewModel,
+          settings: settings,
+          openSettings: { showingSettings = true }
+        )
+      } else {
+        // User not registered - show registration/onboarding flow
+        HomeScreenView(
+          viewModel: viewModel,
+          openSettings: { showingSettings = true }
+        )
+      }
+
+      if showingSettings {
+        settingsScreen
+          .transition(.opacity)
+          .zIndex(1)
+      }
     }
+    .animation(.easeOut(duration: 0.2), value: showingSettings)
+    // Disconnecting from within settings drops registration; close settings so the connect
+    // screen is not left hidden behind it.
+    .onChange(of: isRegistered) { _, registered in
+      if !registered { showingSettings = false }
+    }
+  }
+
+  private var settingsScreen: some View {
+    #if DEBUG
+    SettingsView(
+      settings: settings,
+      showsDisconnect: isRegistered,
+      onBack: { showingSettings = false },
+      onDisconnect: {
+        showingSettings = false
+        viewModel.disconnectGlasses()
+      },
+      mockKit: mockKit
+    )
+    #else
+    SettingsView(
+      settings: settings,
+      showsDisconnect: isRegistered,
+      onBack: { showingSettings = false },
+      onDisconnect: {
+        showingSettings = false
+        viewModel.disconnectGlasses()
+      }
+    )
+    #endif
   }
 }

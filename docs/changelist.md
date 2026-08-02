@@ -4,6 +4,111 @@ Running log of changes, newest first.
 
 ---
 
+## Relay the glasses feed into a LiveKit room
+
+The design's two remaining unimplemented surfaces both turned out to be relay UI: the
+**RELAY** row on the ready screen's spec plate, and the **ROOM** code chip on the live
+session screen. Building them meant building the thing behind them, so this change is the
+design delta and the LiveKit integration together.
+
+The phone is the relay, not the source. Video comes from the glasses through the DAT SDK and
+is handed to WebRTC as-is: `MWDATCamera.VideoFrame` exposes a `CMSampleBuffer` and LiveKit's
+`BufferCapturer.capture(_:)` accepts exactly that, so there is no pixel conversion and no
+`UIImage` round trip on the relay path.
+
+New, in `AssemblyMan/LiveKit/`:
+
+| File | Purpose |
+|------|---------|
+| `LiveKitConfiguration.swift` | Credentials from Info.plist, plus `RoomCode` — six characters from an alphabet with `I L O 0 1` removed, shown as `ABC-DEF` and sent to LiveKit as `ABCDEF`. |
+| `LiveKitTokenMinter.swift` | HS256 JWT, signed on-device with CryptoKit. |
+| `LiveKitFrameSink.swift` | The hot path. Lock-guarded and `Sendable`, so it can be fed off the main actor. |
+| `LiveKitRelay.swift` | `@Observable` façade owning the room, mirroring its state via a delegate proxy. |
+
+Three decisions worth keeping in view:
+
+- **Frames are teed on the delivery thread, before the main-actor hop.** `capture()` only
+  enqueues onto WebRTC's own queue, so it is cheap where the frame arrives. Routing 30 frames
+  a second through the main actor would queue them behind SwiftUI layout, and
+  `Task { @MainActor }` promises no ordering, so frames could arrive out of sequence.
+- **A configuration change does not disturb the room.** `restartStream()` rebuilds the DAT
+  session, but `relay.stop()` fires only on the non-restart branch of the stopped transition.
+  Viewers keep their connection and the code stays valid; they see a brief freeze. Tearing the
+  relay down there would mint a new code and drop everyone on every quality change.
+- **`suspendLocalVideoTracksInBackground` is off.** It defaults to on and suspends any track
+  whose source is `.camera`. Ours is the glasses, and DAT keeps delivering in the background,
+  so the default would freeze the relay the moment the app left the foreground. This needs the
+  `audio` background mode to be useful, which is now declared alongside
+  `NSMicrophoneUsageDescription` — the microphone is published because the assistant in
+  `agent/` is speech-to-speech.
+
+`AppSettings.agent` finally drives something: it is published as participant metadata. A new
+`relaysToLiveKit` toggle starts and stops the relay directly rather than through
+`restartStream()`, since it is not part of `StreamConfiguration`.
+
+**Credentials.** `Config/LiveKit.xcconfig` is committed with empty defaults and optionally
+includes a gitignored `LiveKit.local.xcconfig`, reaching Swift through Info.plist — the same
+route the project already uses for `MetaAppID` and `ClientToken`. Note that `//` starts a
+comment in an xcconfig, so the file stores the host alone and Swift adds the `wss://`. With no
+credentials the relay reports itself unconfigured and the glasses stream is unaffected.
+
+⚠️ The API secret is signed with on-device, so it ships inside the binary and is extractable.
+That is deliberate for a sample that needs no backend, and is flagged in the minter's header.
+A shipping app mints tokens server-side, which is what the SDK's `TokenSource` protocols are
+for. This also departs from `AGENTS.md`, which says a DAT app should depend only on the four
+`MWDAT*` modules.
+
+**Verified on hardware.** A session on a real device relays end to end: connect, publish, and
+a browser viewer in LiveKit Meet seeing the glasses feed, with both an audio and a 480x640
+video track live on the server.
+
+The glasses deliver **`420v`** (`kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange`), which is
+in WebRTC's supported set. That was the open question behind the whole design — it means the
+`CMSampleBuffer` hand-off needs no conversion layer, and the `CVPixelBufferPool`/`vImage`
+fallback that was held in reserve is not needed. The DEBUG counter under the room chip
+(`forwarded/offered · FORMAT`) stays, since a firmware or configuration change could still
+alter the format.
+
+**Known gap.** The unit and UI suites could not be run: the app fails to launch as an XCTest
+host on this machine's simulator, and it does so identically at the previous commit with none
+of these changes present, so it is environmental rather than a regression. The token minter —
+the piece most likely to fail silently — was verified instead by compiling it standalone and
+confirming it is byte-identical to an independent HS256 implementation, and then by the live
+session above.
+
+**Tooling.** `scripts/livekit_viewer_token.py` mints a viewer token for a room code and prints
+a pre-filled LiveKit Meet link; `scripts/livekit_watch_and_open.py` polls for the live session
+and opens it, since the code is regenerated per session. Relay lifecycle steps print to stdout
+in DEBUG as well as `os_log`, because `os_log` is not reachable over `devicectl --console` and
+a relay that connects and quietly leaves is otherwise undiagnosable on a device.
+
+## Second design import — Developer section, SAM overlay, settings from Connect
+
+The Claude Design source had moved on since the first import. Re-read
+`AssemblyMan.dc.html` and picked up four additions:
+
+- **Developer / MockDeviceKit section in Settings** (`Views/DeveloperSection.swift`, DEBUG
+  only). Enable toggle with a paired count, "Pair Ray-Ban Meta" capped at three devices, and
+  a plate per device: identity, Unpair, Power / Donned / Unfolded toggles, Captouch tap and
+  tap-and-hold, and a Front / Back / Video file camera-source picker. Wired to the existing
+  `MockDeviceKitView.ViewModel` and `MockDeviceCardView.ViewModel` — this is the
+  Industry-styled home for what previously lived behind the floating debug button.
+- **Segment Anything overlay** (`Views/DesignSystem/SegmentMaskOverlay.swift`) — dashed
+  masks with confidence chips over the live feed, plus its Overlays toggle. The SDK exposes
+  no segmentation, so the masks are the design's indicative shapes normalised to the
+  viewport; swapping in a real segmenter means replacing the mask data only.
+- **Settings reachable from the Connect screen** — a settings button now sits beside the
+  masthead. This required hoisting settings ownership from `StreamSessionView` up to
+  `MainAppView`, which also keeps it above both branches so opening it never unmounts the
+  screen underneath.
+- **Disconnect is hidden** when settings is opened before the glasses are linked.
+
+Also read the remaining imported files: `ios-frame.jsx` is the prototype's device-frame
+scaffold, `support.js` is the Claude Design template runtime, and `_ds_bundle.js` is empty
+(the Industry system is pure CSS). None carry app content.
+
+---
+
 ## Industry redesign of the AssemblyMan sample app
 
 Branch: `industry-redesign` — in progress, not yet committed.

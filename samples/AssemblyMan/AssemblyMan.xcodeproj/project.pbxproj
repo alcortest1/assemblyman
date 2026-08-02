@@ -29,6 +29,7 @@
 		8FD96B952E6F0F7D00F56AB1 /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB1 /* MWDATCore */; };
 		8FD96B952E6F0F7D00F56AB2 /* MWDATCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB2 /* MWDATCamera */; };
 		8FD96B952E6F0F7D00F56AB3 /* MWDATMockDevice in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB3 /* MWDATMockDevice */; };
+		AA0120000000000000000003 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA0120000000000000000002 /* LiveKit */; };
 		8FFD5FF52E8422580035E446 /* CircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFD5FF22E8422580035E446 /* CircleButton.swift */; };
 		8FFD5FF62E8422580035E446 /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFD5FF32E8422580035E446 /* CustomButton.swift */; };
 		8FFD602C2E8433E20035E446 /* MockDeviceKitViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFD60292E8433E20035E446 /* MockDeviceKitViewModel.swift */; };
@@ -56,6 +57,8 @@
 		DE000000000000000000000B /* IndustryControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000A /* IndustryControls.swift */; };
 		DE000000000000000000000D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000C /* SettingsView.swift */; };
 		DE000000000000000000000F /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000E /* AppSettings.swift */; };
+		DF0000000000000000000001 /* SegmentMaskOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0000000000000000000000 /* SegmentMaskOverlay.swift */; };
+		DF0000000000000000000003 /* DeveloperSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0000000000000000000002 /* DeveloperSection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,9 +141,13 @@
 		DE000000000000000000000A /* IndustryControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndustryControls.swift; sourceTree = "<group>"; };
 		DE000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DE000000000000000000000E /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		DF0000000000000000000000 /* SegmentMaskOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentMaskOverlay.swift; sourceTree = "<group>"; };
+		DF0000000000000000000002 /* DeveloperSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSection.swift; sourceTree = "<group>"; };
+		AA0130000000000000000001 /* LiveKit.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = LiveKit.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		AA0110000000000000000001 /* LiveKit */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LiveKit; sourceTree = "<group>"; };
 		E66CC00E2F3E05D900B07379 /* AssemblyManUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AssemblyManUITests; sourceTree = "<group>"; };
 		E699CC962E8150670052C240 /* AssemblyManTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AssemblyManTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -153,6 +160,7 @@
 				8FD96B952E6F0F7D00F56AB1 /* MWDATCore in Frameworks */,
 				8FD96B952E6F0F7D00F56AB2 /* MWDATCamera in Frameworks */,
 				8FD96B952E6F0F7D00F56AB3 /* MWDATMockDevice in Frameworks */,
+				AA0120000000000000000003 /* LiveKit in Frameworks */,
 				B20000052FB2000100000005 /* UltralyticsYOLO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,12 +219,21 @@
 		5A5A5A5A5A5A5A5A5A5A5A5A = {
 			isa = PBXGroup;
 			children = (
+				AA0130000000000000000002 /* Config */,
 				8FD96B7D2E6F0A9800F56AB1 /* AssemblyMan */,
 				E66CC00E2F3E05D900B07379 /* AssemblyManUITests */,
 				8F2A14F12DDBCEB900D4E5F2 /* Frameworks */,
 				7A7A7A7A7A7A7A7A7A7A7A7A /* Products */,
 				E699CC962E8150670052C240 /* AssemblyManTests */,
 			);
+			sourceTree = "<group>";
+		};
+		AA0130000000000000000002 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				AA0130000000000000000001 /* LiveKit.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		7A7A7A7A7A7A7A7A7A7A7A7A /* Products */ = {
@@ -264,6 +281,7 @@
 				E6FD3BCD2EB4D53A00E7FE5D /* NonStreamView.swift */,
 				DE000000000000000000000C /* SettingsView.swift */,
 				DD00000000000000000001 /* DesignSystem */,
+				DF0000000000000000000002 /* DeveloperSection.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -274,6 +292,7 @@
 				A10000212FA1000100000001 /* MobileSAM */,
 				B20000212FB2000100000001 /* YOLO */,
 				E66CC01A2F3E1A9300B07379 /* TestResources */,
+				AA0110000000000000000001 /* LiveKit */,
 				8FD96B702E6F0A9800F56AB1 /* ViewModels */,
 				8FD96B762E6F0A9800F56AB1 /* Views */,
 				8FD96B772E6F0A9800F56AB1 /* Assets.xcassets */,
@@ -327,6 +346,7 @@
 		DD00000000000000000001 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				DF0000000000000000000000 /* SegmentMaskOverlay.swift */,
 				DE0000000000000000000000 /* Theme.swift */,
 				DE0000000000000000000002 /* OperatorGlyph.swift */,
 				DE0000000000000000000004 /* BlueprintFrame.swift */,
@@ -353,8 +373,12 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				AA0110000000000000000001 /* LiveKit */,
+			);
 			name = AssemblyMan;
 			packageProductDependencies = (
+				AA0120000000000000000002 /* LiveKit */,
 				B20000412FB2000100000001 /* UltralyticsYOLO */,
 			);
 			productName = AssemblyMan;
@@ -440,6 +464,7 @@
 			mainGroup = 5A5A5A5A5A5A5A5A5A5A5A5A;
 			packageReferences = (
 				95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
+				AA0120000000000000000001 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 				B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */,
 			);
 			productRefGroup = 7A7A7A7A7A7A7A7A7A7A7A7A /* Products */;
@@ -518,6 +543,8 @@
 				8FFD5FF52E8422580035E446 /* CircleButton.swift in Sources */,
 				8FFD5FF62E8422580035E446 /* CustomButton.swift in Sources */,
 				E6FD3BCE2EB4D53A00E7FE5D /* NonStreamView.swift in Sources */,
+				DF0000000000000000000001 /* SegmentMaskOverlay.swift in Sources */,
+				DF0000000000000000000003 /* DeveloperSection.swift in Sources */,
 				DE0000000000000000000001 /* Theme.swift in Sources */,
 				DE0000000000000000000003 /* OperatorGlyph.swift in Sources */,
 				DE0000000000000000000005 /* BlueprintFrame.swift in Sources */,
@@ -561,6 +588,7 @@
 /* Begin XCBuildConfiguration section */
 		0B0B0B0B0B0B0B0B0B0B0B0B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0130000000000000000001 /* LiveKit.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -590,6 +618,7 @@
 		};
 		0C0C0C0C0C0C0C0C0C0C0C0C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0130000000000000000001 /* LiveKit.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -882,6 +911,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AA0120000000000000000001 /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/livekit/client-sdk-swift.git";
+			requirement = {
+				kind = revision;
+				revision = 1d711a811fd4e0e7bfd1600c5c1dbd71ad0cf564;
+			};
+		};
 		95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/facebook/meta-wearables-dat-ios";
@@ -901,6 +938,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AA0120000000000000000002 /* LiveKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0120000000000000000001 /* XCRemoteSwiftPackageReference "client-sdk-swift" */;
+			productName = LiveKit;
+		};
 		8FD96B942E6F0F7D00F56AB1 /* MWDATCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;

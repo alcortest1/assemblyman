@@ -1,0 +1,18 @@
+// LiveKit relay configuration.
+//
+// These are empty by default so a clean checkout builds without credentials — the app
+// simply reports the relay as unconfigured and the glasses stream works as it always has.
+//
+// To enable the relay, copy LiveKit.local.xcconfig.example to LiveKit.local.xcconfig and
+// fill it in from the project's livekit.txt. That file is gitignored; never commit it.
+//
+// NOTE: `//` starts a comment in xcconfig, so a full `wss://host` URL would silently
+// truncate to `wss:`. Store the HOST ONLY — the scheme is added back in Swift by
+// LiveKitConfiguration.serverURL.
+
+LIVEKIT_HOST =
+LIVEKIT_API_KEY =
+LIVEKIT_API_SECRET =
+
+// Optional include: the `?` means the build succeeds when the file is absent.
+#include? "LiveKit.local.xcconfig"
