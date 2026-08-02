@@ -74,7 +74,16 @@ final class StreamSessionViewModel {
     }
   }
   var isReticleOverlayEnabled: Bool = true
-  var segmentationOverlay: UIImage?
+  /// The vision overlay drawn over the feed.
+  ///
+  /// Also handed to the relay, so a remote viewer sees the same overlay rather than the bare
+  /// camera. Every path that hides it on screen sets this to nil, so mirroring it here keeps
+  /// the two in step without a second switch to forget.
+  var segmentationOverlay: UIImage? {
+    didSet {
+      relay.frameSink.compositor.setOverlay(segmentationOverlay?.cgImage)
+    }
+  }
   var isGeneratingSegmentation: Bool = false
   var segmentationInferenceMilliseconds: Int?
   var segmentationColoredRegions: Int?

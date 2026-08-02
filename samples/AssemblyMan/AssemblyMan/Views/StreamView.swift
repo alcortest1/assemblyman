@@ -308,14 +308,25 @@ struct StreamView: View {
   /// counts alongside the format turns that into something readable at a glance.
   @ViewBuilder
   private var relayDiagnostics: some View {
-    let diagnostics = viewModel.relay.diagnostics
+    // Read live from the sink rather than the relay's snapshot, which is only taken at
+    // publish time. The elapsed clock re-renders this once a second, which is often enough
+    // to watch counters move.
+    let diagnostics = viewModel.relay.frameSink.diagnostics
+    let compositor = viewModel.relay.frameSink.compositor
     if diagnostics.framesOffered > 0 {
       Text(
         "\(diagnostics.framesForwarded)/\(diagnostics.framesOffered) · \(diagnostics.pixelFormatDescription)"
           + (diagnostics.isPixelFormatSupported == false ? " · UNSUPPORTED" : "")
+          // Present only while burning in an overlay, so its absence is as informative as
+          // its value when the viewer reports a bare feed.
+          + (compositor.isCompositing ? " · OVERLAY \(diagnostics.framesComposited)" : "")
+          + (compositor.lastFailure.map { " · \($0)" } ?? "")
       )
       .font(Theme.body(9).monospacedDigit())
-      .foregroundStyle(diagnostics.isPixelFormatSupported == false ? .red : .white.opacity(0.5))
+      .foregroundStyle(
+        diagnostics.isPixelFormatSupported == false || compositor.lastFailure != nil
+          ? .red : .white.opacity(0.5)
+      )
       .padding(.horizontal, 6)
       .padding(.vertical, 2)
       .background(Theme.accent900.opacity(0.5))
