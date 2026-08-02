@@ -63,6 +63,8 @@ struct Icon: View {
     case stopSquare
     case circleDot
     case chevronLeft
+    case mic
+    case micOff
 
     /// One entry per `<path>` in the source icon.
     var paths: [String] {
@@ -125,6 +127,21 @@ struct Icon: View {
         ]
       case .chevronLeft:
         return ["m15 18-6-6 6-6"]
+      case .mic:
+        return [
+          "M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z",
+          "M19 10v2a7 7 0 0 1-14 0v-2",
+          "M12 19v3",
+        ]
+      case .micOff:
+        return [
+          "M2 2l20 20",
+          "M15 9.34V5a3 3 0 0 0-5.68-1.33",
+          "M9 9v3a3 3 0 0 0 5.12 2.12",
+          "M19 10v2a7 7 0 0 1-.11 1.23",
+          "M5 10v2a7 7 0 0 0 12 5",
+          "M12 19v3",
+        ]
       }
     }
   }
@@ -134,6 +151,7 @@ struct Icon: View {
   let glyphs: [Icon.Glyph] = [
     .video, .volume, .hand, .slidersHorizontal, .camera, .close,
     .share, .hourglass, .triangleAlert, .stopSquare, .circleDot, .chevronLeft,
+    .mic, .micOff,
   ]
   return LazyVGrid(columns: Array(repeating: GridItem(), count: 4), spacing: 24) {
     ForEach(Array(glyphs.enumerated()), id: \.offset) { _, glyph in

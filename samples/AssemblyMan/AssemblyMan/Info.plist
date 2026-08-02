@@ -60,6 +60,10 @@
 		<string>bluetooth-central</string>
 		<string>bluetooth-peripheral</string>
 		<string>external-accessory</string>
+		<!-- Keeps the process alive while the LiveKit relay holds an active audio
+		     session. Without this iOS suspends the app seconds after backgrounding
+		     and the WebRTC transport dies mid-session. -->
+		<string>audio</string>
 	</array>
 	<key>UISupportedExternalAccessoryProtocols</key>
 	<array>
@@ -78,6 +82,17 @@
 	<string>This app needs access to save photos captured from your glasses.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to stream from your phone's camera as a mock device feed.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app uses the microphone so you can talk to the assistant and remote viewers during a session.</string>
+	<!-- LiveKit relay credentials, substituted from Config/LiveKit.xcconfig at build time.
+	     Empty when no LiveKit.local.xcconfig is present — the relay then reports itself
+	     unconfigured and the glasses stream works exactly as it does without it. -->
+	<key>LKServerHost</key>
+	<string>$(LIVEKIT_HOST)</string>
+	<key>LKAPIKey</key>
+	<string>$(LIVEKIT_API_KEY)</string>
+	<key>LKAPISecret</key>
+	<string>$(LIVEKIT_API_SECRET)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

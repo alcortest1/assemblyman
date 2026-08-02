@@ -140,6 +140,35 @@ final class AppConfigurationTests: XCTestCase {
     XCTAssertEqual(info["NSBonjourServices"] as? [String], ["_bonjour._tcp"])
   }
 
+  // MARK: - LiveKit relay
+
+  /// The relay publishes the microphone so the assistant can be spoken to. iOS terminates the
+  /// app outright on the first record activation if this string is absent.
+  func testMicrophoneUsageDescriptionIsDeclared() throws {
+    let description = try XCTUnwrap(
+      infoDictionary()["NSMicrophoneUsageDescription"] as? String,
+      "Publishing audio without NSMicrophoneUsageDescription crashes on first use"
+    )
+    XCTAssertFalse(description.isEmpty)
+  }
+
+  /// Without the audio background mode iOS suspends the app seconds after it leaves the
+  /// foreground and the relay's transport dies mid-session.
+  func testAudioBackgroundModeIsDeclaredForTheRelay() throws {
+    let modes = try XCTUnwrap(infoDictionary()["UIBackgroundModes"] as? [String])
+    XCTAssertTrue(modes.contains("audio"), "UIBackgroundModes is missing audio")
+  }
+
+  /// The three keys are substituted from Config/LiveKit.xcconfig. They are allowed to resolve
+  /// to nothing — that is how a checkout without credentials behaves — but the keys must
+  /// exist, or `LiveKitConfiguration.fromBundle()` silently reads nothing forever.
+  func testRelayCredentialKeysArePresent() throws {
+    let info = try infoDictionary()
+    for key in ["LKServerHost", "LKAPIKey", "LKAPISecret"] {
+      XCTAssertNotNil(info[key] as? String, "Info.plist is missing \(key)")
+    }
+  }
+
   // MARK: - Asset catalog
 
   /// Asset symbols compile against the catalog but resolve by name at runtime: renaming the

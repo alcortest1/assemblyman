@@ -142,11 +142,19 @@ struct PhotoPreviewView: View {
 }
 
 struct ShareSheet: UIViewControllerRepresentable {
-  let photo: UIImage
+  let activityItems: [Any]
+
+  init(activityItems: [Any]) {
+    self.activityItems = activityItems
+  }
+
+  init(photo: UIImage) {
+    self.init(activityItems: [photo])
+  }
 
   func makeUIViewController(context: Context) -> UIActivityViewController {
     let activityViewController = UIActivityViewController(
-      activityItems: [photo],
+      activityItems: activityItems,
       applicationActivities: nil
     )
 

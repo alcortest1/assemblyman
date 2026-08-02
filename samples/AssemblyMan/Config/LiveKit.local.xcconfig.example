@@ -1,0 +1,9 @@
+// Copy to LiveKit.local.xcconfig and fill in from the project's livekit.txt.
+// LiveKit.local.xcconfig is gitignored — keep it that way.
+//
+// HOST ONLY, no scheme: `//` starts a comment in xcconfig, so `wss://host` would
+// truncate to `wss:`.
+
+LIVEKIT_HOST = your-project.livekit.cloud
+LIVEKIT_API_KEY = APIxxxxxxxxxxxx
+LIVEKIT_API_SECRET = your-api-secret

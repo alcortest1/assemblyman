@@ -4,15 +4,16 @@ The companion web portal: join a live session by room code, watch any
 participant's screen — people or agents — and build agents in the Studio.
 
 Implemented from the Claude Design source `AssemblyMan Portal.dc.html`, on the
-Industry design system. No build step, no dependencies.
+Industry design system. The browser loads the LiveKit client from a pinned CDN URL, so
+there is no local build step.
 
 ## Run
 
-Any static file server works:
+For the seeded design demo, any static file server works. To join a real LiveKit room,
+use the development server so the API secret stays outside the browser:
 
 ```bash
-cd web
-python3 -m http.server 8777
+./scripts/portal_dev_server.py
 # → http://localhost:8777
 ```
 
@@ -33,6 +34,10 @@ the credential files.
 `main` does not yet contain `web/` or `vercel.json`, so the production URL will
 not serve the portal until this branch merges.
 
+The Vercel project needs `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and
+`LIVEKIT_API_SECRET` environment variables. `api/token.js` reads them in the serverless
+runtime and returns a room-scoped viewer token; the secret never reaches browser code.
+
 Cache headers are set so `index.html`, `app.js` and `styles/` always revalidate —
 none of them are content-hashed, so a redeploy would otherwise serve stale
 assets. Only `assets/` is cached (24h).
@@ -43,6 +48,8 @@ assets. Only `assets/` is cached (24h).
 |---|---|
 | `index.html` | Markup for all three screens, mounted once and toggled |
 | `app.js` | State and DOM syncing, ported from the design's component |
+| `livekit-bridge.js` | LiveKit room lifecycle, roster, remote audio, and operator video |
+| `../api/token.js` | Vercel token endpoint; generates viewer identities server-side |
 | `styles/industry.css` | The Industry design system — tokens and component classes, copied verbatim from the design project's `_ds` bundle |
 | `styles/portal.css` | Portal screens, built only from Industry tokens |
 | `assets/plant.png` | Stand-in POV frame (same asset the iOS app's mock device uses) |
@@ -68,15 +75,10 @@ Each screen has its own URL, so a `#/room/<code>` link joins that room directly.
 
 ## State
 
-`state` in `app.js` holds the design's seeded demo roster — an operator, two
-viewers, and three agents. Nothing is persisted; a reload resets it.
-
-To put the portal on live data, replace two things:
-
-1. **The roster.** `state.people` and the `stage`/`participants` rendering read
-   from plain objects. Swap them for LiveKit room participants and their tracks.
-2. **The stage media.** `assets/plant.png` stands in for the operator's video —
-   attach the subscribed video track to `.stage-media` instead.
+`state` in `app.js` keeps the seeded demo roster for design-only use. Once
+`livekit-bridge.js` connects, the real LiveKit participant roster replaces it and the
+operator's subscribed camera track replaces `assets/plant.png`. Nothing is persisted; a
+reload leaves the room and resets local UI state.
 
 The `agent/` directory at the repo root has the realtime agent that joins the
 same room and consumes the operator's stream; the Studio's "Assembly Assistant"

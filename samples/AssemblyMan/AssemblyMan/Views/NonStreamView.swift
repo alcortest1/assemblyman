@@ -116,6 +116,12 @@ struct NonStreamView: View {
           .foregroundStyle(Theme.neutral700)
           .accessibilityIdentifier("session_spec")
       }
+      SpecRow(label: "Relay") {
+        Text(settings.relaysToLiveKit ? viewModel.relay.relayLabel : "Off")
+          .font(Theme.body(13))
+          .foregroundStyle(Theme.neutral700)
+          .accessibilityIdentifier("relay_status")
+      }
       SpecRow(label: "Agent") {
         Text(settings.agent.name)
           .font(Theme.body(13))

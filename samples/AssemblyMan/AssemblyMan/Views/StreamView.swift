@@ -26,6 +26,9 @@ struct StreamView: View {
   /// White frame shown for a beat after the shutter fires.
   @State private var isFlashing = false
 
+  /// Hands the room code to the iOS share sheet so a viewer can be sent it.
+  @State private var isSharingRoomCode = false
+
   var body: some View {
     ZStack {
       Theme.accent900.ignoresSafeArea()
@@ -48,6 +51,19 @@ struct StreamView: View {
 
       VStack {
         topBar
+        if let roomCode = viewModel.relay.roomCode {
+          HStack {
+            roomChip(roomCode)
+            Spacer(minLength: 0)
+          }
+        }
+
+        #if DEBUG
+        HStack {
+          relayDiagnostics
+          Spacer(minLength: 0)
+        }
+        #endif
         Spacer()
         controls
       }
@@ -70,6 +86,14 @@ struct StreamView: View {
         PhotoPreviewView(photo: photo) {
           viewModel.dismissPhotoPreview()
         }
+      }
+    }
+    .sheet(isPresented: $isSharingRoomCode) {
+      if let roomCode = viewModel.relay.roomCode {
+        ShareSheet(activityItems: [
+          "Join my AssemblyMan session — room \(roomCode.display)",
+          URL(string: "https://assemblyman.vercel.app/#/room/\(roomCode.display)")!,
+        ])
       }
     }
   }
@@ -194,6 +218,62 @@ struct StreamView: View {
     .frame(minHeight: 28)
   }
 
+  /// The code someone else types to watch this session. Sits under the status row so it reads
+  /// as session identity rather than as another piece of live telemetry.
+  private func roomChip(_ roomCode: RoomCode) -> some View {
+    HStack(spacing: 8) {
+      Text("Room")
+        .font(Theme.overline(10))
+        .tracking(1.2)
+        .textCase(.uppercase)
+        .foregroundStyle(.white.opacity(0.75))
+
+      Text(roomCode.display)
+        .font(Theme.body(12, weight: .semibold).monospacedDigit())
+        .tracking(1.68)
+        .foregroundStyle(.white)
+
+      Button {
+        isSharingRoomCode = true
+      } label: {
+        Icon(glyph: .share, size: 12, color: .white)
+          .frame(width: 22, height: 22)
+          .overlay { Rectangle().strokeBorder(.white.opacity(0.35), lineWidth: Theme.hairline) }
+      }
+      .buttonStyle(PressableStyle(pressedOverlay: .white.opacity(0.15)))
+      .accessibilityLabel("Share room code")
+    }
+    .padding(.leading, 10)
+    .padding(.trailing, 4)
+    .padding(.vertical, 4)
+    .background(Theme.accent900.opacity(0.65))
+    .overlay { Rectangle().strokeBorder(.white.opacity(0.25), lineWidth: Theme.hairline) }
+    .accessibilityIdentifier("room_code_chip")
+  }
+
+  #if DEBUG
+  /// Whether frames are reaching the encoder, and in what pixel format.
+  ///
+  /// WebRTC drops any buffer whose format it cannot encode, and it does so quietly — the
+  /// symptom is a relay that connects and then publishes nothing. Showing offered-vs-forwarded
+  /// counts alongside the format turns that into something readable at a glance.
+  @ViewBuilder
+  private var relayDiagnostics: some View {
+    let diagnostics = viewModel.relay.diagnostics
+    if diagnostics.framesOffered > 0 {
+      Text(
+        "\(diagnostics.framesForwarded)/\(diagnostics.framesOffered) · \(diagnostics.pixelFormatDescription)"
+          + (diagnostics.isPixelFormatSupported == false ? " · UNSUPPORTED" : "")
+      )
+      .font(Theme.body(9).monospacedDigit())
+      .foregroundStyle(diagnostics.isPixelFormatSupported == false ? .red : .white.opacity(0.5))
+      .padding(.horizontal, 6)
+      .padding(.vertical, 2)
+      .background(Theme.accent900.opacity(0.5))
+    }
+  }
+  #endif
+
   private var controls: some View {
     HStack(spacing: 12) {
       Button {
@@ -214,6 +294,25 @@ struct StreamView: View {
       }
       .buttonStyle(PressableStyle(pressedOverlay: Theme.accent900.opacity(0.3)))
       .accessibilityIdentifier("stop_streaming_button")
+
+      // Only meaningful while the relay is up — there is nobody to talk to otherwise.
+      if viewModel.relay.status == .live {
+        Button {
+          viewModel.relay.setMicrophone(enabled: !viewModel.relay.isMicrophoneEnabled)
+        } label: {
+          Icon(
+            glyph: viewModel.relay.isMicrophoneEnabled ? .mic : .micOff,
+            size: 20,
+            color: .white
+          )
+          .frame(width: 52, height: 52)
+          .background(Theme.accent900.opacity(0.55))
+          .overlay { Rectangle().strokeBorder(.white.opacity(0.6), lineWidth: Theme.hairline) }
+        }
+        .buttonStyle(PressableStyle(pressedOverlay: Theme.accent900.opacity(0.3)))
+        .accessibilityLabel(viewModel.relay.isMicrophoneEnabled ? "Mute microphone" : "Unmute microphone")
+        .accessibilityIdentifier("microphone_button")
+      }
 
       Button {
         viewModel.capturePhoto()

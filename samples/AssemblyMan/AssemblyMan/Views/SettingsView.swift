@@ -172,6 +172,14 @@ struct SettingsView: View {
     Section(title: "Session") {
       VStack(spacing: 0) {
         ToggleRow(
+          label: "Relay to a room",
+          detail: "Mirror the session so remote viewers and the assistant can watch and talk.",
+          isOn: $settings.relaysToLiveKit
+        )
+
+        Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+
+        ToggleRow(
           label: "Stream over Wi-Fi",
           detail: "Higher-resolution video than Bluetooth. Uses more battery.",
           isOn: $settings.streamsOverWiFi

@@ -82,6 +82,10 @@ struct StreamSessionView: View {
     // only takes effect once the stream is rebuilt.
     .onChange(of: settings.quality) { _, _ in applySessionSettings() }
     .onChange(of: settings.frameRate) { _, _ in applySessionSettings() }
+    // The relay is not part of StreamConfiguration, so this deliberately does not go through
+    // applySessionSettings() — restarting the glasses stream to turn a room on or off would
+    // interrupt the very feed being relayed.
+    .onChange(of: settings.relaysToLiveKit) { _, relays in applyRelaySetting(relays) }
     .alert("Error", isPresented: $viewModel.showError) {
       Button("OK") {
         viewModel.dismissError()
@@ -102,6 +106,17 @@ struct StreamSessionView: View {
     guard viewModel.isStreaming else { return }
     viewModel.restartStream()
     show(toast: "Restarting at \(settings.quality.label) · \(settings.frameRate.label)")
+  }
+
+  private func applyRelaySetting(_ relays: Bool) {
+    guard viewModel.isStreaming else { return }
+    if relays {
+      viewModel.relay.start(agent: settings.agent)
+      show(toast: "Relaying to a LiveKit room")
+    } else {
+      viewModel.relay.stop()
+      show(toast: "Relay stopped")
+    }
   }
 
   /// Shows a transient message at the bottom of the screen.

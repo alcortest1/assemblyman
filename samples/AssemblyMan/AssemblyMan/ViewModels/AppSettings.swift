@@ -47,6 +47,12 @@ final class AppSettings {
   var quality: Quality = .medium
   var frameRate: FrameRate = .thirty
 
+  /// Whether to mirror the session into a LiveKit room for remote viewers and the assistant.
+  ///
+  /// Unlike quality and frame rate this does not feed `StreamConfiguration`, so toggling it
+  /// starts or stops the relay directly and must not go through `restartStream()`.
+  var relaysToLiveKit: Bool = true
+
   /// Qualities the current transport can sustain.
   var availableQualities: [Quality] {
     streamsOverWiFi ? [.medium, .high] : [.low, .medium]
@@ -106,8 +112,8 @@ final class AppSettings {
 
   /// Assistants that ride along on a session.
   ///
-  /// The DAT SDK exposes no agent API, so this selection is presentation-only for now — it
-  /// is carried here rather than in the view so that wiring it up later touches one place.
+  /// Published as participant metadata when the relay joins the LiveKit room, so whatever
+  /// agent is listening there can tell which assistant the operator asked for.
   enum Agent: String, CaseIterable, Hashable, Identifiable {
     case none
     case assistant

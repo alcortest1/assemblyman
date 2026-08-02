@@ -19,8 +19,15 @@
 
   var state = {
     joined: false,
+    joining: false,
     code: '',
     codeErr: false,
+    codeErrText: '',
+    /* Populated by livekit-bridge.js once a real room is joined. While `connected` is false
+       the portal renders the design's seeded roster, so every screen still demonstrates
+       without a session running. */
+    live: { connected: false, roster: [], hasOperatorVideo: false },
+    liveError: '',
     elapsed: 0,
     tab: 'room',
     stage: 'op',
@@ -116,8 +123,12 @@
   }
 
   /* Roster: people first, then every deployed agent as a participant.
-     Agent participant ids are namespaced so a person can't collide with one. */
+     Agent participant ids are namespaced so a person can't collide with one.
+     In a live room the participants are the roster — the seeded people and the studio's
+     deployed agents are the standing-in demo. */
   function roster() {
+    if (state.live.connected) return state.live.roster;
+
     var people = state.people.map(function (p) {
       return {
         id: p.id, name: p.name, role: p.role, speaking: p.speaking,
@@ -233,21 +244,67 @@
     // An empty field joins the demo room; a partial code is a typo, not a room.
     if (raw && code.replace(/-/g, '').length < 6) {
       state.codeErr = true;
+      state.codeErrText = 'Enter the full code — two groups, like K7F-3QD9.';
       render();
       return;
     }
-    state.joined = true;
     state.code = code;
     state.codeErr = false;
-    state.elapsed = JOINED_ELAPSED;
+
+    // No transport (CDN blocked, or served without the token endpoint): show the design's
+    // demo session rather than a dead screen.
+    if (!window.PortalLive) {
+      enterSession();
+      return;
+    }
+
+    state.joining = true;
+    render();
+
+    window.PortalLive.connect(code, { onUpdate: onLiveUpdate }).then(function (result) {
+      state.joining = false;
+      if (!result.ok) {
+        state.codeErr = true;
+        state.codeErrText = result.error;
+        render();
+        return;
+      }
+      enterSession();
+    });
+  }
+
+  function enterSession() {
+    state.joined = true;
+    state.codeErr = false;
+    // A live session starts its clock now; the demo opens mid-session, as the design does.
+    state.elapsed = state.live.connected ? 0 : JOINED_ELAPSED;
     state.tab = 'room';
-    state.stage = 'op';
+    state.stage = defaultStage();
     startTimer();
+    render();
+  }
+
+  /* Stage the operator when there is one — that is what a viewer came to watch. */
+  function defaultStage() {
+    var op = roster().filter(function (r) { return r.isOp; })[0];
+    return op ? op.id : (roster()[0] || {}).id || 'op';
+  }
+
+  /* Called by the bridge whenever the room changes: someone joins, a track starts, a
+     speaker changes. */
+  function onLiveUpdate(snapshot) {
+    state.live = snapshot;
+    if (!state.joined) return;
+    // Whoever was staged may have left, and the operator may only now have arrived.
+    var stillThere = roster().some(function (r) { return r.id === state.stage; });
+    if (!stillThere) state.stage = defaultStage();
     render();
   }
 
   function leave() {
     stopTimer();
+    if (window.PortalLive) window.PortalLive.disconnect();
+    state.live = { connected: false, roster: [], hasOperatorVideo: false };
     state.joined = false;
     state.code = '';
     state.elapsed = 0;
@@ -325,6 +382,19 @@
     show($('stage-op'), !!st && st.isOp);
     show($('stage-viewer'), !!st && st.isViewer);
     show($('stage-agent'), !!st && st.isAgent);
+
+    // Swap the stand-in still for the operator's track once one is actually subscribed.
+    var liveVideo = state.live.connected && state.live.hasOperatorVideo;
+    show($('stage-video'), liveVideo);
+    show($('stage-img'), !liveVideo);
+    if (liveVideo) window.PortalLive.attachOperatorVideo($('stage-video'));
+
+    var source = $('screen-session').querySelector('.stage-source');
+    if (source) {
+      source.textContent = state.live.connected
+        ? (liveVideo ? 'OPERATOR POV · LIVE' : 'WAITING FOR THE OPERATOR’S CAMERA')
+        : 'OPERATOR POV · RAY-BAN META';
+    }
 
     if (st && st.isViewer) $('staged-initials').textContent = st.initials;
     if (st && st.isAgent) $('staged-name').textContent = st.name;
@@ -452,8 +522,16 @@
     show($('screen-session'), state.joined && state.tab === 'room');
     show($('screen-studio'), state.joined && state.tab === 'studio');
 
-    show($('code-err'), state.codeErr);
+    var err = $('code-err');
+    if (state.codeErrText) err.textContent = state.codeErrText;
+    show(err, state.codeErr);
     $('code').setAttribute('aria-invalid', state.codeErr ? 'true' : 'false');
+
+    // Label lives in its own span — the button's other children are the blueprint corner
+    // marks, which writing textContent on the button would delete.
+    var submit = $('join-form').querySelector('.join-submit');
+    if (submit) submit.disabled = state.joining;
+    $('join-label').textContent = state.joining ? 'Joining…' : 'Join session';
 
     if (state.joined) {
       renderSession();
@@ -565,8 +643,34 @@
       render();
     });
 
+    // A #/room/CODE link joins directly, but the transport is a module: module scripts run
+    // after this classic one and before DOMContentLoaded, so `portal-live-ready` can fire
+    // before init() exists to hear it. Listen *and* check whether it already arrived.
+    window.addEventListener('portal-live-ready', autoJoin);
+
     readUrl();
     render();
+    if (window.PortalLive) autoJoin();
+  }
+
+  /* Connect a hash-route join once the transport is available. */
+  function autoJoin() {
+    if (!window.PortalLive || !state.joined || !state.code || state.live.connected) return;
+    if (state.joining) return;
+    state.joining = true;
+    window.PortalLive.connect(state.code, { onUpdate: onLiveUpdate }).then(function (result) {
+      state.joining = false;
+      if (result.ok) {
+        state.elapsed = 0;
+        state.stage = defaultStage();
+      } else {
+        // Surfaced rather than swallowed: a hash-route join that fails silently looks
+        // identical to the demo roster, which is how a broken transport goes unnoticed.
+        state.liveError = result.error;
+        toast(result.error);
+      }
+      render();
+    });
   }
 
   if (document.readyState === 'loading') {
