@@ -33,8 +33,12 @@ server = AgentServer()
 # need something. Proactivity lets Gemini speak up unprompted on what it sees.
 PROACTIVE = os.getenv("ASSEMBLYMAN_PROACTIVE", "0") == "1"
 
+# Pinned, not `-latest`. The rolling alias resolved to a build whose setup schema has no
+# `proactivity` field, and Gemini rejects an unknown field by closing the socket outright —
+# the agent then joins the room and can neither speak nor hear, which reads as never having
+# joined at all. A dated pin is worth more than a newer model here.
 REALTIME_MODEL = os.getenv(
-    "ASSEMBLYMAN_MODEL", "gemini-2.5-flash-native-audio-latest"
+    "ASSEMBLYMAN_MODEL", "gemini-2.5-flash-native-audio-preview-12-2025"
 )
 
 
@@ -101,11 +105,19 @@ class AssemblyAssistant(Agent):
 async def entrypoint(ctx: JobContext) -> None:
     ctx.log_context_fields = {"room": ctx.room.name}
 
+    # Only send the optional behaviour flags when they are actually on. Gemini treats an
+    # unknown setup field as fatal rather than ignoring it, so sending `proactivity=False`
+    # buys nothing and breaks the session on any build that has dropped the field.
+    options: dict[str, object] = {}
+    if PROACTIVE:
+        options["proactivity"] = True
+    if AFFECTIVE:
+        options["enable_affective_dialog"] = True
+
     session = AgentSession(
         llm=google.beta.realtime.RealtimeModel(
             model=REALTIME_MODEL,
-            proactivity=PROACTIVE,
-            enable_affective_dialog=AFFECTIVE,
+            **options,
             # Endpointing. HIGH end-sensitivity means Gemini commits to "they have stopped"
             # sooner, which together with the shortened silence window is what removes the
             # pause between the operator finishing and the reply starting.
