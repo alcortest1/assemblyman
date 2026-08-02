@@ -48,9 +48,7 @@ test('mints a room-scoped token with a server-generated viewer identity', () => 
   assert.notEqual(claims.sub, 'phone-ABCDEF');
   assert.equal(claims.video.room, 'ABCDEF');
   assert.equal(claims.video.canPublish, true);
-  assert.deepEqual(claims.video.canPublishSources, [
-    'camera', 'microphone', 'screen_share', 'screen_share_audio',
-  ]);
+  assert.deepEqual(claims.video.canPublishSources, ['camera', 'microphone']);
 });
 
 test('rejects partial, oversized, and excluded-glyph room codes', () => {

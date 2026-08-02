@@ -281,22 +281,10 @@ a:hover { color: var(--color-accent-800); text-decoration: underline; }
   background: linear-gradient(to bottom, rgba(10, 16, 24, 0.5), transparent 18%, transparent 74%, rgba(10, 16, 24, 0.55));
 }
 
-/* Overlays share one inset so marks, masks and grid register with each other. */
+/* Overlays share one inset so the marks and the grid register with each other. */
 .overlay { position: absolute; inset: 58px 22px 54px; pointer-events: none; }
 .overlay-marks { border: none; }
 .overlay-marks > .corner { color: rgba(255, 255, 255, 0.85); }
-
-.sam-svg { position: absolute; inset: 0; }
-.sam-label {
-  position: absolute;
-  background: rgba(10, 16, 24, 0.75);
-  border: 1px solid rgba(181, 217, 253, 0.6);
-  color: var(--color-accent-300);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  padding: 2px 6px;
-}
-.sam-label.alt { border-color: rgba(255, 255, 255, 0.5); color: #fff; }
 
 .grid-line { position: absolute; background: rgba(255, 255, 255, 0.3); }
 .grid-line.v { top: 0; bottom: 0; width: 1px; }
@@ -529,6 +517,30 @@ a:hover { color: var(--color-accent-800); text-decoration: underline; }
 }
 .pt-remove:hover { border-color: var(--color-neutral-400); color: var(--color-text); }
 
+/* Per-participant audio. Square and hairlined like everything else in the system; the
+   muted state is the filled one, so a silenced row reads at a glance down the rail. */
+.pt-audio {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  background: none;
+  border: 1px solid var(--color-divider);
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.pt-audio:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.pt-audio.off {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-bg);
+}
+.pt-audio.off:hover { background: var(--color-neutral-800); border-color: var(--color-neutral-800); }
+.pt-audio:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
 .toggle-row {
   display: flex;
   align-items: center;
@@ -538,9 +550,6 @@ a:hover { color: var(--color-accent-800); text-decoration: underline; }
 }
 .toggle-row:last-child { border-bottom: none; }
 .toggle-label { flex: 1; font-size: 13px; }
-
-.captures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.captures img { display: block; width: 100%; height: 56px; object-fit: cover; }
 
 /* ── agent studio ───────────────────────────────────────────────────────── */
 
@@ -748,4 +757,56 @@ a:hover { color: var(--color-accent-800); text-decoration: underline; }
   .join-row { flex-direction: column; }
   .join-steps { flex-direction: column; }
   .join-step { border-left: none; padding: 12px 0 0; }
+}
+
+/* ── live media ─────────────────────────────────────────────────────────── */
+
+/* Each tile carries its own <video>, reused across renders so playback is never
+   restarted. All three avatar layers stack; app.js shows exactly one. */
+.pt-video,
+.pt-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pt-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pt-tail { display: contents; }
+
+.stage-viewer #stage-viewer-video { object-fit: cover; }
+
+/* — your own camera and mic — */
+.media-controls { display: flex; gap: 8px; }
+.media-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 10px;
+  background: none;
+  border: 1px solid var(--color-neutral-400);
+  color: var(--color-neutral-600);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.media-btn:hover { border-color: var(--color-accent); color: var(--color-accent-700); }
+.media-btn svg { flex: none; }
+/* On is the live state, so it carries the accent; off stays quiet and outlined. */
+.media-btn[aria-pressed='true'] {
+  background: var(--color-accent-100);
+  border-color: var(--color-accent);
+  color: var(--color-accent-800);
 }

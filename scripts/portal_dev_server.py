@@ -68,7 +68,7 @@ def mint(api_key, api_secret, room, identity, ttl=6 * 3600):
             "room": room,
             # Matches api/token.js: the portal publishes camera and mic like LiveKit Meet.
             "canPublish": True,
-            "canPublishSources": ["camera", "microphone", "screen_share", "screen_share_audio"],
+            "canPublishSources": ["camera", "microphone"],
             "canSubscribe": True,
             "canPublishData": True,
         },

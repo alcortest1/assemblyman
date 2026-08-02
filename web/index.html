@@ -32,7 +32,7 @@
 
     <span class="spacer"></span>
 
-    <span class="hdr-room" data-when="joined">ROOM<b id="hdr-room-code">K7F-3QD9</b></span>
+    <span class="hdr-room" data-when="joined">ROOM<b id="hdr-room-code">K7F-3QD</b></span>
     <button class="btn-outline" id="leave" type="button" data-when="joined">Leave session</button>
     <span class="hdr-idle" data-when="not-joined">Viewer · No session</span>
   </header>
@@ -59,7 +59,7 @@
 
       <form class="join-form" id="join-form" novalidate>
         <div class="join-row">
-          <input class="join-input" id="code" name="code" placeholder="K7F-3QD9" spellcheck="false"
+          <input class="join-input" id="code" name="code" placeholder="K7F-3QD" spellcheck="false"
                  autocomplete="off" autocapitalize="characters" aria-label="Room code"
                  aria-describedby="code-err" inputmode="text">
           <button class="btn btn-primary blueprint join-submit" type="submit">
@@ -67,7 +67,7 @@
             <span id="join-label">Join session</span>
           </button>
         </div>
-        <span class="join-err" id="code-err" role="alert" hidden>Enter the full code — two groups, like K7F-3QD9.</span>
+        <span class="join-err" id="code-err" role="alert" hidden>Enter the full six-character code — two groups, like K7F-3QD.</span>
       </form>
 
       <div class="join-steps">
@@ -96,17 +96,6 @@
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
         </div>
 
-        <div class="overlay" id="ov-sam">
-          <svg class="sam-svg" width="100%" height="100%" viewBox="0 0 366 620" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M70 180 Q120 120 190 150 Q240 175 225 250 Q205 320 130 305 Q60 285 70 180 Z" fill="rgba(181,217,253,0.28)" stroke="#b5d9fd" stroke-width="1.5" stroke-dasharray="5 3"></path>
-            <path d="M230 330 Q300 310 330 370 Q345 430 290 460 Q230 480 205 425 Q190 365 230 330 Z" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-dasharray="5 3"></path>
-            <path d="M90 420 Q140 395 175 440 Q200 490 155 525 Q100 545 75 495 Q60 450 90 420 Z" fill="rgba(181,217,253,0.28)" stroke="#b5d9fd" stroke-width="1.5" stroke-dasharray="5 3"></path>
-          </svg>
-          <span class="sam-label" style="left:24%;top:22%">MASK 01 · 0.97</span>
-          <span class="sam-label alt" style="left:64%;top:58%">MASK 02 · 0.91</span>
-          <span class="sam-label" style="left:22%;top:76%">MASK 03 · 0.84</span>
-        </div>
-
         <div class="overlay" id="ov-grid">
           <div class="grid-line v" style="left:33.33%"></div>
           <div class="grid-line v" style="left:66.66%"></div>
@@ -124,10 +113,11 @@
         <span class="stage-viewer-note" id="stage-waiting-note">Waiting for the operator to join…</span>
       </div>
 
-      <!-- staged viewer -->
+      <!-- staged viewer: their camera if they are sending one, otherwise their initials -->
       <div class="stage-viewer" id="stage-viewer" hidden>
+        <video class="stage-media" id="stage-viewer-video" autoplay playsinline muted hidden></video>
         <span class="stage-viewer-avatar" id="staged-initials">DR</span>
-        <span class="stage-viewer-note">No video — viewers watch, they don't broadcast</span>
+        <span class="stage-viewer-note" id="staged-note">Camera off</span>
       </div>
 
       <!-- staged agent board -->
@@ -148,7 +138,7 @@
           </div>
           <div class="board-log">
             <div class="board-line"><span class="board-time">12:18</span><span class="board-text">Step 4 confirmed — torque check on the rear bracket passed.</span></div>
-            <div class="board-line"><span class="board-time">12:31</span><span class="board-text flag">MASK 02 flagged — thread wear on the M6 fastener. Still filed to the rail.</span></div>
+            <div class="board-line"><span class="board-time">12:31</span><span class="board-text flag">Thread wear flagged on the M6 fastener. Still filed to the rail.</span></div>
             <div class="board-line"><span class="board-time">12:47</span><span class="board-text">Read step 5 aloud to the operator — align the housing before seating.</span></div>
           </div>
         </div>
@@ -161,6 +151,13 @@
     </div>
 
     <aside class="rail">
+      <!-- Your own camera and mic. Only meaningful in a live room, so app.js hides it
+           entirely while the portal is on the seeded demo roster. -->
+      <div class="media-controls" id="media-controls" role="group" aria-label="Your camera and microphone" hidden>
+        <button class="media-btn" id="toggle-mic" type="button" aria-pressed="false"></button>
+        <button class="media-btn" id="toggle-cam" type="button" aria-pressed="false"></button>
+      </div>
+
       <div class="rail-group">
         <div class="section-head">
           <span class="section-label">Participants</span>
@@ -182,20 +179,8 @@
         </div>
       </div>
 
-      <div class="rail-group">
-        <div class="section-head">
-          <span class="section-label">Captures</span>
-          <span class="section-count">3 this session</span>
-        </div>
-        <div class="captures">
-          <div class="blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><img src="assets/plant.png" alt="Capture 001"></div>
-          <div class="blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><img src="assets/plant.png" alt="Capture 002" style="object-position:20% 60%"></div>
-          <div class="blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><img src="assets/plant.png" alt="Capture 003" style="object-position:80% 30%"></div>
-        </div>
-      </div>
-
       <span class="spacer"></span>
-      <span class="rail-note">View only — capture stays with the operator</span>
+      <span class="rail-note" id="rail-note">Demo preview · capture stays with the operator</span>
     </aside>
   </main>
 
@@ -234,7 +219,7 @@
           <div class="field-group">
             <label class="section-label" for="agent-instructions">Instructions</label>
             <textarea class="textarea" id="agent-instructions" rows="5"></textarea>
-            <span class="field-hint">What the agent watches for and how it responds. It sees the POV feed and SAM masks.</span>
+            <span class="field-hint">What the agent watches for and how it responds. It sees the operator's POV feed.</span>
           </div>
 
           <div class="field-group">

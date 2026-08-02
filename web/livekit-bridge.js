@@ -16,6 +16,7 @@ function report(level, message) {
   // eslint-disable-next-line no-console
   console[level === 'error' ? 'error' : 'log'](`[portal] ${text}`);
   try {
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
     fetch('/api/log', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -49,6 +50,9 @@ const ROOM_CODE_LENGTH = 6;
 let room = null;
 let onUpdate = () => {};
 let audioSink = null;
+/** Identities this viewer has silenced. Local only — muting someone here does not mute them
+ *  for anyone else in the room, which is what a call UI leads people to expect. */
+const mutedIdentities = new Set();
 
 /** Strip separators the way the iOS app does, so a typed code reaches the same room. */
 function canonical(code) {
@@ -90,11 +94,50 @@ function describe(participant, kind) {
   return 'Viewer';
 }
 
+/** Every participant in the room, local first, by identity. */
+function everyone() {
+  if (!room) return [];
+  return [room.localParticipant, ...room.remoteParticipants.values()].filter(Boolean);
+}
+
+function find(identity) {
+  return everyone().filter((p) => p.identity === identity)[0] || null;
+}
+
+/** The camera track for a participant, local or remote, once it is actually playable. */
+function cameraTrack(participant) {
+  if (!participant) return null;
+  const publication = participant.getTrackPublication(Track.Source.Camera);
+  if (!publication || publication.isMuted) return null;
+  return publication.track || null;
+}
+
+function micOn(participant) {
+  const publication = participant && participant.getTrackPublication(Track.Source.Microphone);
+  return !!publication && !publication.isMuted;
+}
+
+/** Silence someone for this viewer only — the room still hears them. Volume rather than
+ *  unsubscribing, so unmuting is instant and nobody else sees a subscription flap. */
+function applyLocalMute(participant) {
+  if (!participant || participant === room.localParticipant) return;
+  const publication = participant.getTrackPublication(Track.Source.Microphone);
+  const track = publication && publication.track;
+  if (track && typeof track.setVolume === 'function') {
+    track.setVolume(mutedIdentities.has(participant.identity) ? 0 : 1);
+  }
+}
+
+function setParticipantMuted(identity, muted) {
+  if (muted) mutedIdentities.add(identity);
+  else mutedIdentities.delete(identity);
+  applyLocalMute(find(identity));
+  onUpdate(snapshot());
+}
+
 /** The roster app.js renders, built from whoever is actually in the room. */
 function roster() {
-  if (!room) return [];
-  const everyone = [room.localParticipant, ...room.remoteParticipants.values()];
-  return everyone.filter(Boolean).map((participant) => {
+  return everyone().map((participant) => {
     const kind = classify(participant);
     const isLocal = participant === room.localParticipant;
     const name = participant.name || (isLocal ? 'You' : participant.identity);
@@ -107,9 +150,43 @@ function roster() {
       isAgent: kind === 'agent',
       isViewer: kind === 'viewer',
       initials: initials(isLocal ? 'You' : name),
+      // Meet renders whatever each participant is actually sending; so does the portal.
+      hasVideo: !!cameraTrack(participant),
+      micOn: micOn(participant),
+      // Whether there is anything to listen to at all, and whether this viewer has silenced
+      // it. Muted-at-source (their choice) and muted-by-me (ours) read differently.
+      hasAudio: !!participant.getTrackPublication(Track.Source.Microphone),
+      mutedByMe: !isLocal && mutedIdentities.has(participant.identity),
+      isLocal,
       live: true,
     };
   });
+}
+
+/* Attaching the same track to the same element on every render restarts playback and black-
+   frames the tile, so each element remembers the track it is already showing. */
+const attached = new WeakMap();
+
+/** Attach `identity`'s camera to `element`. Returns true when something is playing. */
+function attachVideo(identity, element) {
+  if (!element) return false;
+  const track = cameraTrack(find(identity));
+  if (!track) {
+    const previous = attached.get(element);
+    if (previous) {
+      previous.detach(element);
+      attached.delete(element);
+    }
+    return false;
+  }
+  if (attached.get(element) === track) return true;
+  const previous = attached.get(element);
+  if (previous) previous.detach(element);
+  track.attach(element);
+  attached.set(element, track);
+  // The local preview is our own camera coming back at us; unmirrored it reads as wrong.
+  element.style.transform = find(identity) === room.localParticipant ? 'scaleX(-1)' : '';
+  return true;
 }
 
 function operator() {
@@ -123,12 +200,48 @@ function operator() {
 /** Attach the operator's camera track to `element`. Returns true when something is playing. */
 function attachOperatorVideo(element) {
   const participant = operator();
-  if (!participant || !element) return false;
-  const publication = participant.getTrackPublication(Track.Source.Camera);
-  const track = publication && publication.track;
-  if (!track) return false;
-  track.attach(element);
+  return participant ? attachVideo(participant.identity, element) : false;
+}
+
+/* — local media, the way Meet's prejoin leaves it: both on, both toggleable — */
+
+async function setCamera(on) {
+  if (!room) return false;
+  try {
+    await room.localParticipant.setCameraEnabled(on);
+  } catch (error) {
+    report('error', `camera ${on ? 'on' : 'off'} failed: ${error && (error.message || error)}`);
+    return false;
+  }
+  onUpdate(snapshot());
   return true;
+}
+
+async function setMicrophone(on) {
+  if (!room) return false;
+  try {
+    await room.localParticipant.setMicrophoneEnabled(on);
+  } catch (error) {
+    report('error', `microphone ${on ? 'on' : 'off'} failed: ${error && (error.message || error)}`);
+    return false;
+  }
+  onUpdate(snapshot());
+  return true;
+}
+
+/** Publish camera and mic on join. A denied permission prompt must not fail the join —
+ *  watching without sending is still a useful session, so each is attempted separately. */
+async function publishLocalMedia() {
+  const results = await Promise.allSettled([
+    room.localParticipant.setMicrophoneEnabled(true),
+    room.localParticipant.setCameraEnabled(true),
+  ]);
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const what = index === 0 ? 'microphone' : 'camera';
+      report('error', `${what} not published: ${result.reason && (result.reason.message || result.reason)}`);
+    }
+  });
 }
 
 function wire() {
@@ -142,12 +255,18 @@ function wire() {
     RoomEvent.TrackUnmuted,
     RoomEvent.ActiveSpeakersChanged,
     RoomEvent.ConnectionStateChanged,
+    // Our own camera and mic change the roster too — without these the local tile never
+    // updates when you toggle them.
+    RoomEvent.LocalTrackPublished,
+    RoomEvent.LocalTrackUnpublished,
   ].forEach((event) => room.on(event, notify));
 
   // Remote audio is never rendered on the stage — it just needs somewhere to play.
-  room.on(RoomEvent.TrackSubscribed, (track) => {
+  room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
     if (track.kind === Track.Kind.Audio) {
       audioContainer().appendChild(track.attach());
+      // A participant muted before their track arrived must stay muted when it does.
+      applyLocalMute(participant);
     }
   });
 
@@ -157,10 +276,17 @@ function wire() {
 }
 
 function snapshot() {
+  const local = room && room.localParticipant;
   return {
+    // `active` remains true while LiveKit reconnects. app.js uses it to ensure a temporary
+    // network drop never replaces the real roster with the seeded demo participants.
+    active: !!room,
     connected: !!room && room.state === 'connected',
+    connectionState: room ? room.state : 'disconnected',
     roster: roster(),
-    hasOperatorVideo: !!operator()?.getTrackPublication(Track.Source.Camera)?.track,
+    hasOperatorVideo: !!cameraTrack(operator()),
+    camOn: !!cameraTrack(local),
+    micOn: micOn(local),
   };
 }
 
@@ -190,6 +316,7 @@ async function connect(code, handlers = {}) {
     };
   }
 
+  mutedIdentities.clear();
   room = new Room({ adaptiveStream: true, dynacast: true });
   wire();
 
@@ -198,7 +325,13 @@ async function connect(code, handlers = {}) {
     await room.connect(details.serverUrl, details.token);
     report('info', `connected to ${roomName}`);
   } catch (error) {
+    const failedRoom = room;
     room = null;
+    try {
+      await failedRoom.disconnect();
+    } catch (_) {
+      /* The failed connection may already be fully closed. */
+    }
     report('error', `connect to ${roomName} failed: ${error && (error.message || error)}`);
     return { ok: false, error: `Could not join ${roomName}: ${error.message || error}` };
   }
@@ -210,6 +343,10 @@ async function connect(code, handlers = {}) {
     /* Non-fatal — video still plays, audio unblocks on the next click. */
   }
 
+  // A typed-code submit is an explicit join gesture. A shared URL passes false so merely
+  // opening a link never turns on this browser's camera or microphone.
+  if (handlers.publishLocalMedia !== false) await publishLocalMedia();
+
   onUpdate(snapshot());
   return { ok: true, room: roomName };
 }
@@ -218,6 +355,7 @@ async function disconnect() {
   if (!room) return;
   const closing = room;
   room = null;
+  mutedIdentities.clear();
   if (audioSink) audioSink.innerHTML = '';
   await closing.disconnect();
 }
@@ -227,6 +365,10 @@ window.PortalLive = {
   connect,
   disconnect,
   attachOperatorVideo,
+  attachVideo,
+  setCamera,
+  setMicrophone,
+  setParticipantMuted,
   snapshot,
   canonical,
 };

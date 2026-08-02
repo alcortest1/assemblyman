@@ -61,7 +61,7 @@ there and re-sync it from the design project rather than editing token values in
 ## Screens
 
 - **Join** (`#/join`) — room code entry. An empty field joins the demo room
-  `K7F-3QD9`; a partial code is rejected as a typo.
+  `K7F-3QD`; a partial code is rejected as a typo.
 - **Session** (`#/room/<code>`) — staged screen plus the participants rail.
   Clicking a tile stages that participant: the operator's POV, a viewer
   placeholder (viewers watch, they never broadcast), or an agent's board.

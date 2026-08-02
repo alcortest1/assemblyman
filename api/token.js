@@ -40,7 +40,7 @@ function mint(apiKey, apiSecret, room, identity) {
       // the operator and everyone else in the room can see and hear them. The browser still
       // decides whether to actually turn either on — this only grants the permission.
       canPublish: true,
-      canPublishSources: ['camera', 'microphone', 'screen_share', 'screen_share_audio'],
+      canPublishSources: ['camera', 'microphone'],
       canSubscribe: true,
       canPublishData: true,
     },

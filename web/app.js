@@ -12,7 +12,9 @@
 (function () {
   'use strict';
 
-  var DEFAULT_CODE = 'K7F-3QD9';
+  var DEFAULT_CODE = 'K7F-3QD';
+  var ROOM_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  var ROOM_CODE_LENGTH = 6;
   var JOINED_ELAPSED = 754; // 12:34 — the design opens mid-session
 
   // ── state ────────────────────────────────────────────────────────────────
@@ -26,7 +28,10 @@
     /* Populated by livekit-bridge.js once a real room is joined. While `connected` is false
        the portal renders the design's seeded roster, so every screen still demonstrates
        without a session running. */
-    live: { connected: false, roster: [], hasOperatorVideo: false },
+    live: {
+      active: false, connected: false, connectionState: 'disconnected',
+      roster: [], hasOperatorVideo: false, camOn: false, micOn: false
+    },
     liveError: '',
     elapsed: 0,
     tab: 'room',
@@ -34,26 +39,25 @@
     toast: '',
     ovMarks: true,
     ovGrid: false,
-    ovSam: true,
     selId: 'assist',
     seq: 1,
     agents: [
       {
         id: 'assist', name: 'Assembly Assistant', custom: false, deployed: true, voice: 'calm',
         instructions: 'Follow the work order step by step. Confirm each step out loud when it looks complete, and call out the next one. Keep it to one sentence.',
-        triggers: { mask: true, capture: false, interval: true, ask: true },
+        triggers: { capture: false, interval: true, ask: true },
         preview: 'Step 4 confirmed — torque check on the rear bracket passed.'
       },
       {
         id: 'inspect', name: 'Inspection Logger', custom: false, deployed: true, voice: 'muted',
-        instructions: 'Watch for defects, wear and misalignment. Flag anything suspect, file a still for it, and note the mask it came from.',
-        triggers: { mask: true, capture: true, interval: false, ask: false },
-        preview: 'MASK 02 flagged — thread wear on the M6 fastener. Still filed.'
+        instructions: 'Watch for defects, wear and misalignment. Flag anything suspect and file a still for it.',
+        triggers: { capture: true, interval: false, ask: false },
+        preview: 'Thread wear flagged on the M6 fastener. Still filed.'
       },
       {
         id: 'parts', name: 'Parts Spotter', custom: false, deployed: false, voice: 'brisk',
         instructions: 'Identify parts in view and pull their spec: part number, torque, and the tool needed. Answer only when asked.',
-        triggers: { mask: true, capture: false, interval: false, ask: true },
+        triggers: { capture: false, interval: false, ask: true },
         preview: 'M6×20 socket cap — 9 N·m, 5 mm hex.'
       }
     ],
@@ -64,14 +68,19 @@
     ]
   };
 
+  /* Viewer-side only: these draw over the feed in this browser and change nothing for
+     anyone else. Segment Anything was here too, but nothing in the stack produces
+     segmentation — drawn over a real operator feed its shapes claimed detections that were
+     not happening, so it is gone rather than mislabelled. */
   var OVERLAYS = [
     { key: 'ovMarks', label: 'Viewfinder marks' },
-    { key: 'ovGrid', label: 'Thirds grid' },
-    { key: 'ovSam', label: 'Segment Anything' }
+    { key: 'ovGrid', label: 'Thirds grid' }
   ];
 
   var TRIGGERS = [
-    { key: 'mask', label: 'On new mask', desc: 'When Segment Anything finds something' },
+    // "On new mask" lived here, fired by Segment Anything. That overlay is gone — there is
+    // no segmentation anywhere in the stack — so the trigger went with it rather than
+    // remaining as an option that could never fire.
     { key: 'capture', label: 'On capture', desc: 'When the operator takes a still' },
     { key: 'interval', label: 'Every 30 seconds', desc: 'Periodic check-in on progress' },
     { key: 'ask', label: 'When asked', desc: 'Operator says the agent’s name' }
@@ -99,6 +108,38 @@
     '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" ' +
     'stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>';
 
+  function svg(paths) {
+    return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      paths + '</svg>';
+  }
+
+  // Lucide: mic / mic-off drive your own row, volume-2 / volume-x everyone else's — the same
+  // distinction a call makes between "I am not speaking" and "I cannot hear you".
+  var ICON_MIC = svg(
+    '<path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"></path>' +
+    '<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><path d="M12 19v3"></path>');
+
+  var ICON_MIC_OFF = svg(
+    '<path d="M2 2l20 20"></path><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"></path>' +
+    '<path d="M9 9v3a3 3 0 0 0 5.12 2.12"></path><path d="M19 10v2a7 7 0 0 1-.11 1.23"></path>' +
+    '<path d="M5 10v2a7 7 0 0 0 12 5"></path><path d="M12 19v3"></path>');
+
+  var ICON_SPEAKER = svg(
+    '<path d="M11 5 6 9H2v6h4l5 4z"></path><path d="M16 9a5 5 0 0 1 0 6"></path>' +
+    '<path d="M19.4 5.6a9 9 0 0 1 0 12.8"></path>');
+
+  var ICON_SPEAKER_OFF = svg(
+    '<path d="M11 5 6 9H2v6h4l5 4z"></path><path d="M22 9l-6 6"></path><path d="M16 9l6 6"></path>');
+
+  // Lucide: video / video-off, for publishing this browser's own camera.
+  var ICON_CAM = svg(
+    '<path d="m22 8-6 4 6 4V8Z"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect>');
+
+  var ICON_CAM_OFF = svg(
+    '<path d="M2 2l20 20"></path><path d="M10.66 6H14a2 2 0 0 1 2 2v3.34l1 1L22 8v8"></path>' +
+    '<path d="M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"></path>');
+
   // ── helpers ──────────────────────────────────────────────────────────────
 
   function $(id) { return document.getElementById(id); }
@@ -116,6 +157,13 @@
   }
 
   function roomCode() { return state.code || DEFAULT_CODE; }
+  function isLiveRoom() { return !!state.live.active; }
+
+  function canonicalRoomCode(code) {
+    return String(code || '').toUpperCase().split('').filter(function (character) {
+      return ROOM_ALPHABET.indexOf(character) !== -1;
+    }).join('');
+  }
 
   function selected() {
     var byId = state.agents.filter(function (a) { return a.id === state.selId; })[0];
@@ -127,7 +175,7 @@
      In a live room the participants are the roster — the seeded people and the studio's
      deployed agents are the standing-in demo. */
   function roster() {
-    if (state.live.connected) return state.live.roster;
+    if (isLiveRoom()) return state.live.roster;
 
     var people = state.people.map(function (p) {
       return {
@@ -150,7 +198,7 @@
   function staged() {
     var list = roster();
     var hit = list.filter(function (r) { return r.id === state.stage; })[0];
-    if (!hit && state.live.connected && state.stage === 'waiting-op') {
+    if (!hit && isLiveRoom() && state.stage === 'waiting-op') {
       return {
         id: 'waiting-op', name: 'Operator', role: 'Waiting for POV',
         isOp: true, isViewer: false, isAgent: false, speaking: false, initials: 'OP'
@@ -247,10 +295,16 @@
   function join() {
     var raw = $('code').value;
     var code = (raw || DEFAULT_CODE).trim().toUpperCase();
-    // An empty field joins the demo room; a partial code is a typo, not a room.
-    if (raw && code.replace(/-/g, '').length < 6) {
+    // An empty field intentionally opens the seeded demo. Never turn a placeholder into a
+    // real LiveKit room (and a camera permission prompt) just because the SDK loaded.
+    if (!raw.trim()) {
+      state.code = DEFAULT_CODE;
+      enterSession();
+      return;
+    }
+    if (canonicalRoomCode(code).length !== ROOM_CODE_LENGTH) {
       state.codeErr = true;
-      state.codeErrText = 'Enter the full code — two groups, like K7F-3QD9.';
+      state.codeErrText = 'Enter the full six-character code — two groups, like K7F-3QD.';
       render();
       return;
     }
@@ -267,7 +321,10 @@
     state.joining = true;
     render();
 
-    window.PortalLive.connect(code, { onUpdate: onLiveUpdate }).then(function (result) {
+    window.PortalLive.connect(code, {
+      onUpdate: onLiveUpdate,
+      publishLocalMedia: true
+    }).then(function (result) {
       state.joining = false;
       if (!result.ok) {
         state.codeErr = true;
@@ -283,7 +340,7 @@
     state.joined = true;
     state.codeErr = false;
     // A live session starts its clock now; the demo opens mid-session, as the design does.
-    state.elapsed = state.live.connected ? 0 : JOINED_ELAPSED;
+    state.elapsed = isLiveRoom() ? 0 : JOINED_ELAPSED;
     state.tab = 'room';
     state.stage = defaultStage();
     startTimer();
@@ -294,7 +351,7 @@
   function defaultStage() {
     var op = roster().filter(function (r) { return r.isOp; })[0];
     if (op) return op.id;
-    if (state.live.connected) return 'waiting-op';
+    if (isLiveRoom()) return 'waiting-op';
     return (roster()[0] || {}).id || 'op';
   }
 
@@ -312,7 +369,10 @@
   function leave() {
     stopTimer();
     if (window.PortalLive) window.PortalLive.disconnect();
-    state.live = { connected: false, roster: [], hasOperatorVideo: false };
+    state.live = {
+      active: false, connected: false, connectionState: 'disconnected',
+      roster: [], hasOperatorVideo: false, camOn: false, micOn: false
+    };
     state.joined = false;
     state.code = '';
     state.elapsed = 0;
@@ -346,7 +406,7 @@
     var id = 'custom' + state.seq;
     state.agents = state.agents.concat([{
       id: id, name: 'New agent ' + state.seq, custom: true, deployed: false, voice: 'calm',
-      instructions: '', triggers: { mask: false, capture: false, interval: false, ask: true },
+      instructions: '', triggers: { capture: false, interval: false, ask: true },
       preview: 'No output yet — deploy to see it work.'
     }]);
     state.seq += 1;
@@ -381,7 +441,133 @@
     });
   }
 
+  /* Per-participant audio, the way a call does it: your own row toggles your microphone,
+     everyone else's toggles whether you hear them. Muting someone here is local — the room
+     still hears them, which is the one thing a call UI must not be ambiguous about. */
+  function audioControl(r) {
+    if (!state.live.connected) return '';
+
+    if (r.isLocal) {
+      var on = !!state.live.micOn;
+      return '<button class="pt-audio' + (on ? '' : ' off') + '" type="button" data-mic="1"' +
+        ' aria-pressed="' + on + '"' +
+        ' aria-label="' + (on ? 'Mute your microphone' : 'Unmute your microphone') + '"' +
+        ' title="' + (on ? 'Mute yourself' : 'Unmute yourself') + '">' +
+        (on ? ICON_MIC : ICON_MIC_OFF) + '</button>';
+    }
+
+    if (!r.hasAudio) return '';
+    var heard = !r.mutedByMe;
+    return '<button class="pt-audio' + (heard ? '' : ' off') + '" type="button"' +
+      ' data-mute="' + esc(r.id) + '" aria-pressed="' + !heard + '"' +
+      ' aria-label="' + (heard ? 'Mute ' : 'Unmute ') + esc(r.name) + ' for you"' +
+      ' title="' + (heard ? 'Mute for you only' : 'Unmute') + '">' +
+      (heard ? ICON_SPEAKER : ICON_SPEAKER_OFF) + '</button>';
+  }
+
   // ── render: session ──────────────────────────────────────────────────────
+
+  /* Participant tiles are reused across renders, keyed by identity.
+     Rebuilding them with innerHTML — as every other list here does — would tear down the
+     <video> elements on every roster change and restart playback, so each tile is built once
+     and updated in place. This is the reconciliation React gives Meet for free. */
+  var tiles = Object.create(null);
+
+  function buildTile(r) {
+    var el = document.createElement('div');
+    el.className = 'pt';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.dataset.stage = r.id;
+    el.innerHTML =
+      '<span class="pt-avatar">' +
+        '<video class="pt-video" autoplay playsinline muted hidden></video>' +
+        '<img class="pt-still" src="assets/plant.png" alt="" hidden>' +
+        '<span class="pt-glyph"></span>' +
+        '<span class="pt-speaking" hidden></span>' +
+      '</span>' +
+      '<span class="pt-id">' +
+        '<span class="pt-name"></span>' +
+        '<span class="pt-role"></span>' +
+      '</span>' +
+      '<span class="pt-tail"></span>';
+    return el;
+  }
+
+  function updateTile(el, r) {
+    var onStage = state.stage === r.id;
+    el.classList.toggle('on-stage', onStage);
+    el.setAttribute('aria-pressed', onStage ? 'true' : 'false');
+
+    el.querySelector('.pt-name').textContent = r.name;
+    el.querySelector('.pt-role').textContent = r.role;
+    el.querySelector('.pt-speaking').hidden = !r.speaking;
+
+    var video = el.querySelector('.pt-video');
+    var still = el.querySelector('.pt-still');
+    var glyph = el.querySelector('.pt-glyph');
+
+    // Whoever is actually sending video gets shown; the rest fall back the way they did.
+    var playing = r.hasVideo && window.PortalLive
+      ? window.PortalLive.attachVideo(r.id, video)
+      : false;
+    video.hidden = !playing;
+    // The demo still belongs only to the offline operator — never to a live room.
+    still.hidden = playing || !r.isOp || state.live.connected;
+    glyph.hidden = playing || !still.hidden;
+    if (!glyph.hidden) {
+      glyph.innerHTML = r.isAgent ? ICON_AGENT_TILE : '';
+      if (!r.isAgent) glyph.textContent = r.initials;
+      glyph.className = 'pt-glyph' + (r.isAgent ? '' : ' pt-initials');
+    }
+
+    el.querySelector('.pt-tail').innerHTML =
+      (onStage ? '<span class="tag tag-accent pt-badge">ON STAGE</span>' : '') +
+      audioControl(r) +
+      (r.isAgent && r.agentId
+        ? '<button class="pt-remove" type="button" data-recall="' + esc(r.agentId) + '"' +
+          ' aria-label="Remove ' + esc(r.name) + ' from the room">' + ICON_CLOSE + '</button>'
+        : '');
+  }
+
+  /* Your own camera and mic, the two controls every call UI puts within reach.
+     Hidden entirely offline: there is nothing to publish to a demo roster. */
+  function renderMediaControls() {
+    var bar = $('media-controls');
+    if (!bar) return;
+    show(bar, state.live.connected);
+    if (!state.live.connected) return;
+
+    var mic = $('toggle-mic');
+    var cam = $('toggle-cam');
+    mic.setAttribute('aria-pressed', state.live.micOn ? 'true' : 'false');
+    cam.setAttribute('aria-pressed', state.live.camOn ? 'true' : 'false');
+    mic.innerHTML = (state.live.micOn ? ICON_MIC : ICON_MIC_OFF) +
+      '<span>' + (state.live.micOn ? 'Mic on' : 'Mic off') + '</span>';
+    cam.innerHTML = (state.live.camOn ? ICON_CAM : ICON_CAM_OFF) +
+      '<span>' + (state.live.camOn ? 'Camera on' : 'Camera off') + '</span>';
+  }
+
+  function renderParticipants(list) {
+    var container = $('participants');
+    var seen = Object.create(null);
+
+    list.forEach(function (r, index) {
+      var el = tiles[r.id];
+      if (!el) { el = buildTile(r); tiles[r.id] = el; }
+      updateTile(el, r);
+      seen[r.id] = true;
+      if (container.children[index] !== el) {
+        container.insertBefore(el, container.children[index] || null);
+      }
+    });
+
+    Object.keys(tiles).forEach(function (id) {
+      if (seen[id]) return;
+      if (tiles[id].parentNode) tiles[id].parentNode.removeChild(tiles[id]);
+      delete tiles[id];
+    });
+  }
 
   function renderSession() {
     var list = roster();
@@ -394,61 +580,60 @@
     // Three states, deliberately distinct: a real track, a live room with nobody publishing,
     // and the offline demo. The middle one must never borrow the demo's still — a stand-in
     // frame on a live connection is indistinguishable from a working feed.
-    var liveVideo = state.live.connected && state.live.hasOperatorVideo;
-    var liveWaiting = state.live.connected && !state.live.hasOperatorVideo;
+    var liveRoom = isLiveRoom();
+    var liveVideo = liveRoom && state.live.connected && state.live.hasOperatorVideo;
+    var liveWaiting = liveRoom && !liveVideo;
 
     show($('stage-video'), liveVideo);
-    show($('stage-img'), !state.live.connected);
+    show($('stage-img'), !liveRoom);
     show($('stage-waiting'), liveWaiting && !!st && st.isOp);
     if (liveVideo) window.PortalLive.attachOperatorVideo($('stage-video'));
 
     if (liveWaiting) {
-      var others = state.live.roster.filter(function (r) { return !/^portal-/.test(r.id); });
-      $('stage-waiting-note').textContent = others.length
-        ? 'Operator is here but not publishing yet…'
-        : 'Waiting for the operator to join ' + roomCode() + '…';
+      var hasOperator = state.live.roster.some(function (r) { return r.isOp; });
+      $('stage-waiting-note').textContent = !state.live.connected
+        ? 'Connection interrupted — LiveKit is trying to reconnect…'
+        : hasOperator
+          ? 'Operator is here but not publishing yet…'
+          : 'Waiting for the operator to join ' + roomCode() + '…';
     }
 
     var source = $('screen-session').querySelector('.stage-source');
     if (source) {
-      source.textContent = state.live.connected
+      source.textContent = liveRoom
         ? (liveVideo ? 'OPERATOR POV · LIVE' : 'ROOM ' + roomCode() + ' · NO FEED YET')
         : 'OPERATOR POV · RAY-BAN META (DEMO)';
     }
 
-    if (st && st.isViewer) $('staged-initials').textContent = st.initials;
+    // A staged viewer shows their camera when they are sending one — the design's
+    // "viewers don't broadcast" placeholder only holds when they genuinely aren't.
+    if (st && st.isViewer) {
+      var viewerVideo = $('stage-viewer-video');
+      var viewerPlaying = st.hasVideo && window.PortalLive
+        ? window.PortalLive.attachVideo(st.id, viewerVideo)
+        : false;
+      show(viewerVideo, viewerPlaying);
+      show($('staged-initials'), !viewerPlaying);
+      show($('staged-note'), !viewerPlaying);
+      $('staged-initials').textContent = st.initials;
+      $('staged-note').textContent = liveRoom
+        ? (st.isLocal ? 'Your camera is off' : st.name + ' has their camera off')
+        : 'No video — this is the seeded demo roster';
+    }
     if (st && st.isAgent) $('staged-name').textContent = st.name;
 
+    renderMediaControls();
+
     show($('ov-marks'), state.ovMarks);
-    show($('ov-sam'), state.ovSam);
     show($('ov-grid'), state.ovGrid);
 
     $('elapsed').textContent = elapsedText();
     $('participant-count').textContent = list.length + ' in room';
+    $('rail-note').textContent = liveRoom
+      ? 'Camera and microphone share only while enabled · capture stays with the operator'
+      : 'Demo preview · capture stays with the operator';
 
-    $('participants').innerHTML = list.map(function (r) {
-      var onStage = state.stage === r.id;
-      var avatar =
-        r.isOp ? '<img src="assets/plant.png" alt="">'
-        : r.isAgent ? ICON_AGENT_TILE
-        : '<span class="pt-initials">' + esc(r.initials) + '</span>';
-      return '' +
-        '<div class="pt' + (onStage ? ' on-stage' : '') + '" role="button" tabindex="0"' +
-        ' data-stage="' + esc(r.id) + '" aria-pressed="' + onStage + '">' +
-          '<span class="pt-avatar">' + avatar +
-            (r.speaking ? '<span class="pt-speaking"></span>' : '') +
-          '</span>' +
-          '<span class="pt-id">' +
-            '<span class="pt-name">' + esc(r.name) + '</span>' +
-            '<span class="pt-role">' + esc(r.role) + '</span>' +
-          '</span>' +
-          (onStage ? '<span class="tag tag-accent pt-badge">ON STAGE</span>' : '') +
-          (r.isAgent
-            ? '<button class="pt-remove" type="button" data-recall="' + esc(r.agentId) + '"' +
-              ' aria-label="Remove ' + esc(r.name) + ' from the room">' + ICON_CLOSE + '</button>'
-            : '') +
-        '</div>';
-    }).join('');
+    renderParticipants(list);
 
     // Overlay toggles — corner marks are static children, so append rather than replace.
     var box = $('overlays');
@@ -589,6 +774,22 @@
 
     // Participants rail — one listener, two targets: the tile stages, the × recalls.
     $('participants').addEventListener('click', function (e) {
+      // Audio controls sit inside a tile that also stages on click, so they claim the event.
+      var mic = closest(e.target, '[data-mic]', this);
+      if (mic) {
+        e.stopPropagation();
+        window.PortalLive.setMicrophone(!state.live.micOn);
+        return;
+      }
+      var mute = closest(e.target, '[data-mute]', this);
+      if (mute) {
+        e.stopPropagation();
+        var id = mute.dataset.mute;
+        var row = state.live.roster.filter(function (p) { return p.id === id; })[0];
+        window.PortalLive.setParticipantMuted(id, !(row && row.mutedByMe));
+        return;
+      }
+
       var rm = closest(e.target, '[data-recall]', this);
       if (rm) {
         e.stopPropagation();
@@ -602,6 +803,7 @@
     });
     $('participants').addEventListener('keydown', function (e) {
       if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (closest(e.target, 'button', this)) return;
       var pt = closest(e.target, '[data-stage]', this);
       if (!pt) return;
       e.preventDefault();
@@ -614,6 +816,15 @@
       var k = btn.dataset.overlay;
       state[k] = !state[k];
       render();
+    });
+
+    // Toggling publishes or unpublishes for real; the bridge pushes a fresh snapshot back,
+    // so the button label follows the room rather than an optimistic local guess.
+    $('toggle-mic').addEventListener('click', function () {
+      if (window.PortalLive) window.PortalLive.setMicrophone(!state.live.micOn);
+    });
+    $('toggle-cam').addEventListener('click', function () {
+      if (window.PortalLive) window.PortalLive.setCamera(!state.live.camOn);
     });
 
     $('add-agent').addEventListener('click', function () { goTab('studio'); });
@@ -675,10 +886,14 @@
 
   /* Connect a hash-route join once the transport is available. */
   function autoJoin() {
-    if (!window.PortalLive || !state.joined || !state.code || state.live.connected) return;
+    if (!window.PortalLive || !state.joined || !state.code || isLiveRoom()) return;
     if (state.joining) return;
     state.joining = true;
-    window.PortalLive.connect(state.code, { onUpdate: onLiveUpdate }).then(function (result) {
+    window.PortalLive.connect(state.code, {
+      onUpdate: onLiveUpdate,
+      // A shared link is not consent to turn on this browser's camera and microphone.
+      publishLocalMedia: false
+    }).then(function (result) {
       state.joining = false;
       if (result.ok) {
         state.elapsed = 0;
