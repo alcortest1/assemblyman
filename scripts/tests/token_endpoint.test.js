@@ -47,7 +47,10 @@ test('mints a room-scoped token with a server-generated viewer identity', () => 
   assert.match(claims.sub, /^portal-[0-9a-f]{16}$/);
   assert.notEqual(claims.sub, 'phone-ABCDEF');
   assert.equal(claims.video.room, 'ABCDEF');
-  assert.equal(claims.video.canPublish, false);
+  assert.equal(claims.video.canPublish, true);
+  assert.deepEqual(claims.video.canPublishSources, [
+    'camera', 'microphone', 'screen_share', 'screen_share_audio',
+  ]);
 });
 
 test('rejects partial, oversized, and excluded-glyph room codes', () => {

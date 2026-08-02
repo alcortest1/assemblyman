@@ -36,9 +36,11 @@ function mint(apiKey, apiSecret, room, identity) {
     video: {
       roomJoin: true,
       room,
-      // Portal participants are watch-only. The manual Meet helper grants microphone access
-      // separately for interactive testing.
-      canPublish: false,
+      // Portal participants publish their own camera and mic, the way LiveKit Meet does, so
+      // the operator and everyone else in the room can see and hear them. The browser still
+      // decides whether to actually turn either on — this only grants the permission.
+      canPublish: true,
+      canPublishSources: ['camera', 'microphone', 'screen_share', 'screen_share_audio'],
       canSubscribe: true,
       canPublishData: true,
     },
