@@ -77,18 +77,22 @@ struct StreamView: View {
 
       VStack(spacing: 10) {
         topBar
-        // Session identity on the left, vision controls on the right — they never compete
-        // for the same edge, so both sit under the status row rather than stacking.
-        if viewModel.relay.roomCode != nil || showsOverlayControls {
-          HStack(alignment: .top) {
-            if let roomCode = viewModel.relay.roomCode {
-              roomChip(roomCode)
-            }
-            Spacer(minLength: 12)
-            if showsOverlayControls {
-              OverlayControlsView(viewModel: viewModel, settings: settings)
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
+
+        // Keep the session identity and the expanded controls on separate rows. Together
+        // they are wider than the content area on an iPhone, so sharing an HStack caused
+        // the fixed-width controls panel to compress or cover the room code.
+        if let roomCode = viewModel.relay.roomCode {
+          HStack {
+            roomChip(roomCode)
+            Spacer(minLength: 0)
+          }
+        }
+
+        if showsOverlayControls {
+          HStack {
+            Spacer(minLength: 0)
+            OverlayControlsView(viewModel: viewModel, settings: settings)
+              .transition(.move(edge: .top).combined(with: .opacity))
           }
         }
 
@@ -321,6 +325,9 @@ struct StreamView: View {
           // its value when the viewer reports a bare feed.
           + (compositor.isCompositing ? " · OVERLAY \(diagnostics.framesComposited)" : "")
           + (compositor.lastFailure.map { " · \($0)" } ?? "")
+          // A relay with no audio looks healthy from every other angle, so the reason has to
+          // be on screen rather than only in the log.
+          + (viewModel.relay.microphoneIssue.map { " · MIC: \($0)" } ?? "")
       )
       .font(Theme.body(9).monospacedDigit())
       .foregroundStyle(

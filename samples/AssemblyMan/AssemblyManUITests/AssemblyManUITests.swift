@@ -256,6 +256,40 @@ final class AssemblyManUITests: XCTestCase {
     XCTAssertTrue(element("ready_title").exists, "Ready screen title should reappear")
   }
 
+  /// Expanding the vision controls must not compress or cover the room identity.
+  ///
+  /// Regression: both views previously shared one horizontal row even though their
+  /// combined intrinsic width was larger than an iPhone's content area.
+  @MainActor
+  func testOverlayControlsDoNotCoverRoomCode() throws {
+    pairDeviceWithCameraResources()
+    startStreaming()
+
+    let roomCode = element("room_code_chip")
+    guard roomCode.waitForExistence(timeout: 10) else {
+      throw XCTSkip("LiveKit is not configured, so this build does not create a room code")
+    }
+
+    tapWithRetry(app.buttons["overlay_controls_button"])
+
+    let overlayControls = element("overlay_controls_panel")
+    XCTAssertTrue(
+      overlayControls.waitForExistence(timeout: 5),
+      "Vision overlay controls should open"
+    )
+    XCTAssertFalse(
+      roomCode.frame.intersects(overlayControls.frame),
+      "Vision overlay controls must not cover the room code"
+    )
+    XCTAssertGreaterThanOrEqual(
+      overlayControls.frame.minY,
+      roomCode.frame.maxY,
+      "Vision overlay controls should be laid out below the room code"
+    )
+
+    app.buttons["stop_streaming_button"].tap()
+  }
+
   /// Verifies photo capture shows a preview and can be dismissed while continuing to stream.
   // TestRail: C1619609872, C1619610952
   @MainActor
