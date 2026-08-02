@@ -15,3 +15,7 @@ client-sdk-swift/
 LiveKit.local.xcconfig
 .vercel
 .env*
+
+# Local worktrees and captured session data — not source.
+.claude/
+dataset/
