@@ -78,6 +78,24 @@ struct StreamView: View {
       VStack(spacing: 10) {
         topBar
 
+        // A stalled feed is otherwise indistinguishable from a very still scene: the last
+        // frame stays on screen and nothing says the glasses stopped sending.
+        if viewModel.isFeedStalled {
+          HStack {
+            HStack(spacing: 7) {
+              Icon(glyph: .triangleAlert, size: 12, color: .white)
+              Text("No frames for \(viewModel.secondsSinceLastFrame)s")
+                .font(Theme.body(11, weight: .semibold))
+                .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Theme.accent800.opacity(0.9))
+            .overlay { Rectangle().strokeBorder(.white.opacity(0.4), lineWidth: Theme.hairline) }
+            Spacer(minLength: 0)
+          }
+        }
+
         // Keep the session identity and the expanded controls on separate rows. Together
         // they are wider than the content area on an iPhone, so sharing an HStack caused
         // the fixed-width controls panel to compress or cover the room code.
