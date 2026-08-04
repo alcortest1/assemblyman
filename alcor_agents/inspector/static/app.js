@@ -1048,7 +1048,11 @@ const postJSON = (path, body) =>
   }).then(async (r) => (r.ok ? r.json() : { error: (await r.text()) || r.statusText }));
 
 const verdictTone = (v) =>
-  v === "pass" ? "good" : v === "fail" ? "bad" : v === "unsure" ? "warn" : "";
+  v === "pass" ? "good" : v === "fail" ? "bad"
+  // `review` is the rolled-up form of an abstention: one point the photo could
+  // not settle leaves the subtask for a human, and it is warned about in the
+  // same tone as the abstention it came from rather than left neutral.
+  : v === "unsure" || v === "review" ? "warn" : "";
 
 const fmtUSD = (n) =>
   n === null || n === undefined ? "—" : n < 0.01 ? `$${n.toFixed(4)}` : `$${n.toFixed(2)}`;
@@ -1058,12 +1062,53 @@ const fmtUSD = (n) =>
    reads the way an instructor does is the point of this tab. So it is a plain
    editable textarea, saved per target, with the pack-derived text always
    recoverable. */
+/* Client-side twin of `sheet_checks()` in server.py, kept in step with it.
+   The server is authoritative — it re-parses at run time and its split is what
+   gets graded — but the criterion is editable here, and an editor who cannot
+   see what their wording produced until the results come back is editing
+   blind. Both halves must agree, including the defect restatement: a defect
+   graded as written scores "the tube is kinked" as a pass on a kinked tube. */
+const POINT_HEADINGS = ["criteria", "critical defects", "overall decision", "source basis"];
+
+function parsePoints(criterion) {
+  const points = [];
+  let heading = null;
+  for (const raw of String(criterion || "").split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    const lowered = line.toLowerCase().replace(/:$/, "");
+    if (POINT_HEADINGS.includes(lowered)) { heading = lowered; continue; }
+    if (heading === "criteria") {
+      const match = line.match(/^\d+[.)]\s+(.+)/);
+      if (match) {
+        points.push({ id: `c${points.filter((p) => !p.defect).length + 1}`,
+                      statement: match[1].trim(), defect: false });
+      }
+    } else if (heading === "critical defects") {
+      const match = line.match(/^[-*•]\s+(.+)/);
+      if (match) {
+        points.push({ id: `d${points.filter((p) => p.defect).length + 1}`,
+                      statement: `The finished work shows no such defect: ${
+                        match[1].trim().replace(/\.$/, "")}.`,
+                      defect: true });
+      }
+    }
+  }
+  return points;
+}
+
 const CRITERION_SOURCE_LABELS = {
   "pack.checks": "from pack checks",
   "pack.evidence": "from pack evidence",
   "pack.step_text": "step text — not an acceptance criterion",
   "drafted.step": "drafted from procedure + handbook",
   "drafted.task": "drafted from procedure + handbook",
+  // Both of these used to fall through to the "segment description" default
+  // below, which said the text was not an acceptance criterion. It is one, and
+  // saying otherwise invites an instructor to discard a criterion that was
+  // drafted from the procedure and handbook.
+  "drafted.section": "drafted from procedure + handbook",
+  "criteria.subtask": "subtask grading sheet — not SME-reviewed",
   fallback: "no pack criterion — generic fallback",
 };
 
@@ -1113,8 +1158,20 @@ function SourceTrail({ target }) {
    step, and most tasks have none. Rather than leave the criterion ungradeable,
    the operator picks a frame from the extracted clips. */
 function FramePicker({ acs, target, onPick }) {
-  const clips = target.frame_candidates || [];
-  const [clip, setClip] = useState(clips.length ? clips[0].video : null);
+  const all = target.frame_candidates || [];
+  // The clip this target's work was filmed on — its own for a subtask or a
+  // reviewed interval, its subtask's for a step. Those frames are the only ones
+  // that could show the work, so they are the only ones offered: a frame from
+  // another subtask grades exactly as confidently as the right one, and picking
+  // one out of 1593 frames of unrelated footage was the easy mistake to make.
+  const own = all.filter((c) => c.video === (target.clip || target.video));
+  // No clip resolved — the task's footage could not be matched to this work at
+  // all. Everything is offered rather than nothing, since an unscoped choice
+  // beats no choice; the row already says the frame is a guess.
+  const clips = own.length ? own : all;
+  const [clip, setClip] = useState(
+    clips.find((c) => c.video === target.video)?.video
+    || (clips.length ? clips[0].video : null));
   const [frames, setFrames] = useState(null);
 
   useEffect(() => {
@@ -1206,6 +1263,7 @@ function FrameSource({ acs, target, onFrame }) {
              onChange=${(e) => upload(e.target.files && e.target.files[0])} />
       ${target.uploaded && html`<${Pill} kind="good">uploaded<//>`}
       ${target.frame_suggested && html`<${Pill} kind="warn">suggested frame<//>`}
+      ${target.frame_reviewed && html`<${Pill} kind="good">reviewed frame<//>`}
       ${note && html`<div class="criterion-hint">${note}</div>`}
     </div>
   `;
@@ -1307,7 +1365,9 @@ function CriterionEditor({ acs, target, draft, onDraft, onSaved, models }) {
         </button>
         <button class="btn ghost" disabled=${isDefault}
                 onClick=${() => { onDraft(target.target_id, target.criterion_default || ""); }}>
-          Reset to ${(target.criterion_source || "").startsWith("drafted")
+          Reset to ${(target.criterion_source || "").startsWith("criteria.")
+            ? "sheet text"
+            : (target.criterion_source || "").startsWith("drafted")
             ? "compiled text" : "pack text"}
         </button>
         ${target.edited && html`
@@ -1465,36 +1525,179 @@ function VerdictCell({ result }) {
   `;
 }
 
-function ResultsGrid({ run, models }) {
+/* Every criteria point in a subtask is graded on its own call — that is what
+   makes a failure name the condition that failed — but a row per point buries
+   the subtask it belongs to under four near-identical lines. The points are
+   regrouped here into one row per subtask, one cell per model, so the grid reads
+   as "this subtask, by this model" and the points sit inside that cell.
+
+   Same roll-up rule as `handle_photo_run` in server.py: one fail fails the
+   subtask, and a point the photo could not settle leaves the subtask for review
+   rather than being rounded up to a pass. */
+function rollUp(results) {
+  const graded = (results || []).filter((r) => r && !r.error);
+  if (!graded.length) return null;
+  if (graded.some((r) => r.verdict === "fail")) return "fail";
+  if (graded.some((r) => r.verdict !== "pass")) return "review";
+  return "pass";
+}
+
+/* Did this model get the point right? Two sources of truth, and only one of
+   them is stated: a variant or control carries the verdict it ought to get, so
+   it is scored against that. An unlabelled point is graded against a reference
+   frame — footage of work an instructor accepted — so `pass` is the answer that
+   frame implies. That inference is the whole caveat on the totals row, and the
+   note under the grid says so rather than leaving the number to speak for
+   itself. */
+function pointCorrect(result) {
+  if (!result || result.error || !result.verdict) return false;
+  if (result.expected) {
+    return result.expected === "not_pass"
+      ? result.verdict !== "pass"
+      : result.verdict === result.expected;
+  }
+  return result.verdict === "pass";
+}
+
+function SheetCell({ results }) {
+  const [open, setOpen] = useState(false);
+  const points = results || [];
+  const verdict = rollUp(points);
+  const passed = points.filter((p) => !p.error && p.verdict === "pass").length;
+  const failed = points.filter((p) => !p.error && p.verdict === "fail").length;
+  const unsettled = points.filter(
+    (p) => !p.error && p.verdict && p.verdict !== "pass" && p.verdict !== "fail").length;
+  const errored = points.filter((p) => p.error).length;
+  const cost = points.reduce((sum, p) => sum + (p.cost_usd || 0), 0);
+  const mark = (p) => (p.error ? "⚠" : p.verdict === "pass" ? "✓"
+    : p.verdict === "fail" ? "✗" : "—");
+  return html`
+    <td class="verdict-cell sheet-cell">
+      <button class="verdict-toggle" onClick=${() => setOpen(!open)}>
+        <${Pill} kind=${verdictTone(verdict)}>${verdict || "no result"}<//>
+        <span class="cond-tally">
+          ${passed}✓ ${failed}✗${unsettled > 0 ? html` <span class="blocked">${unsettled}—</span>` : ""}
+        </span>
+      </button>
+      <div class="point-list">
+        ${points.map((p) => html`
+          <div key=${p.target_id} class=${"point point-" + (p.error ? "err" : p.verdict)}>
+            <div class="point-line">
+              <span class="point-id">${p.check_id || "—"}</span>
+              <span class="point-v">${mark(p)}</span>
+              <span class="point-text">${p.error ? p.error : p.criterion}</span>
+            </div>
+            ${open && html`
+              <div class="point-detail">
+                ${p.error
+                  ? html`<p>${p.message}</p>`
+                  : html`
+                    <p class="point-conf">
+                      ${p.confidence === null || p.confidence === undefined
+                        ? html`<span class="unobs">not visible</span>`
+                        : `${(p.confidence * 100).toFixed(0)}% confident`}
+                      ${p.expected && html`<span class=${"expect-mark " +
+                        (pointCorrect(p) ? "good" : "bad")}>
+                        ${pointCorrect(p) ? "✓" : "✕"} expected ${p.expected}
+                      </span>`}
+                    </p>
+                    ${p.rationale && html`<p>${p.rationale}</p>`}
+                    ${p.missing_evidence && html`
+                      <p><strong>Missing:</strong> ${p.missing_evidence}</p>`}
+                    <div class="verdict-meta">
+                      ${p.latency_s}s · ${p.prompt_tokens}→${p.completion_tokens} tok
+                      · ${fmtUSD(p.cost_usd)}
+                      ${p.parse !== "json" ? ` · parse: ${p.parse}` : ""}
+                    </div>`}
+              </div>`}
+          </div>
+        `)}
+      </div>
+      ${errored > 0 && html`<div class="verdict-note bad">${errored} call${
+        errored === 1 ? "" : "s"} errored</div>`}
+      ${open && html`<div class="verdict-meta">${points.length} calls · ${fmtUSD(cost)}</div>`}
+    </td>
+  `;
+}
+
+function ResultsGrid({ run, models, restored }) {
   const byTarget = useMemo(() => {
     const map = new Map();
     (run.results || []).forEach((r) => {
-      if (!map.has(r.target_id)) map.set(r.target_id, { label: r.label, cells: {}, ...r });
-      map.get(r.target_id).cells[r.model] = r;
+      // A per-point result names the subtask it rolls up to. Runs restored from
+      // disk predate that field, so the label prefix is the fallback — the ids
+      // are `<target>::c1`, and splitting either one apart is guesswork the
+      // parent fields exist to remove.
+      const parent = r.rolls_up_to || r.target_id;
+      if (!map.has(parent)) {
+        map.set(parent, {
+          ...r,
+          target_id: parent,
+          label: r.rolls_up_to
+            ? r.parent_label || String(r.label || "").split(" · ")[0]
+            : r.label,
+          criterion: r.rolls_up_to ? r.parent_criterion || null : r.criterion,
+          cells: {},
+        });
+      }
+      const row = map.get(parent);
+      (row.cells[r.model] = row.cells[r.model] || []).push(r);
     });
     return [...map.values()];
   }, [run]);
 
   const disagree = (row) => {
-    const verdicts = models.map((m) => row.cells[m] && row.cells[m].verdict).filter(Boolean);
+    const verdicts = models.map((m) => rollUp(row.cells[m])).filter(Boolean);
     return new Set(verdicts).size > 1;
   };
+
+  // Every point graded, across every subtask in the run — the question the grid
+  // itself cannot answer, because it is spread one subtask per row. Counted on
+  // points, not subtasks: a model that fails one point of six has failed the
+  // subtask, and rolling up first would hide the five it got.
+  const totals = useMemo(() => {
+    const out = {};
+    models.forEach((m) => {
+      const points = (run.results || []).filter((r) => r.model === m);
+      const graded = points.filter((p) => !p.error);
+      out[m] = {
+        total: points.length,
+        correct: points.filter(pointCorrect).length,
+        pass: graded.filter((p) => p.verdict === "pass").length,
+        fail: graded.filter((p) => p.verdict === "fail").length,
+        // Everything that is neither — `unsure`, and any verdict a model
+        // returned that this build does not know. Bucketed with the
+        // abstentions rather than dropped, so the three counts and the errors
+        // always add up to the total.
+        unsure: graded.filter((p) => p.verdict !== "pass" && p.verdict !== "fail").length,
+        errors: points.filter((p) => p.error).length,
+        labelled: points.filter((p) => p.expected).length,
+      };
+    });
+    return out;
+  }, [run, models]);
+  const labelled = models.reduce((n, m) => Math.max(n, totals[m]?.labelled || 0), 0);
 
   const s = run.summary || {};
   return html`
     <${F}>
       <div class="card run-summary">
-        <h3>Run ${run.run_id}</h3>
+        <h3>
+          Run ${run.run_id}
+          ${restored && html`<${Pill} kind="warn">restored from disk<//>`}
+        </h3>
+        ${restored && html`
+          <p class="warn-note">
+            The last run recorded for this task, reloaded from
+            <code>build/photo_eval/${run.task_code}/</code>. It reflects the criteria and
+            frames as they were then — not any edit made since. Run grading again to
+            grade what is on screen now.
+          </p>
+        `}
         <div class="run-stats">
           <span><strong>${s.calls}</strong> calls</span>
           <span class=${s.errors ? "bad" : ""}><strong>${s.errors}</strong> errors</span>
           <span><strong>${fmtUSD(s.cost_usd)}</strong> spent</span>
-          ${s.controls > 0 && html`
-            <span class=${s.controls_correct === (s.controls_graded ?? s.controls) ? "good" : "bad"}>
-              <strong>${s.controls_correct}/${s.controls_graded ?? s.controls}</strong>
-              mismatch controls correctly failed
-            </span>
-          `}
           ${s.scored > 0 && html`
             <span class=${s.match_accuracy === 1 ? "good" : s.match_accuracy >= 0.5 ? "" : "bad"}>
               <strong>${s.scored_correct}/${s.scored}</strong> matched expectation
@@ -1507,8 +1710,8 @@ function ResultsGrid({ run, models }) {
             Nothing in this run carried an expected verdict, so there is no accuracy to
             report — only what each model happened to say. Every reference frame is correct
             work, so a sheet of passes cannot distinguish a model that grades from one that
-            always passes. Add mismatch controls, or reword a criterion under
-            <strong>Match test</strong> and mark what it should return.
+            always passes. Reword a criterion under <strong>Match test</strong> and mark
+            what it should return.
           </p>
         `}
       </div>
@@ -1528,7 +1731,6 @@ function ResultsGrid({ run, models }) {
                 <td class="target-cell">
                   ${row.is_control && html`<${Pill} kind="warn">control<//>`}
                   ${row.is_variant && html`<${Pill} kind="accent">variant<//>`}
-                  ${row.mode === "adequacy" && html`<${Pill} kind="warn">photo check<//>`}
                   ${row.expected && html`<span class="expect-tag">expect ${row.expected}</span>`}
                   <div class="target-label">${row.label}</div>
                   <code>${row.frame}</code>
@@ -1538,11 +1740,55 @@ function ResultsGrid({ run, models }) {
                     </details>`}
                   ${disagree(row) && html`<div class="disagree-note">models disagree</div>`}
                 </td>
-                ${models.map((m) => html`<${VerdictCell} key=${m} result=${row.cells[m]} />`)}
+                ${models.map((m) => {
+                  const cells = row.cells[m] || [];
+                  // A subtask split into points gets the combined cell; a
+                  // variant or an unsplit criterion is one call and stays a
+                  // single verdict.
+                  return cells.length && cells[0].rolls_up_to
+                    ? html`<${SheetCell} key=${m} results=${cells} />`
+                    : html`<${VerdictCell} key=${m} result=${cells[0]} />`;
+                })}
               </tr>
             `)}
           </tbody>
+          <tfoot>
+            <tr class="totals-row">
+              <td class="target-cell"><strong>All criteria points</strong>
+                <div class="target-label">every point, across every subtask</div>
+              </td>
+              ${models.map((m) => {
+                const t = totals[m]
+                  || { total: 0, correct: 0, pass: 0, fail: 0, unsure: 0, errors: 0 };
+                return html`
+                  <td key=${m} class="verdict-cell totals-cell">
+                    <div class="totals-count">
+                      <strong>${t.correct}</strong>/${t.total} correct
+                    </div>
+                    <div class="totals-split">
+                      <span class="t-pass">${t.pass} pass</span>
+                      <span class="t-fail">${t.fail} fail</span>
+                      <span class="t-unsure">${t.unsure} unsure</span>
+                    </div>
+                    ${t.errors > 0 && html`
+                      <div class="verdict-note bad">${t.errors} errored</div>`}
+                  </td>`;
+              })}
+            </tr>
+          </tfoot>
         </table>
+        <p class="warn-note">
+          A point counts as correct when it matches the verdict it was labelled with,
+          and — for the great majority, which carry no label —
+          when it comes back <code>pass</code> on a reference frame.
+          ${labelled > 0
+            ? html` Only ${labelled} point${labelled === 1 ? "" : "s"} in this run
+                    carried an expected verdict.`
+            : html` No point in this run carried an expected verdict.`}
+          Reference frames show work an instructor accepted, so <code>pass</code> is the
+          answer they imply — but a model that passes everything scores the same as one
+          that grades, which is what <strong>Match test</strong> exists to separate.
+        </p>
       </div>
     <//>
   `;
@@ -1556,19 +1802,14 @@ function PhotoAssessmentTab({ acs }) {
   const [drafts, setDrafts] = useState({});
   const [variantDrafts, setVariantDrafts] = useState({});
   const [focus, setFocus] = useState(null);
-  const [kind, setKind] = useState("all");
+  const [kind, setKind] = useState("subtask");
   const [query, setQuery] = useState("");
-  const [mismatch, setMismatch] = useState(3);
-  // The reference frames are all correct work, so an unedited pack criterion on
-  // its own frame is a positive case. Scoring it makes the run two-sided: a
-  // model is only right if it passes the true pairing AND fails the perturbed
-  // one. Without this you can only ever measure one direction.
-  const [scoreBase, setScoreBase] = useState(true);
-  const [adequacy, setAdequacy] = useState(true);
-  const [passAt, setPassAt] = useState(0.95);
-  const [gradingMode, setGradingMode] = useState("correctness");
   const [running, setRunning] = useState(false);
   const [run, setRun] = useState(null);
+  // Whether the grid below is this session's run or the last one on disk. They
+  // look identical, and a restored run is easily misread as confirmation that
+  // the edit you just made was graded.
+  const [restored, setRestored] = useState(false);
   const [error, setError] = useState(null);
   const [lightbox, setLightbox] = useState(null);
 
@@ -1579,24 +1820,71 @@ function PhotoAssessmentTab({ acs }) {
     setTargets(null); setSelected(new Set()); setRun(null); setFocus(null);
     setDrafts({}); setVariantDrafts({});
     api(`/api/photo/targets/${acs}`).then((d) => {
-      setTargets(d ? d.targets : []);
-      if (d && d.targets.length) setFocus(d.targets[0].target_id);
+      const list = (d && d.targets) || [];
+      setTargets(list);
+      // Focus the first row of the tab actually being shown. Focusing
+      // targets[0] put the detail pane on a target the visible list did not
+      // contain — on a segmented task that meant a reviewed interval while the
+      // Subtasks tab was open.
+      const first = list.find((t) => t.kind === "section") || list[0];
+      if (first) setFocus(first.target_id);
+    });
+    // Runs are written to build/photo_eval/<ACS>/ and were being kept there
+    // and never read: a reload, or a trip to another task and back, wiped the
+    // results grid and the only way to see the verdicts again was to pay for
+    // them again.
+    api(`/api/photo/runs/${acs}?limit=1`).then((d) => {
+      const last = d && d.runs && d.runs[0];
+      if (last) { setRun(last); setRestored(true); }
     });
   }, [acs]);
 
   const filtered = useMemo(() => {
     if (!targets) return [];
     const q = query.trim().toLowerCase();
-    return targets.filter((t) =>
-      (kind === "all" || t.kind === kind ||
-       // Only these can actually be run; the rest need a frame picked first.
-       (kind === "ready" && t.frame_exists)) &&
-      (!q || (t.label + " " + (t.step_id || "") + " " + (t.video || "") + " " +
-              (t.section || "")).toLowerCase().includes(q)));
+    const hit = (t) => !q || (t.label + " " + (t.step_id || "") + " " + (t.video || "") + " " +
+                              (t.section || "") + " " + (t.clip || "")).toLowerCase().includes(q);
+
+    // A pack section IS the subtask — the level the work is filmed and taught
+    // at. `kind: "subtask"` is a misnomer kept for the wire format: those are
+    // reviewed intervals *inside* a subtask, which the server calls
+    // sub-subtasks. They are step-level evidence, and where they exist they
+    // replace the step targets they cover, so they belong with the steps.
+    //
+    // Reading the kind literally put 150 intervals into the Subtasks tab on
+    // AM.I.E.S1 and left three rows in Steps — the two levels swapped over on
+    // exactly the tasks that have the most footage behind them.
+    const isSubtask = (t) => t.kind === "section";
+    const isStep = (t) => t.kind === "step" || t.kind === "subtask";
+
+    if (kind === "subtask") return targets.filter((t) => isSubtask(t) && hit(t));
+
+    // Steps, under the subtask each belongs to. A step read on its own — "Decide
+    // the size of tubing to use" — does not say which piece of work it is part
+    // of, and the two-level shape of the task is the thing this tab is for.
+    const rows = [];
+    for (const parent of targets.filter(isSubtask)) {
+      const shown = targets.filter((t) => isStep(t) && t.section &&
+                                          t.section === parent.section && hit(t));
+      if (!shown.length) continue;
+      rows.push({ ...parent, depth: 0, heading: true });
+      rows.push(...shown.map((t) => ({ ...t, depth: 1 })));
+    }
+    // A step whose section matches no subtask — and every interval the reviewer
+    // could not map to a pack step — would otherwise vanish from the only tab
+    // that shows it. Listed flat rather than dropped.
+    const claimed = new Set(rows.map((r) => r.target_id));
+    rows.push(...targets.filter((t) => isStep(t) && !claimed.has(t.target_id) && hit(t)));
+    return rows;
   }, [targets, kind, query]);
 
   const focused = (targets || []).find((t) => t.target_id === focus);
   const keyMissing = config && !config.key.present;
+
+  // Off the criterion currently in the editor, not the one last saved, so the
+  // point list and the call estimate both track an edit as it is typed.
+  const pointsFor = (t) => parsePoints(
+    drafts[t.target_id] !== undefined ? drafts[t.target_id] : t.criterion);
 
   const variantCount = useMemo(() => {
     if (!targets) return 0;
@@ -1607,24 +1895,40 @@ function PhotoAssessmentTab({ acs }) {
         .filter((v) => (v.criterion || "").trim()).length), 0);
   }, [targets, selected, variantDrafts]);
 
-  // A target with no photo cannot be graded, so it must not be counted into the
-  // estimate or leave the Run button enabled on a selection that would do
-  // nothing. The server skips them; the UI should say so before the click.
-  const framed = useMemo(
-    () => (targets || []).filter((t) => selected.has(t.target_id) && t.frame_exists).length,
+  // A target with no photo cannot be graded, and neither can one with no
+  // criterion — the clip-derived subtasks have a frame but nothing to judge it
+  // against yet. Both are skipped by the server, so the UI must say so before
+  // the click rather than after the bill.
+  const effective = (t) => (drafts[t.target_id] !== undefined
+    ? drafts[t.target_id] : t.criterion) || "";
+  const chosen = useMemo(
+    () => (targets || []).filter((t) => selected.has(t.target_id)),
     [targets, selected]);
-  const unframed = selected.size - framed;
+  const framed = useMemo(
+    () => chosen.filter((t) => t.frame_exists && effective(t).trim()).length,
+    [chosen, drafts]);
+  const noPhoto = chosen.filter((t) => !t.frame_exists).length;
+  const noCriterion = chosen.filter((t) => t.frame_exists && !effective(t).trim()).length;
   const runnable = framed > 0;
+
+  // Every criteria point is its own call, so a selection of seven subtasks is
+  // not seven calls — it is closer to seventy. Counting targets here understated
+  // the bill by an order of magnitude.
+  const points = useMemo(
+    () => (targets || [])
+      .filter((t) => selected.has(t.target_id) && t.frame_exists && effective(t).trim())
+      .reduce((n, t) => n + Math.max(1, pointsFor(t).length), 0),
+    [targets, selected, drafts]);
 
   const estimate = useMemo(() => {
     if (!config) return null;
-    const calls = framed + variantCount + Math.min(mismatch, framed);
+    const calls = points + variantCount;
     const per = models
       .map((id) => config.models.find((m) => m.id === id))
       .filter(Boolean)
       .reduce((sum, m) => sum + calls * ((1900 * m.in_per_m + 250 * m.out_per_m) / 1e6), 0);
     return { calls: calls * models.length, usd: per };
-  }, [config, models, selected, mismatch, variantCount]);
+  }, [config, models, points, variantCount]);
 
   const toggle = (id) => setSelected((prev) => {
     const next = new Set(prev);
@@ -1678,15 +1982,10 @@ function PhotoAssessmentTab({ acs }) {
       criteria,
       variants,
       frames,
-      base_expected: scoreBase ? "pass" : null,
-      grade_adequacy: adequacy,
-      pass_threshold: passAt,
-      grading_mode: gradingMode,
-      mismatch_count: Math.min(mismatch, selected.size),
     });
     setRunning(false);
     if (!result || result.error) setError((result && result.error) || "Run failed");
-    else setRun(result);
+    else { setRun(result); setRestored(false); }
   };
 
   if (!targets || !config) return html`<div class="empty">Loading photo assessment…</div>`;
@@ -1726,79 +2025,10 @@ function PhotoAssessmentTab({ acs }) {
           `)}
         </div>
 
-        <div class="run-controls">
-          <label class="mismatch-control">
-            Mismatch controls
-            <input type="number" min="0" max="20" value=${mismatch}
-                   onInput=${(e) => setMismatch(Math.max(0, Number(e.target.value) || 0))} />
-          </label>
-          <span class="criterion-hint">
-            Pairs a frame with another subtask's criterion, where the right answer is
-            <strong>fail</strong>. Without these, a model that always passes looks perfect.
-          </span>
-        </div>
-        <div class="run-controls">
-          <div class="seg-control">
-            ${[["correctness", "Per condition"], ["holistic", "Whole assembly (0–100)"]]
-              .map(([id, label]) => html`
-              <button key=${id} class=${"seg" + (gradingMode === id ? " active" : "")}
-                      onClick=${() => setGradingMode(id)}>${label}</button>
-            `)}
-          </div>
-          <span class="criterion-hint">
-            ${gradingMode === "holistic"
-              ? html`Grades the finished article as a whole against a weighted rubric and
-                     returns one 0–100 score. A task roll-up is sent as a single call, not
-                     split per check. Use when your criterion says "do not grade point by
-                     point".`
-              : html`Grades each condition separately and reports which failed. A task
-                     roll-up is split into one call per pack check.`}
-          </span>
-        </div>
-        <div class=${"run-controls" + (gradingMode === "holistic" ? " disabled" : "")}>
-          <label class="mismatch-control">
-            Pass threshold
-            <input type="number" min="0.5" max="1" step="0.01" value=${passAt}
-                   onInput=${(e) => setPassAt(Math.min(1, Math.max(0.5, Number(e.target.value) || 0.95)))} />
-          </label>
-          <span class="criterion-hint">
-            ${gradingMode === "holistic"
-              ? html`Not used in whole-assembly mode — the pass mark comes from the rubric
-                     itself ("PASS requires 75 or higher").`
-              : html`A condition passes when the model's probability it is satisfied reaches
-                     this. A condition the photo cannot show never passes, at any threshold —
-                     lowering this makes passing easier only for things actually visible.`}
-          </span>
-        </div>
-        <div class="run-controls">
-          <label class="mismatch-control">
-            <input type="checkbox" checked=${adequacy}
-                   onChange=${() => setAdequacy(!adequacy)} />
-            Also grade <strong>photo adequacy</strong>
-          </label>
-          <span class="criterion-hint">
-            Asks a separate question first — is this photo usable evidence at all? — for
-            targets whose pack states a framing requirement. Without it, an unusable photo
-            is indistinguishable from bad work.
-          </span>
-        </div>
-        <div class="run-controls">
-          <label class="mismatch-control">
-            <input type="checkbox" checked=${scoreBase}
-                   onChange=${() => setScoreBase(!scoreBase)} />
-            Score unedited pack criteria as <strong>should pass</strong>
-          </label>
-          <span class="criterion-hint">
-            Gives the run a positive class. Combined with perturbed variants and mismatch
-            controls, a model has to get <em>both</em> directions right — correct photo +
-            correct criterion passes, and the same photo + a broken criterion fails.
-          </span>
-        </div>
-
         <div class="run-bar">
-          <span><strong>${framed}</strong> gradeable × <strong>${models.length}</strong> models
-            ${variantCount > 0 ? ` + ${variantCount} variants` : ""}
-            ${mismatch > 0 ? ` + ${Math.min(mismatch, framed)} controls` : ""}</span>
+          <span><strong>${points}</strong> criteria points across <strong>${framed}</strong>
+            ${framed === 1 ? "target" : "targets"} × <strong>${models.length}</strong> models
+            ${variantCount > 0 ? ` + ${variantCount} variants` : ""}</span>
           ${estimate && html`<span class="estimate">≈ ${estimate.calls} calls · ${fmtUSD(estimate.usd)}</span>`}
           <button class="btn primary"
                   disabled=${running || keyMissing || !runnable || !models.length}
@@ -1806,10 +2036,18 @@ function PhotoAssessmentTab({ acs }) {
             ${running ? "Running…" : "Run grading"}
           </button>
         </div>
-        ${unframed > 0 && html`
+        ${noPhoto > 0 && html`
           <div class="run-warning">
-            ${unframed} selected target${unframed === 1 ? " has" : "s have"} no photo and
+            ${noPhoto} selected target${noPhoto === 1 ? " has" : "s have"} no photo and
             will be skipped. Pick a frame on each, or deselect them.
+          </div>
+        `}
+        ${noCriterion > 0 && html`
+          <div class="run-warning">
+            ${noCriterion} selected subtask${noCriterion === 1 ? " has" : "s have"} no
+            criteria yet and will be skipped. These are pieces of work the footage shows
+            but the procedure sheet does not document — write the criteria in the box
+            below and they will be graded point by point like any other.
           </div>
         `}
         ${error && html`<div class="run-error">${error}</div>`}
@@ -1819,9 +2057,7 @@ function PhotoAssessmentTab({ acs }) {
         <div class="card target-list">
           <div class="target-filters">
             <div class="seg-control">
-              ${[["all", "All"], ["step", "Steps"], ["subtask", "Subtasks"],
-                 ["evidence", "Required photos"], ["task", "Task roll-up"],
-                 ["ready", "Has a photo"]].map(([id, label]) => html`
+              ${[["subtask", "Subtasks"], ["step", "Steps"]].map(([id, label]) => html`
                 <button key=${id} class=${"seg" + (kind === id ? " active" : "")}
                         onClick=${() => setKind(id)}>${label}</button>
               `)}
@@ -1829,20 +2065,28 @@ function PhotoAssessmentTab({ acs }) {
             <input class="search" placeholder="Filter targets…" value=${query}
                    onInput=${(e) => setQuery(e.target.value)} />
             <div class="bulk">
+              ${/* Headings are context, not work. Selecting them here would
+                    quietly grade every subtask alongside the steps you asked
+                    for, and bill for it. */""}
               <button class="btn ghost" onClick=${() =>
-                setSelected(new Set(filtered.map((t) => t.target_id)))}>Select all shown</button>
+                setSelected(new Set(filtered.filter((t) => !t.heading)
+                                            .map((t) => t.target_id)))}>Select all shown</button>
               <button class="btn ghost" onClick=${() => setSelected(new Set())}>Clear</button>
             </div>
           </div>
           <div class="target-rows">
             ${filtered.map((t) => html`
               <div key=${t.target_id}
-                   class=${"target-row" + (focus === t.target_id ? " focused" : "") +
-                           (selected.has(t.target_id) ? " selected" : "")}
+                   class=${"target-row" + (t.depth ? " nested" : "") +
+                           (t.heading ? " heading" : "") +
+                           (focus === t.target_id ? " focused" : "") +
+                           (!t.heading && selected.has(t.target_id) ? " selected" : "")}
                    onClick=${() => setFocus(t.target_id)}>
-                <input type="checkbox" checked=${selected.has(t.target_id)}
-                       onClick=${(e) => e.stopPropagation()}
-                       onChange=${() => toggle(t.target_id)} />
+                ${t.heading
+                  ? html`<span class="row-spacer" />`
+                  : html`<input type="checkbox" checked=${selected.has(t.target_id)}
+                                onClick=${(e) => e.stopPropagation()}
+                                onChange=${() => toggle(t.target_id)} />`}
                 ${t.frame_url
                   ? html`<img class="target-thumb" src=${t.frame_url} alt=${t.frame}
                               loading="lazy" />`
@@ -1850,10 +2094,27 @@ function PhotoAssessmentTab({ acs }) {
                 <div class="target-text">
                   <div class="target-label">${t.label}</div>
                   <div class="target-sub">
-                    ${t.step_id ? html`<${Pill}>${t.step_id}<//>` : html`<span class="muted">unmapped</span>`}
-                    <span class="muted">${t.video || t.section || ""}</span>
+                    ${t.kind === "section"
+                      ? html`<${Pill}>subtask<//>`
+                      : t.step_id ? html`<${Pill}>${t.step_id}<//>`
+                      : html`<span class="muted">unmapped</span>`}
+                    <span class="muted">
+                      ${t.kind === "section"
+                        // A subtask that exists only as a grading sheet has no
+                        // pack steps to count, and "0 steps" would read as one
+                        // that lost them rather than one the pack never had.
+                        ? (t.step_count
+                            ? `${t.step_count} step${t.step_count === 1 ? "" : "s"}`
+                            : "criteria sheet")
+                        : t.video || t.section || ""}
+                    </span>
                     ${t.frame_suggested && html`<${Pill} kind="warn">frame guessed<//>`}
-                    ${t.criterion_source.startsWith("drafted")
+                    ${t.frame_reviewed && html`<${Pill} kind="good">reviewed frame<//>`}
+                    ${t.needs_criteria
+                      ? html`<${Pill} kind="warn">needs criteria<//>`
+                      : t.criterion_source.startsWith("criteria.")
+                      ? html`<span class="tick">subtask sheet</span>`
+                      : t.criterion_source.startsWith("drafted")
                       ? html`<span class="tick">drafted criterion</span>`
                       : t.criterion_source.startsWith("pack.")
                       ? html`<span class="tick">pack criterion</span>`
@@ -1873,7 +2134,15 @@ function PhotoAssessmentTab({ acs }) {
               <div class="detail-sub">
                 ${focused.frame
                   ? html`<${F}>
-                      final frame <code>${focused.frame}</code> at ${fmtTime(focused.t_end || 0)}
+                      ${/* Only a reviewed interval knows when its work ended.
+                            A suggested or hand-picked frame has no `t_end`, and
+                            printing "at 0:00.00" for it stated a timestamp
+                            nobody established — and stated it in the same words
+                            used where the time is real. */""}
+                      <code>${focused.frame}</code>
+                      ${focused.t_end != null
+                        ? html` — final frame at ${fmtTime(focused.t_end)}`
+                        : ""}
                       · ${focused.video}
                       ${focused.confidence && html` · review confidence ${focused.confidence}`}
                     <//>`
@@ -1884,16 +2153,20 @@ function PhotoAssessmentTab({ acs }) {
               </div>
               ${focused.frame_suggested && !focused.frame_picked && html`
                 <div class="suggested-note">
-                  This frame was <strong>guessed</strong>: the step's section
+                  This frame was <strong>guessed</strong>: the section
                   “${focused.section}” was matched to the clip <code>${focused.video}</code>
-                  by name, then
-                  ${focused.frame_position
-                    ? ` step ${focused.frame_position[0]} of ${focused.frame_position[1]} was
-                        taken from ${Math.round(100 * focused.frame_position[0] /
-                                                focused.frame_position[1])}% of the way
-                        through it, assuming the steps run in order at an even pace`
-                    : " the clip's last frame was taken as its finished state"}.
-                  No one reviewed it. Check it, or pick another below.
+                  by name
+                  ${focused.frame_share
+                    ? html`, which it shares with ${focused.frame_share[1] - 1} other
+                        section${focused.frame_share[1] === 2 ? "" : "s"} — this one takes
+                        slice ${focused.frame_share[0]} of ${focused.frame_share[1]}`
+                    : ""}${focused.frame_position
+                    ? html`, and step ${focused.frame_position[0]} of
+                        ${focused.frame_position[1]} within it lands at
+                        ${Math.round(100 * (focused.frame_fraction || 0))}% of the clip`
+                    : ""}.
+                  It assumes the work runs in procedure order at an even pace, and
+                  <strong>no one reviewed it</strong>. Check it, or pick another below.
                 </div>
               `}
               ${focused.frame_url
@@ -1901,28 +2174,79 @@ function PhotoAssessmentTab({ acs }) {
                             onClick=${() => setLightbox({ src: focused.frame_url,
                                              caption: `${focused.video} · ${focused.frame}` })} />`
                 : ""}
-              ${(!focused.frame_url || focused.frame_suggested || focused.frame_picked) &&
-                focused.kind === "step" &&
+              ${/* A reviewed sub-subtask frame was chosen deliberately and is
+                    left alone; everything else is either frameless or a guess,
+                    and both need the picker. */
+                focused.kind !== "subtask" &&
+                (!focused.frame_url || focused.frame_suggested || focused.frame_picked) &&
                 html`<${FramePicker} acs=${acs} target=${focused} onPick=${pickFrame} />`}
               <${FrameSource} acs=${acs} target=${focused} onFrame=${(f) =>
                 setTargets((ts) => ts.map((t) => t.target_id === focused.target_id
                   ? { ...t, ...f, frame_exists: true, frame_suggested: false } : t))} />
               ${focused.description && html`
                 <p class="detail-desc"><strong>Reviewed as:</strong> ${focused.description}</p>`}
+              ${focused.needs_criteria && !effective(focused).trim() && html`
+                <div class="criterion-basis">
+                  <span class="eyebrow">No criteria yet</span>
+                  <p>
+                    The footage shows this piece of work, but the procedure sheet for this
+                    task does not document it and no grading sheet exists in
+                    <code>criteria/${acs}/</code>. Nothing has been invented for it —
+                    write the criteria below and they will be split into pass/fail points
+                    like any other subtask.
+                  </p>
+                </div>
+              `}
+              ${/* Exactly what will be asked, one call per line, each answered
+                    pass or fail on its own. Shown because the criterion below is
+                    editable: the points are derived from that text, so an editor
+                    needs to see what their wording actually produced rather than
+                    finding out from the results grid.
+
+                    A critical defect is listed as its absence. The sheets write
+                    defects as things that must NOT be present, and grading that
+                    wording as written would score "the tube is kinked" as a pass
+                    on a kinked tube. */
+                (pointsFor(focused) || []).length > 0 && html`
+                <div class="criteria-points">
+                  <div class="eyebrow">
+                    Graded as ${pointsFor(focused).length} pass/fail
+                    point${pointsFor(focused).length === 1 ? "" : "s"}
+                  </div>
+                  <ol>
+                    ${pointsFor(focused).map((c) => html`
+                      <li key=${c.id} class=${c.defect ? "defect" : ""}>
+                        ${c.defect && html`<${Pill} kind="warn">defect<//>`}
+                        ${c.statement}
+                      </li>
+                    `)}
+                  </ol>
+                </div>
+              `}
+              ${/* Where the sheet's conditions came from. These sheets carry
+                    numeric standards an instructor has to be able to defend, and
+                    they are machine-drafted — so the pages behind them and the
+                    fact that no SME has signed them off belong next to the text,
+                    not in a file the reader has to go and find. */
+                focused.criterion_file && html`
+                <div class="criterion-basis">
+                  <span class="eyebrow">Subtask grading sheet</span>
+                  ${(focused.criterion_basis || []).length > 0 && html`
+                    <ul>
+                      ${focused.criterion_basis.map((b, i) => html`<li key=${i}>${b}</li>`)}
+                    </ul>
+                  `}
+                  <p>
+                    <code>${focused.criterion_file}</code>
+                    ${!focused.criterion_reviewed &&
+                      " — machine-drafted from the procedure sheet and FAA handbook, not reviewed by a subject-matter expert."}
+                  </p>
+                </div>
+              `}
               ${focused.framing && html`
                 <div class="framing-note">
                   <span class="eyebrow">Required framing</span>
                   <p>${focused.framing}</p>
-                </div>
-              `}
-              ${(focused.excluded_checks || []).length > 0 && html`
-                <div class="excluded-checks">
-                  <div class="eyebrow">Excluded — a photo cannot settle these</div>
-                  <ul>
-                    ${focused.excluded_checks.map((e, i) => html`
-                      <li key=${i}><code>${e.observable}</code> ${e.statement}</li>
-                    `)}
-                  </ul>
                 </div>
               `}
               <${CriterionEditor} acs=${acs} target=${focused}
@@ -1944,7 +2268,7 @@ function PhotoAssessmentTab({ acs }) {
         </div>
       </div>
 
-      ${run && html`<${ResultsGrid} run=${run} models=${run.models} />`}
+      ${run && html`<${ResultsGrid} run=${run} models=${run.models} restored=${restored} />`}
       ${lightbox && html`<${Lightbox} ...${lightbox} onClose=${() => setLightbox(null)} />`}
     <//>
   `;

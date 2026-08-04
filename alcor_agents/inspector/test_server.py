@@ -118,6 +118,26 @@ class AtomicCatalogTests(unittest.TestCase):
         self.assertEqual(summary["runs"][0]["atom_metrics"][0]["precision"], 1.0)
 
 
+class ModelConfigTests(unittest.TestCase):
+    def test_every_default_model_is_one_the_picker_offers(self):
+        """The two lists are edited by hand and drift apart silently. A default
+        that is not in MODELS arrives pre-ticked in the browser but has no chip
+        to untick it, so the run goes out against a model nobody chose — and the
+        failure surfaces as an API error per call, not as a config mistake.
+        """
+        for model_id in vlm.DEFAULT_MODELS:
+            self.assertIn(model_id, vlm.MODELS_BY_ID)
+
+    def test_every_model_carries_the_pricing_the_estimate_needs(self):
+        """A missing rate silently prices that model's share of a run at zero,
+        which reads as a cheap run rather than an unknown one."""
+        for model in vlm.MODELS:
+            with self.subTest(model=model["id"]):
+                self.assertTrue(model["label"] and model["vendor"])
+                self.assertGreater(model["in_per_m"], 0)
+                self.assertGreater(model["out_per_m"], 0)
+
+
 class VerdictParsingTests(unittest.TestCase):
     """A reply we cannot read must never become a silent pass."""
 
@@ -207,29 +227,282 @@ class PhotoTargetTests(unittest.TestCase):
         than no frame at all because a wrong verdict is harder to spot than a
         missing one.
         """
+        for acs in ("AM.I.D.S1", "AM.III.F.S11", "AM.I.D.S7"):
+            with self.subTest(task=acs):
+                pack, _, _ = server.load_pack(acs)
+                steps = [t for t in server.photo_targets(acs, pack)
+                         if t["kind"] == "step" and t.get("frame")]
+                self.assertTrue(steps)
+
+                frames = [(t["video"], t["frame"]) for t in steps]
+                self.assertEqual(len(frames), len(set(frames)),
+                                 "two steps were given the same suggested frame")
+
+                by_section = {}
+                for target in steps:
+                    by_section.setdefault(target["section"], []).append(target)
+                for section, members in by_section.items():
+                    with self.subTest(section=section):
+                        # Steps are performed in order, so their frames must
+                        # advance through the clip in the same order.
+                        names = [t["frame"] for t in members]
+                        self.assertEqual(names, sorted(names))
+                        index, count = members[-1]["frame_position"]
+                        self.assertEqual((index, count), (len(members), len(members)))
+
+                # Sections sharing one clip take successive slices of it rather
+                # than each spreading over the whole thing; the section that owns
+                # the final slice ends on the clip's last frame.
+                by_clip = {}
+                for target in steps:
+                    by_clip.setdefault(target["video"], []).append(target)
+                for clip, members in by_clip.items():
+                    with self.subTest(clip=clip):
+                        clip_frames = server.frame_names(acs, clip, "detail")
+                        self.assertEqual(members[-1]["frame"], clip_frames[-1])
+
+    def test_only_subtasks_and_steps_are_built(self):
+        """The tab is two levels — a task is subtasks, a subtask is steps — and
+        anything else has no view to appear in. A target with no view is not
+        neutral: it still lands in the API and in bulk selections, so it gets
+        graded and billed for while being invisible.
+        """
+        for acs in sorted(p.name for p in server.TASKS_DIR.iterdir() if p.is_dir()):
+            with self.subTest(task=acs):
+                pack, _, _ = server.load_pack(acs)
+                kinds = {t["kind"] for t in server.photo_targets(acs, pack)}
+                self.assertTrue(kinds <= {"section", "subtask", "step"}, kinds)
+
+    def test_a_subtask_is_graded_one_point_at_a_time(self):
+        """Sent whole, a sheet returns one verdict for ten conditions: you learn
+        the subtask failed and never which condition did. Each point is its own
+        call so a failure names itself.
+        """
         pack, _, _ = server.load_pack("AM.I.D.S1")
-        steps = [t for t in server.photo_targets("AM.I.D.S1", pack)
-                 if t["kind"] == "step" and t.get("frame")]
-        self.assertTrue(steps)
+        target = next(t for t in server.photo_targets("AM.I.D.S1", pack)
+                      if t.get("clip") == "bend_the_line")
+        checks = target["checks"]
 
-        frames = [(t["video"], t["frame"]) for t in steps]
-        self.assertEqual(len(frames), len(set(frames)), "steps share a suggested frame")
+        criteria = [c for c in checks if not c["defect"]]
+        defects = [c for c in checks if c["defect"]]
+        self.assertEqual(len(criteria), 6)
+        self.assertEqual(len(defects), 4)
+        self.assertEqual([c["id"] for c in criteria], ["c1", "c2", "c3", "c4", "c5", "c6"])
+        self.assertEqual([c["id"] for c in defects], ["d1", "d2", "d3", "d4"])
+        self.assertIn("at least one completed bend", criteria[0]["statement"])
 
-        by_section = {}
-        for target in steps:
-            by_section.setdefault(target["section"], []).append(target)
-        for section, members in by_section.items():
+        # The combination rule is not itself a condition, and neither is the
+        # provenance footer. Either one graded as a point would be an
+        # unanswerable question asked of a photograph.
+        joined = " ".join(c["statement"] for c in checks)
+        self.assertNotIn("Overall PASS requires", joined)
+        self.assertNotIn("FAA-H-8083", joined)
+
+    def test_a_critical_defect_is_graded_as_its_absence(self):
+        """The polarity trap. A sheet writes defects as things that must NOT be
+        present, so grading "Tube is kinked or collapsed flat at the bend" as
+        written scores a PASS on a kinked tube — a verdict that is not merely
+        wrong but backwards, and reads as a clean result.
+        """
+        pack, _, _ = server.load_pack("AM.I.D.S1")
+        for target in server.photo_targets("AM.I.D.S1", pack):
+            for check in target.get("checks") or []:
+                if not check["defect"]:
+                    continue
+                with self.subTest(check=check["id"]):
+                    self.assertTrue(check["statement"].startswith(
+                        "The finished work shows no such defect:"))
+
+        # Restated, not merely prefixed: the defect's own wording survives inside
+        # the sentence so it stays traceable to the sheet.
+        kinked = next(c for t in server.photo_targets("AM.I.D.S1", pack)
+                      if t.get("clip") == "bend_the_line"
+                      for c in t["checks"] if c["id"] == "d2")
+        self.assertIn("kinked or collapsed flat", kinked["statement"])
+
+    def test_an_edited_criterion_is_still_split_into_points(self):
+        """Editing is the whole point of the criterion box, and an edit that
+        silently collapsed the subtask back to one call would take per-point
+        grading away exactly when someone is trying to improve it.
+        """
+        edited = "Criteria\n1. First condition holds\n2. Second condition holds\n"
+        points = server.sheet_checks(edited)
+        self.assertEqual([c["statement"] for c in points],
+                         ["First condition holds", "Second condition holds"])
+
+        # Free prose with no headings is one criterion, not zero points — the
+        # run path falls back to a single call rather than dropping the target.
+        self.assertEqual(server.sheet_checks("Just grade the whole thing."), [])
+
+    def test_subtasks_are_graded_against_their_own_criteria_sheet(self):
+        """`criteria/<ACS>/` holds one sheet per subtask, written about the
+        finished subtask. It beats the previous default — the member steps'
+        criteria concatenated — which had no notion of a finished subtask and so
+        could not state what the article should look like once one was done.
+        """
+        for acs in sorted(p.name for p in server.TASKS_DIR.iterdir() if p.is_dir()):
+            pack, _, _ = server.load_pack(acs)
+            sections = [t for t in server.photo_targets(acs, pack)
+                        if t["kind"] == "section"]
+            for target in sections:
+                with self.subTest(task=acs, section=target["section"]):
+                    if target.get("needs_criteria"):
+                        # A clip the paperwork never documented. It must carry
+                        # nothing rather than something invented: an empty
+                        # criterion is skipped by the run, a made-up one would
+                        # be graded and reported as an assessment standard.
+                        self.assertEqual(target["criterion"], "")
+                        self.assertIsNone(target["criterion_file"])
+                        self.assertEqual(target["checks"], [])
+                        continue
+                    # The join is on clip name where the campus names its clips
+                    # after the work, and on subtask title where it numbers them
+                    # (AM.II.A.S6 films flush_patch_1..8). Every section resolves
+                    # by one route or the other; a regression in either shows up
+                    # here as a section falling back to the concatenation.
+                    self.assertEqual(target["criterion_source"], "criteria.subtask")
+                    self.assertTrue(target["criterion_file"])
+                    # The provenance footer is metadata about the sheet, not a
+                    # condition the work is judged against, so it must not reach
+                    # the model as one.
+                    self.assertNotIn("Source basis", target["criterion"])
+
+    def test_every_criteria_sheet_reaches_a_target_of_its_own(self):
+        """The converse of the test above, and the one that actually caught
+        things. That test asks whether every *target* found a sheet, which
+        passes trivially when a sheet is never reached: seven of thirty-seven
+        were ungradeable while it stayed green.
+
+        Three separate causes, one per task. AM.I.E.S1 was hand-compiled before
+        sections existed so all its steps carry `section: null` and no subtask
+        target was built at all. AM.II.K.S3 lost the three subtasks its
+        segmentation pass covered completely, because a fully covered section
+        was skipped. AM.II.A.S6 folded "Create the Patch Doubler" in as a
+        note-only heading, leaving its sheet with no section to join to.
+        """
+        for acs in sorted(p.name for p in server.TASKS_DIR.iterdir() if p.is_dir()):
+            with self.subTest(task=acs):
+                pack, _, _ = server.load_pack(acs)
+                sections = [t for t in server.photo_targets(acs, pack)
+                            if t["kind"] == "section"]
+                written = {s["code"] for s in server.read_subtask_criteria(acs).values()}
+                self.assertTrue(written, f"{acs} has no criteria sheets")
+
+                graded = [t["criterion_file"].split("__")[-1].removesuffix(".txt")
+                          for t in sections if t.get("criterion_file")]
+                self.assertEqual(written, set(graded))
+                # One target per sheet. Two targets sharing a sheet would grade
+                # the same subtask twice and double its weight in any run.
+                self.assertEqual(len(graded), len(set(graded)))
+
+    def test_a_fully_segmented_subtask_keeps_its_sheet_and_gains_a_real_frame(self):
+        """A reviewed segment grades one interval *inside* the work; the sheet
+        grades the finished subtask those intervals add up to. Different
+        questions, so covering a section with segments must not retire it.
+
+        The segments do settle something the name match could not, though.
+        AM.II.K.S3 films `elect_conn_2..5`, which no subtask title can ever
+        match, so these three had no clip to hang a frame on. The interval that
+        covered the section's last step names both.
+        """
+        pack, _, _ = server.load_pack("AM.II.K.S3")
+        targets = server.photo_targets("AM.II.K.S3", pack)
+        by_section = {t["section"]: t for t in targets if t["kind"] == "section"}
+
+        for section in ("Set Up the DNC Crimper", "Crimp the Wire",
+                        "Insert the Pin into the Electrical Connector"):
             with self.subTest(section=section):
-                # Order within a section must follow the clip's timeline, since
-                # the steps are performed in order.
-                names = [t["frame"] for t in members]
-                self.assertEqual(names, sorted(names))
-                # The last step of a section still lands on the clip's final
-                # frame — that is the closest thing to its finished state.
-                clip_frames = server.frame_names("AM.I.D.S1", members[-1]["video"], "detail")
-                self.assertEqual(members[-1]["frame"], clip_frames[-1])
-                index, count = members[-1]["frame_position"]
-                self.assertEqual((index, count), (len(members), len(members)))
+                target = by_section[section]
+                self.assertEqual(target["criterion_source"], "criteria.subtask")
+                self.assertTrue(target["frame_exists"], "reviewed footage exists")
+                # Evidence, not an even-pace guess, and it must not claim to be
+                # the other thing.
+                self.assertTrue(target["frame_reviewed"])
+                self.assertFalse(target["frame_suggested"])
+                self.assertEqual(target["clip"], target["video"])
+
+    def test_a_sheet_with_no_pack_section_is_graded_without_inventing_a_clip(self):
+        """AM.II.A.S6's doubler sheet has no section, and its clips are
+        `flush_patch_1..8` — a same-prefix numbered series whose names carry no
+        signal to match a title against. The eight real sections take those
+        clips positionally; a ninth subtask matching `flush_patch_1` on the word
+        "patch" would be an accident of vocabulary, and grading the doubler
+        against footage of the damage being identified is worse than offering no
+        frame at all. So it gets a target and a criterion, and no clip.
+        """
+        pack, _, _ = server.load_pack("AM.II.A.S6")
+        target = next(t for t in server.photo_targets("AM.II.A.S6", pack)
+                      if t["target_id"] == "section:create-the-patch-doubler")
+        self.assertEqual(target["criterion_source"], "criteria.subtask")
+        self.assertIn("doubler", target["criterion"].lower())
+        self.assertIsNone(target["clip"])
+        self.assertFalse(target["frame_exists"])
+        # No pack steps behind it, so it must not report a step count that would
+        # read as a section that lost its steps.
+        self.assertEqual(target["step_count"], 0)
+
+    def test_sheet_titles_place_subtasks_on_the_clips_that_demonstrate_them(self):
+        """AM.I.E.S1's steps carry no section — they group by `variant` — so its
+        subtasks are `bolts_hand`, `bolts_pliers` and `turnbuckle_hand`, and no
+        string match gets from those to sheets titled "Wire Safety on Bolts by
+        Hand". Both sides land on the same clip, and that is the join.
+
+        The pliers subtask is filmed as four takes, `safety_wire_pliers_1..4`.
+        Its clip is the one the reviewer put its *last* step in, not the
+        alphabetically first of the four — a subtask's frame should show the
+        work finished, and take 1 is where it starts.
+        """
+        pack, _, _ = server.load_pack("AM.I.E.S1")
+        targets = server.photo_targets("AM.I.E.S1", pack)
+        by_file = {t["criterion_file"].split("__")[-1].removesuffix(".txt"): t
+                   for t in targets
+                   if t["kind"] == "section" and t.get("criterion_file")}
+        self.assertEqual(
+            {code: target["clip"] for code, target in by_file.items()},
+            {"wire_safety_on_a_turnbuckle_by_hand":
+                "insert_wire_for_double_wrap_turnbuckle_safety",
+             "wire_safety_on_bolts_by_hand": "safety_wire_by_hand",
+             "wire_safety_on_bolts_with_safety_wire_pliers": "safety_wire_pliers_4"})
+        for target in by_file.values():
+            self.assertTrue(target["frame_exists"])
+
+        # One subtask per sheet, and every step owned by one of them. Read only
+        # off `section`, the pack had no subtask that owned any step, so the
+        # steps and the sheets sat in two piles that never met.
+        self.assertEqual(sorted(t["section"] for t in targets if t["kind"] == "section"),
+                         ["bolts_hand", "bolts_pliers", "turnbuckle_hand"])
+        self.assertEqual(sum(t["step_count"] for t in targets if t["kind"] == "section"),
+                         len(pack["steps"]))
+
+    def test_sheet_notes_parse_as_whole_sentences(self):
+        """A sheet's Notes are separated by ".;" and contain a plain ";" inside
+        a sentence, so splitting on the bare semicolon tore one note into two
+        half-claims. The notes no longer surface in the tab, but the parser
+        still reads them and a bad split would corrupt the criterion boundary
+        they sit behind.
+        """
+        sheets = server.read_subtask_criteria("AM.I.D.S1")
+        notes = sheets["bend_the_line"]["notes"]
+        self.assertEqual(len(notes), 3)
+        self.assertIn("only gross flattening or kinking is gradeable", notes[0])
+        for note in notes:
+            self.assertTrue(note.endswith("."), note)
+
+    def test_a_suggested_clip_does_not_move_between_runs(self):
+        """Ties must break the same way every time.
+
+        Scoring iterated a set of clip names, so with equal scores the winner
+        followed string hash order — randomised per process. The suggested frame
+        could then change across a server restart, which makes a verdict
+        impossible to trace back to what was actually graded.
+        """
+        pack, _, _ = server.load_pack("AM.III.F.S11")
+        first = {t["target_id"]: t.get("frame")
+                 for t in server.photo_targets("AM.III.F.S11", pack)}
+        for _ in range(3):
+            again = {t["target_id"]: t.get("frame")
+                     for t in server.photo_targets("AM.III.F.S11", pack)}
+            self.assertEqual(again, first)
 
     def test_targets_use_final_frames_and_prefer_pack_checks(self):
         pack, _, _ = server.load_pack("AM.II.K.S3")
@@ -241,16 +514,20 @@ class PhotoTargetTests(unittest.TestCase):
             # exists whether or not a photo of the work does yet.
             self.assertTrue(target["criterion"])
             if target["kind"] in ("step", "section"):
-                # Derived from the pack, so no reviewed segment pinned a frame.
-                # A frame may still be *suggested* by matching the step or
-                # section title to a clip name, which is what makes an
-                # unsegmented task runnable without picking 27 frames by hand.
-                # Anything suggested must say so, or a guess would be
-                # indistinguishable from a reviewed interval.
+                # Derived from the pack, so no reviewed segment pinned a frame
+                # to the target itself. A frame can still arrive two ways: it
+                # may be *suggested* by matching the step or section title to a
+                # clip name, which is what makes an unsegmented task runnable
+                # without picking 27 frames by hand; or it may be *reviewed*,
+                # taken from the interval that covered the section's last step.
+                # Which of the two it was must be stated, or a guess would be
+                # indistinguishable from evidence.
                 if target["frame"] is None:
                     self.assertFalse(target["frame_exists"])
                 else:
-                    self.assertTrue(target["frame_suggested"])
+                    self.assertNotEqual(
+                        bool(target["frame_suggested"]), bool(target.get("frame_reviewed")),
+                        f"{target['target_id']} must be exactly one of suggested/reviewed")
                     self.assertTrue(target["frame"].startswith("t"))
                     self.assertIn(target["frame"], target["frame_url"])
                 continue
@@ -269,8 +546,6 @@ class PhotoTargetTests(unittest.TestCase):
         mapped = next(t for t in targets if t["criterion_source"] == "pack.checks")
         step = next(s for s in pack["steps"] if s["id"] == mapped["step_id"])
         self.assertIn(step["checks"][0]["statement"], mapped["criterion_default"])
-
-        self.assertTrue(any(t["kind"] == "task" for t in targets))
 
     def test_a_saved_edit_shadows_the_pack_default(self):
         pack, _, _ = server.load_pack("AM.II.K.S3")
@@ -319,36 +594,36 @@ class PhotoTargetTests(unittest.TestCase):
                 for target in from_checks:
                     self.assertIn(target["step_id"], pack_ids)
 
-    def test_only_photo_observable_checks_reach_the_criterion(self):
-        """A tactile check must never be handed to a photo grader.
+    def test_every_check_reaches_the_criterion_whatever_its_observable(self):
+        """The whole rubric is graded, not the part a camera happens to reach.
 
-        The packs mark pull tests and measured lengths as non-photo on purpose.
-        Folding them into the criterion makes the whole thing ungradeable —
-        a compound criterion is only as gradeable as its least gradeable clause,
-        so the photographable part never gets assessed.
+        This asserted the opposite while a criterion was graded as one blob:
+        folding in a pull test made the whole thing ungradeable, because a
+        compound criterion is only as gradeable as its least gradeable clause.
+        Each check is now its own call, so that reasoning no longer holds and
+        pre-filtering the rubric only hid conditions the assessment includes.
         """
         pack, _, _ = server.load_pack("AM.II.K.S3")
         targets = server.photo_targets("AM.II.K.S3", pack)
         by_step = {s["id"]: s for s in pack["steps"]}
 
         checked_any = False
+        non_photo_seen = False
         for target in targets:
             if target["criterion_source"] != "pack.checks" or target["kind"] != "subtask":
                 continue
             step = by_step[target["step_id"]]
             for check in step.get("checks") or []:
-                observable = check.get("observable") or "photo"
-                if observable == "photo":
-                    self.assertIn(check["statement"], target["criterion_default"])
-                    checked_any = True
-                else:
-                    self.assertNotIn(check["statement"], target["criterion_default"])
-                    # Excluded, not silently dropped.
-                    self.assertIn(
-                        check["statement"],
-                        [e["statement"] for e in target["excluded_checks"]],
-                    )
+                self.assertIn(check["statement"], target["criterion_default"])
+                checked_any = True
+                if (check.get("observable") or "photo") != "photo":
+                    non_photo_seen = True
         self.assertTrue(checked_any)
+        # The point of the change: a measurement or pull test is part of the
+        # rubric and is graded like anything else. Each check is its own call
+        # now, so one that a photo cannot settle returns `unsure` on its own
+        # line instead of dragging every other check on the step with it.
+        self.assertTrue(non_photo_seen, "fixture no longer covers a non-photo check")
 
     def test_expectation_semantics(self):
         self.assertTrue(vlm.expectation_met("pass", "pass"))
@@ -407,28 +682,6 @@ class PhotoTargetTests(unittest.TestCase):
         self.assertIn("keep_variants", reloaded)
         self.assertNotIn("drop", reloaded)
 
-    def test_mismatch_controls_pair_a_frame_with_a_foreign_criterion(self):
-        pack, _, _ = server.load_pack("AM.II.K.S3")
-        targets = server.photo_targets("AM.II.K.S3", pack)
-        controls = server.build_mismatch_jobs(targets, 5)
-
-        self.assertEqual(len(controls), 5)
-        for control in controls:
-            # `not_pass`, not `fail`: the rubric reserves `fail` for a photo that
-            # positively shows the criterion violated. A criterion from another
-            # task simply is not depicted, which is correctly `unsure`, so
-            # demanding `fail` would score correct behaviour as wrong.
-            self.assertEqual(control["expected"], "not_pass")
-            self.assertTrue(control["is_control"])
-            self.assertNotEqual(control["criterion_from"], control["source_target_id"])
-            source = next(t for t in targets if t["target_id"] == control["source_target_id"])
-            # The frame stays the target's own; only the criterion is foreign.
-            self.assertEqual(control["frame"], source["frame"])
-            self.assertNotEqual(control["criterion"], source["criterion"])
-
-    def test_no_controls_possible_from_a_single_target(self):
-        self.assertEqual(server.build_mismatch_jobs([], 3), [])
-
 
 class DraftedPackTests(unittest.TestCase):
     """A task compiled by packs/compile_pack.py must reach both tabs.
@@ -483,8 +736,11 @@ class DraftedPackTests(unittest.TestCase):
         self.assertEqual(steps, {s["id"] for s in self.pack["steps"]})
         for target in targets:
             self.assertTrue(target["criterion"].strip())
-        self.assertTrue(any(t["kind"] == "task" for t in targets))
-        self.assertTrue(any(t["kind"] == "evidence" for t in targets))
+        # And the subtasks those steps belong to, each carrying its own points.
+        subtasks = [t for t in targets if t["kind"] == "section"]
+        self.assertTrue(subtasks)
+        for subtask in subtasks:
+            self.assertTrue(subtask["checks"], subtask["target_id"])
 
     def test_criteria_are_drafted_from_procedure_and_handbook(self):
         criteria = server.read_drafted_criteria(self.ACS)

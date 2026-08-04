@@ -203,16 +203,125 @@ Edits made in the browser still override it and still save to
 `build/photo_eval/<ACS>/prompts.json`; *Reset to compiled text* restores the
 draft.
 
-Most targets have no photograph attached. Segmentation is what pins a frame to a
-step and only two tasks have been through it, so a step target starts frameless
-and the operator picks a frame from the extracted clips. That is a deliberate
-consequence of a finding already recorded in `inspector/README.md`: **the final
-frame of a reviewed sub-subtask is not a substitute for a deliberately taken
-assessment photo.** Grading AM.III.F.S11's compiled criteria against the last
-frame of `wire_lacing_1` reproduced it precisely — Opus 5 answered `unsure` on
-almost every condition and said why: *"In-progress photo: hands tying a dark
-lacing cord around a white wire bundle"*, and asked for *"completed lacing
-photographed unobstructed with a ruler in frame"*.
+### One row per subtask, and the invariant that keeps it honest
 
-That is the grader working, not failing. The criterion is the deliverable here;
-the photograph that will satisfy it is one a student has yet to take.
+`criteria/<ACS>/` holds one sheet per subtask, written about the finished subtask
+rather than assembled from the steps leading to it — which is the question a
+subtask target exists to ask. Each sheet becomes exactly one row under its task
+roll-up, so AM.I.D.S1 lists its seven (`route_the_line`, `cut_the_line`,
+`deburr_the_line`, `bend_the_line`, `flare_the_line`, `test_fluid_line`,
+`install_fluid_line`) as seven separately gradeable rows.
+
+Targets were built from pack sections and the sheet looked up afterwards, which
+silently dropped any sheet whose section was absent, merged away, or fully
+segmented — seven of thirty-seven, across three tasks and for three unrelated
+reasons:
+
+| Task | Lost | Because |
+|---|---|---|
+| AM.I.E.S1 | all 3 | hand-compiled before sections existed, so every step carries `section: null` and no subtask target was built at all |
+| AM.II.K.S3 | 3 of 5 | a section whose every step a segment covered was skipped, retiring the subtask along with it |
+| AM.II.A.S6 | the doubler | "Create the Patch Doubler" was folded in as a note-only heading, leaving its sheet no section to join to |
+
+Subtasks are now built from the union of pack sections and sheets, and a section
+covered by segments keeps its sheet — a reviewed segment grades one interval
+*inside* the work, the sheet grades the finished subtask those intervals add up
+to. The test that guards this asserts the direction that actually catches things:
+every **sheet** reaches exactly one target. Asserting every *target* found a
+sheet passes trivially while a sheet is never reached, which is how all seven
+stayed invisible under a green suite.
+
+A sheet-only subtask is matched to a clip by the same title overlap a pack
+section uses, which is what puts AM.I.E.S1's turnbuckle sheet on
+`insert_wire_for_double_wrap_turnbuckle_safety` rather than on one of the four
+pliers clips. Where the clips are a same-prefix numbered series the names carry
+no signal to match against, so it gets no clip at all: the doubler hitting
+`flush_patch_1` on the word *patch* would be an accident of vocabulary, and
+grading a doubler against footage of damage being identified is worse than
+offering no frame. It is still listed, still carries its criterion, and takes a
+frame from the picker.
+
+### Graded a point at a time, reported a subtask at a time
+
+A sheet is not one question. `sheet_checks()` splits it into its numbered
+criteria and its critical defects and each becomes its own model call, so a
+failure names the condition that failed rather than reporting that the subtask,
+as a whole, did. Defects are restated as absences before they are graded: taken
+as written, "Tube is kinked or collapsed flat at the bend" scores a `pass` on a
+kinked tube, which is not merely wrong but backwards, and reads as a clean
+result.
+
+The grid reports the other way round. Sixty-two points across seven subtasks is
+sixty-two rows of near-identical text, so the points are regrouped into one row
+per subtask and one cell per model, each cell listing its own points and their
+verdicts under the roll-up: one `fail` fails the subtask, and a point the photo
+could not settle leaves it for `review` rather than being rounded up to a pass.
+That is the rule `handle_photo_run` applies, and the cell applies the same one so
+the two cannot drift.
+
+A final row totals every point, per model — how many came back `pass`, `fail`
+and `unsure`, and how many were correct. Correct is the labelled verdict where a
+variant or control states one, and `pass` everywhere else, because every other
+point is graded against a reference frame: footage of work an instructor
+accepted. That inference is the row's whole caveat and is stated beneath it. A
+model that passes everything scores like one that grades, which is what the match
+test exists to separate.
+
+### Which frame a criterion is tried against
+
+Segmentation is what pins a frame to a step, and only two tasks have been through
+it. For the rest, a frame is *suggested* by laying the work out along its clip:
+
+1. Each pack section is matched to a clip by name overlap — "Cut the Tubing"
+   against `cut_the_line`, "Bending the Tubing" against `bend_the_line`. Ties
+   break in sorted order so the choice cannot move between server restarts. A
+   task with a single clip uses it regardless of the name, since there is nothing
+   to choose between — that is what makes the tasks whose only section is called
+   "Procedure" runnable at all.
+2. Sections sharing a clip take **successive slices** of it, in procedure order,
+   rather than each spreading over the whole thing.
+3. Steps subdivide their section's slice, so step *i* of *n* lands at its own
+   boundary and the last step of the last section ends on the clip's final frame.
+
+The rule this enforces is that **only the work that ends where a frame was taken
+may be graded against it.** Giving all three steps of "Cut the Tubing" the clip's
+last frame graded "Decide the size of tubing to use" against a photo of tubing
+already cut — a confident `fail` on a step the student performed correctly. That
+is worse than having no frame, because a wrong verdict is harder to notice than a
+missing one. On AM.I.D.S1 this collapsed 23 steps onto 7 frames; they now get 23.
+
+The whole-task roll-up takes the final frame of the last section that maps to a
+clip, since that is the closest thing an unsegmented task has to a photograph of
+finished work. Without it the single target the pilot most cares about — is the
+finished work correct — was the one target that could never run.
+
+Every suggested frame is marked `frame_suggested`, and the UI states what the
+guess rested on ("section 2 of 2 on this clip, step 3 of 4 within it, 88% of the
+way through") so it is never mistaken for a reviewed interval. The picker
+overrides it on any target.
+
+Where a subtask *has* been segmented, none of the above applies: the interval
+covering its last step names both the clip and the frame the work ended on, and
+that is evidence rather than an even-pace guess, so it wins. Those targets are
+marked `frame_reviewed` instead. This also settles the clip, which matters more
+than the frame — name overlap put "Insert the Pin into the Electrical Connector"
+on `elect_conn_2` on the words *electrical* and *connector*, but the work was
+filmed in `elect_conn_5`, and a subtask whose frame comes from one clip while its
+clip says another is filed under the wrong roll-up.
+
+### It is still not an assessment photo
+
+All of the above only chooses among frames of a reference video, and
+`inspector/README.md` already records what those are worth: **the final frame of
+a reviewed sub-subtask is not a substitute for a deliberately taken assessment
+photo.** Grading AM.III.F.S11's compiled criteria against `wire_lacing_1`
+reproduced it precisely — Opus 5 answered `unsure` on almost every condition and
+said why: *"In-progress photo: hands tying a dark lacing cord around a white wire
+bundle"*, asking for *"completed lacing photographed unobstructed with a ruler in
+frame"*. On AM.I.D.S1 the objections are occlusion — *"cut area occluded"*,
+*"flared end concealed inside the tool"* — which is what a head-mounted camera
+does during the action.
+
+That is the grader working, not failing; in the same runs the mismatch controls
+came back `fail`. The criterion is the deliverable here; the photograph that will
+satisfy it is one a student has yet to take.

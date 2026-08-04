@@ -14,5 +14,11 @@ data/
 # Generated artifacts — frames, indexes, segments, and sheets derived from data/.
 build/
 
+# Model-drafted grading sheets and their reports, written by
+# packs/generate_criteria.py and packs/atom_criteria.py from data/. Re-drafted
+# whenever the model or the source procedure changes, so the scripts are the
+# source and these are their output.
+criteria/
+
 # macOS
 .DS_Store

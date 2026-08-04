@@ -54,6 +54,10 @@ EVAL_RUNS_DIR = ROOT / "build" / "evals" / "runs"
 # Photo criteria drafted from the procedure sheet and handbook by
 # packs/compile_pack.py, with the source attribution behind each condition.
 CRITERIA_DIR = ROOT / "build" / "criteria"
+# Hand-organised grading sheets, one per subtask, checked into the repo rather
+# than built. `build/criteria` holds the compiler's per-step output; this holds
+# the per-subtask instrument the roll-up's subtasks are graded against.
+SUBTASK_CRITERIA_DIR = ROOT / "criteria"
 # The photo-assessment tab is the one part of the inspector that writes: edited
 # criteria and completed grading runs land here, and nowhere else.
 PHOTO_DIR = ROOT / "build" / "photo_eval"
@@ -740,41 +744,48 @@ def task_detail(acs: str) -> dict | None:
 # --------------------------------------------------------- photo assessment
 
 
+def subtask_key(step: dict) -> str | None:
+    """Which subtask a pack step belongs to.
+
+    Its `section` where the pack has one, its `variant` where it does not.
+    AM.I.E.S1 was compiled before sections existed: all thirteen of its steps
+    carry `section: null` and group by `variant` instead (`bolts_hand`,
+    `bolts_pliers`, `turnbuckle_hand`). Reading only `section` left that task
+    with no subtask owning any step, so its steps and its sheet-derived
+    subtasks sat in two piles that never met.
+    """
+    return step.get("section") or step.get("variant")
+
+
 def _photo_checks(step: dict) -> list[dict]:
-    """The checks of a step a photograph could actually settle."""
-    return [c for c in (step.get("checks") or [])
-            if c.get("statement") and (c.get("observable") or "photo") == "photo"]
+    """Every check of a step, whatever it is observable through."""
+    return [c for c in (step.get("checks") or []) if c.get("statement")]
 
 
 def _criterion_for_step(step: dict) -> dict:
-    """Turn a pack step into a photo-gradeable criterion plus its provenance.
+    """Turn a pack step into its criterion plus provenance.
 
-    Only checks marked `observable: photo` go into the criterion. The packs
-    deliberately mark pull tests, continuity checks and measured lengths as
-    `measurement` or `video` because a photograph cannot settle them, and
-    folding those into the text asked a grader to answer an unanswerable
-    question: a compound criterion is only as gradeable as its least gradeable
-    clause, so one tactile check drags the whole verdict to `unsure` and the
-    photographable part never gets assessed at all. Excluded checks are returned
-    rather than dropped, so the UI can show what was set aside and why.
+    Every check goes in, whatever the pack marks it observable through. This
+    used to keep only `observable: photo`, on the reasoning that a compound
+    criterion is only as gradeable as its least gradeable clause — one pull test
+    dragged the whole verdict to `unsure` and the photographable part never got
+    assessed. That reasoning belonged to a criterion graded as one blob. Each
+    check is now its own call, so a measurement comes back `unsure` on its own
+    line and takes nothing else with it, and the rubric is assessed whole rather
+    than pre-filtered down to what a camera happens to reach.
 
-    A step with no photo checks falls back to its instruction text, which
-    describes an action rather than an acceptance condition — recorded as a
-    distinct source so an action cannot masquerade as a criterion.
+    A step with no checks falls back to its instruction text, which describes an
+    action rather than an acceptance condition — recorded as a distinct source
+    so an action cannot masquerade as a criterion.
     """
     checks = [c for c in (step.get("checks") or []) if c.get("statement")]
-    gradeable = [c for c in checks if (c.get("observable") or "photo") == "photo"]
-    excluded = [
-        {"statement": c["statement"], "observable": c.get("observable")}
-        for c in checks if c not in gradeable
-    ]
-    if gradeable:
-        body = "\n".join(f"- {c['statement']}" for c in gradeable)
-        return {"criterion": body, "source": "pack.checks", "excluded": excluded}
+    if checks:
+        body = "\n".join(f"- {c['statement']}" for c in checks)
+        return {"criterion": body, "source": "pack.checks", "excluded": []}
     return {
         "criterion": (step.get("text") or step.get("id") or "").strip(),
         "source": "pack.step_text",
-        "excluded": excluded,
+        "excluded": [],
     }
 
 
@@ -821,6 +832,140 @@ def read_drafted_criteria(acs: str) -> dict:
     return data if isinstance(entries, dict) else {}
 
 
+def read_subtask_criteria(acs: str) -> dict[str, dict]:
+    """Load `criteria/<ACS>/<ACS>__<code>.txt`, the per-subtask grading sheets.
+
+    These are written at the level the work is actually filmed and taught at —
+    one sheet per subtask (`bend_the_line`, `flare_the_line`) — and each is a
+    complete grading instrument: what to assess, the numbered conditions, the
+    critical defects, and how to combine them into a verdict. That is a
+    different and better thing than what a subtask target could previously
+    show, which was its member steps' criteria concatenated together. A
+    concatenation has no notion of the finished subtask, so it could not state
+    what the article should look like once the subtask is done.
+
+    Keyed by both the subtask code and its normalised title, because the join
+    to a target differs by task: S1's codes are its clip names, while
+    AM.II.A.S6 films `flush_patch_1..8` and can only be matched on title.
+    """
+    entries: dict[str, dict] = {}
+    directory = SUBTASK_CRITERIA_DIR / acs
+    if not directory.is_dir():
+        return entries
+
+    for path in sorted(directory.glob(f"{acs}__*.txt")):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        header, _, body = text.partition("=" * 78)
+        if not body.strip():
+            # No rule bar, so the file is not in the expected shape. Grading
+            # against a half-parsed sheet is worse than not offering it.
+            continue
+
+        fields = {}
+        for line in header.splitlines():
+            key, sep, value = line.partition(":")
+            if sep and key.strip().isupper():
+                fields[key.strip()] = value.strip()
+        code = fields.get("SUBTASK CODE") or path.stem.split("__", 1)[-1]
+
+        # The body opens with "<code> — VLM GRADING CRITERIA"; the criterion
+        # itself is everything after it up to the provenance footer.
+        lines = body.splitlines()
+        start = 1 if lines and "VLM GRADING CRITERIA" in lines[0] else 0
+        basis_at = next((i for i, l in enumerate(lines) if l.strip() == "Source basis"),
+                        len(lines))
+        criterion = "\n".join(lines[start:basis_at]).strip()
+        if not criterion:
+            continue
+
+        # `Notes` record what the sheet's author decided a photograph cannot
+        # settle — a flattening percentage, a torque, a pressure reading. They
+        # are the sheet's own exclusions, so they belong with the target's
+        # other excluded checks rather than inside the text a model grades
+        # against, where they would read as conditions to be met.
+        notes: list[str] = []
+        basis: list[str] = []
+        for line in lines[basis_at + 1:]:
+            item = line.strip().lstrip("-").strip()
+            if not item:
+                continue
+            label, sep, rest = item.partition(":")
+            if sep and label.strip().lower() == "notes":
+                # Notes are separated by ".;" and freely contain a plain ";"
+                # inside a sentence ("...correct at this stage; flaring is the
+                # next subtask."). Splitting on the bare semicolon tore single
+                # notes into fragments that read as two half-finished claims
+                # about what a photograph can settle, so the split has to be
+                # anchored on the sentence end.
+                notes.extend(n.strip() for n in re.split(r"(?<=\.);\s*", rest) if n.strip())
+            elif sep:
+                basis.append(item)
+
+        entry = {
+            "code": code,
+            "title": fields.get("SUBTASK") or code,
+            "criterion": criterion,
+            "notes": notes,
+            "basis": basis,
+            "file": str(path.relative_to(ROOT)),
+            "reviewed": False,
+        }
+        entries[code.lower()] = entry
+        title_key = re.sub(r"[^a-z0-9]+", "", entry["title"].lower())
+        if title_key:
+            entries.setdefault(title_key, entry)
+    return entries
+
+
+def sheet_checks(criterion: str) -> list[dict]:
+    """Split a subtask criterion into the points it will be graded on.
+
+    Sent whole, a sheet comes back as one verdict: you learn the subtask failed
+    and never which of its conditions did. Each point is graded on its own call
+    instead, so a failure names itself.
+
+    Two kinds of point, and they do not have the same polarity. A numbered
+    criterion is a condition to be met. A critical defect is the opposite — it
+    is a thing whose *presence* fails the work — so grading its wording as
+    written would score "the tube is kinked" as a pass when the tube is kinked.
+    Defects are restated as absences before they become points, which is the
+    whole reason this parser exists rather than a regex at the call site.
+
+    `Overall decision` is a rule for combining points, not a point; the roll-up
+    in `handle_photo_run` is what applies it.
+    """
+    checks: list[dict] = []
+    section = None
+    for line in (criterion or "").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        heading = stripped.lower().rstrip(":")
+        if heading in ("criteria", "critical defects", "overall decision", "source basis"):
+            section = heading
+            continue
+        if section == "criteria":
+            numbered = re.match(r"\d+[.)]\s+(.+)", stripped)
+            if numbered:
+                checks.append({"id": f"c{sum(1 for c in checks if not c['defect']) + 1}",
+                               "statement": numbered.group(1).strip(), "defect": False})
+        elif section == "critical defects":
+            bullet = re.match(r"[-*•]\s+(.+)", stripped)
+            if bullet:
+                defect = bullet.group(1).strip().rstrip(".")
+                checks.append({
+                    "id": f"d{sum(1 for c in checks if c['defect']) + 1}",
+                    # Phrased so it stays grammatical whatever the defect's own
+                    # wording is — "No <defect>" breaks on "Tube is kinked".
+                    "statement": f"The finished work shows no such defect: {defect}.",
+                    "defect": True,
+                })
+    return checks
+
+
 def frame_candidates(acs: str) -> list[dict]:
     """Extracted clips a target with no reviewed frame can be pointed at.
 
@@ -865,6 +1010,14 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
     candidates = frame_candidates(acs)
     targets: list[dict] = []
     covered_steps: set[str] = set()
+    # The reviewed frame each step was last seen finished on. A section whose
+    # steps are all segmented has no clip guessed for it — its clip was never a
+    # name match — but it does have footage, and the final frame of the last
+    # interval covering its work is that footage's account of the finished
+    # subtask. That is evidence rather than a guess, so it beats the name-match
+    # path below.
+    step_frames: dict[str, tuple[str, str]] = {}
+    clip_subtasks: dict[str, set[str]] = {}
     saw_clip_level = False
 
     def apply_store(target: dict) -> dict:
@@ -904,6 +1057,12 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
             step, _variant = resolve(video, data, segment)
             if step:
                 covered_steps.add(step.get("id"))
+                step_frames[step.get("id")] = (video, frame)
+                # Which subtask this clip was reviewed as showing. A clip a
+                # reviewer already attributed to an existing subtask is another
+                # take of it, not a subtask of its own.
+                if subtask_key(step):
+                    clip_subtasks.setdefault(video, set()).add(subtask_key(step))
                 built = _criterion_for_step(step)
                 criterion, source, excluded = built["criterion"], built["source"], built["excluded"]
             else:
@@ -912,12 +1071,23 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
             target_id = f"{video}:{segment.get('seq')}"
             targets.append(apply_store({
                 "target_id": target_id,
+                # A reviewed interval *inside* a subtask — the code calls these
+                # sub-subtasks. It is step-level evidence, not a subtask, and
+                # the tab groups it with steps accordingly.
                 "kind": "subtask",
                 "video": video,
+                # The clip this interval was filmed on. Every target names the
+                # clip its work appears in, so the frame picker can offer that
+                # clip alone rather than all of the task's footage.
+                "clip": video,
                 "seq": segment.get("seq"),
                 "label": (segment.get("substep_label") or "").replace("-", " "),
                 "step_id": (step or {}).get("id") or segment.get("step_id"),
                 "step_title": (step or {}).get("text") or segment.get("step_title"),
+                # Resolved from the pack step the interval was matched to.
+                # Without it an interval has no subtask to be listed under, and
+                # 150 of them pile up outside the structure of the task.
+                "section": subtask_key(step or {}),
                 "confidence": segment.get("confidence"),
                 "t_end": segment.get("t_end"),
                 "frame": frame,
@@ -926,103 +1096,17 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
                 "description": segment.get("short_description"),
                 "criterion_default": criterion,
                 "criterion_source": source,
-                "excluded_checks": excluded,
                 "frame_candidates": candidates,
             }))
 
-        # Task level. `evidence.required` lists SEPARATE photos, each with its
-        # own framing and medium — so it must not be joined into one criterion
-        # and pointed at one frame. That asks a single photo to satisfy three
-        # different capture requirements at once, which fails by construction
-        # and tells you nothing about the work. One target per required photo,
-        # plus a roll-up that receives the whole set.
+        # A clip that carries reviewed intervals also anchors the subtasks built
+        # below: `saw_clip_level` is what tells them a segmented account of this
+        # task exists, so a section can take its frame from the interval that
+        # covered its last step rather than from a name-matched guess.
         last = segments[-1] if segments else None
         if not (last and last.get("frame_end")):
             continue
         saw_clip_level = True
-
-        required = [r for r in (((pack or {}).get("evidence") or {}).get("required") or [])
-                    if isinstance(r, dict)]
-        photo_items = [r for r in required if (r.get("medium") or "photo") == "photo"]
-        non_photo = [
-            {"statement": r.get("description") or r.get("id"), "observable": r.get("medium")}
-            for r in required if r not in photo_items
-        ]
-        frame = last["frame_end"]
-        frame_url = f"/files/build/frames/{acs}/{video}/{frame}"
-        frame_exists = (FRAME_SETS["detail"] / acs / video / frame).is_file()
-
-        for item in photo_items:
-            description = (item.get("description") or item.get("statement") or "").strip()
-            if not description:
-                continue
-            targets.append(apply_store({
-                "target_id": f"{video}:ev:{item.get('id')}",
-                "kind": "evidence",
-                "video": video,
-                "seq": None,
-                "label": f"{video} — required photo {item.get('id')}",
-                "step_id": None,
-                "step_title": "Task level — required evidence",
-                "confidence": None,
-                "t_end": last.get("t_end"),
-                "frame": frame,
-                "frame_url": frame_url,
-                "frame_exists": frame_exists,
-                "description": description,
-                # `framing` is a capture instruction, not an acceptance
-                # condition, so it drives the adequacy grader rather than being
-                # folded into the criterion the work is judged against.
-                "framing": item.get("framing"),
-                "evidence_id": item.get("id"),
-                "assumed": bool(item.get("assumed")),
-                "criterion_default": description,
-                "criterion_source": "pack.evidence",
-                "excluded_checks": non_photo,
-                # `description` and `framing` say what to photograph and how —
-                # they are capture instructions, not acceptance conditions. The
-                # pack declares no link from an evidence item to the checks it
-                # supports, so inventing one here would put words in the SME's
-                # mouth. These targets answer "is this the required photo?" and
-                # nothing else; workmanship is judged by the roll-up.
-                "adequacy_only": True,
-            }))
-
-        # The roll-up asks the actual task-level question — is the finished work
-        # correct — against every photo-observable check in the pack, and is fed
-        # the whole frame set rather than one frame.
-        # Carried as discrete checks, not one joined blob: a compound criterion
-        # fails whole the moment any clause fails, so you learn that something
-        # is wrong but never which. Each check is graded on its own call.
-        pack_checks = [
-            {"id": check.get("id"), "statement": check["statement"], "step_id": step.get("id")}
-            for step in (pack or {}).get("steps") or []
-            for check in step.get("checks") or []
-            if (check.get("observable") or "photo") == "photo" and check.get("statement")
-        ]
-        criterion = ("\n".join(f"- {c['statement']}" for c in pack_checks) if pack_checks
-                     else "The finished work is complete and correct.")
-        targets.append(apply_store({
-            "target_id": f"{video}:task",
-            "kind": "task",
-            "video": video,
-            "seq": None,
-            "label": f"{video} — whole task (all photo checks)",
-            "step_id": None,
-            "step_title": "Task level — roll-up",
-            "confidence": None,
-            "t_end": last.get("t_end"),
-            "frame": frame,
-            "frame_url": frame_url,
-            "frame_exists": frame_exists,
-            "description": last.get("short_description"),
-            "criterion_default": criterion,
-            "criterion_source": "pack.checks" if pack_checks else "fallback",
-            "excluded_checks": non_photo,
-            "multi_image": True,
-            "checks": pack_checks,
-            "frame_candidates": candidates,
-        }))
 
     # ---------------------------------------------------------- pack-derived
     # Everything above needs a reviewed segment to exist. These do not.
@@ -1051,12 +1135,22 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
         def related(a: str, b: str) -> bool:
             return len(a) >= 3 and len(b) >= 3 and (a.startswith(b[:4]) or b.startswith(a[:4]))
 
+        # Sorted, so a tie resolves the same way on every run. Iterating a set
+        # here made the winner depend on string hash order, which is randomised
+        # per process — the suggested frame could change across restarts, and a
+        # criterion that grades differently after a restart is untraceable.
         best, best_score = None, 0
-        for clip in {c["video"] for c in candidates}:
+        for clip in sorted({c["video"] for c in candidates}):
             clip_words = [w for w in re.findall(r"[a-z]{3,}", clip.lower()) if w not in skip]
             score = sum(1 for w in words if any(related(w, c) for c in clip_words))
             if score > best_score:
                 best, best_score = clip, score
+        # With a single clip there is nothing to choose between, so a failed name
+        # match is no reason to withhold it. That covers the tasks whose sections
+        # are just called "Procedure" — no title can ever match a clip name, and
+        # they were the ones left with nothing runnable at all.
+        if best is None and len(candidates) == 1:
+            return candidates[0]["video"]
         return best
 
     clip_frames: dict[str, list[str]] = {}
@@ -1066,33 +1160,125 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
             clip_frames[clip] = frame_names(acs, clip, "detail")
         return clip_frames[clip]
 
-    def suggest_frame(clip: str, position: tuple[int, int] | None) -> str | None:
-        """Which frame of a clip stands for this piece of work.
+    sheets = read_subtask_criteria(acs)
+
+    # Which clip each sheet was placed on, for the clip-based join below. Filled
+    # once the orphan sheets have been placed.
+    sheet_by_clip: dict[str, dict] = {}
+
+    def sheet_for(clip: str | None, section_title: str | None) -> dict | None:
+        """The grading sheet for a subtask, matched on clip name then title."""
+        return (sheets.get((clip or "").lower())
+                or sheets.get(re.sub(r"[^a-z0-9]+", "", (section_title or "").lower()))
+                # Neither name matched, but both the subtask and a sheet were
+                # placed on the same clip, and one clip shows one piece of work.
+                # This is the only join AM.I.E.S1 has: its subtask level is the
+                # pack's `variant` (`bolts_hand`), and no amount of string
+                # matching gets from that to a sheet called "Wire Safety on
+                # Bolts by Hand" — but both land on `safety_wire_by_hand`.
+                or (sheet_by_clip.get(clip) if clip else None))
+
+    # Which clip each pack section is guessed to come from, resolved once. When
+    # several sections land on the same clip they have to share it rather than
+    # each spreading over the whole thing, or their steps overlap and the later
+    # ones collide on identical frames.
+    pack_sections = list(dict.fromkeys(
+        subtask_key(s) for s in (pack or {}).get("steps") or [] if subtask_key(s)))
+    section_clip = {name: suggest_clip(name) for name in pack_sections}
+
+    # Some campuses name clips after the work (`cut_the_line`), others just
+    # number them (`flush_patch_1..8`, `wire_lacing_1..3`). A numbered clip
+    # carries nothing for a title to match against, so name matching returns
+    # nothing and every section looks like it has no footage — which is
+    # indistinguishable, in the output, from footage that never shows finished
+    # work. They need different remedies, so they must not be conflated.
+    #
+    # Where the clips form a numbered series and there is exactly one per
+    # section, the correspondence is positional. The equal-count condition is
+    # what keeps this from being a wild guess: 8 sections against 8 numbered
+    # clips is a filming convention, 4 sections against 3 clips is not, and the
+    # latter is left unmatched rather than mapped arbitrarily.
+    numbered = sorted(
+        (c["video"] for c in candidates if re.search(r"_(\d+)$", c["video"])),
+        key=lambda v: int(re.search(r"_(\d+)$", v).group(1)))
+    # When every clip is the same word plus an index, the names carry no signal
+    # to discriminate on, and any match is an accident of vocabulary — "Create
+    # the Patch Filler" hitting `flush_patch_1` on the word "patch" while the
+    # other seven sections match nothing. Treating that one accident as a real
+    # result blocked the positional reading for all eight, so a same-prefix
+    # series is detected and positional wins outright.
+    same_prefix = len({re.sub(r"_\d+$", "", v) for v in numbered}) == 1
+    if (pack_sections and numbered and same_prefix
+            and len(numbered) == len(candidates)
+            and len(numbered) == len(pack_sections)):
+        section_clip = dict(zip(pack_sections, numbered))
+    clip_sections: dict[str, list[str]] = {}
+    for name in pack_sections:
+        if section_clip.get(name):
+            clip_sections.setdefault(section_clip[name], []).append(name)
+
+    # A grading sheet the pack has no section for still describes a finished,
+    # photographable piece of work, so it gets a subtask target of its own
+    # rather than being dropped on the floor. Two tasks need this and for
+    # different reasons: AM.I.E.S1 was hand-compiled before sections existed so
+    # every one of its steps carries `section: null`, and AM.II.A.S6 folded
+    # "Create the Patch Doubler" in as a note-only heading. In both the sheet is
+    # the only record that the subtask exists at all.
+    claimed = {sheet["code"] for sheet in
+               (sheet_for(section_clip.get(name), name) for name in pack_sections) if sheet}
+    by_code = {sheet["code"]: sheet for sheet in sheets.values()}
+    unclaimed = [sheet for code, sheet in by_code.items() if code not in claimed]
+
+    # Where every clip is the same word plus an index, the names carry no signal
+    # to discriminate on and a name match is the accident described above — so a
+    # sheet-only subtask is left without a clip rather than pinned to
+    # `flush_patch_1`. Everywhere else its title goes through the same matcher a
+    # pack section's title does, which is what places AM.I.E.S1's three sheets
+    # on the clips that actually demonstrate them.
+    titles_carry_signal = not (numbered and same_prefix and len(numbered) == len(candidates))
+    placements = [(sheet, suggest_clip(sheet["title"]) if titles_carry_signal else None)
+                  for sheet in unclaimed]
+    for sheet, clip in placements:
+        if clip:
+            sheet_by_clip.setdefault(clip, sheet)
+
+    # A sheet that landed on the same clip as a pack subtask is that subtask's
+    # sheet, not a subtask of its own — `sheet_for` will now find it by clip.
+    # Emitting it separately as well would list the same piece of work twice:
+    # once as `bolts_hand` with AM.I.E.S1's four steps under it, and again as
+    # "Wire Safety on Bolts by Hand" with none, both graded and both billed.
+    section_clips = {section_clip.get(name) for name in pack_sections}
+    orphan_sheets = [sheet for sheet, clip in placements
+                     if not (clip and clip in section_clips)]
+    for sheet, clip in placements:
+        if sheet not in orphan_sheets:
+            continue
+        section_clip[sheet["title"]] = clip
+        if clip:
+            clip_sections.setdefault(clip, []).append(sheet["title"])
+
+    def suggest_frame(clip: str, fraction: float) -> str | None:
+        """The frame `fraction` of the way through a clip.
 
         A clip's final frame is the closest thing it has to a finished state, so
-        it is right for the section as a whole. It is wrong for the individual
-        steps inside that section: giving all three steps of "Cut the Tubing"
-        the clip's last frame grades "Decide the size of tubing to use" against a
-        photo of tubing already cut. That reads as a confident failure on a step
-        the student performed correctly, which is worse than having no frame at
-        all — a wrong verdict is harder to notice than a missing one.
+        it is right for whatever work ends there. It is wrong for everything
+        before it: giving all three steps of "Cut the Tubing" the clip's last
+        frame grades "Decide the size of tubing to use" against a photo of
+        tubing already cut. That reads as a confident failure on a step the
+        student performed correctly, which is worse than having no frame at all,
+        because a wrong verdict is harder to notice than a missing one.
 
-        The steps of a section run in order through its clip, so step i of n has
-        finished at roughly i/n of the way through. That boundary frame is the
-        guess. It is still only a guess — `frame_suggested` says so, and the
-        picker overrides it — but it is one that moves through the work instead
-        of standing still at the end of it.
+        So work is laid out along the clip in the order the procedure performs
+        it: sections sharing a clip take successive slices of it, and the steps
+        of a section subdivide their own slice. It remains a guess assuming an
+        even pace — `frame_suggested` says so and the picker overrides it — but
+        it is a guess that moves through the work rather than standing still at
+        the end of it.
         """
         names = frames_of(clip)
         if not names:
             return None
-        if not position:
-            return names[-1]
-        index, count = position
-        if count < 1:
-            return names[-1]
-        # 1-based index, so the final step lands on the final frame.
-        cut = round(len(names) * index / count) - 1
+        cut = round(len(names) * min(1.0, max(0.0, fraction))) - 1
         return names[min(len(names) - 1, max(0, cut))]
 
     def blank_frame(target: dict, section_title: str | None = None,
@@ -1101,19 +1287,38 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
         target.update({"video": None, "seq": None, "confidence": None, "t_end": None,
                        "frame": None, "frame_url": None, "frame_exists": False,
                        "frame_candidates": candidates})
-        clip = suggest_clip(section_title) if section_title else None
-        frame = suggest_frame(clip, position) if clip else None
-        if clip and frame:
-            path = FRAME_SETS["detail"] / acs / clip / frame
-            target.update({
-                "video": clip, "frame": frame,
-                "frame_url": f"/files/build/frames/{acs}/{clip}/{frame}",
-                "frame_exists": path.is_file(),
-                "frame_suggested": True,
-                # Where in the clip the guess came from, so the UI can say "step
-                # 2 of 3" rather than implying someone chose this frame.
-                "frame_position": list(position) if position else None,
-            })
+        clip = section_clip.get(section_title) if section_title else None
+        # Recorded whether or not a frame can be guessed from it. A step belongs
+        # to the clip its section was matched to, and that is what the frame
+        # picker must offer — without it a step fell back to every clip in the
+        # task, so picking a frame for "Cut the Tubing, step 2" meant scrolling
+        # 1593 frames of seven unrelated subtasks to find the ~160 that could
+        # possibly show it.
+        target.setdefault("clip", clip)
+        if not clip:
+            return target
+
+        # The section's own slice of its clip, then the step's slice of that.
+        peers = clip_sections.get(clip) or [section_title]
+        share = peers.index(section_title) if section_title in peers else 0
+        index, count = position or (1, 1)
+        fraction = (share + (index / count if count else 1)) / len(peers)
+
+        frame = suggest_frame(clip, fraction)
+        if not frame:
+            return target
+        path = FRAME_SETS["detail"] / acs / clip / frame
+        target.update({
+            "video": clip, "frame": frame,
+            "frame_url": f"/files/build/frames/{acs}/{clip}/{frame}",
+            "frame_exists": path.is_file(),
+            "frame_suggested": True,
+            # What the guess was based on, so the UI can show its reasoning
+            # rather than implying someone chose this frame.
+            "frame_position": list(position) if position else None,
+            "frame_share": [share + 1, len(peers)] if len(peers) > 1 else None,
+            "frame_fraction": round(fraction, 3),
+        })
         return target
 
     # One target per pack section — the level the work is actually filmed and
@@ -1121,13 +1326,75 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
     # a whole-task roll-up, and the subtasks the task is made of ("Cut the
     # Tubing", "Bending the Tubing") had no representation anywhere.
     sections = dict.fromkeys(
-        s.get("section") for s in (pack or {}).get("steps") or [] if s.get("section")
+        subtask_key(s) for s in (pack or {}).get("steps") or [] if subtask_key(s)
     )
+    # The subtasks to emit: every pack section, plus every grading sheet no pack
+    # section corresponds to. Each row carries the sheet it will be graded
+    # against, resolved once here so the suppression rule below can see it.
+    subtask_rows: list[tuple[str, list[dict], dict | None]] = []
     for section in sections:
         member_steps = [s for s in (pack or {}).get("steps") or []
-                        if s.get("section") == section]
-        if all(s.get("id") in covered_steps for s in member_steps):
+                        if subtask_key(s) == section]
+        # A reviewed segment target grades one interval *inside* the work; the
+        # sheet grades the finished subtask those intervals add up to. They are
+        # different questions, so a fully segmented section still needs its
+        # sheet — dropping it cost AM.II.K.S3 three of its five subtasks, which
+        # were the three its segmentation pass happened to cover completely.
+        if not sheet_for(section_clip.get(section), section) and all(
+                s.get("id") in covered_steps for s in member_steps):
             continue
+        subtask_rows.append((section, member_steps, None))
+    subtask_rows.extend((sheet["title"], [], sheet) for sheet in orphan_sheets)
+
+    section_targets: list[dict] = []
+    # A subtask whose title matched no clip still has footage — the campus filmed
+    # it, the name simply carries no signal ("Cut The Hose" against
+    # `flex_hose_2`). Clips are numbered in filming order and pack subtasks are
+    # listed in procedure order, so the unclaimed clips fall to the unplaced
+    # subtasks in sequence. Done before the targets are built, because a subtask
+    # given its clip here also gets that clip's frame rather than none.
+    #
+    # Order is what keeps this honest: the pointer only ever moves forward, so a
+    # subtask can be given a clip that comes after the previous subtask's and
+    # never one that comes before it. Without this pass an unmatched subtask sat
+    # frameless while its own clip was picked up as a subtask of its own — S7
+    # reported seven subtasks for six pieces of work, one of them a duplicate.
+    ordered_clips = [c["video"] for c in candidates]
+    taken: set[str] = set()
+    cursor = 0
+    for section, _members, _orphan in subtask_rows:
+        wanted = section_clip.get(section)
+        # A clip a previous subtask already holds is not available to this one.
+        # Both of S7's sections match `flex_hose_1` on the word "hose", and
+        # letting them share it left five clips unclaimed and two subtasks
+        # pointing at the same footage — the second graded against a photo of
+        # the first one's work.
+        if wanted and wanted in ordered_clips and wanted not in taken:
+            taken.add(wanted)
+            cursor = max(cursor, ordered_clips.index(wanted) + 1)
+            continue
+        nxt = next((c for c in ordered_clips[cursor:]
+                    if c not in taken and c not in clip_subtasks), None)
+        if not nxt:
+            # Nothing left to give it. Better clipless than pinned to footage of
+            # another subtask's work.
+            section_clip[section] = None
+            continue
+        section_clip[section] = nxt
+        taken.add(nxt)
+        cursor = ordered_clips.index(nxt) + 1
+
+    # Rebuilt from the final assignment rather than patched alongside it. The
+    # first version appended to it and left the old entry in place, so S7's two
+    # sections still both counted as sharing `flex_hose_1` — each took half the
+    # clip, and "Determine the Distance and Hose" ended at its midpoint while
+    # its own clip's second half showed the next subtask's work.
+    clip_sections.clear()
+    for name, _members, _orphan in subtask_rows:
+        if section_clip.get(name):
+            clip_sections.setdefault(section_clip[name], []).append(name)
+
+    for section, member_steps, orphan in subtask_rows:
         statements = []
         for member in member_steps:
             entry = drafted_for(member.get("id"))
@@ -1138,40 +1405,167 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
                                         for c in _photo_checks(member)])
                 if line.strip()
             )
-        if not statements:
+        clip = section_clip.get(section)
+        # The subtask's own grading sheet, matched on its clip name first and
+        # its title second. It wins over the concatenated step criteria: it is
+        # written about the finished subtask rather than assembled from the
+        # steps that lead to it, so it can say what the article should look
+        # like once the subtask is done — which is the question a subtask
+        # target exists to ask.
+        sheet = orphan or sheet_for(clip, section)
+        if not (statements or sheet):
             continue
-        targets.append(apply_store(blank_frame({
+        # A section whose every step was segmented has real footage even when no
+        # clip name matched its title — AM.II.K.S3 films `elect_conn_2..5`, which
+        # no subtask title can ever match. The last interval covering its work
+        # names both the clip and the frame that work finished on, so it settles
+        # what the name match could not.
+        # It also overrules a clip the name match guessed. `elect_conn_2` won
+        # "Insert the Pin into the Electrical Connector" on the words electrical
+        # and connector, but the work was filmed in `elect_conn_5` — and a
+        # subtask whose frame comes from one clip while its clip says another
+        # gets filed under the wrong roll-up, beside a finished article it had
+        # no part in.
+        reviewed = next((step_frames[s["id"]] for s in reversed(member_steps)
+                         if s.get("id") in step_frames), None)
+        if reviewed:
+            clip = reviewed[0]
+        # Led by the clip name. The subtasks of a task are known by what the
+        # footage is called — `bend_the_line`, `flare_the_line` — and a list
+        # ordered by section title alone made you translate every row back to
+        # the clip it came from before you could tell which subtask it was.
+        # A sheet-only subtask has no pack steps to count, and "(0 steps)" would
+        # read as a section that lost its steps rather than one the pack never
+        # had; it is named for the sheet it comes from instead.
+        steps_note = f"({len(member_steps)} steps)" if member_steps else "(criteria sheet)"
+        label = (f"{clip} — {section} {steps_note}" if clip
+                 else f"{section} — subtask {steps_note}")
+        section_target = blank_frame({
             "target_id": f"section:{re.sub(r'[^a-z0-9]+', '-', section.lower()).strip('-')}",
             # Not "subtask": that kind already means a reviewed sub-subtask
             # interval, which carries a real frame and a confidence. A section
             # is a pack-derived grouping with neither.
             "kind": "section",
-            "label": f"{section} — subtask ({len(member_steps)} steps)",
+            "label": label,
             "step_id": None,
             "step_title": section,
             "section": section,
-            "description": f"All photo-gradeable conditions across {len(member_steps)} steps.",
-            "criterion_default": "\n".join(dict.fromkeys(statements)),
-            "criterion_source": "drafted.section",
-            "excluded_checks": [],
+            "clip": clip,
+            "step_count": len(member_steps),
+            "description": (sheet["title"] if sheet else
+                            f"All photo-gradeable conditions across {len(member_steps)} steps."),
+            "criterion_default": (sheet["criterion"] if sheet
+                                  else "\n".join(dict.fromkeys(statements))),
+            "criterion_source": "criteria.subtask" if sheet else "drafted.section",
+            # Provenance stays attached to the criterion it belongs to, so a
+            # sheet's claims remain traceable to the procedure and handbook
+            # pages they were drafted from.
+            "criterion_file": sheet["file"] if sheet else None,
+            "criterion_basis": sheet["basis"] if sheet else [],
+            "criterion_reviewed": bool(sheet and sheet["reviewed"]),
             "framing": None,
             "sources": [],
             "conflicts": [],
-        }, section)))
+        }, section)
+        # Wherever it exists, including over a frame the name match already
+        # suggested. That suggestion is an even-pace guess at where a section
+        # sits inside its clip; this is a reviewer saying where the work ended.
+        # Sections sharing a clip keep their spread either way, since each
+        # resolves its own last covered step rather than the clip's endpoint.
+        if reviewed:
+            video, frame = reviewed
+            section_target.update({
+                "video": video, "frame": frame,
+                "frame_url": f"/files/build/frames/{acs}/{video}/{frame}",
+                "frame_exists": (FRAME_SETS["detail"] / acs / video / frame).is_file(),
+                # Not `frame_suggested`: this is where a reviewer said the work
+                # ended, not an even-pace guess at where it might have. Both
+                # keys are set so a frame always says which of the two it is.
+                "frame_suggested": False,
+                "frame_reviewed": True,
+            })
+        section_target = apply_store(section_target)
+        # Parsed from the *effective* criterion, so an operator's saved edit is
+        # split into its own points rather than reverting the subtask to a
+        # single call the moment it is edited.
+        section_target["checks"] = sheet_checks(section_target["criterion"])
+        section_targets.append(section_target)
+        targets.append(section_target)
+
+    # One subtask per clip. A campus films one clip per piece of work, so a clip
+    # with no subtask is a piece of work the paperwork does not mention: on
+    # AM.I.D.S7 the procedure sheet stops after "Cut The Hose" while the footage
+    # goes on to mark the hose, fit both end fittings and pressure-test it. Four
+    # subtasks existed only as video, and a tab built from the pack alone
+    # reported the task as two subtasks long.
+    #
+    # These carry no criterion. There is no sheet and no pack section behind
+    # them, and writing one here would be inventing an acceptance standard for
+    # aircraft maintenance out of a video frame. The target exists so the work
+    # is visible and so a criterion can be authored against it in the tab; until
+    # one is, it says so and cannot be graded.
+    claimed_clips = {t["clip"] for t in section_targets if t.get("clip")}
+    for candidate in candidates:
+        clip = candidate["video"]
+        # A clip a reviewer already attributed to a subtask is another take of
+        # that subtask, not a new one. AM.I.E.S1 films `safety_wire_pliers_1..4`
+        # and the segmentation pass places all five steps of `bolts_pliers` in
+        # every one of them — four takes of one subtask, and splitting them into
+        # four would quadruple that subtask's weight in any run.
+        if clip in claimed_clips or clip in clip_subtasks:
+            continue
+        frames = frames_of(clip)
+        if not frames:
+            continue
+        frame = frames[-1]
+        targets.append(apply_store({
+            "target_id": f"clip:{clip}",
+            "kind": "section",
+            "label": f"{clip} — subtask (no criteria sheet)",
+            "step_id": None,
+            "step_title": clip,
+            "section": clip,
+            "clip": clip,
+            "step_count": 0,
+            "video": clip,
+            "seq": None,
+            "confidence": None,
+            "t_end": None,
+            "frame": frame,
+            "frame_url": f"/files/build/frames/{acs}/{clip}/{frame}",
+            "frame_exists": (FRAME_SETS["detail"] / acs / clip / frame).is_file(),
+            # The clip's last frame is the closest thing it has to finished
+            # work, and it was not guessed from a name match — it is simply
+            # where this clip ends. Neither suggested nor reviewed.
+            "frame_suggested": False,
+            "frame_reviewed": False,
+            "frame_candidates": candidates,
+            "description": None,
+            "criterion_default": "",
+            "criterion_source": "none",
+            "criterion_file": None,
+            "criterion_basis": [],
+            "criterion_reviewed": False,
+            "needs_criteria": True,
+            "framing": None,
+            "sources": [],
+            "conflicts": [],
+            "checks": [],
+        }))
 
     # Position of each step within its own section, so a suggested frame can
     # advance through the clip rather than every step sharing its last frame.
     section_members: dict[str, list[str]] = {}
     for step in (pack or {}).get("steps") or []:
         if step.get("id"):
-            section_members.setdefault(step.get("section") or "", []).append(step["id"])
+            section_members.setdefault(subtask_key(step) or "", []).append(step["id"])
 
     for step in (pack or {}).get("steps") or []:
         if not step.get("id") or step["id"] in covered_steps:
             continue
         built = _criterion_for_step(step)
         entry = drafted_for(step["id"])
-        members = section_members.get(step.get("section") or "", [])
+        members = section_members.get(subtask_key(step) or "", [])
         position = ((members.index(step["id"]) + 1, len(members))
                     if step["id"] in members else None)
         # The compiled criterion is preferred where it exists: it was drafted
@@ -1186,122 +1580,16 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
             "label": f"{step['id']} — {step.get('text') or step['id']}",
             "step_id": step["id"],
             "step_title": step.get("text"),
-            "section": step.get("section"),
+            "section": subtask_key(step),
             "description": entry.get("step_text") or step.get("text"),
             "criterion_default": criterion or built["criterion"],
             "criterion_source": "drafted.step" if criterion else built["source"],
-            "excluded_checks": built["excluded"] + [
-                {"statement": s, "observable": "not photo-gradeable"}
-                for s in entry.get("not_photo_gradeable") or []
-            ],
             "framing": entry.get("required_framing"),
             "sources": entry.get("sources") or [],
             "conflicts": entry.get("conflicts") or [],
-        }, step.get("section"), position)))
-
-    if saw_clip_level:
-        return targets
-
-    # No segmented clip, so the clip-level targets above never ran. Emit the
-    # same two kinds without a clip to hang them on.
-    required = [r for r in (((pack or {}).get("evidence") or {}).get("required") or [])
-                if isinstance(r, dict)]
-    photo_items = [r for r in required if (r.get("medium") or "photo") == "photo"]
-    non_photo = [
-        {"statement": r.get("description") or r.get("id"), "observable": r.get("medium")}
-        for r in required if r not in photo_items
-    ]
-
-    for item in photo_items:
-        description = (item.get("description") or item.get("statement") or "").strip()
-        if not description:
-            continue
-        targets.append(apply_store(blank_frame({
-            "target_id": f"ev:{item.get('id')}",
-            "kind": "evidence",
-            "label": f"Required photo {item.get('id')}",
-            "step_id": None,
-            "step_title": "Task level — required evidence",
-            "description": description,
-            "framing": item.get("framing"),
-            "evidence_id": item.get("id"),
-            "assumed": bool(item.get("assumed")),
-            "criterion_default": description,
-            "criterion_source": "pack.evidence",
-            "excluded_checks": non_photo,
-            "adequacy_only": True,
-        })))
-
-    pack_checks = [
-        {"id": check.get("id"), "statement": check["statement"], "step_id": step.get("id")}
-        for step in (pack or {}).get("steps") or []
-        for check in step.get("checks") or []
-        if (check.get("observable") or "photo") == "photo" and check.get("statement")
-    ]
-    if not (pack_checks or drafted_for("task")):
-        return targets
-
-    task_entry = drafted_for("task")
-    task_criterion = (task_entry.get("criterion") or "").strip()
-    targets.append(apply_store(blank_frame({
-        "target_id": "task",
-        "kind": "task",
-        "label": "Whole task (all photo checks)",
-        "step_id": None,
-        "step_title": "Task level — roll-up",
-        "description": None,
-        "criterion_default": task_criterion or "\n".join(
-            f"- {c['statement']}" for c in pack_checks),
-        "criterion_source": "drafted.task" if task_criterion else "pack.checks",
-        "excluded_checks": non_photo + [
-            {"statement": s, "observable": "not photo-gradeable"}
-            for s in task_entry.get("not_photo_gradeable") or []
-        ],
-        "sources": task_entry.get("sources") or [],
-        "multi_image": True,
-        "checks": pack_checks,
-    })))
+        }, subtask_key(step), position)))
 
     return targets
-
-
-def build_mismatch_jobs(targets: list[dict], count: int) -> list[dict]:
-    """Pair frames with criteria they should NOT satisfy.
-
-    Every reference frame in this dataset is correct work, so a run where each
-    model passes everything is indistinguishable from a run where each model
-    simply always says pass. Mispairing a frame with another subtask's criterion
-    produces an item whose correct answer is `fail`, which is what makes the
-    results discriminative. It is a synthetic negative and no substitute for the
-    labelled negatives docs/evals.md calls for — a mispaired criterion is
-    usually *obviously* wrong, so passing this control is a floor, not a ceiling.
-    """
-    usable = [t for t in targets if t.get("frame_exists") and t.get("criterion")]
-    if len(usable) < 2 or count <= 0:
-        return []
-    pairs = []
-    for offset, target in enumerate(usable[:count]):
-        # Prefer a criterion from a different pack step; fall back to any other.
-        other = next(
-            (o for o in usable[offset + 1 :] + usable[:offset]
-             if o["step_id"] != target["step_id"]),
-            None,
-        ) or usable[(offset + len(usable) // 2) % len(usable)]
-        if other["target_id"] == target["target_id"]:
-            continue
-        pairs.append({
-            "target_id": f"{target['target_id']}~mismatch",
-            "source_target_id": target["target_id"],
-            "criterion_from": other["target_id"],
-            "label": f"{target['label']} × criterion from “{other['label']}”",
-            "frame": target["frame"],
-            "video": target["video"],
-            "frame_url": target["frame_url"],
-            "criterion": other["criterion"],
-            "expected": "not_pass",
-            "is_control": True,
-        })
-    return pairs
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -1359,8 +1647,19 @@ class Handler(SimpleHTTPRequestHandler):
 
         if len(parts) == 3 and parts[0] == "photo" and parts[1] == "runs":
             acs = parts[2]
+            # `limit` exists so the browser can restore just the last run on
+            # load. A run holds one result per criteria point per model —
+            # hundreds of objects — so reading every run off disk to show the
+            # newest gets slower with each run performed.
+            try:
+                limit = int((query.get("limit") or ["0"])[0])
+            except ValueError:
+                limit = 0
+            paths = sorted((PHOTO_DIR / acs).glob("run_*.json"), reverse=True)
+            if limit > 0:
+                paths = paths[:limit]
             runs = []
-            for path in sorted((PHOTO_DIR / acs).glob("run_*.json"), reverse=True):
+            for path in paths:
                 data = read_json(path)
                 if data:
                     runs.append(data)
@@ -1670,60 +1969,41 @@ class Handler(SimpleHTTPRequestHandler):
                 "frame_url": f"/files/build/frames/{acs}/{video}/{frame}",
             })
 
-        # "holistic" grades the assembly as a whole against a weighted rubric;
-        # "correctness" grades condition by condition. Same photo, same grid.
-        # Read before the item loop, which branches on it when deciding whether
-        # to expand a roll-up into one call per check.
-        grading_mode = body.get("grading_mode") or "correctness"
-        if grading_mode not in ("correctness", "holistic"):
-            return self.send_error(400, "grading_mode must be correctness or holistic")
-
-        # One frame per clip: on a task filmed as one clip per subtask, that is
-        # the whole finished story and is what a roll-up should be shown.
-        rollup_submission = sorted({
-            str(FRAME_SETS["detail"] / acs / c["video"] / c["last_frame"])
-            for c in frame_candidates(acs) if c.get("last_frame")
-        })
-
         inline_variants = body.get("variants") or {}
         items = []
         for target in targets:
-            # A roll-up is graded against the whole photo set, so it is runnable
-            # once a submission can be assembled even though it has no frame
-            # pinned to itself. Requiring its own frame silently dropped it from
-            # every run on an unsegmented task.
-            if target.get("multi_image") and target["criterion"] and rollup_submission:
-                pass
-            elif not (target["frame_exists"] and target["criterion"]):
+            if not (target["frame_exists"] and target["criterion"]):
                 continue
             base = {
                 "upload_path": target.get("upload_path"),
                 "video": target["video"], "frame": target["frame"],
                 "frame_url": target["frame_url"], "step_id": target["step_id"],
-                "expected": body.get("base_expected") or None,
+                "expected": None,
                 "is_control": False, "is_variant": False, "variant_of": None,
                 "framing": target.get("framing"),
-                "multi_image": bool(target.get("multi_image")),
             }
-            edited = target.get("edited") or inline.get(target["target_id"])
-            checks = target.get("checks") or []
+            # Re-parsed from the criterion actually being graded, so a criterion
+            # edited in the browser is still split into its own points. Reading
+            # the target's stored checks instead would grade the sheet the
+            # operator just replaced.
+            checks = sheet_checks(target["criterion"]) or target.get("checks") or []
 
-            if target.get("adequacy_only"):
-                # Capture instruction: the only answerable question is whether
-                # the photo is the one that was asked for.
-                items.append({**base, "target_id": target["target_id"],
-                              "label": target["label"], "criterion": target["criterion"],
-                              "adequacy_only": True})
-            elif checks and not edited and grading_mode != "holistic":
-                # A roll-up expands to one call per check, so a task-level result
-                # names the specific check that failed. An explicit edit means
-                # the author wants their own single criterion used instead.
+            if checks:
+                # One call per point, so a failure names the condition that
+                # failed instead of reporting that the subtask, as a whole, did.
                 for check in checks:
                     items.append({**base,
                                   "target_id": f"{target['target_id']}::{check['id']}",
-                                  "label": f"{target['label']} · {check['step_id']}",
+                                  "label": f"{target['label']} · {check['id']}",
                                   "criterion": check["statement"],
                                   "rolls_up_to": target["target_id"],
+                                  # The subtask a point belongs to, carried on the
+                                  # point itself: the grid reports one row per
+                                  # subtask, and a point that cannot name its
+                                  # parent's label and whole sheet can only be
+                                  # regrouped by picking its id apart.
+                                  "parent_label": target["label"],
+                                  "parent_criterion": target["criterion"],
                                   "check_id": check["id"]})
             else:
                 items.append({**base, "target_id": target["target_id"],
@@ -1746,47 +2026,14 @@ class Handler(SimpleHTTPRequestHandler):
                     "is_control": False, "is_variant": True,
                     "variant_of": target["target_id"],
                 })
-        items += [
-            {**job, "is_variant": False, "variant_of": None}
-            for job in build_mismatch_jobs(targets, int(body.get("mismatch_count") or 0))
-        ]
-
         context = (pack or {}).get("title")
-        # A roll-up gets the whole submission: every selected frame, deduplicated
-        # and in clip order, so "is the task done" is asked of the photo set the
-        # student would actually hand in.
-        submission = sorted({
-            t.get("upload_path")
-            or str(FRAME_SETS["detail"] / acs / t["video"] / t["frame"])
-            for t in targets if t["frame_exists"] and (t.get("upload_path") or t.get("video"))
-        })
-        # A task like "Fabricate a rigid line" is filmed as one clip per
-        # subtask — cut, deburr, bend, flare, route, install, test — and the
-        # roll-up asks whether the finished article is right, which no single
-        # subtask's photo can answer. When a roll-up is graded and the selection
-        # has not already supplied a spread of photos, fall back to one frame
-        # per clip so the submission covers every subtask rather than whichever
-        # one happened to be selected alongside it.
-        # A roll-up asks whether the finished article is right, and on a task
-        # filmed as one clip per subtask that question spans every clip. Using
-        # only the frames of whichever targets happened to be selected alongside
-        # it answered a narrower question than the one being asked, so the
-        # per-clip set is unioned in rather than used as a fallback.
-        if any(t.get("multi_image") for t in targets):
-            submission = sorted(set(submission) | set(rollup_submission))
-        # Adequacy is only meaningful where the pack states a framing
-        # requirement, i.e. the required-evidence targets.
-        grade_adequacy = bool(body.get("grade_adequacy"))
 
         jobs = []
         for item in items:
-            # A roll-up graded across the whole photo set has no single frame of
-            # its own; only the multi-image path is used for it.
             frame_path = item.get("upload_path") or (
                 str(FRAME_SETS["detail"] / acs / item["video"] / item["frame"])
                 if item.get("video") and item.get("frame") else None
             )
-            multi = item.get("multi_image") and (len(submission) > 1 or not frame_path)
             base_cell = {
                 "target_id": item["target_id"], "label": item["label"],
                 "frame": item["frame"], "video": item["video"],
@@ -1796,33 +2043,25 @@ class Handler(SimpleHTTPRequestHandler):
                 "variant_of": item.get("variant_of"),
             }
             for model_id in model_ids:
-                if not item.get("adequacy_only"):
-                    jobs.append({
-                        "model": model_id, "criterion": item["criterion"], "context": context,
-                        "image_paths": submission if multi else None,
-                        "image_path": None if multi else frame_path,
-                        "mode": grading_mode,
-                        "cell": {**base_cell, "mode": grading_mode,
-                                 "rolls_up_to": item.get("rolls_up_to"),
-                                 "check_id": item.get("check_id")},
-                    })
-                if (grade_adequacy or item.get("adequacy_only")) and item.get("framing"):
-                    jobs.append({
-                        "model": model_id, "criterion": item["criterion"],
-                        "framing": item["framing"], "mode": "adequacy",
-                        "image_path": frame_path,
-                        # An adequacy result is about the photo, so it carries no
-                        # workmanship expectation and must not be scored as one.
-                        "cell": {**base_cell, "mode": "adequacy",
-                                 "target_id": f"{item['target_id']}@adequacy",
-                                 "label": f"{item['label']} — photo usable?",
-                                 "expected": None},
-                    })
+                jobs.append({
+                    "model": model_id, "criterion": item["criterion"], "context": context,
+                    "image_path": frame_path,
+                    "mode": "correctness",
+                    "cell": {**base_cell, "mode": "correctness",
+                             "rolls_up_to": item.get("rolls_up_to"),
+                             "parent_label": item.get("parent_label"),
+                             "parent_criterion": item.get("parent_criterion"),
+                             "check_id": item.get("check_id")},
+                })
         if not jobs:
             return self.send_error(400, "Nothing runnable — check frames exist and criteria are non-empty")
 
-        pass_at = float(body.get("pass_threshold") or vlm.DEFAULT_PASS_THRESHOLD)
-        fail_at = float(body.get("fail_threshold") or vlm.DEFAULT_FAIL_THRESHOLD)
+        # Thresholds are no longer an operator control, but they are not gone:
+        # `apply_thresholds` still refuses to pass a condition the photo cannot
+        # show, at any threshold, and that rule is what keeps "not visible" from
+        # being rounded to a pass. Fixed at the module defaults.
+        pass_at = vlm.DEFAULT_PASS_THRESHOLD
+        fail_at = vlm.DEFAULT_FAIL_THRESHOLD
         results = vlm.grade_many(jobs, workers=int(body.get("workers") or 4),
                                  pass_at=pass_at, fail_at=fail_at)
 

@@ -35,13 +35,19 @@ MODELS = [
      "in_per_m": 5.00, "out_per_m": 25.00},
     {"id": "google/gemini-3.6-flash", "label": "Gemini 3.6 Flash", "vendor": "Google",
      "in_per_m": 1.50, "out_per_m": 7.50},
-    {"id": "openai/gpt-5.6-terra", "label": "GPT-5.6 Terra", "vendor": "OpenAI",
-     "in_per_m": 1.00, "out_per_m": 6.00},
+    # `-preview` is the whole id, not a qualifier that can be trimmed: there is
+    # no `google/gemini-3.1-pro` on OpenRouter, and asking for one 404s every
+    # call in the run. Pricing read from the models endpoint.
+    {"id": "google/gemini-3.1-pro-preview", "label": "Gemini 3.1 Pro Preview",
+     "vendor": "Google", "in_per_m": 2.00, "out_per_m": 12.00},
     {"id": "openai/gpt-5.6-sol", "label": "GPT-5.6 Sol", "vendor": "OpenAI",
      "in_per_m": 5.00, "out_per_m": 30.00},
 ]
 MODELS_BY_ID = {m["id"]: m for m in MODELS}
-DEFAULT_MODELS = ["anthropic/claude-opus-5", "google/gemini-3.6-flash", "openai/gpt-5.6-terra"]
+# Every model, every run. A verdict from one model is an opinion; the useful
+# signal is where they disagree, and a run that silently left one out cannot
+# show that. Deselect in the picker for a deliberately cheap run.
+DEFAULT_MODELS = [m["id"] for m in MODELS]
 
 VERDICTS = ("pass", "fail", "unsure")
 
@@ -859,6 +865,203 @@ def draft_pack_task(*, model: str, sources: str, summary: str,
     user = f"{sources}\n\nCOMPILED STEPS\n{summary.strip()}\n\n" \
            "Compile the task-level evidence, criterion and rationale."
     result = _complete(model=model, system=PACK_TASK_PROMPT, user_text=user,
+                       max_tokens=max_tokens, key=key, post=post)
+    if result.get("error"):
+        return result
+    parsed = parse_json_object(result["text"])
+    if parsed is None:
+        return {"error": "unparsed", "message": "Reply was not JSON.",
+                "raw_text": result["text"][:1200], "cost_usd": result["cost_usd"]}
+    return {"error": None, "cost_usd": result["cost_usd"],
+            "latency_s": result["latency_s"], **parsed}
+
+
+# ------------------------------------------------------ subtask rubric drafting
+#
+# `packs/compile_pack.py` compiles one criterion per *step*, which is the right
+# grain for an instructor reviewing a pack but the wrong grain for a grader: a
+# student photographs a finished subtask ("the bend"), not each of the three
+# steps that produced it. This prompt drafts the subtask-level rubric that
+# `packs/generate_criteria.py` renders — the conditions a still of the completed
+# subtask must satisfy, and the defects that condemn it outright.
+#
+# The rules below are not stylistic. Each one closes a way a rubric lets a
+# grader answer a question the photograph cannot settle, which is the failure
+# that produces a confident wrong verdict rather than an honest missing one.
+
+RUBRIC_PROMPT = """\
+You are writing a grading rubric for a vision-language model. The model will be \
+shown ONE photograph of a completed subtask from an FAA Part 147 aircraft \
+maintenance training task, and must judge it against your rubric.
+
+Write the rubric from the campus procedure sheet and the FAA handbook extract \
+supplied. Introduce nothing they do not support.
+
+STAY INSIDE THIS SUBTASK
+Grade the state the work is in when THIS subtask is finished, and no further. \
+Work belonging to a later subtask has not happened yet, so its absence is the \
+correct state, not a defect — if this subtask marks out an area and the next one \
+cuts it, "no material has been removed" condemns exactly correct work. The scope \
+note tells you what comes before and after.
+
+GRADE THE RESULT, NOT THE WORK
+The photograph shows finished work. Every criterion must describe evidence \
+visible in the completed article. "The tube is cut to the marked length" is \
+gradeable; "the student aligned the cutting wheel with the mark" is not, because \
+the action is over. Never refer to the student, the technician, or what was done \
+during the step.
+
+EACH CRITERION
+  * is independently gradeable PASS or FAIL on its own
+  * states ONE requirement — do not join unrelated requirements with "and"
+  * uses direct, concrete language naming what is seen
+  * names the reference when verification needs one in frame: a gauge, ruler, \
+scale, template, drawing, or a marking on the work. Write "measured against a \
+rule in frame", not "measures 6 inches".
+  * never requires a hidden property. Torque, pressure integrity, internal \
+condition, material type, alloy, wall thickness and exact dimensions are not \
+visible. Do not ask for them unless the supplied text says a marking, colour \
+band or printed code carries them and that marking would be in the photograph.
+  * ignores cosmetics unless appearance bears on function, integrity, fit, \
+safety, or whether the work can be inspected.
+
+EACH CRITICAL DEFECT
+  * is a serious mistake that is AFFIRMATIVELY VISIBLE — something present in \
+the frame, not something missing from the evidence
+  * never fires from absence of confirmation. "The flare angle cannot be \
+confirmed" is not a defect. "The flare is visibly split at the rim" is.
+  * names the article it is looking at when the defect is something missing. \
+"No sleeve is visible" condemns a badly framed photograph of correct work; "The \
+tube end is bare between the B-nut and the flare, with no sleeve on it" \
+condemns the work. Missing hardware is a real defect — write it so it fires on \
+what is in the frame, not on what is out of it.
+  * is a condition of the WORK, never a property of the photograph. A missing \
+ruler, gauge or template in the frame is a framing problem, and the criterion \
+that needs it already fails on its own — it is not a critical defect.
+  * covers damage, wrong configuration, deformation, absent required hardware, \
+unsafe routing, visible leakage, or another functionally unacceptable condition \
+the sources support
+
+NUMBERS AND ATTRIBUTION
+Use a number only if it appears verbatim in the procedure or handbook text you \
+were given. Source priority is: task-specific controlling data, then the \
+procedure sheet, then the FAA handbook or advisory circular. Follow the \
+higher-priority source where they differ, and record the disagreement in \
+`source_notes` — never resolve a conflict silently. List a manual page in \
+`manual_sources` only if a criterion you wrote actually rests on text from that \
+page.
+
+NEVER
+Never write "INSUFFICIENT IMAGE". Never assign a percentage weight or a point \
+value to a criterion. Never claim a photograph establishes airworthiness, \
+internal condition, pressure integrity, torque, material type, or an exact \
+dimension.
+
+Reply with JSON only, no prose around it:
+{"subtask_description": "<noun phrase for the finished work, e.g. 'flared tube \
+end with its sleeve and B-nut' — completes the sentence 'Assess the completed \
+___ visible in the image.'>",
+ "criteria": ["<one visible requirement, under 20 words>"],
+ "critical_defects": ["<one affirmative visible defect, under 15 words>"],
+ "procedure_sources": ["<procedure document and section>"],
+ "manual_sources": ["<handbook, chapter and page, only where relied on>"],
+ "source_notes": ["<conflict between sources, or a limitation of what the \
+photograph can settle>"]}
+
+Give 4 to 6 criteria and 3 to 5 critical defects. Stay inside the word limits: \
+the rendered rubric has a hard 300-word ceiling and overrunning it fails \
+validation."""
+
+
+def draft_subtask_rubric(*, model: str, sources: str, subtask: str,
+                         adjust: str | None = None, key: str | None = None,
+                         max_tokens: int = 3000, post=_post) -> dict:
+    """Draft the criteria and critical defects for one procedure subtask.
+
+    `adjust` carries a length correction back into a second attempt. The rendered
+    rubric has to land between 100 and 300 words, and that is a property of the
+    assembled Markdown rather than of anything the model can count, so the caller
+    measures it and asks again rather than guessing at the prompt.
+    """
+    user = f"{sources}\n\nSUBTASK TO GRADE\n{subtask.strip()}\n\n" \
+           "Write the rubric for THIS subtask only."
+    if adjust:
+        user += f"\n\nREVISION REQUIRED\n{adjust.strip()}"
+    result = _complete(model=model, system=RUBRIC_PROMPT, user_text=user,
+                       max_tokens=max_tokens, key=key, post=post)
+    if result.get("error"):
+        return result
+    parsed = parse_json_object(result["text"])
+    if parsed is None:
+        return {"error": "unparsed", "message": "Reply was not JSON.",
+                "raw_text": result["text"][:1200], "cost_usd": result["cost_usd"]}
+    return {"error": None, "cost_usd": result["cost_usd"],
+            "latency_s": result["latency_s"], **parsed}
+
+
+# --------------------------------------------------------- step/atom rubrics
+#
+# One step, one frame, a handful of words. The compiled atoms already say what
+# the step must satisfy (`checks`) and how it goes wrong (`error_modes`); this
+# turns the photo-observable ones into something a grader can answer while
+# looking at the single frame where that step ends. It is deliberately much
+# smaller than the subtask rubric: a step is a slice of work, the frame is a
+# guess at where it finished, and a long rubric would imply more certainty about
+# both than either deserves.
+
+STEP_PROMPT = """\
+You are writing a very short grading rubric for a vision-language model. It will \
+see ONE frame — the moment this single step of an aircraft maintenance procedure \
+finishes — and judge it against your rubric.
+
+You are given the step, the acceptance checks already compiled for it, and the \
+error modes already compiled for it. Each check is marked with the evidence that \
+settles it. USE ONLY the checks marked `photo`. A check marked `measurement`, \
+`document` or `video` cannot be answered from a frame, and turning one into a \
+grading point invites a grader to pass work it cannot see.
+
+BE SHORT. One to three grading points, and the whole rubric — points and \
+critical mistakes together — under 100 words. This is a slice of work caught \
+mid-procedure, not a finished article; there is not much a single frame can \
+honestly settle, and padding it out manufactures confidence.
+
+EACH GRADING POINT
+  * is independently gradeable PASS or FAIL from the frame alone
+  * states ONE thing that is visible, in plain concrete words
+  * describes the state the work is in when this step ends — not the action, \
+and not work belonging to a later step
+  * never asks for a torque, a pressure, an exact dimension, an alloy, or an \
+internal condition
+
+EACH CRITICAL MISTAKE
+  * is a serious error that is affirmatively VISIBLE in the frame
+  * never fires because something is out of shot or cannot be made out — that \
+is a framing problem, not a defect
+  * is drawn from the compiled error modes, preferring those marked `critical`
+
+If the frame is mid-action — a tool in the way, hands over the work, the article \
+still in a fixture — say so in `frame_limits`. That is the normal case for a \
+step caught in progress, and naming it is more useful than pretending the view \
+is clean.
+
+Reply with JSON only, no prose around it:
+{"grading_points": ["<one visible requirement, under 18 words>"],
+ "critical_mistakes": ["<one affirmative visible error, under 14 words>"],
+ "frame_limits": "<what this frame probably cannot show, one short sentence, \
+or null>"}
+
+One to three grading points, one to three critical mistakes. Under 100 words \
+in total."""
+
+
+def draft_step_rubric(*, model: str, sources: str, step: str, adjust: str | None = None,
+                      key: str | None = None, max_tokens: int = 1200, post=_post) -> dict:
+    """Draft the 1-3 grading points and critical mistakes for one procedure step."""
+    user = f"{sources}\n\nSTEP TO GRADE\n{step.strip()}\n\n" \
+           "Write the short frame rubric for THIS step only."
+    if adjust:
+        user += f"\n\nREVISION REQUIRED\n{adjust.strip()}"
+    result = _complete(model=model, system=STEP_PROMPT, user_text=user,
                        max_tokens=max_tokens, key=key, post=post)
     if result.get("error"):
         return result
