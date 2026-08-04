@@ -1,0 +1,199 @@
+{
+  "acs_code": "AM.III.M.S5",
+  "task": "Perform a minor repair to a metal propeller blade.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.III.M.S5 – Perform a Minor Repair to a Metal Propeller Blade.docx",
+      "title": "AM.III.M.S5 – Perform a Minor Repair to a Metal Propeller Blade",
+      "variant": "AM.III.M.S5 – Perform a Minor Repair to a Metal Propeller Blade",
+      "sections": [
+        {
+          "section": "Before You Begin",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": [
+            {
+              "text": "Be currently enrolled in or have completed Block 16: Aircraft Propellers and Inspections."
+            },
+            {
+              "text": "Review pages 8-29 to 8-31 from chapter 8 in the AC-43.13-1B."
+            },
+            {
+              "text": "Ask the AI Assistant about how to measure damage on a propeller blade."
+            }
+          ]
+        },
+        {
+          "section": "Safety and Equipment",
+          "steps": [],
+          "notes": [],
+          "safety": [
+            {
+              "text": "Fine metallic dust is created when filing and sanding metal propeller blades. Avoid ingestion of metal particulates."
+            }
+          ],
+          "equipment": [
+            {
+              "text": "Eye protection"
+            },
+            {
+              "text": "Ear protection"
+            },
+            {
+              "text": "Gloves"
+            },
+            {
+              "text": "Standard toolbox set"
+            },
+            {
+              "text": "Parts bags"
+            },
+            {
+              "text": "Pen & paper"
+            },
+            {
+              "text": "FOD box"
+            },
+            {
+              "text": "Riffle files / jeweler files"
+            },
+            {
+              "text": "Sandpaper (extra fine)"
+            },
+            {
+              "text": "Clean rags"
+            },
+            {
+              "text": "Cleaning solvent"
+            }
+          ],
+          "you_need_to": []
+        },
+        {
+          "section": "Prepare the Damaged Area",
+          "steps": [
+            {
+              "text": "Clean the portion of the blade to be repaired1.",
+              "text_clean": "Clean the portion of the blade to be repaired.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Verify the extent of the damage2.",
+              "text_clean": "Verify the extent of the damage.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Mark the repair area3.",
+              "text_clean": "Mark the repair area.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Wipe the damaged area of the propeller blade with a rag dampened with solvent to remove oils, dirt, and debris."
+            },
+            {
+              "text": "Use a steel scale to determine the length and width of the damage. Use a depth gauge to determine the depth of the damage. Place the depth gauge on a flat surface of the blade. Set the needle to zero by loosening the dial clamping screw and rotating the needle on zero. Center the gauge over the deepest part of the damage, extend the plunger and read the dial. Each line on the ring of the dial is in increments of 0.001”. The small dial is in increments of 0.1” (e.g., the needle points to the number 54 line and the small dial points to 2. This is 0.254”)."
+            },
+            {
+              "text": "Outline the repair area with dye or a marker. Draw a contoured shape that tapers into the damage."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Blend the Damage Out",
+          "steps": [
+            {
+              "text": "File the rough edges of the damage down1.",
+              "text_clean": "File the rough edges of the damage down.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Contour the repair2.",
+              "text_clean": "Contour the repair.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Taper the repair into the blade shape3.",
+              "text_clean": "Taper the repair into the blade shape.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Fine sand the repair4.",
+              "text_clean": "Fine sand the repair.",
+              "note_refs": [
+                4
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use a riffler or jeweler file around the perimeter of the damage. File the metal in the forward motion, running the length of the file across it. Edges should feel flush with no burrs or raised points."
+            },
+            {
+              "text": "Use a riffler or jeweler file to round the repair in all directions."
+            },
+            {
+              "text": "File the edges into a smooth transition to the undamaged portions of the blade. No sharp shapes."
+            },
+            {
+              "text": "Progress to a #00 grit sandpaper, leveling the repair. Feel for raised textures."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Clean the Repair",
+          "steps": [
+            {
+              "text": "Wipe the repair area clean1.",
+              "text_clean": "Wipe the repair area clean.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Measure the dimensions of the repair2.",
+              "text_clean": "Measure the dimensions of the repair.",
+              "note_refs": [
+                2
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Clear all fine metallic dust from the blade surface with a rag dampened with solvent."
+            },
+            {
+              "text": "Use a steel scale to measure the length and width of the repair. Use a depth gauge to measure the depth of the repair."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 9,
+      "note_count": 9
+    }
+  ]
+}

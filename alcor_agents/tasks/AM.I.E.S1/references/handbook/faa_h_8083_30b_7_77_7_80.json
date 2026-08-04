@@ -1,0 +1,22 @@
+{
+  "acs_code": "AM.I.E.S1",
+  "handbook": "FAA-H-8083-30B",
+  "handbook_key": "30B",
+  "pdf": "data/amtg_handbook.pdf",
+  "located_by": "label",
+  "spec": "7-77..7-80",
+  "labels": [
+    "7-77",
+    "7-78",
+    "7-79",
+    "7-80"
+  ],
+  "pdf_page_indices": [
+    320,
+    321,
+    322,
+    323
+  ],
+  "cited_by_source": false,
+  "file": "references/handbook/faa_h_8083_30b_7_77_7_80.md"
+}

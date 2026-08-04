@@ -17,23 +17,46 @@ final class AppSettingsTests: XCTestCase {
 
   private var settings: AppSettings!
 
+  private var defaults: UserDefaults!
+  private var suiteName: String!
+
   override func setUp() async throws {
     try await super.setUp()
-    settings = AppSettings()
+    // A private suite per test: `streamsOverWiFi` is persisted now, so sharing
+    // `UserDefaults.standard` would let one test — or the app's own last run on this
+    // simulator — decide another test's starting state.
+    suiteName = "AppSettingsTests.\(UUID().uuidString)"
+    defaults = UserDefaults(suiteName: suiteName)
+    settings = AppSettings(defaults: defaults)
   }
 
   override func tearDown() async throws {
+    defaults.removePersistentDomain(forName: suiteName)
+    defaults = nil
+    suiteName = nil
     settings = nil
     try await super.tearDown()
   }
 
   // MARK: - Defaults
 
-  func testDefaultsToTheBluetoothTier() {
-    XCTAssertFalse(settings.streamsOverWiFi)
-    XCTAssertEqual(settings.quality, .medium)
+  /// Requesting the top tier is the only thing that makes the SDK take a Wi-Fi lease, and
+  /// Bluetooth Classic is where the feed stalls — so a fresh install asks for Wi-Fi.
+  func testDefaultsToTheWiFiTier() {
+    XCTAssertTrue(settings.streamsOverWiFi)
+    XCTAssertEqual(settings.quality, .high)
     XCTAssertEqual(settings.frameRate, .thirty)
-    XCTAssertEqual(settings.streamSpec, "720p · 30 fps · Bluetooth")
+    XCTAssertEqual(settings.streamSpec, "1080p · 30 fps · Wi-Fi")
+  }
+
+  /// The choice has to outlive a launch, or every session silently starts back on Bluetooth.
+  func testTransportChoiceSurvivesRelaunch() {
+    settings.streamsOverWiFi = false
+
+    let relaunched = AppSettings(defaults: defaults)
+
+    XCTAssertFalse(relaunched.streamsOverWiFi)
+    XCTAssertEqual(relaunched.quality, .medium, "the tier must follow the stored transport")
   }
 
   // MARK: - Tiers

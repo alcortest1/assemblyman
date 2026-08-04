@@ -1,0 +1,26 @@
+{
+  "acs_code": "AM.III.M.S5",
+  "sources": [
+    {
+      "kind": "workbook_xlsx",
+      "path": "data/Alcor_Pilot_AMS_Selections (1).xlsx",
+      "sha256": "1905eb54fe1ebee6d2943b0fe52bb11d4c0a82ce998c2140f3cb58663d148520",
+      "bytes": 73476,
+      "modified": 1785705151
+    },
+    {
+      "kind": "workbook_csv",
+      "path": "data/processed/tasks.csv",
+      "sha256": "54af83bf525735f2f7034f78bf593f4bb13511af8cbae933645b3d80adb2e6d2",
+      "bytes": 7966,
+      "modified": 1785705394
+    },
+    {
+      "kind": "procedure_docx",
+      "path": "data/drive-download-aim-procedures-confidential/AM.III.M.S5 \u2013 Perform a Minor Repair to a Metal Propeller Blade.docx",
+      "sha256": "72b7cda29ed2f4edb170977275daba06da9130c7663a93359752c17de5d2b0a3",
+      "bytes": 17812,
+      "modified": 1785705122
+    }
+  ]
+}

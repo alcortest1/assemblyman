@@ -1,0 +1,109 @@
+{
+  "acs_code": "AM.I.D.S8",
+  "task": "Fabricate a flareless-fitting-tube connection.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.I.D.S8 – Fabricate a  Flareless-Fitting-Tube Connection.docx",
+      "title": "AM.I.D.S8 – Fabricate a  Flareless-Fitting-Tube Connection",
+      "variant": "AM.I.D.S8 – Fabricate a  Flareless-Fitting-Tube Connection",
+      "sections": [
+        {
+          "section": "Before You Begin",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": [
+            {
+              "text": "Be currently enrolled in or have completed Block 03: General Science III."
+            },
+            {
+              "text": "Review pages 9-5 to 9-8 in the 8083-30B."
+            },
+            {
+              "text": "Ask the AI Assistant about inspection criteria for rigid tubing."
+            }
+          ]
+        },
+        {
+          "section": "Safety and Equipment",
+          "steps": [],
+          "notes": [],
+          "safety": [
+            {
+              "text": "Over-tightening flareless fitting may deform the tubing too much, causing line failure."
+            },
+            {
+              "text": "Installation of sleeves without lubrication may cause stress cracks."
+            }
+          ],
+          "equipment": [
+            {
+              "text": "Rigid Tubing"
+            },
+            {
+              "text": "Cutting Tool"
+            },
+            {
+              "text": "Sand Paper"
+            },
+            {
+              "text": "Debur Tool"
+            },
+            {
+              "text": "Flareless Sleeve"
+            },
+            {
+              "text": "B-nut"
+            },
+            {
+              "text": "Mandrel"
+            }
+          ],
+          "you_need_to": []
+        },
+        {
+          "section": "Cut the Tubing",
+          "steps": [
+            {
+              "text": "Measure needed length of tubing.",
+              "text_clean": "Measure needed length of tubing.",
+              "note_refs": []
+            },
+            {
+              "text": "Cut the tubing1.",
+              "text_clean": "Cut the tubing.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Deburr the tubing ends2-3.",
+              "text_clean": "Deburr the tubing ends.",
+              "note_refs": [
+                2,
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Open the rolling jaws just wide enough to set the rigid line in. Align the marked line and sharp cutting wheel precisely, hold in place with one hand. Use your other hand to twist the knob, tightening the cutting wheel to the tubing slightly snug. Hold the tubing firm while rotating the cutting tool around it. The cutting tool will loosen after a few rotations. Continue re-tightening and rotating the cutting tool until cleanly cut through tubing."
+            },
+            {
+              "text": "Insert deburring tool tip into the end of the tubing. Press tubing firmly into the tool while twisting it in a motion similar to sharpening a pencil. Perform 3-4 twists at a time and check the inside diameter is smooth and the original size returned."
+            },
+            {
+              "text": "Place a sheet of sandpaper on a flat surface and apply a drop of hydraulic fluid in the center. Hold the tubing end perpendicular and press it firmly into the area lubricated with the hydraulic fluid, moving it in a continuous figure-8 pattern on the sandpaper until the end is smooth. Then, wrap the sandpaper around the tubing end and twist the tubing, like sharpening a pencil, to remove any remaining burrs."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 3,
+      "note_count": 3
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "acs_code": "AM.I.E.S1",
+  "sources": [
+    {
+      "kind": "workbook_xlsx",
+      "path": "data/Alcor_Pilot_AMS_Selections (1).xlsx",
+      "sha256": "1905eb54fe1ebee6d2943b0fe52bb11d4c0a82ce998c2140f3cb58663d148520",
+      "bytes": 73476,
+      "modified": 1785705151
+    },
+    {
+      "kind": "workbook_csv",
+      "path": "data/processed/tasks.csv",
+      "sha256": "54af83bf525735f2f7034f78bf593f4bb13511af8cbae933645b3d80adb2e6d2",
+      "bytes": 7966,
+      "modified": 1785705394
+    },
+    {
+      "kind": "procedure_docx",
+      "path": "data/drive-download-aim-procedures-confidential/AM.I.E.S1 \u2013 Perform the Wire Safety on Bolts (By Hand).docx",
+      "sha256": "28d77dc2e1509bd0d2709c018319107540e19792ec0d6d9bb5b29fd23fdfc32f",
+      "bytes": 15941,
+      "modified": 1785705122
+    },
+    {
+      "kind": "procedure_docx",
+      "path": "data/drive-download-aim-procedures-confidential/AM.I.E.S1 \u2013 Perform the Wire Safety on Bolts (With Safety Wire Pliers).docx",
+      "sha256": "b23dae9a90f91aebf02536895f995c7584fbf6a718df8db5e388aa8f273dc720",
+      "bytes": 16163,
+      "modified": 1785705122
+    },
+    {
+      "kind": "procedure_docx",
+      "path": "data/drive-download-aim-procedures-confidential/AM.I.E.S1 \u2013 Perform the Wire Safety on a Turnbuckle (By Hand).docx",
+      "sha256": "cdbb6817474a9431a43800dade13bc915b859aa0c114585bab5bc5ccb2274409",
+      "bytes": 15971,
+      "modified": 1785705122
+    }
+  ]
+}

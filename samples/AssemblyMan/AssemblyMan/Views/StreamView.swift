@@ -79,14 +79,24 @@ struct StreamView: View {
         topBar
 
         // A stalled feed is otherwise indistinguishable from a very still scene: the last
-        // frame stays on screen and nothing says the glasses stopped sending.
-        if viewModel.isFeedStalled {
+        // frame stays on screen and nothing says the glasses stopped sending. Rebuilding says
+        // so quietly — the operator has their hands full, and this is a status, not a
+        // decision they have to make.
+        if viewModel.isReconnecting || viewModel.isFeedStalled {
           HStack {
             HStack(spacing: 7) {
-              Icon(glyph: .triangleAlert, size: 12, color: .white)
-              Text("No frames for \(viewModel.secondsSinceLastFrame)s")
-                .font(Theme.body(11, weight: .semibold))
-                .foregroundStyle(.white)
+              if viewModel.isReconnecting {
+                Spinner(size: 11, color: .white)
+              } else {
+                Icon(glyph: .triangleAlert, size: 12, color: .white)
+              }
+              Text(
+                viewModel.isReconnecting
+                  ? "Reconnecting to the glasses…"
+                  : "No frames for \(viewModel.secondsSinceLastFrame)s"
+              )
+              .font(Theme.body(11, weight: .semibold))
+              .foregroundStyle(.white)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)

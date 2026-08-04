@@ -1,0 +1,18 @@
+# Python virtualenv
+.venv/
+__pycache__/
+*.pyc
+
+# Local secrets — never commit. The repo-root .gitignore also covers .env*.
+.env
+.env.*
+
+# Datasets and corpora — fetched or licensed, not source. Includes the
+# confidential AIM procedure docs and ~95 GB of external datasets.
+data/
+
+# Generated artifacts — frames, indexes, segments, and sheets derived from data/.
+build/
+
+# macOS
+.DS_Store

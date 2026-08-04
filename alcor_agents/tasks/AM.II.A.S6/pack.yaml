@@ -1,0 +1,2354 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.II.A.S6
+
+schema_version: 1
+status: draft
+acs_code: AM.II.A.S6
+task_no: 8
+title: Prepare and install a patch to repair an aircraft or component
+subject: Airframe
+block: 5
+campus: AIM Fremont
+week: 1
+day: 2
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:29:02Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - references/handbook/faa_h_8083_31b_4_85_4_96.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The campus rates this High for installation because the acceptance evidence for a patch
+    is largely finished geometry: a cutout with rounded corners and deburred edges, a filler
+    sitting flush in the opening, edge-distance and pitch layout still visible as marker lines,
+    concentric holes through the stack, and driven heads that are either flush and clean or
+    dented and cocked. A still resolves all of that when a scale is in frame. What a still
+    cannot settle is the instrumented and tactile half — shop head height and width against
+    the 0.5D/1.5D targets from the procedure sheet, material gauge and alloy of doubler and
+    filler, burr removal on the faying (hidden) faces, and whether the drill and punch were
+    held perpendicular with the work backed. Those need measurement, video, or a materials
+    record, so the pack pairs the installation photos with a rivet-gauge measurement set.
+safety:
+- >-
+  Cutting and forming metal can make sharp edges on the material, posing a hazard.
+- >-
+  Riveting is a loud and repetitive process; hearing protection should be used.
+- When possible, clamp down and secure material being drilled or riveted.
+equipment:
+- Eye protection
+- Ear protection
+- Gloves
+- Standard toolbox set
+- Parts bags
+- Pen & paper
+- FOD box
+- Rivets
+- Rivet gun and sets
+- Bucking bar
+- Pneumatic drill
+- Drill bit set
+- Sandpaper (multiple grit)
+- Files (flat, half-round, and rat tail)
+- Ball peen hammer
+- Punch set
+- Dividers
+- Scale (12” / 6”)
+- Cleco (pins and clamps) and pliers
+- Deburr tool
+- Marker
+steps:
+- id: id.s1
+  section: Identify the Damage
+  text: Inspect the area for damage.
+  checks:
+  - id: id.s1.c1
+    statement: >-
+      Dirt, grease and paint are removed from the damaged area and surrounding structure so
+      each rivet and fastener is visible.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-85
+    origin: drafted
+    note: >-
+      Handbook: "Remove all dirt, grease, and paint from the damaged and surrounding areas
+      to determine the exact condition of each rivet, bolt, and weld."
+  - id: id.s1.c2
+    statement: >-
+      Inspection extends into the adjacent area, covering skin wrinkles, dents, loose rivets
+      and abrasions, not just the obvious damage.
+    observable: video
+    source: handbook FAA-H-8083-31B p.4-85
+    origin: drafted
+    note: >-
+      Handbook: "Inspect skin for wrinkles throughout a large area" and "Check all skin, dents,
+      and wrinkles for any cracks or abrasions."
+  - id: id.s1.c3
+    statement: >-
+      Any movable parts in the inspected area are operated and confirmed to function normally.
+    observable: video
+    source: handbook FAA-H-8083-31B p.4-86
+    origin: drafted
+    note: 'Handbook: "Check the operation of all movable parts in the area."'
+  - id: id.s1.c4
+    statement: >-
+      Damage type is named and classified, with a stated determination that repair rather
+      than replacement is appropriate.
+    observable: document
+    source: handbook FAA-H-8083-31B p.4-86
+    origin: drafted
+    note: >-
+      Handbook: "Determine if repair would be the best procedure"; damage classes given on
+      p.4-90.
+  error_modes:
+  - id: id.s1.e1
+    statement: >-
+      Inspection stops at the visible damage; cracks, working rivets or wrinkles in adjacent
+      structure go unfound.
+    severity: critical
+    origin: drafted
+  - id: id.s1.e2
+    statement: >-
+      Damage misclassified as negligible or patchable when it exceeds limits, so the wrong
+      repair path is started.
+    severity: critical
+    origin: drafted
+  - id: id.s1.e3
+    statement: >-
+      Area left dirty, greasy or painted, hiding fine cracks and fretting residue around rivet
+      heads.
+    severity: major
+    origin: drafted
+- id: id.s2
+  section: Identify the Damage
+  text: Measure the extent of the damage.
+  note_refs:
+  - 1
+  checks:
+  - id: id.s2.c1
+    statement: >-
+      Recorded height and length capture the full extent of the damage, including crack tips
+      and adjacent affected area.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "the extent of damage must be fully evaluated" and "Check all skin, dents,
+      and wrinkles for any cracks or abrasions."
+  - id: id.s2.c2
+    statement: >-
+      A steel scale rests flat on the surface, spanning the damage's greatest dimension with
+      its zero at the damage edge.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 1: "Use a steel scale to find the damage's height and length."
+  - id: id.s2.c3
+    statement: >-
+      The damaged and surrounding area is free of dirt, grease and loose paint so the damage
+      boundary is unambiguous.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-85
+    origin: drafted
+    note: >-
+      "Remove all dirt, grease, and paint from the damaged and surrounding areas to determine
+      the exact condition".
+  - id: id.s2.c4
+    statement: >-
+      Measured dimensions are compared against the permissible damage limits for that component
+      before a repair class is chosen.
+    observable: document
+    source: handbook FAA-H-8083-31B p.4-90
+    origin: drafted
+    note: >-
+      "Permissible limits for negligible damage vary for different components of different
+      aircraft and should be carefully researched on an individual basis."
+  error_modes:
+  - id: id.s2.e1
+    statement: >-
+      Only the visibly obvious damage is measured; crack ends or adjacent distortion are excluded,
+      understating the extent.
+    severity: critical
+    origin: drafted
+  - id: id.s2.e2
+    statement: >-
+      Dimensions estimated by eye or with the scale skewed/not zeroed, yielding wrong height
+      and length.
+    severity: major
+    origin: drafted
+  - id: id.s2.e3
+    statement: >-
+      Measurements taken but not written down, so layout later relies on memory.
+    severity: minor
+    origin: drafted
+- id: id.s3
+  section: Identify the Damage
+  text: Mark the repair area with a marker around all of the damage.
+  checks:
+  - id: id.s3.c1
+    statement: >-
+      The marker outline fully encircles the damage, with every crack tip, dent edge and abrasion
+      inside the line.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: mark "around all of the damage"; handbook 4-92 "Remove all distorted
+      skin and structure in damaged area."
+  - id: id.s3.c2
+    statement: >-
+      The outline is circular or oval, or if rectangular has visibly rounded rather than square
+      corners.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-86
+    origin: drafted
+    note: >-
+      Handbook: "try to make cutouts either circular or oval in shape"; also p.4-92 "Round
+      all square corners."
+  - id: id.s3.c3
+    statement: Rectangular marked corners carry a radius of no less than 1/2 inch.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-86
+    origin: drafted
+    note: >-
+      Handbook: "make the radius of curvature at each corner no smaller than 1/2-inch" for
+      rectangular cutouts.
+  - id: id.s3.c4
+    statement: >-
+      The marked boundary lies outside the measured damage extent by a clear margin on all
+      sides, in sound metal.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Compare outline to the height/length taken with the steel scale; handbook 4-92: edges
+      of completed repair match existing structure.
+  error_modes:
+  - id: id.s3.e1
+    statement: >-
+      Outline drawn on or inside the damage boundary, leaving crack tips or distortion outside
+      the removal area.
+    severity: critical
+    origin: drafted
+  - id: id.s3.e2
+    statement: >-
+      Repair area marked with sharp square corners, creating a stress-riser cutout when cut.
+    severity: major
+    origin: drafted
+  - id: id.s3.e3
+    statement: >-
+      Boundary scribed or scratched into the skin instead of marked, or line so heavy it hides
+      the damage.
+    severity: minor
+    origin: drafted
+- id: rd.s1
+  section: Remove the Damage
+  text: Cut out or stop the damage from spreading.
+  note_refs:
+  - 1
+  checks:
+  - id: rd.s1.c1
+    statement: >-
+      No crack, tear or distorted material remains inside the cut perimeter; the damage is
+      fully excised or arrested.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-92 damage removal: "Remove all distorted skin and structure in damaged
+      area"; procedure sheet step 1.
+  - id: rd.s1.c2
+    statement: >-
+      A stop hole 3/32-inch diameter is drilled at each crack end so the hole encloses the
+      crack tip.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-96 figure: "Stop holes—drill 3/32" diameter holes in each sharp corner";
+      p.4-93 "a small hole must be drilled in each end".
+  - id: rd.s1.c3
+    statement: >-
+      The cutout is circular/oval or has rounded corners — no square corners remain in the
+      opening.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      "Round all square corners"; p.4-86 "try to make cutouts either circular or oval in shape",
+      rectangular corner radius "no smaller than 1/2-inch" (measured separately).
+  - id: rd.s1.c4
+    statement: >-
+      Surrounding skin outside the marked repair area is free of saw skips, gouges or overcuts.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-92: "Remove damaged material so that the edges of the completed repair
+      match existing structure and aircraft lines."
+  error_modes:
+  - id: rd.s1.e1
+    statement: >-
+      Stop hole drilled short of, or offset from, the crack tip so the crack is not arrested.
+    severity: critical
+    origin: drafted
+  - id: rd.s1.e2
+    statement: >-
+      Cut boundary leaves part of the crack or distorted skin inside the opening.
+    severity: critical
+    origin: drafted
+  - id: rd.s1.e3
+    statement: >-
+      Cutout has square corners or a torn/nicked edge that becomes a new crack starter.
+    severity: major
+    origin: drafted
+  - id: rd.s1.e4
+    statement: >-
+      Cut runs outside the marked area, enlarging the opening beyond the planned patch.
+    severity: minor
+    origin: drafted
+- id: rd.s2
+  section: Remove the Damage
+  text: Smooth and deburr all cut edges.
+  note_refs:
+  - 2
+  checks:
+  - id: rd.s2.c1
+    statement: >-
+      All cut edges are free of burrs, feathered slivers, nicks and visible tool/scratch marks.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-92: "Smooth out any abrasions and/or dents"; procedure sheet note requires
+      removing sharp edges and scratches.
+  - id: rd.s2.c2
+    statement: >-
+      Every corner of the cutout is rounded, with no square or sharp corner remaining.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      Damage Removal list: "Round all square corners"; also figure 4-176 "cut to a smooth
+      rectangle with corner radii".
+  - id: rd.s2.c3
+    statement: Corner radius of a rectangular cutout measures no smaller than 1/2 inch.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-86
+    origin: drafted
+    note: >-
+      "make the radius of curvature at each corner no smaller than 1⁄2-inch"; procedure sheet
+      gives no cutout radius figure.
+  - id: rd.s2.c4
+    statement: >-
+      Sanding progressed from coarse grit through to fine grit rather than a single grit.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 2: start coarse-grit progressing to fine-grit; handbook is qualitative
+      only.
+  error_modes:
+  - id: rd.s2.e1
+    statement: >-
+      Sharp edge or burr left on the cut, which can initiate a crack while the cutout looks
+      finished.
+    severity: critical
+    origin: drafted
+  - id: rd.s2.e2
+    statement: >-
+      Square or tight corners left unrounded at the cutout, or radius under 1/2 inch.
+    severity: major
+    origin: drafted
+  - id: rd.s2.e3
+    statement: >-
+      Over-sanding gouges the edge or enlarges the opening past the marked repair boundary.
+    severity: major
+    origin: drafted
+  - id: rd.s2.e4
+    statement: >-
+      Coarse-grit scratch pattern left in the surface with no fine-grit finish.
+    severity: minor
+    origin: drafted
+- id: cp.s1
+  section: Create the Patch Filler
+  text: Transfer the opening’s shape.
+  note_refs:
+  - 1
+  checks:
+  - id: cp.s1.c1
+    statement: >-
+      The traced outline on the blank reproduces the opening's full perimeter as one continuous
+      fine line, with no gaps, double lines or corner deviation.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: 'Procedure sheet: "Use a fine-tip marker to trace the shape accurately."'
+  - id: cp.s1.c2
+    statement: >-
+      The blank extends past the traced line on every side, leaving margin material outside
+      the line for cutting and filing.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "a piece of sheet metal larger than the opening"; margin needed for
+      later cut-outside-the-line step.
+  - id: cp.s1.c3
+    statement: >-
+      The blank chosen for the filler is the same gauge and alloy as the original skin.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Handbook: "The filler must be of the same gauge and material as the original skin."
+      Gauge verified by micrometer, alloy by stock marking.
+  - id: cp.s1.c4
+    statement: >-
+      The blank is held flat and flush against the underside of the skin throughout tracing,
+      without tilt or lift.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "against the underside, pressing it flush"; only observable while the
+      trace is made.
+  error_modes:
+  - id: cp.s1.e1
+    statement: >-
+      Blank shifts or is held off the skin, so the traced outline is offset and the finished
+      filler fits loose with excessive gap.
+    severity: critical
+    origin: drafted
+  - id: cp.s1.e2
+    statement: >-
+      Wrong stock traced — doubler-gauge or different alloy used for the filler instead of
+      skin-gauge material.
+    severity: critical
+    origin: drafted
+  - id: cp.s1.e3
+    statement: >-
+      Broad or repeated marker lines, or trace run off the blank edge leaving no cutting margin
+      on one side.
+    severity: major
+    origin: drafted
+- id: cp.s2
+  section: Create the Patch Filler
+  text: Remove and cut out the shape.
+  note_refs:
+  - 2
+  checks:
+  - id: cp.s2.c1
+    statement: >-
+      The cut edge lies entirely outside the traced outline, with the marker line still visible
+      on the blank.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: cut close to the marked line, leaving a small amount of material
+      outside the line.
+  - id: cp.s2.c2
+    statement: >-
+      Excess material left outside the traced line is small and reasonably uniform, filable
+      to fit without reworking the whole edge.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      'Small amount of material outside the line' is qualitative; the actual margin must be
+      measured off the blank.
+  - id: cp.s2.c3
+    statement: >-
+      Cut edges are free of tears, cracks, curl or buckling, and no nick crosses inside the
+      outline.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-93: damage 'must be cleaned and smoothed'; p.4-92 'Smooth out any abrasions
+      and/or dents.'
+  - id: cp.s2.c4
+    statement: >-
+      The blank was cut from stock of the same gauge and alloy as the original skin.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Handbook: 'The filler must be of the same gauge and material as the original skin.'
+      Verified by micrometer/stock marking, not by sight.
+  error_modes:
+  - id: cp.s2.e1
+    statement: >-
+      Cut runs inside the traced line, producing an undersized filler with a gap around the
+      opening.
+    severity: major
+    origin: drafted
+  - id: cp.s2.e2
+    statement: >-
+      Filler blank cut from thinner or dissimilar stock than the skin, which still looks correct
+      once fitted.
+    severity: critical
+    origin: drafted
+  - id: cp.s2.e3
+    statement: Shear or snips leave a curled, torn or work-hardened edge on the blank.
+    severity: minor
+    origin: drafted
+- id: cp.s3
+  section: Create the Patch Filler
+  text: Size material to fit the shape.
+  note_refs:
+  - 3
+  checks:
+  - id: cp.s3.c1
+    statement: >-
+      The filler seats fully in the opening and sits flush with the surrounding skin, with
+      no step, lip, or bulge.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Handbook: "A flush patch is a filler patch that is flush to the skin when applied";
+      p.4-93 requires "a smooth outside surface".
+  - id: cp.s3.c2
+    statement: >-
+      The gap between filler and opening edge is uniform around the full perimeter, with no
+      wedge-shaped or crescent gap.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: file "until the patch fits the opening"; handbook speaks only qualitatively
+      of fit and contour.
+  - id: cp.s3.c3
+    statement: >-
+      Filed edges are straight and square to the surface, free of file gouges, waviness, and
+      burrs.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet step 4 deburr/smooth; handbook p.4-92 "Smooth out any abrasions and/or
+      dents" and "Round all square corners".
+  - id: cp.s3.c4
+    statement: >-
+      The filler material is the same gauge and alloy as the original skin after fitting.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Handbook: "The filler must be of the same gauge and material as the original skin."
+      Verify with micrometer/material marking.
+  - id: cp.s3.c5
+    statement: >-
+      The filler enters the opening by hand without forcing, hammering, or rocking in place.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: file "carefully remove material until the patch fits the opening"
+      — fit judged during trial fitting.
+  error_modes:
+  - id: cp.s3.e1
+    statement: >-
+      Over-filing leaves an oversized, loose filler with a wide or uneven gap that cannot
+      be riveted flush.
+    severity: major
+    origin: drafted
+  - id: cp.s3.e2
+    statement: >-
+      Oversized filler forced into the opening, upsetting the skin edge or standing proud
+      of the surface while looking seated.
+    severity: critical
+    origin: drafted
+  - id: cp.s3.e3
+    statement: File chatter, gouges, or burrs left on the filler edges after sizing.
+    severity: minor
+    origin: drafted
+- id: cp.s4
+  section: Create the Patch Filler
+  text: Deburr edges and smooth scratches with sandpaper.
+  checks:
+  - id: cp.s4.c1
+    statement: >-
+      All cut edges and hole edges of the filler are burr-free and uniformly smooth, with
+      no sharp or ragged sections.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet step 4 and safety note 1 (cut/formed metal leaves sharp edges); handbook
+      defines burr as 'a small, thin section of metal extending beyond a regular surface'.
+  - id: cp.s4.c2
+    statement: >-
+      No coarse file marks or deep scratches remain on the filler faces or edges after final
+      sanding.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-89: 'Scratches, which penetrate the pure aluminum surface layer, permit
+      corrosion to take place in the alloy beneath.'
+  - id: cp.s4.c3
+    statement: >-
+      After sanding, the filler still fits the opening with a uniform gap and no oversize
+      slop from removed material.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet Create the Patch Filler note 3: file 'until the patch fits the opening';
+      fit gap must be gauged, not eyeballed.
+  - id: cp.s4.c4
+    statement: >-
+      Filler thickness is unchanged by face sanding and still matches the original skin gauge.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Handbook: 'The filler must be of the same gauge and material as the original skin.'
+      Requires micrometer reading.
+  error_modes:
+  - id: cp.s4.e1
+    statement: >-
+      Faces sanded aggressively, thinning the filler below original skin gauge while the part
+      still looks correct.
+    severity: critical
+    origin: drafted
+  - id: cp.s4.e2
+    statement: >-
+      Burrs or sharp slivers left on the filler edges, preventing flush seating and posing
+      a cut hazard.
+    severity: major
+    origin: drafted
+  - id: cp.s4.e3
+    statement: >-
+      Edges over-sanded, enlarging the filler-to-opening gap so the filler no longer fits
+      snugly and must be remade.
+    severity: major
+    origin: drafted
+  - id: cp.s4.e4
+    statement: >-
+      Coarse-grit cross scratches left on the clad surface without progression to fine grit.
+    severity: minor
+    origin: drafted
+- id: pr.s1
+  section: Perform Rivet Layout
+  text: Choose the rivet for the repair.
+  note_refs:
+  - 1
+  checks:
+  - id: pr.s1.c1
+    statement: >-
+      Selected rivet diameter equals the next standard size above three times the measured
+      skin thickness.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-86
+    origin: drafted
+    note: >-
+      Handbook: "multiply the thickness of the skin by three and use the next larger size
+      rivet corresponding to that figure"; procedure sheet only says "calculate".
+  - id: pr.s1.c2
+    statement: >-
+      Rivet type and material match the original rivets in the part being repaired.
+    observable: document
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      Handbook: "the rivet size and material should be the same as the original rivets in
+      the part being repaired."
+  - id: pr.s1.c3
+    statement: >-
+      Rivet length provides grip for the full doubler-plus-skin-plus-filler stack with enough
+      shank left to upset a shop head.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note: "Calculate the required rivet diameter and length." No numeric
+      length rule appears in the handbook extract.
+  - id: pr.s1.c4
+    statement: >-
+      Selected rivet head style (universal or countersunk) matches the existing rivet heads
+      in the surrounding skin.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      Rests on handbook "the rivet size and material should be the same as the original rivets";
+      head style comparison is visually settleable.
+  error_modes:
+  - id: pr.s1.e1
+    statement: >-
+      Diameter computed from skin thickness but rounded down instead of up, leaving the joint
+      critical in shear.
+    severity: critical
+    origin: drafted
+  - id: pr.s1.e2
+    statement: >-
+      Rivet length chosen for skin alone, ignoring doubler and filler gauges, so no shank
+      remains to form a full shop head.
+    severity: major
+    origin: drafted
+  - id: pr.s1.e3
+    statement: >-
+      Rivet alloy or head style substituted for what is on hand rather than matching the original
+      installation.
+    severity: major
+    origin: drafted
+- id: pr.s2
+  section: Perform Rivet Layout
+  text: Determine and plot the edge distance.
+  note_refs:
+  - 2
+  checks:
+  - id: pr.s2.c1
+    statement: >-
+      Edge distance lines are marked on all four edges of the doubler, the filler, and the
+      skin repair area.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: "Mark that distance from all edges with a marker"; handbook is
+      qualitative on layout.
+  - id: pr.s2.c2
+    statement: >-
+      Each marked edge distance measures the value calculated for the selected rivet diameter,
+      and no less.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      Handbook: "the proper edge distance for the larger rivet must be maintained"; the numeric
+      value comes from the student's calculation.
+  - id: pr.s2.c3
+    statement: >-
+      Marked edge distance meets the handbook minimum for the rivet size used, e.g. 1/4" for
+      1/8" rivets.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Figure 4-175 text: "Minimum edge distance using 1/8" rivets is 1/4" and using 5/32"
+      rivets is 5/16"" (stated for lap/scab patch).
+  - id: pr.s2.c4
+    statement: >-
+      Each line runs parallel to its edge at a constant offset, and lines meet cleanly at
+      the corners.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Layout must be usable for pitch plotting; handbook only requires patterns "conform to
+      instructions in the applicable aircraft manual".
+  - id: pr.s2.c5
+    statement: >-
+      Rivet diameter used in the edge distance calculation matches the rivet chosen in step
+      1 of the layout.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Perform Rivet Layout notes 1-2 require the calculated diameter to drive the edge distance
+      figure.
+  error_modes:
+  - id: pr.s2.e1
+    statement: >-
+      Edge distance marked smaller than the calculated minimum, inviting tearout while the
+      layout still looks orderly.
+    severity: critical
+    origin: drafted
+  - id: pr.s2.e2
+    statement: >-
+      Edge distance lines omitted on one or more edges, or plotted on only one of the three
+      pieces.
+    severity: major
+    origin: drafted
+  - id: pr.s2.e3
+    statement: >-
+      Lines wander or taper relative to the edge, or are drawn with a broad marker that obscures
+      the true dimension.
+    severity: minor
+    origin: drafted
+- id: pr.s3
+  section: Perform Rivet Layout
+  text: Determine the pitch and plot each rivet.
+  note_refs:
+  - 3
+  checks:
+  - id: pr.s3.c1
+    statement: >-
+      Adjacent dots along each rivet line are spaced at the calculated pitch, equal to one
+      another within layout tolerance.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Calculate the needed pitch. Mark a dot at that interval on each material"; requires
+      scale reading between dots.
+  - id: pr.s3.c2
+    statement: >-
+      The plotted pitch and rivet count match the documented calculation and the applicable
+      manual's rivet pattern.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-92: "The rivet pattern for a repair must conform to instructions in the
+      applicable aircraft manual"; count from Figure 4-169.
+  - id: pr.s3.c3
+    statement: >-
+      Every dot sits on the previously plotted edge-distance lines, with rows symmetrical
+      about the opening and none outside the layout.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet step 2 plots edge distance first; dots must fall on those lines for a valid pattern.
+  - id: pr.s3.c4
+    statement: >-
+      On a lap or scab patch layout, rows are staggered about 1/2 inch apart with spacing
+      about 1 inch.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-96
+    origin: drafted
+    note: >-
+      Handbook: "Space rivets aproximately 1" apart in staggered rows 1/2" apart"; applies
+      to lap/scab patch geometry only.
+  error_modes:
+  - id: pr.s3.e1
+    statement: >-
+      Pitch calculated too large, plotting fewer rivets than the joint needs, leaving a shear-critical
+      repair that looks correct.
+    severity: critical
+    origin: drafted
+  - id: pr.s3.e2
+    statement: >-
+      Pitch too small, crowding dots so holes will tear out or crack between rivets.
+    severity: critical
+    origin: drafted
+  - id: pr.s3.e3
+    statement: >-
+      Dots plotted on only one piece, or offset between skin, doubler and filler so patterns
+      cannot align.
+    severity: major
+    origin: drafted
+  - id: pr.s3.e4
+    statement: Fat, smeared or doubled marker dots that hide the true rivet center.
+    severity: minor
+    origin: drafted
+- id: dh.s1
+  section: Drill the Holes
+  text: Center punch the holes in the skin.
+  note_refs:
+  - 1
+  checks:
+  - id: dh.s1.c1
+    statement: >-
+      Every plotted rivet mark on the skin carries exactly one punch indentation centered
+      on the mark, with no stray or doubled indentations.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Notes: "Place the point of the center punch directly on a mark for a
+      rivet" and "Repeat for all rivet mark locations on the skin."
+  - id: dh.s1.c2
+    statement: >-
+      Measured punch-center locations match the plotted edge distance and pitch for the repair
+      layout.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "The rivet pattern for a repair must conform to instructions in the applicable
+      aircraft manual"; procedure sheet plots ED and pitch marks.
+  - id: dh.s1.c3
+    statement: >-
+      The skin around each indentation remains flat, with no warping, dishing or backside
+      bulge from an over-heavy blow.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: "One light blow is enough; too heavy and the metal will warp";
+      verify with straightedge/flatness check.
+  - id: dh.s1.c4
+    statement: >-
+      The punch is held perpendicular and steady against the skin and struck with a single
+      light hammer blow.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Notes: "Hold the punch steady against the material" and "Lightly tap
+      the top of the center punch".
+  error_modes:
+  - id: dh.s1.e1
+    statement: >-
+      Indentation set off the layout mark, so the drilled hole ends up short of minimum edge
+      distance while looking normal.
+    severity: critical
+    origin: drafted
+  - id: dh.s1.e2
+    statement: >-
+      Hammer blow too heavy, warping or denting the skin around the punch marks.
+    severity: major
+    origin: drafted
+  - id: dh.s1.e3
+    statement: >-
+      Missed or duplicated punch marks, or stray indentations and scratches outside the layout.
+    severity: minor
+    origin: drafted
+- id: dh.s2
+  section: Drill the Holes
+  text: Drill pilot holes through the marks.
+  note_refs:
+  - 2
+  checks:
+  - id: dh.s2.c1
+    statement: >-
+      Each pilot hole is centered on its center-punch mark, with layout dots still visible
+      around the hole rim.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet directs the bit apex be positioned in the punch indentation and holes drilled
+      through the marks, preserving edge distance and pitch.
+  - id: dh.s2.c2
+    statement: >-
+      Pilot holes are round and clean, with no elongation, ovalling, tearing or crescent gouging
+      at the hole edge.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-85
+    origin: drafted
+    note: >-
+      Handbook: "Drill bits that do not cut satisfactorily cause damage to the hole."
+  - id: dh.s2.c3
+    statement: >-
+      Pilot bit diameter is no larger than the rivet diameter, #40 (0.098") for a 1/8" rivet.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: bit "same size as or slightly smaller than the rivet diameter... #40 drill bits
+      are preferred"; handbook gives no such figure.
+  - id: dh.s2.c4
+    statement: >-
+      Drill is held perpendicular with the part clamped or backed while drilling, and exit
+      is controlled at breakout.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: keep drill perpendicular, anticipate exit; handbook mentions clamping and a wood
+      support only in the titanium hand-drilling context.
+  error_modes:
+  - id: dh.s2.e1
+    statement: >-
+      Pilot drilled with a bit larger than the rivet diameter, leaving an oversize hole no
+      step-up can correct.
+    severity: critical
+    origin: drafted
+  - id: dh.s2.e2
+    statement: >-
+      Holes drilled off the punch marks, breaking edge distance or pitch on skin, doubler
+      or filler.
+    severity: major
+    origin: drafted
+  - id: dh.s2.e3
+    statement: >-
+      Drill wanders or is skewed, producing elongated, triangular or torn holes and back-side
+      breakout damage.
+    severity: major
+    origin: drafted
+  - id: dh.s2.e4
+    statement: >-
+      Chuck or bit contact scratches and mars the skin around the holes at breakout.
+    severity: minor
+    origin: drafted
+- id: dh.s3
+  section: Drill the Holes
+  text: Drill the patch doubler.
+  note_refs:
+  - 3
+  checks:
+  - id: dh.s3.c1
+    statement: >-
+      Every drilled doubler hole is concentric with its mating skin hole, with cleco pins
+      seated fully and no crescent or double-drilled openings.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Transfer holes from the skin to the doubler... Drill a hole and hold it aligned
+      with a cleco pin.'
+  - id: dh.s3.c2
+    statement: >-
+      The doubler is held with cleco clamps or pins so it cannot shift between the first and
+      last hole drilled.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Secure in place with cleco clamps, if possible'; only observable while drilling
+      progresses.
+  - id: dh.s3.c3
+    statement: >-
+      Hole centers on the doubler sit at the laid-out edge distance from the doubler edges,
+      with the ED line bisecting the transferred skin holes.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Bisect the holes in the skin with the edge distance line on the doubler.' Handbook
+      only states edge distance 'must be maintained' qualitatively.
+  - id: dh.s3.c4
+    statement: >-
+      Pilot holes are drilled with a bit no larger than the rivet diameter (#40 preferred
+      for a 1/8" rivet).
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 6: bit 'same size as or slightly smaller than the rivet diameter... #40 drill
+      bits are preferred'; figure is the sheet's alone.
+  error_modes:
+  - id: dh.s3.e1
+    statement: >-
+      Doubler shifts while drilling, so holes only line up when forced with a cleco, leaving
+      elongated holes hidden between the layers.
+    severity: critical
+    origin: drafted
+  - id: dh.s3.e2
+    statement: >-
+      Doubler drilled with too little edge margin, so a hole breaks out or leaves insufficient
+      edge distance for riveting.
+    severity: critical
+    origin: drafted
+  - id: dh.s3.e3
+    statement: >-
+      Drill held off perpendicular, producing angled or oval holes and burred breakout on
+      the back face of the doubler.
+    severity: major
+    origin: drafted
+- id: dh.s4
+  section: Drill the Holes
+  text: Drill the patch filler.
+  note_refs:
+  - 4
+  checks:
+  - id: dh.s4.c1
+    statement: >-
+      Every hole in the filler is round and full-size, with no teardrop, elongation or double-drilled
+      crescent.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook warns of "holes that have been elongated" and "if the rivet holes show elongation,
+      replace the rivets with the next larger size" (p.4-91/4-92).
+  - id: dh.s4.c2
+    statement: >-
+      Filler holes hold the laid-out edge distance and pitch from every filler edge.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet requires plotted ED and pitch; handbook only states "The rivet pattern
+      for a repair must conform to instructions in the applicable aircraft manual" (p.4-92).
+  - id: dh.s4.c3
+    statement: >-
+      Filler sits in the opening flush with the skin and its holes register with the doubler
+      on cleco pins.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: fit into opening and transfer holes to doubler; handbook: "A flush
+      patch is a filler patch that is flush to the skin" (p.4-96).
+  - id: dh.s4.c4
+    statement: >-
+      Filler shows no warp, dishing or bulge around the punched and drilled holes.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: "One light blow is enough; too heavy and the metal will warp";
+      handbook lists upsetting as a defect (p.4-90).
+  - id: dh.s4.c5
+    statement: >-
+      Drill is held perpendicular with the filler clamped or backed while drilling.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet note 12; handbook: "When hand drilling thin or flexible parts, put a
+      support (such as a block of wood) behind the part" (p.4-85).
+  error_modes:
+  - id: dh.s4.e1
+    statement: >-
+      Drill wandered or was tilted, producing an oversize/teardrop hole that a rivet head
+      will later hide.
+    severity: critical
+    origin: drafted
+  - id: dh.s4.e2
+    statement: >-
+      Filler holes drilled short of the required edge distance, inviting tear-out while looking
+      acceptable.
+    severity: critical
+    origin: drafted
+  - id: dh.s4.e3
+    statement: >-
+      Filler holes miss the doubler layout, so transferred holes are mismatched and the filler
+      will not sit flush.
+    severity: major
+    origin: drafted
+  - id: dh.s4.e4
+    statement: Heavy center punch blow or drill grab dished the filler around a hole.
+    severity: minor
+    origin: drafted
+- id: dh.s5
+  section: Drill the Holes
+  text: Step up to the next drill bit size.
+  note_refs:
+  - 5
+  checks:
+  - id: dh.s5.c1
+    statement: >-
+      The final hole diameter is at least 0.003 in larger than the rivet diameter (e.g. #30,
+      0.1285 in, for a -4 rivet).
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 17 gives the ream dimension; handbook pages speak only qualitatively
+      about hole size and rivet fit.
+  - id: dh.s5.c2
+    statement: >-
+      The step-up sequence is pilot #40 then finish size, with no size skipped past the specified
+      increment.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Notes 6 and 17 fix pilot (#40) and finish (#30) bits; handbook increments (0.0313/0.0625
+      in) apply only to titanium holes 0.1875 in and larger.
+  - id: dh.s5.c3
+    statement: >-
+      Finished holes are round and clean, with no elongation, tearing or triangular lobing
+      at the hole edge.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-85
+    origin: drafted
+    note: >-
+      "Drill bits that do not cut satisfactorily cause damage to the hole"; p.4-91 warns of
+      "holes that have been elongated."
+  - id: dh.s5.c4
+    statement: >-
+      Skin, doubler and filler remain clamped or clecoed together while holes are enlarged,
+      so the stack stays aligned.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "clamp them together tightly... use temporary bolts, Cleco clamps" (stated
+      for titanium hand drilling); procedure notes 14-16 require cleco pins.
+  - id: dh.s5.c5
+    statement: >-
+      The new bit is chucked with the flutes fully exposed clear of the chuck jaws.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 7: "Install drill bit into pneumatic drill with flutes fully exposed."
+  error_modes:
+  - id: dh.s5.e1
+    statement: >-
+      Holes left at pilot size or under the ream dimension, so rivets are forced into interference
+      and shanks are damaged.
+    severity: critical
+    origin: drafted
+  - id: dh.s5.e2
+    statement: >-
+      Bit size skipped or oversized bit used, enlarging holes beyond ream dimension and leaving
+      a loose fit that looks normal once riveted.
+    severity: critical
+    origin: drafted
+  - id: dh.s5.e3
+    statement: >-
+      Clecos removed during step-up, letting the stack shift so enlarged holes are misaligned
+      or elongated.
+    severity: major
+    origin: drafted
+  - id: dh.s5.e4
+    statement: >-
+      Excessive feed or dull bit leaves torn, out-of-round holes and heavy burrs on the exit
+      side.
+    severity: major
+    origin: drafted
+- id: dh.s6
+  section: Drill the Holes
+  text: Drill all holes up to the finished size.
+  checks:
+  - id: dh.s6.c1
+    statement: >-
+      Each finished hole measures at least 0.003" larger than the rivet diameter (e.g., 0.1285"/#30
+      for a -4 rivet).
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet Senior Mechanic Note 17 gives the ream dimension; handbook pages supplied
+      state no such figure.
+  - id: dh.s6.c2
+    statement: >-
+      Finished holes are round and clean-edged, with no elongation, tri-lobing or torn bore
+      walls.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-85
+    origin: drafted
+    note: >-
+      "Drill bits that do not cut satisfactorily cause damage to the hole"; p.4-91 treats
+      elongated holes as defects.
+  - id: dh.s6.c3
+    statement: >-
+      Holes remain concentric through skin, doubler and filler with no step or crescent between
+      layers.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook treats "holes in the sheet misaligned" as a defect condition; procedure sheet
+      requires cleco pinning to hold alignment.
+  - id: dh.s6.c4
+    statement: >-
+      Edge distance to the plotted layout lines is still met after enlarging holes to finished
+      size.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      "the proper edge distance for the larger rivet must be maintained" when a hole is enlarged.
+  error_modes:
+  - id: dh.s6.e1
+    statement: >-
+      Holes left at pilot/#40 size so rivets must be forced, damaging the hole while the work
+      looks finished.
+    severity: critical
+    origin: drafted
+  - id: dh.s6.e2
+    statement: >-
+      Layers shift because clecos were removed before final drilling, leaving offset holes
+      hidden between skin, doubler and filler.
+    severity: critical
+    origin: drafted
+  - id: dh.s6.e3
+    statement: >-
+      Drill wander or non-perpendicular drilling leaves oversized, elongated or tri-lobed
+      holes.
+    severity: major
+    origin: drafted
+- id: dh.s7
+  section: Drill the Holes
+  text: Deburr all drilled holes from both sides.
+  checks:
+  - id: dh.s7.c1
+    statement: >-
+      No raised metal or burr ring remains around any drilled hole on either face of skin,
+      doubler and filler.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Deburr all drilled holes from both sides." Handbook only defines a burr as "a
+      small, thin section of metal extending beyond a regular surface... on the edge of a
+      hole."
+  - id: dh.s7.c2
+    statement: >-
+      Hole diameter after deburring is still at the finished/ream size and not enlarged or
+      knife-edged by the deburr tool.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: ream "at least 0.003" larger than the rivet diameter" (e.g., #30 = 0.1285" for
+      a -4 rivet); handbook gives no deburr dimension.
+  - id: dh.s7.c3
+    statement: >-
+      Parts were separated so the faying (hidden) faces of every hole were deburred, not just
+      the exposed sides.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      "from both sides" — the blind face cannot be verified once the assembly is re-clecoed.
+  - id: dh.s7.c4
+    statement: >-
+      Faying surfaces and hole edges are free of chips, shavings and FOD before reassembly.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet equipment list includes FOD box; trapped swarf prevents parts sitting flush.
+  error_modes:
+  - id: dh.s7.e1
+    statement: >-
+      Only the accessible face is deburred; burrs on the mating faces hold the sheets apart
+      while the assembly still looks flush and correct.
+    severity: critical
+    origin: drafted
+  - id: dh.s7.e2
+    statement: >-
+      Over-deburring countersinks or enlarges the hole, leaving a knife edge and reduced rivet
+      head bearing.
+    severity: major
+    origin: drafted
+  - id: dh.s7.e3
+    statement: >-
+      Deburr tool or drill chips left between doubler and skin, or tool slips and scratches
+      the surrounding skin.
+    severity: minor
+    origin: drafted
+- id: sr.s1
+  section: Set up Rivet Gun
+  text: Choose the set and spring.
+  note_refs:
+  - 1
+  checks:
+  - id: sr.s1.c1
+    statement: >-
+      The selected set's tip style matches the rivet head style to be driven — concave recess
+      for universal, flat disk for countersunk.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: universal set has 'concave recess on tip'; countersunk set has 'disk-shaped head'.
+      Handbook extract does not cover rivet gun sets.
+  - id: sr.s1.c2
+    statement: >-
+      The concave recess diameter equals the rivet head diameter, neither undersized nor oversized.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires recess 'the same size as rivet head'; sizing needs a measured or gauged
+      comparison, not appearance.
+  - id: sr.s1.c3
+    statement: >-
+      The retaining spring form matches the chosen set — cone-shaped for a universal set,
+      cylindrical for a countersunk set.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: universal 'uses a cone-shaped retaining spring'; countersunk 'uses a cylinder
+      shaped retaining spring'.
+  - id: sr.s1.c4
+    statement: >-
+      Set shank and spring are undamaged, clean and free of burrs, mushrooming or chipping
+      on the working face.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by sheet's set selection step; a marred set face transfers defects to rivet
+      heads. Needs SME confirmation of acceptance limit.
+    assumed: true
+  error_modes:
+  - id: sr.s1.e1
+    statement: >-
+      A flat countersunk set is chosen for universal-head rivets (or a concave set for flush
+      rivets), deforming heads and skin.
+    severity: critical
+    origin: drafted
+  - id: sr.s1.e2
+    statement: >-
+      Spring form does not match the set, so the set is not retained and can be ejected from
+      the gun in use.
+    severity: critical
+    origin: drafted
+  - id: sr.s1.e3
+    statement: >-
+      Set recess is oversized for the rivet head, letting the set slip and mark the skin with
+      'smiles'.
+    severity: major
+    origin: drafted
+- id: sr.s2
+  section: Set up Rivet Gun
+  text: Install the set and spring on the rivet gun.
+  note_refs:
+  - 2
+  checks:
+  - id: sr.s2.c1
+    statement: >-
+      The retaining spring is threaded fully onto the gun barrel with no exposed threads or
+      gap at the collar.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Slide the spring over the set down to the threads" and rotate gun
+      in tightening direction.
+  - id: sr.s2.c2
+    statement: >-
+      The installed set matches the rivet type: concave recess with cone-shaped spring for
+      universal, disk head with cylindrical spring for countersunk.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note distinguishes universal (concave recess, cone spring) from countersunk
+      (disk head, cylinder spring) setups.
+  - id: sr.s2.c3
+    statement: >-
+      The concave recess diameter of the set equals the rivet head size being driven.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: recess "the same size as rivet head"; requires comparing set recess
+      to rivet head dimension.
+  - id: sr.s2.c4
+    statement: >-
+      The spring is tightened until a marked rise in torque is felt and the set is captive
+      in the gun.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: rotate "until you feel a high rise in torque"; tactile and retention
+      cannot be seen in a still.
+  error_modes:
+  - id: sr.s2.e1
+    statement: >-
+      Spring only hand-started, not torqued down, so the set can be ejected from the gun under
+      recoil.
+    severity: critical
+    origin: drafted
+  - id: sr.s2.e2
+    statement: >-
+      Wrong set installed for the rivet head type (disk set on universal rivets), which will
+      mar the head and skin.
+    severity: critical
+    origin: drafted
+  - id: sr.s2.e3
+    statement: >-
+      Set installed with concave head reversed or spring cross-threaded on the barrel.
+    severity: major
+    origin: drafted
+- id: sr.s3
+  section: Set up Rivet Gun
+  text: Set rivet gun pressure.
+  note_refs:
+  - 3
+  checks:
+  - id: sr.s3.c1
+    statement: >-
+      The rivet gun is connected to a compressed air source with the hose secured at the gun
+      inlet.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Connect the gun to a source of compressed air"; handbook pages 4-85..4-96 do
+      not address rivet gun pressure setup.
+  - id: sr.s3.c2
+    statement: >-
+      The set tip is pressed into a scrap wood block, not the workpiece or an installed rivet,
+      while pressure is set.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Moderately press the set head into a block of wood. Keep it there while setting
+      pressure."
+  - id: sr.s3.c3
+    statement: >-
+      The trigger is pulled fully while the regulator is twisted, and the set stays captive
+      in the gun throughout.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Pull the trigger fully while twisting the regulator"; retaining spring must
+      hold set during firing.
+  - id: sr.s3.c4
+    statement: >-
+      Regulator is adjusted off maximum to a recoil the student can control without the gun
+      walking off the block.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "twisting the regulator until a manageable recoil is found"; no psi value given
+      by either source.
+  error_modes:
+  - id: sr.s3.e1
+    statement: >-
+      Gun fired free in the air or with set unrestrained, launching the set as a projectile.
+    severity: critical
+    origin: drafted
+  - id: sr.s3.e2
+    statement: >-
+      Pressure set by firing against the actual skin or a rivet, denting the repair while
+      the gun looks correctly rigged.
+    severity: critical
+    origin: drafted
+  - id: sr.s3.e3
+    statement: >-
+      Regulator left at or near maximum, so first rivets are driven with uncontrollable recoil.
+    severity: major
+    origin: drafted
+  - id: sr.s3.e4
+    statement: >-
+      Trigger feathered instead of pulled fully, so the recoil judged does not represent driving
+      conditions.
+    severity: minor
+    origin: drafted
+- id: rm.s1
+  section: Rivet the Material
+  text: Insert a rivet.
+  note_refs:
+  - 1
+  checks:
+  - id: rm.s1.c1
+    statement: >-
+      The rivet passes through every layer to be joined (skin, doubler, and filler as applicable),
+      with its shank visible on the far side.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 1: "Press a rivet through all the sheets of material to be joined."
+  - id: rm.s1.c2
+    statement: >-
+      The manufactured head is fully seated against the skin with no gap or cocking between
+      head and sheet.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet requires the rivet head be kept flush to the skin; a seated head is
+      the inspectable outcome of insertion.
+  - id: rm.s1.c3
+    statement: >-
+      The rivet installed matches the diameter, length, and material determined in the rivet-layout
+      step for this repair.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-92: "Normally, the rivet size and material should be the same as the original
+      rivets in the part being repaired." Procedure sheet: calculate rivet diameter and length.
+  - id: rm.s1.c4
+    statement: >-
+      Protruding shank length is sufficient to form a shop head of about 0.5D height and 1.5D
+      width.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Shop head 0.5D/1.5D is the procedure sheet's figure alone; handbook extract states no
+      protrusion value. Needs SME confirmation of pre-buck protrusion.
+    assumed: true
+  - id: rm.s1.c5
+    statement: >-
+      The sheets are held in contact at the rivet location, with no visible gap or slippage
+      between layers before bucking.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Insertion must not spring the layers apart; procedure sheet directs clecoing/holding
+      parts aligned during fastening.
+  error_modes:
+  - id: rm.s1.e1
+    statement: >-
+      Rivet inserted through only some layers (e.g., misses the filler or doubler), leaving
+      a joint that looks riveted but carries no load path.
+    severity: critical
+    origin: drafted
+  - id: rm.s1.e2
+    statement: >-
+      Undersized or wrong-material rivet dropped into an oversize hole, loose in the bore
+      yet plausible-looking once bucked.
+    severity: critical
+    origin: drafted
+  - id: rm.s1.e3
+    statement: Rivet too short, leaving insufficient shank to form a full shop head.
+    severity: major
+    origin: drafted
+  - id: rm.s1.e4
+    statement: >-
+      Head left unseated or cocked in the hole, or the rivet falls out before the gun is applied.
+    severity: major
+    origin: drafted
+- id: rm.s2
+  section: Rivet the Material
+  text: Align the rivet gun.
+  note_refs:
+  - 2
+  checks:
+  - id: rm.s2.c1
+    statement: >-
+      The rivet set is seated squarely on the manufactured head, fully covering it with no
+      offset onto the surrounding skin.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Press the rivet set snug into the rivet head." Concentric seating
+      is visible in a still of the held position.
+  - id: rm.s2.c2
+    statement: >-
+      The gun barrel axis is held perpendicular to the skin and stays perpendicular through
+      the recoil.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Keep the rivet gun perpendicular to the material and stabilize your
+      wrist to control the recoil"; a still cannot show it was held.
+  - id: rm.s2.c3
+    statement: >-
+      The skin and manufactured head around the rivet are free of set marks, gouges or deformities
+      from off-axis contact.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook: "examining both the shop and manufactured heads and the surrounding skin and
+      structural parts for deformities."
+  - id: rm.s2.c4
+    statement: >-
+      The rivet shank remains straight and unjoggled in the hole after the set is aligned
+      and pressure applied.
+    observable: video
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook: "Joggles in removed rivet shanks indicate partial shear failure"; joggling
+      is only evidenced as it occurs, not from a surface still.
+  error_modes:
+  - id: rm.s2.e1
+    statement: >-
+      Gun held off-axis so the set drives the rivet crooked, joggling the shank inside a joint
+      that still looks acceptable outside.
+    severity: critical
+    origin: drafted
+  - id: rm.s2.e2
+    statement: >-
+      Set not pressed snug or not centered on the head, so it skids onto the skin and gouges
+      or 'smiles' the surface.
+    severity: major
+    origin: drafted
+  - id: rm.s2.e3
+    statement: >-
+      Wrist not stabilized, letting the gun walk under recoil and leaving scuffs or a tipped
+      manufactured head.
+    severity: minor
+    origin: drafted
+- id: rm.s3
+  section: Rivet the Material
+  text: Position the bucking bar.
+  note_refs:
+  - 3
+  checks:
+  - id: rm.s3.c1
+    statement: >-
+      The bucking bar's hardened flat face sits squarely and fully centered on the rivet shank,
+      not overhanging onto the surrounding skin.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Place its hardened surface on the rivet shank directly in line with
+      the rivet gun set." Handbook extract is silent on bucking bar use.
+  - id: rm.s3.c2
+    statement: >-
+      The contact face of the bucking bar is smooth and free of nicks, burrs or paint that
+      would mark the shop head.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by requirement to use the bar's "hardened surface" against the shank; damaged
+      faces transfer defects to the shop head.
+  - id: rm.s3.c3
+    statement: >-
+      The bar stays coaxial with the gun set and perpendicular to the sheet for the whole
+      burst, without walking off the shank.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: keep the bucking bar perpendicular "to avoid joggling the rivet shank";
+      only observable while driving.
+  - id: rm.s3.c4
+    statement: >-
+      The bar is held firmly against the material with pull pressure matching the gun's push,
+      so it does not bounce clear.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Equal the pushing pressure on the rivet gun with the pulling pressure
+      on the bucking bar."
+  error_modes:
+  - id: rm.s3.e1
+    statement: >-
+      Bar offset or cocked on the shank, clinching the shank sideways so the shop head forms
+      off-center yet still looks formed.
+    severity: critical
+    origin: drafted
+  - id: rm.s3.e2
+    statement: >-
+      Bar allowed to bounce or lift during driving, leaving an under-driven, loose rivet that
+      appears seated.
+    severity: critical
+    origin: drafted
+  - id: rm.s3.e3
+    statement: >-
+      Bar edge or face strikes the skin beside the rivet, denting or scarring the repair area.
+    severity: major
+    origin: drafted
+- id: rm.s4
+  section: Rivet the Material
+  text: Buck the rivet.
+  note_refs:
+  - 4
+  checks:
+  - id: rm.s4.c1
+    statement: >-
+      The manufactured head sits flush against the skin with no gap, tipping, or raised edge
+      around it.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Keep the rivet head flush to the skin." Handbook only addresses head
+      slippage on removed/existing rivets.
+  - id: rm.s4.c2
+    statement: >-
+      The shop head is concentric with the shank and not clinched, cocked, or joggled to one
+      side.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Keep the bucking bar perpendicular to avoid joggling the rivet shank."
+      Handbook discusses joggled shanks only for removed rivets.
+  - id: rm.s4.c3
+    statement: >-
+      Skin and doubler around the rivet are free of bucking bar dents, set 'smileys,' and
+      upset material.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Follows from procedure sheet's flush-head and controlled, equalized pressure requirement;
+      no handbook figure applies to this step.
+  - id: rm.s4.c4
+    statement: >-
+      Gun and bucking bar are held perpendicular with pushing and pulling pressure equalized
+      for a 1–3 second trigger pull.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Pull the trigger all the way for 1 to 3 seconds" and equal pushing/pulling
+      pressure; only visible while performed.
+  - id: rm.s4.c5
+    statement: >-
+      Any rivet head cracking stays within limits: depth under 1/8 and width under 1/16 of
+      shank diameter.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      Handbook: "The depth of the crack is less than 1/8 of the shank diameter"; "width of
+      the crack is less than 1/16 of the shank diameter."
+  error_modes:
+  - id: rm.s4.e1
+    statement: >-
+      Bucking bar held off-line, producing a clinched or joggled shank with a cocked shop
+      head that still looks set.
+    severity: critical
+    origin: drafted
+  - id: rm.s4.e2
+    statement: >-
+      Rivet over-driven — shop head flattened beyond limits, skin dimpled and hole enlarged
+      around the rivet.
+    severity: major
+    origin: drafted
+  - id: rm.s4.e3
+    statement: >-
+      Bucking bar or rivet set slips, leaving 'smiley' crescent marks or dents in the skin.
+    severity: minor
+    origin: drafted
+- id: rm.s5
+  section: Rivet the Material
+  text: Check the shop head dimensions.
+  note_refs:
+  - 5
+  checks:
+  - id: rm.s5.c1
+    statement: Measured shop head height is approximately 0.5 × rivet shank diameter.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note 5: 'preferred height = 0.5D'; the cited handbook pages give no
+      shop head dimensions.
+  - id: rm.s5.c2
+    statement: >-
+      Measured shop head width (diameter) is approximately 1.5 × rivet shank diameter.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note 5: 'preferred width = 1.5D'; handbook extract states no numeric
+      shop head standard.
+  - id: rm.s5.c3
+    statement: >-
+      Shop head is round and concentric on the shank, not clinched, tipped or joggled to one
+      side.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-91: 'examining both the shop and manufactured heads and the surrounding
+      skin and structural parts for deformities'; sheet says keep bar perpendicular 'to avoid
+      joggling'.
+  - id: rm.s5.c4
+    statement: >-
+      Manufactured head sits flush with the skin and surrounding skin shows no dishing, smiles
+      or gaps between sheets.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: 'Keep the rivet head flush to the skin.' Handbook p.4-91 requires inspecting
+      'the surrounding skin and structural parts for deformities'.
+  error_modes:
+  - id: rm.s5.e1
+    statement: >-
+      Under-driven rivet accepted: shop head shorter/narrower than 1.5D width, still looks
+      formed to a novice.
+    severity: critical
+    origin: drafted
+  - id: rm.s5.e2
+    statement: >-
+      Bucking bar held off-axis, producing a clinched or joggled shop head that will not carry
+      shear.
+    severity: critical
+    origin: drafted
+  - id: rm.s5.e3
+    statement: >-
+      Over-driven rivet: shop head flattened past 0.5D height with cracking or skin dished
+      around the head.
+    severity: major
+    origin: drafted
+- id: rr.s1
+  section: Remove the Rivet
+  text: Center punch the rivet head.
+  note_refs:
+  - 1
+  checks:
+  - id: rr.s1.c1
+    statement: >-
+      A single punch indentation sits at the geometric center of the rivet head, not offset
+      toward its edge.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 1: 'Place the point of the center punch in the middle of the rivet head.'
+  - id: rr.s1.c2
+    statement: >-
+      The rivet head and surrounding skin show no dishing, dent or upset metal from the hammer
+      blow.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: 'Lightly tap'; handbook defines 'Dent—indentation in a metal surface produced
+      by an object striking with force... surrounding... slightly upset.'
+  - id: rr.s1.c3
+    statement: >-
+      No stray punch marks, slip scratches or hammer strikes appear on the skin around the
+      target rivet.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: 'Scratch—slight tear or break in metal surface from light, momentary contact';
+      sheet requires punch held on the rivet head only.
+  - id: rr.s1.c4
+    statement: >-
+      The indentation is deep enough to seat the drill point so the bit does not walk off
+      the head.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Purpose of the punch mark per sheet sequence; only evidenced by the punch/drill start
+      being performed.
+  - id: rr.s1.c5
+    statement: >-
+      The punch was struck with one light blow, the punch held steady and perpendicular to
+      the head.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: 'Sheet note 1: ''Lightly tap the punch with a hammer.'''
+  error_modes:
+  - id: rr.s1.e1
+    statement: >-
+      Punch mark placed off-center on the rivet head, so the subsequent drill cuts into the
+      skin or enlarges the hole.
+    severity: critical
+    origin: drafted
+  - id: rr.s1.e2
+    statement: >-
+      Blow too heavy, denting the rivet head and warping or upsetting the surrounding skin.
+    severity: major
+    origin: drafted
+  - id: rr.s1.e3
+    statement: Punch slips off the head, leaving stray marks or scratches in the skin.
+    severity: minor
+    origin: drafted
+- id: rr.s2
+  section: Remove the Rivet
+  text: Drill into the rivet head.
+  note_refs:
+  - 2
+  checks:
+  - id: rr.s2.c1
+    statement: >-
+      The drilled hole is centered in the rivet head, concentric with the head and not encroaching
+      on the surrounding skin.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Follows from centering the punch in the middle of the rivet head so the drill stays
+      within the head.
+  - id: rr.s2.c2
+    statement: The drill bit used is smaller in diameter than the rivet shank diameter.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: 'Use a drill bit smaller than the diameter of the rivet'; handbook
+      gives no bit size here.
+  - id: rr.s2.c3
+    statement: >-
+      Drilling depth stops at the bottom of the rivet head and does not extend into the shank
+      or underlying structure.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: 'only drill down to the bottom of the rivet head'; handbook p.4-91:
+      'drilling off the head and carefully punching out the shank'.
+  - id: rr.s2.c4
+    statement: >-
+      The skin around the rivet head shows no drill gouging, chatter marks, or elongation
+      of the rivet hole.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook: 'carefully punching out the shank' and warns 'if the rivet holes show elongation,
+      replace the rivets with the next larger size'.
+  error_modes:
+  - id: rr.s2.e1
+    statement: >-
+      Drilling straight through the head into the shank and hole, elongating or oversizing
+      the rivet hole while still looking normal.
+    severity: critical
+    origin: drafted
+  - id: rr.s2.e2
+    statement: >-
+      Using a bit equal to or larger than the rivet diameter, cutting the hole oversize so
+      the original rivet size can no longer be used.
+    severity: critical
+    origin: drafted
+  - id: rr.s2.e3
+    statement: >-
+      Drill walks off-center and gouges or cuts the surrounding skin around the rivet head.
+    severity: major
+    origin: drafted
+- id: rr.s3
+  section: Remove the Rivet
+  text: Remove the rivet head.
+  note_refs:
+  - 3
+  checks:
+  - id: rr.s3.c1
+    statement: >-
+      The rivet head is completely sheared free of the shank, with no partial collar or attached
+      fragment remaining.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires rolling the punch to 'shear off the rivet head'; handbook speaks only
+      of 'drilling off the head'.
+  - id: rr.s3.c2
+    statement: >-
+      The skin around the rivet shows no punch gouges, crescent scoring, or new dents from
+      the shearing action.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook: rivets are removed 'by drilling off the head and carefully punching out the
+      shank'; careless punching marks the sheet.
+  - id: rr.s3.c3
+    statement: >-
+      The punch used is smaller in diameter than the hole drilled in the rivet head.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Insert a smaller diameter punch than the drilled hole in the rivet head.'
+  - id: rr.s3.c4
+    statement: >-
+      The skin hole remains round and to nominal diameter, not elongated or stretched by the
+      punch.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook: 'if the rivet holes show elongation, replace the rivets with the next larger
+      size' — elongation needs gauging, not sight.
+  error_modes:
+  - id: rr.s3.e1
+    statement: >-
+      An oversize punch or hammer blows are used, shearing the head but expanding or elongating
+      the skin hole while the work still looks normal.
+    severity: critical
+    origin: drafted
+  - id: rr.s3.e2
+    statement: >-
+      The head is only partly sheared and is pried or chiselled off, gouging and denting the
+      surrounding skin.
+    severity: major
+    origin: drafted
+  - id: rr.s3.e3
+    statement: >-
+      The punch slips off the drilled recess and leaves scratches or a shallow ring mark around
+      the rivet.
+    severity: minor
+    origin: drafted
+- id: rr.s4
+  section: Remove the Rivet
+  text: Punch out the rivet shank.
+  note_refs:
+  - 4
+  checks:
+  - id: rr.s4.c1
+    statement: >-
+      The hole is completely clear of rivet material, with the freed shank present as a separate
+      piece.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step calls for the shank knocked through the hole; a residual plug or partial shank
+      means the step is unfinished.
+  - id: rr.s4.c2
+    statement: The punch used is equal to, not larger than, the rivet diameter.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 4: 'Use a punch equal to the rivet diameter to knock it through
+      the hole.'
+  - id: rr.s4.c3
+    statement: >-
+      The vacated hole is still round and to original size, with no elongation from the punch.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.4-91: 'if the rivet holes show elongation, replace the rivets with the next
+      larger size'; gauge hole in two axes.
+  - id: rr.s4.c4
+    statement: >-
+      The skin around the hole is free of punch strikes, dents or dishing from the removal.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook p.4-91: shank is to be 'carefully punching out'; surrounding skin must show
+      no new distortion.
+  - id: rr.s4.c5
+    statement: >-
+      The workpiece was backed/supported so the blow drove the shank out rather than deflecting
+      the sheet.
+    observable: video
+    source: handbook FAA-H-8083-31B p.4-91
+    origin: drafted
+    note: >-
+      Handbook p.4-85: 'When hand drilling thin or flexible parts, put a support (such as
+      a block of wood) behind the part' — same principle applied to punching.
+    assumed: true
+  error_modes:
+  - id: rr.s4.e1
+    statement: >-
+      An oversize punch is driven through, enlarging or ovaling the hole while the surface
+      still looks clean.
+    severity: critical
+    origin: drafted
+  - id: rr.s4.e2
+    statement: >-
+      Shank is only partly driven and remains lodged in the hole, hidden from the visible
+      side.
+    severity: major
+    origin: drafted
+  - id: rr.s4.e3
+    statement: >-
+      Hammering on an unsupported panel dishes or dents the skin around the hole.
+    severity: major
+    origin: drafted
+- id: rr.s5
+  section: Remove the Rivet
+  text: Inspect the hole for damage.
+  note_refs:
+  - 5
+  checks:
+  - id: rr.s5.c1
+    statement: >-
+      The vacated hole is round and free of elongation, tearout or cracks running from its
+      edge.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure: "Look for irregular hole shapes." Handbook: "if the rivet holes show elongation,
+      replace the rivets with the next larger size"; "Sheet failures, such as tearouts, cracks
+      between rivets."
+  - id: rr.s5.c2
+    statement: >-
+      Hole diameter matches the original nominal rivet hole size, with no enlargement beyond
+      it.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      "If a rivet hole has been enlarged or deformed, the next larger size rivet must be used
+      after reworking the hole." Enlargement is only settled by gauging.
+  - id: rr.s5.c3
+    statement: >-
+      Skin around the hole is free of drill or punch gouges, scoring and raised burrs on both
+      faces.
+    observable: photo
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      Damage Removal: "Smooth out any abrasions and/or dents"; burr defined p.4-90 as metal
+      "on the edge of a hole."
+  - id: rr.s5.c4
+    statement: >-
+      If the hole is enlarged or deformed, edge distance still meets minimum for the next
+      larger rivet.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.4-92
+    origin: drafted
+    note: >-
+      "the proper edge distance for the larger rivet must be maintained" — requires a dimension
+      from hole centre to edge.
+  error_modes:
+  - id: rr.s5.e1
+    statement: >-
+      An elongated or out-of-round hole is judged serviceable and re-riveted with the same
+      size rivet, hiding a bearing failure.
+    severity: critical
+    origin: drafted
+  - id: rr.s5.e2
+    statement: >-
+      Hole is torn or crescent-gouged oversize by the punch or drill wandering off the rivet
+      head.
+    severity: major
+    origin: drafted
+  - id: rr.s5.e3
+    statement: >-
+      Burrs and drill swarf left at the hole edge, so the inspection is made through obscuring
+      debris.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The prepared repair site before any patch part is fitted: marker outline fully enclosing
+      the damage, the cutout with rounded (not square) corners, deburred and smoothed cut
+      edges, and any stop holes at crack ends.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Perpendicular to the skin, close enough that the cut edge and corner radii fill roughly
+      half the frame; steel scale laid flat across the opening's greatest dimension with zero
+      at an edge; raking side light to reveal burrs, saw skips and scratches.
+  - id: ev2
+    description: >-
+      Doubler and filler laid out flat, marker side up, showing edge-distance lines on all
+      edges and the plotted rivet dots, with the two parts side by side so their layouts can
+      be compared.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Directly overhead on a plain contrasting bench surface, both parts fully in frame, 6"
+      or 12" scale placed alongside one edge-distance line so offsets and pitch can be read;
+      even diffuse light, no glare on the marker ink.
+  - id: ev3
+    description: >-
+      The assembled stack after final-size drilling and deburring but before riveting: filler
+      seated in the opening with the doubler behind the skin, clecoes installed, holes concentric
+      through all layers.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Skin side, perpendicular, whole repair area plus at least one rivet pitch of surrounding
+      skin; scale in frame; low-angle light across the filler/skin joint to show whether the
+      filler is flush or stepped, and to catch any burr rings.
+  - id: ev4
+    description: >-
+      The completed repair, skin side, all rivets driven: manufactured heads flush and seated,
+      no bucking-bar dents, set 'smileys', dishing or interlayer gaps, layout lines still
+      legible.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Perpendicular, entire patch and surrounding rivet rows in frame, then close enough that
+      individual head seating is readable; scale included; raking light to make dents and
+      non-flush heads cast shadow.
+  - id: ev5
+    description: >-
+      Shop head dimensions measured on every driven rivet — height and width recorded against
+      the rivet shank diameter — plus recorded finished hole diameter and the gauge/alloy
+      of doubler and filler stock.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Rivet gauge or caliper shown in contact with each shop head with the reading legible,
+      one entry per rivet in a recorded table; hole diameter by pin gauge or caliper; material
+      gauge from a micrometer or the stock certification.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-31B
+    chapter: 4
+    pages:
+    - 4-85
+    - 4-86
+    - 4-87
+    - 4-88
+    - 4-89
+    - 4-90
+    - 4-91
+    - 4-92
+    - 4-93
+    - 4-94
+    - 4-95
+    - 4-96
+    pdf_page_indices:
+    - 246
+    - 247
+    - 248
+    - 249
+    - 250
+    - 251
+    - 252
+    - 253
+    - 254
+    - 255
+    - 256
+    - 257
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_31b_4_85_4_96.md
+  videos:
+  - path: data/videos/AM.II.A.S6/flush_patch_1.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_2.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_3.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_4.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_5.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_6.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_7.mp4
+  - path: data/videos/AM.II.A.S6/flush_patch_8.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=B54yKvNzkeg
+assumptions:
+- id: sr.s1.c4
+  statement: >-
+    Set shank and spring are undamaged, clean and free of burrs, mushrooming or chipping on
+    the working face.
+  reason: >-
+    Implied by sheet's set selection step; a marred set face transfers defects to rivet heads.
+    Needs SME confirmation of acceptance limit.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: rm.s1.c4
+  statement: >-
+    Protruding shank length is sufficient to form a shop head of about 0.5D height and 1.5D
+    width.
+  reason: >-
+    Shop head 0.5D/1.5D is the procedure sheet's figure alone; handbook extract states no
+    protrusion value. Needs SME confirmation of pre-buck protrusion.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: rr.s4.c5
+  statement: >-
+    The workpiece was backed/supported so the blow drove the shank out rather than deflecting
+    the sheet.
+  reason: >-
+    Handbook p.4-85: 'When hand drilling thin or flexible parts, put a support (such as a
+    block of wood) behind the part' — same principle applied to punching.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev5
+  statement: >-
+    Shop head dimensions measured on every driven rivet — height and width recorded against
+    the rivet shank diameter — plus recorded finished hole diameter and the gauge/alloy of
+    doubler and filler stock.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  Does this practical require a flush patch (doubler plus filler, as the procedure sheet's
+  fabrication steps assume) or a lap/scab patch? The handbook edge-distance and 1"/staggered
+  1/2" spacing figures on p. 4-96 are stated for the lap patch and may not govern a flush
+  patch layout.
+- >-
+  What skin thickness and alloy is the training coupon, and what rivet diameter, edge distance
+  and pitch does that yield? Without these the layout criteria cannot be checked numerically.
+- >-
+  What tolerance band applies to the campus 0.5D/1.5D shop head figures — the sheet says 'preferred'
+  but gives no accept/reject range.
+- >-
+  Is the source of the rivet count an SRM, AC 43.13-1 Figure 4-169, or an instructor-supplied
+  value? The pack currently accepts 'the documented calculation'.
+- >-
+  Is the Remove the Rivet section graded on the same coupon as the installed patch, or on
+  a separate practice piece? This changes whether a vacated hole in the finished patch is
+  a defect or expected evidence.
+- >-
+  Are the 0.003-inch ream allowance and #40/#30 drill sizes campus practice or traceable to
+  an SRM the student should cite?

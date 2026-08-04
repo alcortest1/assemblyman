@@ -1,0 +1,26 @@
+{
+  "acs_code": "AM.II.K.S3",
+  "sources": [
+    {
+      "kind": "workbook_xlsx",
+      "path": "data/Alcor_Pilot_AMS_Selections (1).xlsx",
+      "sha256": "1905eb54fe1ebee6d2943b0fe52bb11d4c0a82ce998c2140f3cb58663d148520",
+      "bytes": 73476,
+      "modified": 1785705151
+    },
+    {
+      "kind": "workbook_csv",
+      "path": "data/processed/tasks.csv",
+      "sha256": "54af83bf525735f2f7034f78bf593f4bb13511af8cbae933645b3d80adb2e6d2",
+      "bytes": 7966,
+      "modified": 1785705394
+    },
+    {
+      "kind": "procedure_docx",
+      "path": "data/drive-download-aim-procedures-confidential/AM.II.K.S3 \u2013 Assemble an Aircraft Electrical Connector.docx",
+      "sha256": "1272d3a50f769972cb70af6778de9aad1e40368d77293d045aa24651a5e0469c",
+      "bytes": 18974,
+      "modified": 1785705122
+    }
+  ]
+}

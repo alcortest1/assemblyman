@@ -1,0 +1,22 @@
+{
+  "acs_code": "AM.I.C.S3",
+  "handbook": "FAA-H-8083-30B",
+  "handbook_key": "30B",
+  "pdf": "data/amtg_handbook.pdf",
+  "located_by": "search",
+  "spec": "content search: ballast weight shift required location",
+  "labels": [
+    "6-3",
+    "6-4",
+    "6-5",
+    "6-6"
+  ],
+  "pdf_page_indices": [
+    213,
+    214,
+    215,
+    216
+  ],
+  "cited_by_source": false,
+  "file": "references/handbook/faa_h_8083_30b_content_search_ballast_weight_shift_required_location.md"
+}

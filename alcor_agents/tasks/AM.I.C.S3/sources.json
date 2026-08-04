@@ -1,0 +1,26 @@
+{
+  "acs_code": "AM.I.C.S3",
+  "sources": [
+    {
+      "kind": "workbook_xlsx",
+      "path": "data/Alcor_Pilot_AMS_Selections (1).xlsx",
+      "sha256": "1905eb54fe1ebee6d2943b0fe52bb11d4c0a82ce998c2140f3cb58663d148520",
+      "bytes": 73476,
+      "modified": 1785705151
+    },
+    {
+      "kind": "workbook_csv",
+      "path": "data/processed/tasks.csv",
+      "sha256": "54af83bf525735f2f7034f78bf593f4bb13511af8cbae933645b3d80adb2e6d2",
+      "bytes": 7966,
+      "modified": 1785705394
+    },
+    {
+      "kind": "procedure_docx",
+      "path": "data/drive-download-aim-procedures-confidential/AM.I.C.S3 - Calculate Ballast Weight Shift and Required Weight Location_.docx",
+      "sha256": "c93355e82e383dcb98b5d364f6d96757641f1f554d85f03daa0c3f941d58be81",
+      "bytes": 15603,
+      "modified": 1785705122
+    }
+  ]
+}

@@ -1,0 +1,409 @@
+{
+  "acs_code": "AM.I.D.S1",
+  "task": "Fabricate a rigid line with a flare and a bend.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.I.D.S1– Fabricate a Rigid Line with a Flare and a Bend.docx",
+      "title": "AM.I.D.S1– Fabricate a Rigid Line with a Flare and a Bend",
+      "variant": "AM.I.D.S1– Fabricate a Rigid Line with a Flare and a Bend",
+      "sections": [
+        {
+          "section": "Before You Begin",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": [
+            {
+              "text": "Be currently enrolled in or have completed Block 03: General Science III."
+            },
+            {
+              "text": "Review pages 9-1 to 9-7 from chapter 9 in the FAA-H-8083-30B and page 9-18 from chapter 9 in the AC-43.13-1B."
+            },
+            {
+              "text": "Ask the AI Assistant about rigid fluid line inspection criteria."
+            }
+          ]
+        },
+        {
+          "section": "Safety and Equipment",
+          "steps": [],
+          "notes": [],
+          "safety": [
+            {
+              "text": "Hydraulic fluid can cause irritation and burns if left on skin."
+            },
+            {
+              "text": "High pressure fluids can cause severe injuries if sprayed at body."
+            },
+            {
+              "text": "Handling sharp tools may present a cutting hazard."
+            },
+            {
+              "text": "Filed or sanded metal turns to fine metallic dust and if ingested can cause internal injuries."
+            },
+            {
+              "text": "Keep all fluid out of eyes and mouth."
+            }
+          ],
+          "equipment": [
+            {
+              "text": "Eye protection"
+            },
+            {
+              "text": "Ear protection"
+            },
+            {
+              "text": "Gloves"
+            },
+            {
+              "text": "Standard toolbox set"
+            },
+            {
+              "text": "Parts bags"
+            },
+            {
+              "text": "Pen & paper"
+            },
+            {
+              "text": "FOD box"
+            },
+            {
+              "text": "Rigid tubing"
+            },
+            {
+              "text": "Fittings (B-Nut and Sleeves)"
+            },
+            {
+              "text": "Hand bender"
+            },
+            {
+              "text": "Flaring tool"
+            },
+            {
+              "text": "220 to 80 grit sandpaper"
+            },
+            {
+              "text": "System hydraulic fluid"
+            },
+            {
+              "text": "Tubing cutter"
+            },
+            {
+              "text": "0.041” Safety wire"
+            },
+            {
+              "text": "Tape measure and scale"
+            },
+            {
+              "text": "Hydraulic Pressure test cart"
+            },
+            {
+              "text": "Shop rags"
+            },
+            {
+              "text": "Felt tip marker"
+            },
+            {
+              "text": "AC 43.13 - 1B"
+            }
+          ],
+          "you_need_to": []
+        },
+        {
+          "section": "Determine the Line Route",
+          "steps": [
+            {
+              "text": "Use the safety wire method to map tubing length and bends1.",
+              "text_clean": "Use the safety wire method to map tubing length and bends.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Carefully remove the wire, keeping its shape2.",
+              "text_clean": "Carefully remove the wire, keeping its shape.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Straighten the wire and measure the total length3.",
+              "text_clean": "Straighten the wire and measure the total length.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Cut a length of safety wire that is longer than the distance between the fittings you are connecting. Insert one end of the wire into the first fitting. Route the other end of wire to the second fitting, taking the most appropriate route, including bends. Cut the excess wire to allow it to feed into the other fitting. Use a marker to mark the location of each bend and ends."
+            },
+            {
+              "text": "Draw or photograph the shape to make"
+            },
+            {
+              "text": "Use a tape measure for length and add ½” per bend. This is the length of tubing you will need."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Cut the Tubing",
+          "steps": [
+            {
+              "text": "Decide the size of tubing to use1.",
+              "text_clean": "Decide the size of tubing to use.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Transfer length onto the tubing2.",
+              "text_clean": "Transfer length onto the tubing.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Cut the tubing with a cutter tool3.",
+              "text_clean": "Cut the tubing with a cutter tool.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use the tubing referred to in the manual (e.g. 0.25” OD)."
+            },
+            {
+              "text": "At the length measured from the routing process, mark on the tubing with a marker."
+            },
+            {
+              "text": "Open the rolling jaws just wide enough to set the rigid line in. Align the marked line and sharp cutting wheel precisely, hold in place with one hand. Use your other hand to twist the knob tightening the cutting wheel to the tubing, slightly snug. Hold the tubing firm while rotating the cutting tool around it. The cutting tool will loosen after a few rotations. Continue re-tightening and rotating the cutting tool until cleanly cut through tubing."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Deburr and Resize Tubing Ends",
+          "steps": [
+            {
+              "text": "Use a single-edge deburr tool for inside diameter resizing the tubing1.",
+              "text_clean": "Use a single-edge deburr tool for inside diameter resizing the tubing.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Deburr the outside edge of the tubing end2.",
+              "text_clean": "Deburr the outside edge of the tubing end.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Check ends for burrs.",
+              "text_clean": "Check ends for burrs.",
+              "note_refs": []
+            }
+          ],
+          "notes": [
+            {
+              "text": "Insert deburring tool tip into the end of the tubing. Press tubing firmly into the tool while twisting it in a motion similar to sharpening a pencil. Perform 3-4 twists at a time and check the inside diameter is smooth and the original size returned."
+            },
+            {
+              "text": "On a flat surface, place a sheet of sandpaper with a drop of hydraulic fluid in the center. Hold the tubing end perpendicular and press it firmly into the area lubricated with the hydraulic fluid, moving it in a continuous figure-8 pattern on the sandpaper until the end is smooth. Then wrap the sandpaper around the tubing end and twist the tubing, like sharpening a pencil, to remove any remaining burrs."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Bending the Tubing",
+          "steps": [
+            {
+              "text": "Measure and mark where the middle of each bend will be on the tubing1.",
+              "text_clean": "Measure and mark where the middle of each bend will be on the tubing.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Use a hand bender to bend the tubing2.",
+              "text_clean": "Use a hand bender to bend the tubing.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Repeat at each marked bend location.",
+              "text_clean": "Repeat at each marked bend location.",
+              "note_refs": []
+            }
+          ],
+          "notes": [
+            {
+              "text": "Measure from the ends of the wire to the bend marks. Use that dimension to mark on the tubing."
+            },
+            {
+              "text": "Open the bender jaws wide to insert the tubing into the right size channel under the tube clamp on the tool (e.g. ¼” or ⅜”). Align the bend mark on the tubing with the L or R indication line on the upper handle of bender. Use the L line mark if the end of the tubing measured from is on the left. Use the R line mark if the end of the tubing measured from is on the right. Align 0 on the upper handle and 0 on the forming wheel. Grip both handles of the bender. Smoothly bring your hands towards each other until the upper handle 0 points to the desired degrees."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Flare the Tube",
+          "steps": [
+            {
+              "text": "Install the hardware1.",
+              "text_clean": "Install the hardware.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Use the flaring tool2.",
+              "text_clean": "Use the flaring tool.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Check for a good flare3.",
+              "text_clean": "Check for a good flare.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Repeat hardware and flare process for the other end.",
+              "text_clean": "Repeat hardware and flare process for the other end.",
+              "note_refs": []
+            }
+          ],
+          "notes": [
+            {
+              "text": "Slide the B-nut on the tube with the threads pointing towards the end being flared. Slide the sleeve on with the larger opening pointing towards the end of the tube being flared."
+            },
+            {
+              "text": "Loosen the lever on the tubing flare die tool to open the dies and place the tubing into the correct diameter block, extending it through the tapered side about the thickness of a dime. Make sure the holder is square to the tube and avoid putting in at an angle before tightening to avoid scoring and potential failures when pressurized. Tighten tubing flare die tool lever so the tubing cannot move. Center the flaring anvil over the tube opening, apply a drop of hydraulic fluid to the rim, and slowly rotate the anvil handle until a noticeable rise in torque is felt and the die is fully seated. Remove the anvil and remove the tubing from the flare die tool."
+            },
+            {
+              "text": "To check for a good 47° flare, pull the sleeve up to the flare and look down into the tube. You should see a thin ring of blue (the sleeve) around the flared tube end."
+            },
+            {
+              "text": "If the ring of blue seen is thick, it's under-flared and may blow off when under system pressure."
+            },
+            {
+              "text": "If no ring of blue is seen, it’s over-flared and may crack the flare when under system pressure, leading to leaks."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Pressure Test the Tubing",
+          "steps": [
+            {
+              "text": "Use an enclosed pressure test box.",
+              "text_clean": "Use an enclosed pressure test box.",
+              "note_refs": []
+            },
+            {
+              "text": "Connect the completed rigid line to the pressure tester pump1.",
+              "text_clean": "Connect the completed rigid line to the pressure tester pump.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Place the rigid line into the enclosed box.",
+              "text_clean": "Place the rigid line into the enclosed box.",
+              "note_refs": []
+            },
+            {
+              "text": "Pressurize the rigid line2.",
+              "text_clean": "Pressurize the rigid line.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Check tubing for leaks3.",
+              "text_clean": "Check tubing for leaks.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use two wrenches when connecting the rigid line to the tester. Position the wrenches 45° apart on the hardware. Squeeze the wrenches together like plier handles to tighten or loosen, depending on which side of the bottom wrench the top wrench is on."
+            },
+            {
+              "text": "Pump hydraulic fluid into the rigid line and pressurize it to 1.5 times the system pressure it’s to be installed in (e.g.2000 psi system pressure = 3000 psi test pressure)."
+            },
+            {
+              "text": "Leaks at certain spots are linked to specific faults:"
+            },
+            {
+              "text": "Leak on b-nut end = not tight enough"
+            },
+            {
+              "text": "Leak at bottom of sleeve = flare failure"
+            },
+            {
+              "text": "Leak on tubing = possible damage from fabrication"
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Install Rigid Line on Aircraft",
+          "steps": [
+            {
+              "text": "Fit rigid line into position.",
+              "text_clean": "Fit rigid line into position.",
+              "note_refs": []
+            },
+            {
+              "text": "Tighten rigid line on fittings1.",
+              "text_clean": "Tighten rigid line on fittings.",
+              "note_refs": [
+                1
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use two wrenches. Place one on the b-nut and the other on the fitting. Rotate in a tightening direction until a high rise in torque is felt, then ⅓ of a turn"
+            },
+            {
+              "text": "Clear all fine metallic dust from the blade surface with a rag dampened with solvent."
+            },
+            {
+              "text": "Use a steel scale to measure the length and width of the repair. Use a depth gauge to measure the depth of the repair."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 23,
+      "note_count": 24
+    }
+  ]
+}

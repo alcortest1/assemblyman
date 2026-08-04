@@ -1,0 +1,125 @@
+{
+  "acs_code": "AM.I.I.S1",
+  "task": "Complete an FAA Form 337 for a major repair or alteration.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.I.I.S1 – Complete an FAA Form 337 for a Major Repair or Alteration.docx",
+      "title": "AM.I.I.S1 – Complete an FAA Form 337 for a Major Repair or Alteration",
+      "variant": "AM.I.I.S1 – Complete an FAA Form 337 for a Major Repair or Alteration",
+      "sections": [
+        {
+          "section": "Procedure",
+          "steps": [
+            {
+              "text": "Confirm form 337 requirement1.",
+              "text_clean": "Confirm form 337 requirement.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Collect approved data2.",
+              "text_clean": "Collect approved data.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Fill out block 13.",
+              "text_clean": "Fill out block 1.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Fill out block 24.",
+              "text_clean": "Fill out block 2.",
+              "note_refs": [
+                4
+              ]
+            },
+            {
+              "text": "Fill out block 45.",
+              "text_clean": "Fill out block 4.",
+              "note_refs": [
+                5
+              ]
+            },
+            {
+              "text": "Fill out block 56.",
+              "text_clean": "Fill out block 5.",
+              "note_refs": [
+                6
+              ]
+            },
+            {
+              "text": "Fill out block 67.",
+              "text_clean": "Fill out block 6.",
+              "note_refs": [
+                7
+              ]
+            },
+            {
+              "text": "Fill out block 88.",
+              "text_clean": "Fill out block 8.",
+              "note_refs": [
+                8
+              ]
+            },
+            {
+              "text": "Determine who receives the document9.",
+              "text_clean": "Determine who receives the document.",
+              "note_refs": [
+                9
+              ]
+            },
+            {
+              "text": "Write a logbook entry10.",
+              "text_clean": "Write a logbook entry.",
+              "note_refs": [
+                10
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "This form is required when the work performed meets the “major” repair or alteration requirement outlined in 14 CFR part 43 appendix A."
+            },
+            {
+              "text": "Applicable reference data to complete the work must be used such as a STC, technical drawing, or a process specific manual."
+            },
+            {
+              "text": "Use the information from the aircraft’s data plate for its make, model, serial number, and registration number."
+            },
+            {
+              "text": "Find the aircraft’s registration records for the owner’s name and address."
+            },
+            {
+              "text": "Select the correct action performed, either repair or alteration."
+            },
+            {
+              "text": "Fill in the product’s information such as make, model, and serial number."
+            },
+            {
+              "text": "Fill in A and B with the person’s information who performed the work. Verify the conformity statement. Sign only when work has been completed."
+            },
+            {
+              "text": "Explain clearly what was done, how it was done, what approved data was used, and an airworthiness statement. If more space is needed, note where those pages are."
+            },
+            {
+              "text": "Keep the original form 337 with the aircraft records. Provide a copy to the owner and send a copy to the FAA within 48 hours of completion."
+            },
+            {
+              "text": "The form 337 does not replace a logbook entry. Include a write up for the action performed with reference to the form 337 and a statement for return to service."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 10,
+      "note_count": 10
+    }
+  ]
+}

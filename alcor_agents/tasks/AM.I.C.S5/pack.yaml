@@ -1,0 +1,714 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.C.S5
+
+schema_version: 1
+status: draft
+acs_code: AM.I.C.S5
+task_no: 2
+title: Calculate weight and balance for an aircraft after an equipment change
+subject: General
+block: 1
+campus: AIM Fremont
+week: 4
+day: 3
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:16:10Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - >-
+    references/handbook/faa_h_8083_30b_content_search_weight_balance_after_equipment_change.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: Low
+  rationale: >-
+    The campus rates this Low because the deliverable is arithmetic, not a physical condition:
+    nothing on the aircraft changes as a result of the work, so the only thing a still can
+    capture is a sheet of paper. A photograph of the worksheet does read reliably — the station
+    rows, the signs on the nose-gear arm and moment, the two summed columns, the unsummed
+    arm column, and the final in-range statement are all legible and independently re-checkable
+    from the image. What no still shows is whether the recorded weights are the readings this
+    aircraft actually produced, whether tare was removed before the numbers were written down,
+    whether the arms are true distances from the published datum, and whether the CG limits
+    came from the correct TCDS entry; those depend on instrumented readings and source documents,
+    not framing.
+steps:
+- id: p.s1
+  section: Procedure
+  text: Identify the weight at the landing gear locations.
+  note_refs:
+  - 1
+  checks:
+  - id: p.s1.c1
+    statement: >-
+      Three individual weights are recorded separately, each labeled to its gear position
+      (RMLG, LMLG, NG).
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 1: read each scale for its individual weight; tricycle gear identified
+      as RMLG, LMLG, NG.
+  - id: p.s1.c2
+    statement: >-
+      Each recorded value in pounds matches the indication on its corresponding scale or load
+      cell.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step requires reading actual scale/load-cell indications, not estimated or carried-over
+      figures.
+  - id: p.s1.c3
+    statement: >-
+      Tare weight (chocks, jacks, ground locks) is subtracted from each scale reading before
+      it is recorded.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.6-5
+    origin: drafted
+    note: >-
+      "This extra weight is known as tare weight and must be subtracted from the scale reading."
+      Handbook not cited by sheet; needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s1.e1
+    statement: >-
+      Scale readings recorded without subtracting tare weight, so all later moments and CG
+      are inflated but look plausible.
+    severity: critical
+    origin: drafted
+  - id: p.s1.e2
+    statement: >-
+      Nose gear reading mislabeled or transposed with a main gear reading, giving a plausible
+      but wrong CG.
+    severity: critical
+    origin: drafted
+  - id: p.s1.e3
+    statement: >-
+      A single combined total weight is recorded instead of three individual gear-position
+      readings.
+    severity: major
+    origin: drafted
+- id: p.s2
+  section: Procedure
+  text: Identify the arms of each weight.
+  note_refs:
+  - 2
+  checks:
+  - id: p.s2.c1
+    statement: >-
+      An arm is recorded for all three scale locations (RMLG, LMLG, NG), each expressed in
+      inches.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 2: 'The arm of each weight is its distance from the datum in inches'; example lists
+      all three locations.
+  - id: p.s2.c2
+    statement: Any location forward of the datum carries a negative arm value.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Procedure note 2 gives '-45" NG'; handbook: 'Weight being added forward of the datum
+      produces a negative moment (+weight, −arm).' Handbook is an uncited, provisional reference.
+    assumed: true
+  - id: p.s2.c3
+    statement: >-
+      The datum used is the one published for the aircraft, taken from the TCDS or Aircraft
+      Specifications.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-6
+    origin: drafted
+    note: >-
+      'This information is furnished by the FAA ... in the TCDS or Aircraft Specifications.'
+      Uncited reference; needs subject-matter confirmation.
+    assumed: true
+  - id: p.s2.c4
+    statement: >-
+      Each recorded arm matches the actual distance from the datum to that gear/scale reaction
+      point.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 2 defines arm as distance from datum in inches, so the figure must be verified
+      against a measured or published distance.
+  error_modes:
+  - id: p.s2.e1
+    statement: >-
+      Negative sign omitted on a forward-of-datum arm (e.g. nose gear entered as +45"), producing
+      a plausible but wrong CG.
+    severity: critical
+    origin: drafted
+  - id: p.s2.e2
+    statement: >-
+      Arms measured from a convenient reference (firewall, spar, nose) rather than the published
+      datum.
+    severity: critical
+    origin: drafted
+  - id: p.s2.e3
+    statement: >-
+      Arm values transcribed to the wrong location row, or units/labels omitted from the worksheet.
+    severity: major
+    origin: drafted
+- id: p.s3
+  section: Procedure
+  text: Multiply the weight by the arm.
+  note_refs:
+  - 3
+  checks:
+  - id: p.s3.c1
+    statement: >-
+      Every weighed station row shows a moment equal to that row's own weight multiplied by
+      that row's own arm.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 3: 'Multiply each weight by its own arm (e.g., 1,250 x 120 = 150,000... 1,125
+      x -45 = -50,625).'
+  - id: p.s3.c2
+    statement: >-
+      The nose gear moment is negative, reflecting its arm forward of the datum.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Sheet shows -50,625; handbook: '+weight, −arm' gives 'a negative moment'. Handbook extract
+      is uncited, so needs SME confirmation.
+    assumed: true
+  - id: p.s3.c3
+    statement: >-
+      Each weight is paired with its own station's arm, with no arms swapped or reused between
+      stations.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 3 requires each weight be multiplied by 'its own arm'; three distinct station products
+      expected.
+  - id: p.s3.c4
+    statement: Moment values are labeled in inch-pounds (in-lb) on the worksheet.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      Handbook: 'Moment = Weight (arm) = 5 lb (80") = 400 in-lb'. Reference is uncited/assumed;
+      requires SME confirmation.
+    assumed: true
+  - id: p.s3.c5
+    statement: >-
+      A moment entry is present for every station read on the scales, with no blank rows.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 1 identifies three weighing locations; note 3 requires a product for each.
+  error_modes:
+  - id: p.s3.e1
+    statement: >-
+      Negative sign dropped on the forward (nose gear) moment, so a plausible-looking but
+      falsely aft CG results.
+    severity: critical
+    origin: drafted
+  - id: p.s3.e2
+    statement: >-
+      A weight is multiplied by another station's arm, or the main-gear arm is applied to
+      the nose gear.
+    severity: major
+    origin: drafted
+  - id: p.s3.e3
+    statement: >-
+      Moments recorded without units or with inconsistent rounding between rows.
+    severity: minor
+    origin: drafted
+- id: p.s4
+  section: Procedure
+  text: Find the total weight.
+  note_refs:
+  - 4
+  checks:
+  - id: p.s4.c1
+    statement: >-
+      The worksheet shows all three individual scale weights listed and a single total-weight
+      entry labeled in pounds.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 4 sums the three readings to one value expressed in LBS (e.g.,
+      3,575 LBS).
+  - id: p.s4.c2
+    statement: >-
+      The recorded total equals the arithmetic sum of the left main, right main, and nose
+      gear readings.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "the weights need to be summed" and "the weight and moment columns are summed";
+      procedure note 4 gives the same addition.
+  - id: p.s4.c3
+    statement: >-
+      Any tare weight is subtracted from the scale readings before they are totaled.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.6-5
+    origin: drafted
+    note: >-
+      "This extra weight is known as tare weight and must be subtracted from the scale reading."
+      Provisional: handbook not cited by procedure sheet; needs SME confirmation.
+    assumed: true
+  - id: p.s4.c4
+    statement: >-
+      The total weight is checked against the maximum allowable gross weight from the TCDS
+      or Aircraft Specifications.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      "maximum authorized weight of the aircraft and its contents, and is indicated in the
+      Aircraft Specifications or TCDS." Provisional: uncited handbook, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s4.e1
+    statement: >-
+      Tare weight (chocks, jacks, ground locks) left in the readings, giving a plausible but
+      overstated total weight.
+    severity: critical
+    origin: drafted
+  - id: p.s4.e2
+    statement: >-
+      A scale reading omitted or transposed, or moments added instead of weights, so the total
+      is wrong.
+    severity: major
+    origin: drafted
+  - id: p.s4.e3
+    statement: >-
+      Total entered without units or illegibly, or arm signs mistakenly applied to the weight
+      column.
+    severity: minor
+    origin: drafted
+- id: p.s5
+  section: Procedure
+  text: Find the total moment.
+  note_refs:
+  - 5
+  checks:
+  - id: p.s5.c1
+    statement: >-
+      The total moment equals the algebraic sum of the individual moments, with forward-of-datum
+      moments subtracted (e.g., 243,375 in-lb).
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "The weight and moment columns are summed"; signs per "Weight being added
+      forward of the datum produces a negative moment". Assumed reference needs SME confirmation.
+    assumed: true
+  - id: p.s5.c2
+    statement: >-
+      Only the weight and moment columns are totaled; the arm column carries no sum.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-6
+    origin: drafted
+    note: >-
+      Handbook: "The arm column is not summed." Uncited reference located at compilation;
+      requires subject-matter confirmation.
+    assumed: true
+  - id: p.s5.c3
+    statement: >-
+      The total moment is recorded with its sign and in inch-pounds, matching the moments
+      carried from step 3.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      Handbook shows "Moment = 400 in-lb" and moment sign table (Figure 6-3). Provisional:
+      handbook not cited by the procedure sheet.
+    assumed: true
+  error_modes:
+  - id: p.s5.e1
+    statement: >-
+      Nose-gear (negative) moment added as a positive value, inflating the total moment while
+      the worksheet still looks complete.
+    severity: critical
+    origin: drafted
+  - id: p.s5.e2
+    statement: >-
+      Individual moment omitted or mistranscribed from step 3, so the total does not reconcile
+      with the listed moments.
+    severity: major
+    origin: drafted
+  - id: p.s5.e3
+    statement: >-
+      Total moment written without units or sign, or arm column mistakenly totaled.
+    severity: minor
+    origin: drafted
+- id: p.s6
+  section: Procedure
+  text: Divide the total moment by the total weight.
+  note_refs:
+  - 6
+  checks:
+  - id: p.s6.c1
+    statement: >-
+      The quotient equals total moment divided by total weight and matches an independent
+      recomputation of the recorded figures.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure step 6 (243,375 / 3,575 = 68.07"); handbook: "the CG being equal to the total
+      moment divided by the total weight".
+  - id: p.s6.c2
+    statement: >-
+      The result is recorded as a CG station in inches referenced to the datum, with correct
+      sign if forward of datum.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 6 records the answer as 68.07" CG; note 2 establishes negative arms forward of
+      datum.
+  - id: p.s6.c3
+    statement: >-
+      No total is entered for the arm column; the CG value alone occupies the bottom of that
+      column.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-6
+    origin: drafted
+    note: >-
+      "The arm column is not summed. The number appearing at the bottom of that column is
+      the CG." Uncited extract; needs SME confirmation.
+    assumed: true
+  - id: p.s6.c4
+    statement: The CG figure is rounded to tenths of an inch on the worksheet.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.6-6
+    origin: drafted
+    note: >-
+      "106.9" (106.87 rounded to tenths)". Uncited extract, provisional; procedure sheet uses
+      hundredths, so SME must confirm.
+    assumed: true
+  error_modes:
+  - id: p.s6.e1
+    statement: >-
+      Division inverted (total weight ÷ total moment), producing a small plausible-looking
+      number instead of a CG station.
+    severity: critical
+    origin: drafted
+  - id: p.s6.e2
+    statement: >-
+      Divided by an incomplete weight total (e.g., mains only, nose gear omitted), giving
+      a CG that appears in range.
+    severity: critical
+    origin: drafted
+  - id: p.s6.e3
+    statement: >-
+      CG recorded without units or datum sign convention, or arm column erroneously summed.
+    severity: minor
+    origin: drafted
+- id: p.s7
+  section: Procedure
+  text: Determine if the CG is in range.
+  note_refs:
+  - 7
+  checks:
+  - id: p.s7.c1
+    statement: >-
+      The CG limits used are recorded with their source (TCDS entry or instructor-given value)
+      for this specific aircraft model/serial.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: "CG range is found on the TCDS or a given value"; handbook: data "furnished
+      by the FAA ... in the TCDS or Aircraft Specifications".
+  - id: p.s7.c2
+    statement: >-
+      The computed CG in inches from datum falls within the stated forward and aft limits
+      (e.g., 68.07" within 64"–70").
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet Note 7 example: "If the CG range is 64"-70" ... then the CG is within
+      range"; handbook gives no numeric limits.
+  - id: p.s7.c3
+    statement: >-
+      The worksheet records an explicit in-range or out-of-range determination, not just a
+      bare CG number.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: Step 7 requires a determination as the deliverable of the calculation.
+  - id: p.s7.c4
+    statement: >-
+      Total weight from step 4 is also compared against the maximum allowable gross weight
+      from the TCDS.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      "maximum authorized weight of the aircraft and its contents, and is indicated in the
+      Aircraft Specifications or TCDS"; assumed reference, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s7.e1
+    statement: >-
+      CG declared in range against a remembered or wrong-model CG range instead of the aircraft's
+      TCDS limits.
+    severity: critical
+    origin: drafted
+  - id: p.s7.e2
+    statement: >-
+      Nose gear negative arm mishandled upstream, giving a plausible-looking CG that is falsely
+      inside limits.
+    severity: critical
+    origin: drafted
+  - id: p.s7.e3
+    statement: >-
+      CG value computed but no in-range/out-of-range conclusion or limits recorded on the
+      worksheet.
+    severity: major
+    origin: drafted
+  - id: p.s7.e4
+    statement: >-
+      Units or datum reference omitted, or CG rounded inconsistently with the worked example.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The completed weight and balance worksheet in full: item/weight/arm/moment columns,
+      one row per weighed station (RMLG, LMLG, NG), the total weight entry, the total moment
+      entry, the arm column with no sum, the computed CG station, and the written in-range/out-of-range
+      determination.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Square-on overhead, whole sheet edge to edge in frame, close enough that handwritten
+      digits and minus signs are unambiguous; even diffuse light with no shadow from the camera
+      or hand across the columns; student name/date block included.
+  - id: ev2
+    description: >-
+      The nose gear scale or load cell indication, showing the displayed weight together with
+      enough of the nose gear and its scale/jack to identify the station being read.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Low angle from the front quarter, display filling roughly a third of the frame and readable,
+      nose wheel and scale platform both in shot; avoid glare on the readout face.
+  - id: ev3
+    description: >-
+      One main gear station on its scale with any tare-producing items in frame — chocks,
+      jack, ground locks — so the reviewer can see what was on the platform when the reading
+      was taken.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Ground-level side view, whole scale platform and wheel visible plus the readout, tape
+      measure or ruler laid alongside for scale reference if the platform edge is unclear.
+  - id: ev4
+    description: >-
+      The data source used for datum location, CG forward and aft limits, and maximum allowable
+      gross weight: the TCDS or Aircraft Specifications page, or the instructor-issued value
+      sheet, with aircraft make/model (and serial or registration if applicable) visible.
+    medium: document
+    origin: drafted
+    framing: >-
+      Full page or screenshot, the relevant CG range and datum lines legible; revision date
+      or sheet number in frame.
+    assumed: true
+  - id: ev5
+    description: >-
+      Recorded arm verification and tare accounting: the measured distance from the datum
+      to at least one gear reaction point taken with tape or plumb bob, and the tare weight
+      determined for each scale, each written down with the raw scale reading before subtraction.
+      A still of the worksheet cannot establish that the arms are actual measured distances
+      or that tare was removed before recording.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Not applicable — instrumented reading logged in the student's own hand; may be supported
+      by a photo of the tape stretched from datum reference to the reaction point.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 6
+    pages:
+    - 6-3
+    - 6-4
+    - 6-5
+    - 6-6
+    pdf_page_indices:
+    - 213
+    - 214
+    - 215
+    - 216
+    located_by: search
+    cited_by_source: false
+    file: >-
+      references/handbook/faa_h_8083_30b_content_search_weight_balance_after_equipment_change.md
+    id: ref.handbook.30b
+    assumed: true
+  videos:
+  - path: data/videos/AM.I.C.S5/weight_balance_1.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=4hk83jPB0oA
+assumptions:
+- id: p.s1.c3
+  statement: >-
+    Tare weight (chocks, jacks, ground locks) is subtracted from each scale reading before
+    it is recorded.
+  reason: >-
+    "This extra weight is known as tare weight and must be subtracted from the scale reading."
+    Handbook not cited by sheet; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s2.c2
+  statement: Any location forward of the datum carries a negative arm value.
+  reason: >-
+    Procedure note 2 gives '-45" NG'; handbook: 'Weight being added forward of the datum produces
+    a negative moment (+weight, −arm).' Handbook is an uncited, provisional reference.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s2.c3
+  statement: >-
+    The datum used is the one published for the aircraft, taken from the TCDS or Aircraft
+    Specifications.
+  reason: >-
+    'This information is furnished by the FAA ... in the TCDS or Aircraft Specifications.'
+    Uncited reference; needs subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s3.c2
+  statement: >-
+    The nose gear moment is negative, reflecting its arm forward of the datum.
+  reason: >-
+    Sheet shows -50,625; handbook: '+weight, −arm' gives 'a negative moment'. Handbook extract
+    is uncited, so needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s3.c4
+  statement: Moment values are labeled in inch-pounds (in-lb) on the worksheet.
+  reason: >-
+    Handbook: 'Moment = Weight (arm) = 5 lb (80") = 400 in-lb'. Reference is uncited/assumed;
+    requires SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s4.c3
+  statement: >-
+    Any tare weight is subtracted from the scale readings before they are totaled.
+  reason: >-
+    "This extra weight is known as tare weight and must be subtracted from the scale reading."
+    Provisional: handbook not cited by procedure sheet; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s4.c4
+  statement: >-
+    The total weight is checked against the maximum allowable gross weight from the TCDS or
+    Aircraft Specifications.
+  reason: >-
+    "maximum authorized weight of the aircraft and its contents, and is indicated in the Aircraft
+    Specifications or TCDS." Provisional: uncited handbook, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s5.c1
+  statement: >-
+    The total moment equals the algebraic sum of the individual moments, with forward-of-datum
+    moments subtracted (e.g., 243,375 in-lb).
+  reason: >-
+    Handbook: "The weight and moment columns are summed"; signs per "Weight being added forward
+    of the datum produces a negative moment". Assumed reference needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s5.c2
+  statement: >-
+    Only the weight and moment columns are totaled; the arm column carries no sum.
+  reason: >-
+    Handbook: "The arm column is not summed." Uncited reference located at compilation; requires
+    subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s5.c3
+  statement: >-
+    The total moment is recorded with its sign and in inch-pounds, matching the moments carried
+    from step 3.
+  reason: >-
+    Handbook shows "Moment = 400 in-lb" and moment sign table (Figure 6-3). Provisional: handbook
+    not cited by the procedure sheet.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s6.c3
+  statement: >-
+    No total is entered for the arm column; the CG value alone occupies the bottom of that
+    column.
+  reason: >-
+    "The arm column is not summed. The number appearing at the bottom of that column is the
+    CG." Uncited extract; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s6.c4
+  statement: The CG figure is rounded to tenths of an inch on the worksheet.
+  reason: >-
+    "106.9" (106.87 rounded to tenths)". Uncited extract, provisional; procedure sheet uses
+    hundredths, so SME must confirm.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s7.c4
+  statement: >-
+    Total weight from step 4 is also compared against the maximum allowable gross weight from
+    the TCDS.
+  reason: >-
+    "maximum authorized weight of the aircraft and its contents, and is indicated in the Aircraft
+    Specifications or TCDS"; assumed reference, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    The data source used for datum location, CG forward and aft limits, and maximum allowable
+    gross weight: the TCDS or Aircraft Specifications page, or the instructor-issued value
+    sheet, with aircraft make/model (and serial or registration if applicable) visible.
+  reason: Required as document, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    Recorded arm verification and tare accounting: the measured distance from the datum to
+    at least one gear reaction point taken with tape or plumb bob, and the tare weight determined
+    for each scale, each written down with the raw scale reading before subtraction. A still
+    of the worksheet cannot establish that the arms are actual measured distances or that
+    tare was removed before recording.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ref.handbook.30b
+  statement: >-
+    FAA-H-8083-30B pages 6-3, 6-4, 6-5, 6-6 are the governing handbook section for this task.
+  reason: >-
+    The procedure sheet cites no available handbook section for this task; this range was
+    located by content search during pack compilation.
+  resolve_by: Confirm the page range with AIM before marking this pack reviewed.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  The task title says 'after an equipment change,' but the seven steps describe a scale weighing
+  and CG computation with no added or removed equipment item. An SME must confirm whether
+  the assessed deliverable is a weighing/EWCG calculation, an equipment-change (add/remove
+  weight) calculation, or both.
+- >-
+  The handbook page range (FAA-H-8083-30B 6-3 to 6-6) was located during compilation and is
+  not cited by the procedure sheet. Every standard drawn from it — tare subtraction, unsummed
+  arm column, rounding to tenths, TCDS maximum weight comparison — is provisional until an
+  SME confirms the reference.
+- >-
+  Is tare weight taught and assessed in this task at all? It appears nowhere in the procedure
+  sheet's steps or notes.
+- >-
+  Is rounding to tenths of an inch a graded requirement or merely the handbook's example precision?
+- >-
+  Does the campus expect an actual aircraft weighing (scales, load cells) or a paper exercise
+  with instructor-supplied weights? This decides whether the scale-indication photos and arm
+  measurement are obtainable at all.
+- >-
+  Should the submission include comparison of total weight against maximum ramp/takeoff/landing
+  weights, or gross weight only?

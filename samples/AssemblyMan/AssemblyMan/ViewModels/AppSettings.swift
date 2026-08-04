@@ -29,14 +29,20 @@ final class AppSettings {
 
   /// Whether to ask for the high-bandwidth video tier.
   ///
-  /// The SDK chooses the transport itself — there is no public API to pick Wi-Fi over
-  /// Bluetooth. What the app controls is the resolution it requests, and the top tier is
-  /// only deliverable over Wi-Fi, so this toggle gates which qualities are offered. The
-  /// Wi-Fi path additionally requires `NSLocalNetworkUsageDescription` and
-  /// `NSBonjourServices` in Info.plist, which the app declares.
-  var streamsOverWiFi: Bool = false {
+  /// This does not select a transport, and nothing here reaches the SDK — the only value that
+  /// does is `StreamConfiguration.resolution`. What this toggle does is widen the tier list to
+  /// include `.high`, and requesting `.high` is what makes the SDK take a Wi-Fi lease: the
+  /// camera framework carries the string "requires medium (BTC) or high (WiFi) bandwidth
+  /// link", and the core framework upgrades to SoftAP on demand. Asking for `.medium` pins the
+  /// session to Bluetooth Classic.
+  ///
+  /// On by default because Bluetooth Classic is where the feed stalls. The Wi-Fi path
+  /// additionally needs `NSLocalNetworkUsageDescription` and `NSBonjourServices` in
+  /// Info.plist, which the app declares.
+  var streamsOverWiFi: Bool {
     didSet {
       guard streamsOverWiFi != oldValue else { return }
+      defaults.set(streamsOverWiFi, forKey: Self.wiFiKey)
       // Keep the selection inside whatever the new transport can carry.
       if !availableQualities.contains(quality) {
         quality = streamsOverWiFi ? .high : .medium
@@ -44,8 +50,23 @@ final class AppSettings {
     }
   }
 
-  var quality: Quality = .medium
+  /// The tier that actually gets the Wi-Fi lease, so a fresh launch does not start on
+  /// Bluetooth and discover the problem mid-session.
+  var quality: Quality
   var frameRate: FrameRate = .thirty
+
+  static let wiFiKey = "streamsOverWiFi"
+  @ObservationIgnored private let defaults: UserDefaults
+
+  /// `defaults` is injectable so tests are not steered by whatever the device last stored.
+  init(defaults: UserDefaults = .standard) {
+    self.defaults = defaults
+    // `UserDefaults` cannot distinguish an absent boolean from `false`, so the default only
+    // applies when nothing has been written yet.
+    let prefersWiFi = defaults.object(forKey: Self.wiFiKey) as? Bool ?? true
+    self.streamsOverWiFi = prefersWiFi
+    self.quality = prefersWiFi ? .high : .medium
+  }
 
   /// Whether to mirror the session into a LiveKit room for remote viewers and the assistant.
   ///

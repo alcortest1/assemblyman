@@ -1,0 +1,190 @@
+{
+  "acs_code": "AM.I.D.S7",
+  "task": "Fabricate a flexible hose.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.I.D.S7 – Fabricate a Flexible Hose.docx",
+      "title": "AM.I.D.S7 – Fabricate a Flexible Hose",
+      "variant": "AM.I.D.S7 – Fabricate a Flexible Hose",
+      "sections": [
+        {
+          "section": "Before You Begin",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": [
+            {
+              "text": "Be currently enrolled in or have completed Block 03: General Science III."
+            },
+            {
+              "text": "Review pages 9-16 to 9-23 from chapter 9 in the FAA-H-8083-30B."
+            },
+            {
+              "text": "Ask the AI Assistant about the different types of flexible hose materials."
+            }
+          ]
+        },
+        {
+          "section": "Safety and Equipment",
+          "steps": [],
+          "notes": [],
+          "safety": [
+            {
+              "text": "Hydraulic fluid can cause irritation and burns if left on skin."
+            },
+            {
+              "text": "High pressure fluids can cause severe injuries if sprayed at the body."
+            },
+            {
+              "text": "Handling sharp tools presents a cutting hazard."
+            }
+          ],
+          "equipment": [
+            {
+              "text": "Eye protection"
+            },
+            {
+              "text": "Ear protection"
+            },
+            {
+              "text": "Gloves"
+            },
+            {
+              "text": "Standard toolbox set"
+            },
+            {
+              "text": "Parts bags"
+            },
+            {
+              "text": "Pen & paper"
+            },
+            {
+              "text": "FOD box"
+            },
+            {
+              "text": "Rags"
+            },
+            {
+              "text": "Hydraulic fluid"
+            },
+            {
+              "text": "MS type fittings"
+            },
+            {
+              "text": "Flexible hose"
+            },
+            {
+              "text": "Cut off wheel"
+            },
+            {
+              "text": "Mandrel"
+            },
+            {
+              "text": "Safety wire"
+            },
+            {
+              "text": "Masking tape"
+            },
+            {
+              "text": "Tape measure"
+            }
+          ],
+          "you_need_to": []
+        },
+        {
+          "section": "Determine the Distance and Hose",
+          "steps": [
+            {
+              "text": "Measure the route that the hose needs to take1.",
+              "text_clean": "Measure the route that the hose needs to take.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Choose a hose and fitting assembly2.",
+              "text_clean": "Choose a hose and fitting assembly.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Mark the hose3.",
+              "text_clean": "Mark the hose.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use a tape measure to map the distance. Flexible hoses need room for expansion when they are pressurized. Add 5-8% of the total length needed for the final dimension (e.g., measured distance is 24”. 5-8% of 24” is 1.2”-1.92”. Add them together 24” + 1.9” = 25.9”)."
+            },
+            {
+              "text": "The hose is marked on its lay line with a dash number. Each part of the fitting assembly is marked with a corresponding dash number (e.g., on the hose a -6 is printed. On the nipple, B-nut, and collar, a -6 is also printed)."
+            },
+            {
+              "text": "Transfer the measurement needed onto the hose with masking tape, wrapped evenly around the hose."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Cut The Hose",
+          "steps": [
+            {
+              "text": "Secure the hose into a table vise1.",
+              "text_clean": "Secure the hose into a table vise.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Setup a pneumatic cut off wheel2.",
+              "text_clean": "Setup a pneumatic cut off wheel.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Cut the hose to length3.",
+              "text_clean": "Cut the hose to length.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Verify the cuts4.",
+              "text_clean": "Verify the cuts.",
+              "note_refs": [
+                4
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Place the hose horizontally through the vise jaws. Protrude the taped location to the edge of the vise. Close the vise jaws snug against the hose without putting significant tension on it."
+            },
+            {
+              "text": "Connect a composite blade cut off wheel to a compressed air source."
+            },
+            {
+              "text": "Hold the cut off tool with both hands, using your thumb to control the trigger. Start the cut off wheel just before contacting the hose. Slowly lower the cut off wheel, allowing the tool to do the cutting. Keep the blade as vertical as possible to create a clean cut. The tool should make a consistent whining noise as it cuts through the hose. If the noise changes pitch (lower or higher) it indicates how much pressure is being applied to the tool. Lower pitch = too much pressure. Higher pitch = not enough pressure."
+            },
+            {
+              "text": "Unravel the tape from the cut end by pulling it off at a 45° angle towards the end of the hose. Ensure the cut end is as flat as possible."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 7,
+      "note_count": 7
+    }
+  ]
+}

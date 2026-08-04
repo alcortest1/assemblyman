@@ -1,0 +1,308 @@
+{
+  "acs_code": "AM.II.K.S3",
+  "task": "Assemble an aircraft electrical connector.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.II.K.S3 – Assemble an Aircraft Electrical Connector.docx",
+      "title": "AM.II.K.S3 – Assemble an Aircraft Electrical Connector",
+      "variant": "AM.II.K.S3 – Assemble an Aircraft Electrical Connector",
+      "sections": [
+        {
+          "section": "Before You Begin",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": [
+            {
+              "text": "Be currently enrolled in or have completed Block 06: Communications and Navigation Systems, Aircraft and Electrical Systems."
+            },
+            {
+              "text": "Review pages 9-92 to 9-94 from chapter 9 in the FAA-H-8083-31B."
+            },
+            {
+              "text": "Ask the AI Assistant about how electrical connectors are used in aircraft."
+            }
+          ]
+        },
+        {
+          "section": "Safety & Equipment",
+          "steps": [],
+          "notes": [],
+          "safety": [
+            {
+              "text": "Small pin terminations can be damaged if mishandled when installing into the connectors."
+            },
+            {
+              "text": "Avoid sharp edges contacting the connector’s rubber insert when removing and installing pins to preserve wire security."
+            }
+          ],
+          "equipment": [
+            {
+              "text": "Eye protection"
+            },
+            {
+              "text": "Ear protection"
+            },
+            {
+              "text": "Gloves"
+            },
+            {
+              "text": "Standard toolbox set"
+            },
+            {
+              "text": "Parts bags"
+            },
+            {
+              "text": "Pen & paper"
+            },
+            {
+              "text": "FOD box"
+            },
+            {
+              "text": "Electrical wire"
+            },
+            {
+              "text": "Wire strippers"
+            },
+            {
+              "text": "DNC wire crimpers"
+            },
+            {
+              "text": "Install and remover tool"
+            },
+            {
+              "text": "Pin and receiver"
+            },
+            {
+              "text": "Electrical connector"
+            }
+          ],
+          "you_need_to": []
+        },
+        {
+          "section": "Prepare the Wire",
+          "steps": [
+            {
+              "text": "Select the correct wire gauge for the pin and receiver1.",
+              "text_clean": "Select the correct wire gauge for the pin and receiver.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Cut the wire to the required length.",
+              "text_clean": "Cut the wire to the required length.",
+              "note_refs": []
+            },
+            {
+              "text": "Strip ⅛” of insulation off the wire ends.",
+              "text_clean": "Strip ⅛” of insulation off the wire ends.",
+              "note_refs": []
+            },
+            {
+              "text": "Insert the wire into the pin2.",
+              "text_clean": "Insert the wire into the pin.",
+              "note_refs": [
+                2
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "For the pin used, certain wire gauges are compatible."
+            },
+            {
+              "text": "Ensure the wire seats at the base of the pin opening."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Set Up the DNC Crimper",
+          "steps": [
+            {
+              "text": "Open the crimper jaws all the way1.",
+              "text_clean": "Open the crimper jaws all the way.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Insert the crimper turret on the tool face2.",
+              "text_clean": "Insert the crimper turret on the tool face.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Secure the turret set screws.",
+              "text_clean": "Secure the turret set screws.",
+              "note_refs": []
+            },
+            {
+              "text": "Turn the handle dial to the wire size being crimped3.",
+              "text_clean": "Turn the handle dial to the wire size being crimped.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Rotate the turret to the corresponding wire termination size4.",
+              "text_clean": "Rotate the turret to the corresponding wire termination size.",
+              "note_refs": [
+                4
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Squeeze the handles together until a release is felt. Let the handles rest open."
+            },
+            {
+              "text": "There are cut-outs and tangs that key into each other for proper fit."
+            },
+            {
+              "text": "Remove the cotter key and rotate the dial. Reinstall cotter key when selection is made."
+            },
+            {
+              "text": "Press the trigger on the turret side. Rotate the turret to position the needed crimper hole over the opening. Press the turret down until it clicks."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Crimp the Wire",
+          "steps": [
+            {
+              "text": "With the pin positioned on the wire end, insert it into the crimper jaws1.",
+              "text_clean": "With the pin positioned on the wire end, insert it into the crimper jaws.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Close the crimper handles2.",
+              "text_clean": "Close the crimper handles.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Release the jaws, removing the wire.",
+              "text_clean": "Release the jaws, removing the wire.",
+              "note_refs": []
+            },
+            {
+              "text": "Inspect the termination3.",
+              "text_clean": "Inspect the termination.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Feed the pin through the back of the crimper, viewed from the turret side."
+            },
+            {
+              "text": "Firmly squeeze the crimper handles until they release."
+            },
+            {
+              "text": "Pull on the wire and pin termination as if pulling it apart. The new termination should retain the same strength as the wire itself."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Insert the Pin into the Electrical Connector",
+          "steps": [
+            {
+              "text": "Obtain the electrical connector pair and delineate the pin and receiver sides1.",
+              "text_clean": "Obtain the electrical connector pair and delineate the pin and receiver sides.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Prepare the wire in the installer tool2.",
+              "text_clean": "Prepare the wire in the installer tool.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Install the termination into the correct connector location3.",
+              "text_clean": "Install the termination into the correct connector location.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Inspect the installed pin4.",
+              "text_clean": "Inspect the installed pin.",
+              "note_refs": [
+                4
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "The pin side of an electrical connector is a flat surface with craters at pin locations. The receiver side will have wells for the termination to rest in."
+            },
+            {
+              "text": "Slide the wire into the cut channel on the side of the installer tool. Pull the wire taut, contacting the termination to the tool. Hold the wire in this position with your thumb."
+            },
+            {
+              "text": "Hold the connector with the back side facing up. Press the termination into its hole until an internal resistance is felt. Gently slip the installer tool out of the hole, leaving the wire installed."
+            },
+            {
+              "text": "Tug on the wire to ensure the termination is seated."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Test the Connector",
+          "steps": [
+            {
+              "text": "Check the wire for continuity1.",
+              "text_clean": "Check the wire for continuity.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Check for the correct location2.",
+              "text_clean": "Check for the correct location.",
+              "note_refs": [
+                2
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use a multimeter to verify that the wire, termination, and connector have the appropriate continuity."
+            },
+            {
+              "text": "Look for the numbers printed on the face of both sides of connectors. Ensure the wire locations match. Position and twist the connectors together."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 19,
+      "note_count": 15
+    }
+  ]
+}

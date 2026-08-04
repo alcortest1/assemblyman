@@ -1,0 +1,488 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.C.S3
+
+schema_version: 1
+status: draft
+acs_code: AM.I.C.S3
+task_no: 1
+title: Calculate ballast weight shift and required weight location
+subject: General
+block: 1
+campus: AIM Fremont
+week: 4
+day: 3
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:14:11Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - >-
+    references/handbook/faa_h_8083_30b_content_search_ballast_weight_shift_required_location.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: Low
+  rationale: >-
+    This is a paper calculation with no physical deliverable, which is why the campus rates
+    photo fit Low. A still of the worksheet can show the transcribed givens, the formula substitution,
+    the units, and the final ballast weight and station — all of which are readable text —
+    but it cannot show that the student selected the nearest exceeded CG limit by reasoning
+    rather than coincidence, that the givens were drawn from the correct authoritative source,
+    or that the arithmetic was performed rather than copied. Grading therefore rests on the
+    document trail plus an independent recomputation, not on imagery of a workpiece.
+steps:
+- id: p.s1
+  section: Procedure
+  text: Identify the aircraft total weight.
+  note_refs:
+  - 1
+  checks:
+  - id: p.s1.c1
+    statement: >-
+      The weight entered is the aircraft's total (loaded) weight from the given problem data,
+      not the empty weight.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Formula uses 'total acft weight'; note 1 gives it as a supplied value, e.g., 2,500 LBS.
+  - id: p.s1.c2
+    statement: >-
+      The total weight figure is legibly recorded on the worksheet with pound units shown.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step 1 requires the value be identified and carried into the ballast formula; units
+      make it auditable.
+  - id: p.s1.c3
+    statement: >-
+      If no value is given, the weight is traced to the Aircraft Specifications or TCDS and
+      that source is cited.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      Handbook: maximum weight 'is indicated in the Aircraft Specifications or TCDS'; reference
+      is uncited/provisional, needs SME confirmation.
+    assumed: true
+  - id: p.s1.c4
+    statement: >-
+      The weight used does not exceed the maximum allowable gross weight for the category
+      being computed.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      Handbook: 'variations to the maximum allowable weight depending on the purpose and conditions';
+      provisional, uncited reference needing SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s1.e1
+    statement: >-
+      Empty weight substituted for total loaded weight, producing a plausible but understated
+      ballast figure.
+    severity: critical
+    origin: drafted
+  - id: p.s1.e2
+    statement: >-
+      Given weight transcribed incorrectly (digit or decimal error) into the formula.
+    severity: major
+    origin: drafted
+  - id: p.s1.e3
+    statement: >-
+      Value written without units or unlabeled, so its role in the formula is ambiguous.
+    severity: minor
+    origin: drafted
+- id: p.s2
+  section: Procedure
+  text: Identify how far CG is out of range.
+  note_refs:
+  - 2
+  checks:
+  - id: p.s2.c1
+    statement: >-
+      The out-of-range distance is computed against the nearest exceeded CG limit, not the
+      opposite limit (e.g., 71.2" − 70" = 1.2").
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note 2: "When shifting CG, shift it to the closest limit it currently
+      is out of."
+  - id: p.s2.c2
+    statement: >-
+      The stated direction of required CG shift matches which limit was exceeded (aft-out
+      CG requires forward shift).
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      Handbook: "Weight being added forward of the datum produces a negative moment"; sign/direction
+      logic. Assumed reference — needs SME confirmation.
+    assumed: true
+  - id: p.s2.c3
+    statement: >-
+      The CG limits used match the published/given range for the applicable category rather
+      than an assumed value.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-6
+    origin: drafted
+    note: >-
+      Handbook: specifications "furnished by the FAA ... in the TCDS or Aircraft Specifications."
+      Assumed reference — requires SME confirmation.
+    assumed: true
+  - id: p.s2.c4
+    statement: >-
+      Written solution legibly shows the given CG range, current CG, and the subtraction,
+      with inch units labeled.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet gives worked example format "64"-70"; CG @ 71.2"" as the expected showing
+      of work.
+  error_modes:
+  - id: p.s2.e1
+    statement: >-
+      Subtracts the far (non-exceeded) CG limit from current CG, producing a plausible but
+      oversized shift distance.
+    severity: critical
+    origin: drafted
+  - id: p.s2.e2
+    statement: >-
+      States the shift direction backwards, so ballast would be placed on the wrong side and
+      worsen the CG.
+    severity: critical
+    origin: drafted
+  - id: p.s2.e3
+    statement: >-
+      Omits units or mislabels the result, or arithmetic transcription is illegible.
+    severity: minor
+    origin: drafted
+- id: p.s3
+  section: Procedure
+  text: Identify ballast location.
+  note_refs:
+  - 3
+  checks:
+  - id: p.s3.c1
+    statement: >-
+      The worksheet records a single ballast location expressed as a fuselage station or arm
+      in inches, not a vague area.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 3: location is 'usually a baggage compartment or a given fuselage
+      station (e.g., ballast location +45")'.
+  - id: p.s3.c2
+    statement: >-
+      The recorded arm carries the correct algebraic sign relative to the aircraft datum used
+      in the problem.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      'Whether the moment is preceded by a positive (+) or negative (−) sign depends on its
+      location in relation to the datum'; handbook not cited, needs SME confirmation.
+    assumed: true
+  - id: p.s3.c3
+    statement: >-
+      The chosen ballast station lies on the side of the CG that moves the CG toward the exceeded
+      limit.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Sheet example places ballast at +45" to move CG forward from 71.2"; handbook: 'Weight
+      being added forward of the datum produces a negative moment'. Handbook uncited, provisional.
+    assumed: true
+  - id: p.s3.c4
+    statement: >-
+      The location used is one given or approved for ballast (e.g., baggage compartment),
+      not an arbitrary or inaccessible point.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 3 restricts location to a baggage compartment or a given fuselage station.
+  error_modes:
+  - id: p.s3.e1
+    statement: >-
+      Ballast station chosen on the same side as the CG excess, so the computed weight would
+      worsen the out-of-limit CG while the arithmetic still looks correct.
+    severity: critical
+    origin: drafted
+  - id: p.s3.e2
+    statement: >-
+      Arm recorded without sign or measured from the wrong reference, corrupting the ballast-to-CG
+      distance in the formula.
+    severity: major
+    origin: drafted
+  - id: p.s3.e3
+    statement: >-
+      Location written without units or station label, or as a general area rather than a
+      numeric station.
+    severity: minor
+    origin: drafted
+- id: p.s4
+  section: Procedure
+  text: Determine temporary ballast weight.
+  note_refs:
+  - 4
+  checks:
+  - id: p.s4.c1
+    statement: >-
+      The denominator is the distance from the ballast station to the desired CG limit (70−45=25"),
+      not to the current CG.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet formula: 'distance between ballast location and desired CG'; worked
+      example uses (70−45).
+  - id: p.s4.c2
+    statement: >-
+      The computed ballast weight equals total weight × shift distance ÷ that arm (e.g., 2,500×1.2÷25
+      = 120 lb).
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet worked example: '(2,500 x 1.2) / (70-45) = 3,000 / 25 = 120 LBS'; handbook
+      extract gives no ballast formula.
+  - id: p.s4.c3
+    statement: >-
+      Ballast station chosen is on the side of the CG that moves it toward the nearest exceeded
+      limit.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 2: 'shift it to the closest limit it currently is out of'; requires
+      correct fore/aft sense.
+  - id: p.s4.c4
+    statement: >-
+      Recomputed loaded CG with the ballast installed falls inside the published range and
+      total weight stays within maximum allowable.
+    observable: document
+    source: handbook FAA-H-8083-30B p.6-3
+    origin: drafted
+    note: >-
+      Handbook: 'maximum authorized weight of the aircraft and its contents'; source not cited
+      by procedure sheet, so needs subject-matter confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s4.e1
+    statement: >-
+      Arm taken from ballast station to current CG instead of desired limit, understating
+      ballast so CG remains out of range.
+    severity: critical
+    origin: drafted
+  - id: p.s4.e2
+    statement: >-
+      Ballast weight applied at a station on the wrong side of the CG, driving the CG further
+      out of limits.
+    severity: critical
+    origin: drafted
+  - id: p.s4.e3
+    statement: >-
+      Result recorded without units or station reference, or rounded down below the required
+      weight.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The completed worksheet section listing the four identified givens: aircraft total weight
+      in pounds, the published/given CG range, the current CG location, and the ballast station
+      expressed as an arm in inches with its algebraic sign.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Flat overhead shot of the worksheet, page filling the frame, close enough that handwritten
+      digits and unit labels are legible; even lighting with no glare or shadow across the
+      figures.
+  - id: ev2
+    description: >-
+      Close-up of the out-of-range determination: the subtraction of the nearest exceeded
+      CG limit from the current CG (e.g., 71.2" − 70" = 1.2") together with a written statement
+      of the required direction of CG shift.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Tight crop on that block of work at roughly 300 mm, worksheet held square to the lens;
+      a ruler or pen laid alongside for scale is optional but the digits and inch marks must
+      be sharp.
+  - id: ev3
+    description: >-
+      Close-up of the ballast formula fully substituted and solved — total weight × shift
+      distance in the numerator, ballast-station-to-desired-limit distance in the denominator
+      — with the final ballast weight labeled in pounds (worked example: 2,500 × 1.2 ÷ 25
+      = 120 lb).
+    medium: photo
+    origin: drafted
+    framing: >-
+      Tight crop showing the whole fraction and the result line in one frame; no cropping
+      of the denominator; glare-free so division and decimal points are unambiguous.
+  - id: ev4
+    description: >-
+      The source data the givens were transcribed from — the instructor-issued problem statement,
+      or, where the values are not given, the Aircraft Specifications or TCDS page showing
+      gross weight and CG range — submitted alongside the worksheet so the transcription can
+      be checked.
+    medium: document
+    origin: drafted
+    framing: >-
+      Scan or flat photo of the source page with the relevant weight and CG-range entries
+      visible and unobscured; student annotation circling the values used is acceptable.
+    assumed: true
+  - id: ev5
+    description: >-
+      An independent recomputation of the loaded CG with the calculated ballast installed
+      at the chosen station, shown as a weight/arm/moment table with totals, confirming the
+      resulting CG falls inside the published range and total weight stays within the maximum
+      allowable.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Tabulated figures legible in a flat scan or photo; this is a verification calculation,
+      not a still of an object — a photograph of the ballast formula alone cannot settle whether
+      the answer actually returns the CG to limits.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 6
+    pages:
+    - 6-3
+    - 6-4
+    - 6-5
+    - 6-6
+    pdf_page_indices:
+    - 213
+    - 214
+    - 215
+    - 216
+    located_by: search
+    cited_by_source: false
+    file: >-
+      references/handbook/faa_h_8083_30b_content_search_ballast_weight_shift_required_location.md
+    id: ref.handbook.30b
+    assumed: true
+  videos:
+  - path: data/videos/AM.I.C.S3/weight_balance_3.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=FsUetnVyKRo
+assumptions:
+- id: p.s1.c3
+  statement: >-
+    If no value is given, the weight is traced to the Aircraft Specifications or TCDS and
+    that source is cited.
+  reason: >-
+    Handbook: maximum weight 'is indicated in the Aircraft Specifications or TCDS'; reference
+    is uncited/provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s1.c4
+  statement: >-
+    The weight used does not exceed the maximum allowable gross weight for the category being
+    computed.
+  reason: >-
+    Handbook: 'variations to the maximum allowable weight depending on the purpose and conditions';
+    provisional, uncited reference needing SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s2.c2
+  statement: >-
+    The stated direction of required CG shift matches which limit was exceeded (aft-out CG
+    requires forward shift).
+  reason: >-
+    Handbook: "Weight being added forward of the datum produces a negative moment"; sign/direction
+    logic. Assumed reference — needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s2.c3
+  statement: >-
+    The CG limits used match the published/given range for the applicable category rather
+    than an assumed value.
+  reason: >-
+    Handbook: specifications "furnished by the FAA ... in the TCDS or Aircraft Specifications."
+    Assumed reference — requires SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s3.c2
+  statement: >-
+    The recorded arm carries the correct algebraic sign relative to the aircraft datum used
+    in the problem.
+  reason: >-
+    'Whether the moment is preceded by a positive (+) or negative (−) sign depends on its
+    location in relation to the datum'; handbook not cited, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s3.c3
+  statement: >-
+    The chosen ballast station lies on the side of the CG that moves the CG toward the exceeded
+    limit.
+  reason: >-
+    Sheet example places ballast at +45" to move CG forward from 71.2"; handbook: 'Weight
+    being added forward of the datum produces a negative moment'. Handbook uncited, provisional.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s4.c4
+  statement: >-
+    Recomputed loaded CG with the ballast installed falls inside the published range and total
+    weight stays within maximum allowable.
+  reason: >-
+    Handbook: 'maximum authorized weight of the aircraft and its contents'; source not cited
+    by procedure sheet, so needs subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    The source data the givens were transcribed from — the instructor-issued problem statement,
+    or, where the values are not given, the Aircraft Specifications or TCDS page showing gross
+    weight and CG range — submitted alongside the worksheet so the transcription can be checked.
+  reason: Required as document, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    An independent recomputation of the loaded CG with the calculated ballast installed at
+    the chosen station, shown as a weight/arm/moment table with totals, confirming the resulting
+    CG falls inside the published range and total weight stays within the maximum allowable.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ref.handbook.30b
+  statement: >-
+    FAA-H-8083-30B pages 6-3, 6-4, 6-5, 6-6 are the governing handbook section for this task.
+  reason: >-
+    The procedure sheet cites no available handbook section for this task; this range was
+    located by content search during pack compilation.
+  resolve_by: Confirm the page range with AIM before marking this pack reviewed.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  Confirm the governing reference. FAA-H-8083-30B pp. 6-3 to 6-6 was located during compilation
+  and is not cited by the procedure sheet; an SME must confirm it, or supply the correct citation,
+  before this pack is marked reviewed. Note that the extract given covers CG, datum, and empty
+  weight but contains no ballast-shift formula.
+- >-
+  Is the recomputation of loaded CG with ballast installed in scope? It is not in the four
+  step instructions but appears in the step-level checks; if out of scope, evidence item 5
+  and the corresponding criterion line must be dropped.
+- >-
+  Do the instructor-issued problem sets state the datum location and sign convention, or is
+  the student expected to assume a positive-aft arm? This determines whether the algebraic-sign
+  criterion is fair.
+- >-
+  Is the maximum-allowable-gross-weight check taught in this task or in a separate weight-check
+  task?
+- >-
+  Is permanent ballast (approval, placarding, permanent installation) assessed anywhere, or
+  does the sheet's mention of it remain background only?
+- >-
+  Tolerance on the final answer: is an exact match to the computed value required, or is rounding
+  to the nearest pound or nearest whole ballast increment acceptable?

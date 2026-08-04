@@ -1,0 +1,360 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.D.S8
+
+schema_version: 1
+status: draft
+acs_code: AM.I.D.S8
+task_no: 7
+title: Fabricate a flareless-fitting-tube connection
+subject: General
+block: 3
+campus: AIM Fremont
+week: 3
+day: 3
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:23:46Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - references/handbook/faa_h_8083_30b_9_5_9_8.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The campus rates this High because the deliverable is a physical artifact that holds its
+    state: a square, deburred, cut tube end and — if the presetting operation is part of the
+    graded submission — a nut, sleeve and tube whose relative positions can be photographed
+    with a scale in frame. A still reads the cut face for saw marks, chatter or torn metal,
+    reads burrs and chips at the bore, and reads whether the tube projects beyond the sleeve
+    pilot when a rule is laid alongside. What a still cannot read is squareness and bore diameter
+    to a tolerance, the 0.005"/0.015" sleeve-pilot clearance, the turn count used at final
+    tightening, or whether the sleeve pilot is immobile on the tube — those are caliper, feel
+    and process facts.
+safety:
+- >-
+  Over-tightening flareless fitting may deform the tubing too much, causing line failure.
+- Installation of sleeves without lubrication may cause stress cracks.
+equipment:
+- Rigid Tubing
+- Cutting Tool
+- Sand Paper
+- Debur Tool
+- Flareless Sleeve
+- B-nut
+- Mandrel
+steps:
+- id: ct.s1
+  section: Cut the Tubing
+  text: Measure needed length of tubing.
+  checks:
+  - id: ct.s1.c1
+    statement: >-
+      Measured length matches the length specified for the assembly on the work order/drawing.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure: "Measure needed length of tubing." Handbook: "Cut the tube to the correct
+      length" — no numeric tolerance given by either source.
+  - id: ct.s1.c2
+    statement: >-
+      The layout mark is a single crisp line perpendicular to the tube axis and continuous
+      around the circumference.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "Cut the tube to the correct length, with the ends perfectly square"; a square
+      cut requires a square reference mark.
+  - id: ct.s1.c3
+    statement: >-
+      Measured length includes allowance for the tube bottoming in the fitting and projecting
+      beyond the sleeve pilot.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "The tube must bottom firmly in the fitting" and "tube should extend 3⁄32"
+      to 1⁄8" beyond the sleeve pilot."
+  - id: ct.s1.c4
+    statement: >-
+      The marking method leaves no scratch, gouge or scribe groove in the tube wall.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet safety intent: deformation or damage to tubing leads to line failure;
+      handbook gives no marking-tool standard.
+  error_modes:
+  - id: ct.s1.e1
+    statement: >-
+      Length measured without allowance for fitting engagement, giving a short tube that cannot
+      bottom in the fitting.
+    severity: critical
+    origin: drafted
+  - id: ct.s1.e2
+    statement: >-
+      Mark scribed diagonally or not carried around the tube, producing an out-of-square cut.
+    severity: major
+    origin: drafted
+  - id: ct.s1.e3
+    statement: >-
+      Deep scribe or file mark used for layout, leaving a stress riser in the tube wall.
+    severity: minor
+    origin: drafted
+- id: ct.s2
+  section: Cut the Tubing
+  text: Cut the tubing.
+  note_refs:
+  - 1
+  checks:
+  - id: ct.s2.c1
+    statement: >-
+      The cut end is square to the tube axis with no visible taper or angled face.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook 9-6: "Cut the tube to the correct length, with the ends perfectly square."
+      Verify with a square/protractor, not by eye.
+  - id: ct.s2.c2
+    statement: Finished tube length matches the length measured in step 1.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook 9-6: "Cut the tube to the correct length"; procedure sheet step 1 requires
+      measuring needed length first.
+  - id: ct.s2.c3
+    statement: >-
+      The cut face is clean and single-plane, free of saw marks, chatter ridges, spiral kerf
+      or torn metal.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 1: rotate and re-tighten "until cleanly cut through tubing"; handbook
+      only states ends be square.
+  - id: ct.s2.c4
+    statement: >-
+      Tube remains round at the cut, not flattened or ovalized by cutter-wheel over-tightening.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 1 says tighten wheel only "slightly snug"; ovality confirmed by measuring OD on
+      two axes at the end.
+  error_modes:
+  - id: ct.s2.e1
+    statement: >-
+      Cutter wheel over-tightened, flattening or ovalizing the tube end while the cut still
+      looks clean.
+    severity: critical
+    origin: drafted
+  - id: ct.s2.e2
+    statement: >-
+      End cut off-square, so the tube cannot bottom squarely on the fitting seat.
+    severity: critical
+    origin: drafted
+  - id: ct.s2.e3
+    statement: >-
+      Dull wheel or sawing motion leaves a ragged, torn end with heavy raised ridge.
+    severity: major
+    origin: drafted
+  - id: ct.s2.e4
+    statement: Cut made off the marked line, producing a tube of incorrect length.
+    severity: major
+    origin: drafted
+- id: ct.s3
+  section: Cut the Tubing
+  text: Deburr the tubing ends.
+  note_refs:
+  - 2
+  - 3
+  checks:
+  - id: ct.s3.c1
+    statement: >-
+      Both the inside and outside edges of the tube end are free of burrs, raised metal and
+      sharp edges.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "Deburr the inside and outside of the tube." Procedure sheet requires
+      end smooth after sanding.
+  - id: ct.s3.c2
+    statement: >-
+      The bore is restored to its original inside diameter, not reamed oversize or belled
+      at the end.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: "check the inside diameter is smooth and the original size returned";
+      needs ID gauge or caliper reading.
+  - id: ct.s3.c3
+    statement: >-
+      The tube end remains perpendicular to the tube axis, with no taper or chamfer from sanding.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "Cut the tube to the correct length, with the ends perfectly square"; squareness
+      verified against a machinist square.
+  - id: ct.s3.c4
+    statement: >-
+      The tube bore and end are clean of metal chips, abrasive grit and excess hydraulic fluid.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sanding with hydraulic fluid and deburring generate swarf; sheet's finished end must
+      be smooth and clean for presetting.
+  error_modes:
+  - id: ct.s3.e1
+    statement: >-
+      Internal burr left in the bore; the end looks finished but restricts flow and sheds
+      metal into the system.
+    severity: critical
+    origin: drafted
+  - id: ct.s3.e2
+    statement: >-
+      Over-deburring thins the wall to a knife edge or bells the ID, so the sleeve cannot
+      bite properly.
+    severity: critical
+    origin: drafted
+  - id: ct.s3.e3
+    statement: >-
+      Sanding scores or scratches the OD where the sleeve cutting edge must grip and seal.
+    severity: major
+    origin: drafted
+  - id: ct.s3.e4
+    statement: Metal chips or abrasive grit left inside the tube after deburring.
+    severity: major
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The tube with the cut layout mark still visible, and a rule or tape aligned from the
+      reference end to the mark so the measured length is legible.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Perpendicular to the tube axis, close enough that the rule graduations and the mark
+      are both readable; mark line and rule edge in the same plane; even diffuse light, no
+      glare on the polished tube.
+  - id: ev2
+    description: >-
+      Side profile of the finished cut end resting against a machinist square or flat reference
+      block, showing the end face against the reference and the absence of flattening or ovalization
+      at the cut.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Square-on side view at the reference contact line, macro distance, backlit or light
+      background so any gap between tube end and square shows as a visible line of light.
+  - id: ev3
+    description: >-
+      End-on macro of the deburred tube end showing the inside and outside edges of the bore,
+      the condition of the end face, and that the bore is clear of chips, grit and excess
+      hydraulic fluid.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Directly down the tube axis, macro, with a coin or scale marker beside the tube for
+      size reference; raking light across the end face to reveal raised metal or remaining
+      burrs.
+  - id: ev4
+    description: >-
+      Instrumented readings for the dimensions a still cannot settle: restored inside diameter
+      at the deburred end compared with an undisturbed section, and — if presetting is part
+      of this submission — tube projection beyond the sleeve pilot and sleeve-pilot-to-tube
+      clearance.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Caliper or small-hole gauge readings recorded on the work sheet with tube material and
+      outside diameter stated; instrument face photographed at each reading if the campus
+      requires a witness image.
+    assumed: true
+  - id: ev5
+    description: >-
+      If presetting is part of this submission: a short clip of the disassembled preset joint
+      with an attempt to slide the sleeve along the tube, demonstrating the sleeve pilot does
+      not translate and only rotates.
+    medium: video
+    origin: drafted
+    framing: >-
+      Hand-held close shot of the sleeve and tube, ~30 cm, sleeve cut visible in frame throughout;
+      steady enough that any axial movement of the sleeve against a fixed reference mark would
+      be seen.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 9
+    pages:
+    - 9-5
+    - 9-6
+    - 9-7
+    - 9-8
+    pdf_page_indices:
+    - 357
+    - 358
+    - 359
+    - 360
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_30b_9_5_9_8.md
+  videos:
+  - path: data/videos/AM.I.D.S8/flareless_fitting_1_rf.mp4
+  - path: data/videos/AM.I.D.S8/flareless_fitting_2_rf.mp4
+  - path: data/videos/AM.I.D.S8/flareless_fitting_3_rf.mp4
+  trainwithaim_video: >-
+    https://www.youtube.com/watch?si=XNyBGdnnD8MFlwmB&v=Jvi5eEIQFck&feature=youtu.be
+assumptions:
+- id: ev4
+  statement: >-
+    Instrumented readings for the dimensions a still cannot settle: restored inside diameter
+    at the deburred end compared with an undisturbed section, and — if presetting is part
+    of this submission — tube projection beyond the sleeve pilot and sleeve-pilot-to-tube
+    clearance.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    If presetting is part of this submission: a short clip of the disassembled preset joint
+    with an attempt to slide the sleeve along the tube, demonstrating the sleeve pilot does
+    not translate and only rotates.
+  reason: Required as video, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  The procedure sheet's step list ends at 'Deburr the tubing ends', yet the task title and
+  the campus fit note say 'completed connection'. Does the graded submission include the presetting
+  operation and the assembled joint, or only the prepared tube ends?
+- >-
+  Tube material and outside diameter must be fixed for the pack: they select between the 0.005"
+  and 0.015" clearance limits and between the '1 to 1 1/6 turns' and '1 1/6 to 1 1/2 turns'
+  final tightening ranges on p. 9-6.
+- >-
+  What length value, and what tolerance on it, does the work order specify? The sheet gives
+  no number.
+- >-
+  Is a scribe or metal-marking pencil permitted for the layout mark, given the check that
+  no scribe groove may remain in the tube wall?
+- >-
+  Should the OCR'd fraction '1 1/6 turns' on p. 9-6 be verified against the source PDF before
+  any turn-count criterion is graded?

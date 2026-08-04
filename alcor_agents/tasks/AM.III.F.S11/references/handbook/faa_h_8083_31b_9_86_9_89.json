@@ -1,0 +1,22 @@
+{
+  "acs_code": "AM.III.F.S11",
+  "handbook": "FAA-H-8083-31B",
+  "handbook_key": "31B",
+  "pdf": "data/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf",
+  "located_by": "label",
+  "spec": "9-86..9-89",
+  "labels": [
+    "9-86",
+    "9-87",
+    "9-88",
+    "9-89"
+  ],
+  "pdf_page_indices": [
+    501,
+    502,
+    503,
+    504
+  ],
+  "cited_by_source": true,
+  "file": "references/handbook/faa_h_8083_31b_9_86_9_89.md"
+}

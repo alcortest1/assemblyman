@@ -1,0 +1,949 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.I.S1
+
+schema_version: 1
+status: draft
+acs_code: AM.I.I.S1
+task_no: 4
+title: Complete an FAA Form 337 for a major repair or alteration
+subject: General
+block: 3
+campus: AIM Fremont
+week: 1
+day: 3
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:18:32Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - >-
+    references/handbook/faa_h_8083_30b_content_search_complete_faa_form_major_repair_alteration.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: Document
+  rationale: >-
+    This is a paperwork task, so the artifact and the work product are the same object: a
+    still of the completed Form 337 shows every field that must be filled, whether one and
+    only one box in block 4 is marked, whether entries are legible and in permanent ink, whether
+    the pre-printed conformity statement is intact, and whether block 3 was left open for
+    a field approval. What a still cannot settle is correctness of the content — whether the
+    make/model/serial transcribed into blocks 1 and 5 match the data plate, whether the reference
+    in block 8 is genuinely approved data at a current revision effective for that serial
+    number, whether the signer holds the credential entered, and whether the FAA copy went
+    out within the campus's stated 48 hours. That is why the campus rated this 'Document':
+    the photograph proves form completion, and separate source documents must be submitted
+    alongside it to prove the entries are true.
+steps:
+- id: p.s1
+  section: Procedure
+  text: Confirm form 337 requirement.
+  note_refs:
+  - 1
+  checks:
+  - id: p.s1.c1
+    statement: >-
+      A written determination classifies the work as repair or alteration and as major or
+      minor before the form is started.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "First consider whether this a repair or an alteration" and whether work "constitutes
+      a major or a minor maintenance action"; assumed reference needs SME confirmation.
+    assumed: true
+  - id: p.s1.c2
+    statement: >-
+      The determination cites 14 CFR part 43 appendix A (paragraph/example) as the basis for
+      the 'major' classification.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure note 1: required when work meets the "major" requirement "outlined in 14 CFR
+      part 43 appendix A".
+  - id: p.s1.c3
+    statement: >-
+      The classification reached matches the actual work scope and correctly concludes Form
+      337 is required.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "If the maintenance accomplished was a major repair or alteration, the work
+      must be documented on FAA Form 337"; provisional, needs SME confirmation.
+    assumed: true
+  - id: p.s1.c4
+    statement: >-
+      If a certificated repair station did the major repair, the work order plus signed maintenance
+      release alternative is addressed.
+    observable: document
+    source: handbook FAA-H-8083-30B p.2-16
+    origin: drafted
+    note: >-
+      Handbook: signed work order "accompanied by a signed maintenance release may be used
+      in lieu of the FAA Form 337"; uncited extract, SME confirmation needed.
+    assumed: true
+  error_modes:
+  - id: p.s1.e1
+    statement: >-
+      Work that is minor is classified as major (or vice versa), so the wrong record type
+      is generated.
+    severity: critical
+    origin: drafted
+  - id: p.s1.e2
+    statement: >-
+      Determination made with no citation to 14 CFR part 43 appendix A or other authority.
+    severity: major
+    origin: drafted
+  - id: p.s1.e3
+    statement: >-
+      Alteration described as a repair (or reverse) in the determination, mislabeling block
+      4 downstream.
+    severity: major
+    origin: drafted
+  - id: p.s1.e4
+    statement: Determination is illegible, undated, or unsigned scratch notes.
+    severity: minor
+    origin: drafted
+- id: p.s2
+  section: Procedure
+  text: Collect approved data.
+  note_refs:
+  - 2
+  checks:
+  - id: p.s2.c1
+    statement: >-
+      The assembled data package qualifies as approved data (e.g., STC, TCDS, AD, DER-approved
+      data, FAA-approved SB), not merely acceptable data.
+    observable: document
+    source: handbook FAA-H-8083-30B p.2-15
+    origin: drafted
+    note: >-
+      Handbook: "Major repairs and alterations require 'approved data.' Some examples of approved
+      data are AD notes, STCs, TCDS, DER-specific delegations, and FAA-approved manufacturer
+      Service Bulletins"; assumed reference needs SME confirmation.
+    assumed: true
+  - id: p.s2.c2
+    statement: >-
+      Each data item shows applicability/effectivity covering the specific aircraft make,
+      model and serial number being worked.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2 requires "applicable reference data to complete the work"; applicability
+      is what makes data usable on this product.
+  - id: p.s2.c3
+    statement: >-
+      The document number, revision level and date of each data item are identified and current
+      at time of use.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 8 requires stating "what approved data was used" in block 8, which requires
+      unique identification of the data.
+  - id: p.s2.c4
+    statement: >-
+      If no previously approved data exists, a field approval package is initiated instead
+      of proceeding on unapproved data.
+    observable: document
+    source: handbook FAA-H-8083-30B p.2-15
+    origin: drafted
+    note: >-
+      Handbook: "the technician may request that the FAA accomplish a 'Field Approval'"; provisional
+      — handbook not cited by the sheet, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s2.e1
+    statement: >-
+      Acceptable data (maintenance manual, AC 43.13-1) is collected and used as the basis
+      for a major repair or alteration.
+    severity: critical
+    origin: drafted
+  - id: p.s2.e2
+    statement: >-
+      An STC or drawing is used with no evidence of applicability to that make, model and
+      serial number.
+    severity: critical
+    origin: drafted
+  - id: p.s2.e3
+    statement: >-
+      A superseded revision of the data is used, or the revision/date is never recorded for
+      citation in block 8.
+    severity: major
+    origin: drafted
+- id: p.s3
+  section: Procedure
+  text: Fill out block 1.
+  note_refs:
+  - 3
+  checks:
+  - id: p.s3.c1
+    statement: >-
+      All Block 1 fields — make, model, serial number, and nationality/registration mark —
+      are filled with no blanks.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step note requires make, model, serial number and registration number to be entered
+      in block 1.
+  - id: p.s3.c2
+    statement: >-
+      Make, model and serial number entered match the aircraft data plate exactly, character
+      for character.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step note: 'Use the information from the aircraft's data plate'; verification requires
+      comparing form to the data plate.
+  - id: p.s3.c3
+    statement: >-
+      Nationality and registration mark agree with the aircraft's registration records.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Registration number must trace to registration records, not to memory or the tail marking
+      alone.
+  - id: p.s3.c4
+    statement: >-
+      Entries are legible, in permanent ink, inside field boundaries, with no erasures or
+      uninitialed corrections.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Form 337 is a permanent aircraft record; workmanship standard for an official document
+      entry.
+  error_modes:
+  - id: p.s3.e1
+    statement: >-
+      Serial number copied from logbook, invoice or memory rather than the data plate, giving
+      a wrong but plausible entry.
+    severity: critical
+    origin: drafted
+  - id: p.s3.e2
+    statement: >-
+      Model or serial number transposed into the wrong field, or registration mark entered
+      without nationality letter.
+    severity: major
+    origin: drafted
+  - id: p.s3.e3
+    statement: >-
+      One Block 1 field left blank or filled in pencil, with smudged or overwritten characters.
+    severity: minor
+    origin: drafted
+- id: p.s4
+  section: Procedure
+  text: Fill out block 2.
+  note_refs:
+  - 4
+  checks:
+  - id: p.s4.c1
+    statement: >-
+      Block 2 shows a complete owner entry — name plus street, city, state and ZIP — with
+      no blank lines.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 4 directs the owner's name and address be entered in block 2; completeness is visible
+      on the finished form.
+  - id: p.s4.c2
+    statement: >-
+      The name and address in block 2 match the aircraft's current registration record exactly.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 4: 'Find the aircraft's registration records for the owner's name and address'
+      — verification requires the registration document.
+  - id: p.s4.c3
+    statement: >-
+      Block 2 names the registered owner, not the mechanic, repair facility or requesting
+      customer.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 7 assigns the performing person's information to block 7A/B, keeping block 2 for
+      the owner alone.
+  - id: p.s4.c4
+    statement: >-
+      Block 2 is filled in as part of the front-side entries completed through block 6 before
+      submission.
+    observable: document
+    source: handbook FAA-H-8083-30B p.2-15
+    origin: drafted
+    note: >-
+      Handbook: 'the technician completes the front side of Form 337 through block 6'. Assumed
+      reference; needs subject-matter confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s4.e1
+    statement: >-
+      Owner name/address taken from the work order, logbook or data plate instead of the registration
+      record, giving a plausible but outdated owner.
+    severity: critical
+    origin: drafted
+  - id: p.s4.e2
+    statement: >-
+      Block 2 left blank or missing address elements such as city, state or ZIP.
+    severity: major
+    origin: drafted
+  - id: p.s4.e3
+    statement: >-
+      Entry illegible, overwritten or crossed out rather than cleanly corrected.
+    severity: minor
+    origin: drafted
+- id: p.s5
+  section: Procedure
+  text: Fill out block 4.
+  note_refs:
+  - 5
+  checks:
+  - id: p.s5.c1
+    statement: >-
+      Exactly one of the two options in block 4 — Repair or Alteration — is marked, never
+      both and never left blank.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 5: "Select the correct action performed, either repair or alteration."
+  - id: p.s5.c2
+    statement: >-
+      The option marked matches the classification of the work: alteration if the aircraft
+      was changed from its previous state, repair if returned to it.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "a repair basically returns the aircraft to its previous or unaltered condition";
+      "An alteration... always changes or modifies the aircraft." Handbook uncited — needs
+      SME confirmation.
+    assumed: true
+  - id: p.s5.c3
+    statement: >-
+      The block 4 selection is consistent with the approved data cited and the block 8 description
+      of work (e.g., STC install marked as alteration).
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Notes 2 and 8 require approved data and a clear description; the classification must
+      agree with them.
+  - id: p.s5.c4
+    statement: >-
+      The mark is legible and unambiguous, placed inside the intended box, with no erasure,
+      overwriting or correction fluid.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Form must read unambiguously as a permanent aircraft record; workmanship expectation
+      of the sheet.
+  error_modes:
+  - id: p.s5.e1
+    statement: >-
+      Work that modified the aircraft (e.g., STC avionics install) is marked as Repair, so
+      the form looks complete but records the wrong configuration change.
+    severity: critical
+    origin: drafted
+  - id: p.s5.e2
+    statement: >-
+      Both boxes marked, or neither marked, leaving the type of action undetermined.
+    severity: major
+    origin: drafted
+  - id: p.s5.e3
+    statement: >-
+      Check mark straddles both boxes or is obscured by erasure/correction fluid, making the
+      entry hard to read.
+    severity: minor
+    origin: drafted
+- id: p.s6
+  section: Procedure
+  text: Fill out block 5.
+  note_refs:
+  - 6
+  checks:
+  - id: p.s6.c1
+    statement: >-
+      Block 5 shows make, model and serial number only on the row for the unit actually repaired
+      or altered, other rows blank or N/A.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 6: "Fill in the product's information such as make, model, and serial number."
+  - id: p.s6.c2
+    statement: >-
+      The make, model and serial number entered match the product's data plate and registration/maintenance
+      records exactly.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet notes 3 and 6 require unit identity taken from the product's own data plate/records,
+      not from memory.
+  - id: p.s6.c3
+    statement: >-
+      Block 5 entries are legible, in permanent ink, with no erasures, overwrites or correction
+      fluid.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Documentation convention supporting the sheet's configuration-history purpose; not stated
+      verbatim in either source — needs SME confirmation.
+    assumed: true
+  - id: p.s6.c4
+    statement: >-
+      If the form is being submitted for field approval, Block 5 is complete along with the
+      rest of the front side through Block 6, Block 3 left open.
+    observable: document
+    source: handbook FAA-H-8083-30B p.2-15
+    origin: drafted
+    note: >-
+      Handbook: "completes the front side of Form 337 through block 6 (leaving block 3 open
+      for later FAA approval)"; extract not cited by sheet, confirm with SME.
+    assumed: true
+  error_modes:
+  - id: p.s6.e1
+    statement: >-
+      Serial number transposed or copied from a different unit, so the form looks complete
+      but records the wrong product.
+    severity: critical
+    origin: drafted
+  - id: p.s6.e2
+    statement: >-
+      Unit data entered on the wrong row (e.g. appliance data on the airframe line) or Block
+      5 left blank.
+    severity: major
+    origin: drafted
+  - id: p.s6.e3
+    statement: Entries in pencil, illegible, or corrected by overwriting.
+    severity: minor
+    origin: drafted
+- id: p.s7
+  section: Procedure
+  text: Fill out block 6.
+  note_refs:
+  - 7
+  checks:
+  - id: p.s7.c1
+    statement: >-
+      Block 6 A, B, C and D are all completed: name/address, kind-of-agency box marked, certificate
+      number, and dated signature.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 7: "Fill in A and B with the person's information who performed the work"; signature
+      block must be dated and signed.
+  - id: p.s7.c2
+    statement: >-
+      The pre-printed conformity statement is intact, unaltered and not struck through or
+      overwritten.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 7 requires the student to "Verify the conformity statement" before signing.
+  - id: p.s7.c3
+    statement: >-
+      The kind of agency marked and the certificate number entered match the credential actually
+      held by the signer.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook 2-16: a certificated repairman is "not authorized to approve that product for
+      RTS"; requires checking the certificate itself.
+    assumed: true
+  - id: p.s7.c4
+    statement: >-
+      The signature date is on or after the date the described work was actually completed.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 7: "Sign only when work has been completed" — settled only against work records/logbook
+      dates.
+  - id: p.s7.c5
+    statement: >-
+      If the job is a field approval, block 6 is completed but block 3 is left blank for FAA
+      entry.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.2-15
+    origin: drafted
+    note: >-
+      Handbook: "completes the front side of Form 337 through block 6 (leaving block 3 open
+      for later FAA approval)"; assumed reference, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s7.e1
+    statement: >-
+      Block 6 signed and dated before the repair or alteration was actually finished.
+    severity: critical
+    origin: drafted
+  - id: p.s7.e2
+    statement: >-
+      Kind of agency or certificate number entered does not match the signer's actual authority
+      (e.g. repairman signing conformity).
+    severity: critical
+    origin: drafted
+  - id: p.s7.e3
+    statement: >-
+      Block 6 partially completed — address, certificate number or date omitted — or signature
+      illegible.
+    severity: major
+    origin: drafted
+- id: p.s8
+  section: Procedure
+  text: Fill out block 8.
+  note_refs:
+  - 8
+  checks:
+  - id: p.s8.c1
+    statement: >-
+      Block 8 contains a legible narrative stating what work was done and how it was accomplished,
+      not just a part number or bare reference.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note 8: "Explain clearly what was done, how it was done."
+  - id: p.s8.c2
+    statement: >-
+      Block 8 includes an airworthiness statement for the repair or alteration performed.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note 8 requires "an airworthiness statement" within the block 8 description.
+  - id: p.s8.c3
+    statement: >-
+      The data cited in block 8 is approved data identified by title, number and revision,
+      and it actually covers the work described.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.2-16: "the work must be documented on FAA Form 337 and requires supporting
+      approved data"; assumed reference, needs SME confirmation.
+    assumed: true
+  - id: p.s8.c4
+    statement: >-
+      If continuation sheets are used, block 8 states where they are and each attached sheet
+      is identifiable to this aircraft and date.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet note 8: "If more space is needed, note where those pages are." Verification
+      requires the attached pages.
+  error_modes:
+  - id: p.s8.e1
+    statement: >-
+      Block 8 cites only acceptable data (maintenance manual, AC 43.13-1) instead of approved
+      data, while the form looks complete.
+    severity: critical
+    origin: drafted
+  - id: p.s8.e2
+    statement: >-
+      Narrative is vague boilerplate ("repaired IAW manual") omitting method, materials or
+      extent of work.
+    severity: major
+    origin: drafted
+  - id: p.s8.e3
+    statement: >-
+      Continuation pages used but not referenced in block 8 or not identified to the aircraft,
+      so the record is incomplete.
+    severity: major
+    origin: drafted
+- id: p.s9
+  section: Procedure
+  text: Determine who receives the document.
+  note_refs:
+  - 9
+  checks:
+  - id: p.s9.c1
+    statement: >-
+      Three complete collated sets of the form — original plus two copies, including any block
+      8 continuation pages — are present.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires original for aircraft records, copy to owner, copy to FAA; all three
+      must be complete sets.
+  - id: p.s9.c2
+    statement: >-
+      The wet-signed original is the copy filed with the aircraft records, not a photocopy.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      "Keep the original form 337 with the aircraft records" — which copy went where is only
+      settled from the records file.
+  - id: p.s9.c3
+    statement: >-
+      The FAA copy is transmitted within 48 hours of work completion, evidenced by dated transmittal
+      against the completion date.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      48-hour limit stated by the procedure sheet only; handbook extract gives no distribution
+      timing.
+  - id: p.s9.c4
+    statement: >-
+      Student identifies that a repair station major repair may use a signed work order plus
+      maintenance release in lieu of Form 337.
+    observable: document
+    source: handbook FAA-H-8083-30B p.2-16
+    origin: drafted
+    note: >-
+      "a signed copy of the completed customer work order accompanied by a signed maintenance
+      release may be used in lieu of the FAA Form 337"; uncited reference, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: p.s9.e1
+    statement: >-
+      FAA copy never sent, or sent after the 48-hour window, while the file looks complete.
+    severity: critical
+    origin: drafted
+  - id: p.s9.e2
+    statement: Original mailed to the FAA and a photocopy left in the aircraft records.
+    severity: major
+    origin: drafted
+  - id: p.s9.e3
+    statement: Owner never given a copy, or the copy omits block 8 continuation sheets.
+    severity: major
+    origin: drafted
+- id: p.s10
+  section: Procedure
+  text: Write a logbook entry.
+  note_refs:
+  - 10
+  checks:
+  - id: p.s10.c1
+    statement: >-
+      A separate logbook entry exists for the work in addition to the completed Form 337.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: "does not replace a logbook entry"; handbook p.2-16: "the work must
+      be documented on FAA Form 337" alongside the 43.9 record entry.
+    assumed: true
+  - id: p.s10.c2
+    statement: >-
+      The entry explicitly cross-references the Form 337 for the major repair or alteration.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 10 requires a write-up "with reference to the form 337"; handbook
+      does not state this.
+  - id: p.s10.c3
+    statement: >-
+      The entry shows a description of the work, the completion date, and a signature with
+      certificate number and type.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.2-16
+    origin: drafted
+    note: >-
+      Handbook: "What—a description of the work performed... When—the date the work was completed...
+      the signature, certificate number, and type of certificate"; uncited source, needs SME
+      confirmation.
+    assumed: true
+  - id: p.s10.c4
+    statement: >-
+      The work and approved data described in the entry agree with Form 337 block 8 and the
+      aircraft records.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Requires comparing the entry against the completed 337 and approved data; cannot be
+      judged from the entry alone.
+  error_modes:
+  - id: p.s10.e1
+    statement: >-
+      No logbook entry made because the Form 337 was treated as sufficient documentation.
+    severity: critical
+    origin: drafted
+  - id: p.s10.e2
+    statement: >-
+      Entry is unsigned or omits certificate number/type, so no valid approval for return
+      to service exists.
+    severity: critical
+    origin: drafted
+  - id: p.s10.e3
+    statement: >-
+      Entry is vague or omits the Form 337 reference, breaking the link to the approved data.
+    severity: major
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      Front side of the completed FAA Form 337, whole page, showing blocks 1, 2, 4, 5 and
+      6 (A through D) and the state of block 3.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Camera directly overhead and parallel to the page, page filling the frame edge to edge
+      with all four form margins visible; diffuse light with no glare or shadow across the
+      signature or checkboxes; student name card and date placed beside (not on top of) the
+      form.
+  - id: ev2
+    description: >-
+      Reverse side of the form showing the block 8 narrative in full, plus any continuation
+      sheets laid out beside it.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Overhead, square to the page; narrative text must be resolvable enough to read the cited
+      data title/number/revision and the airworthiness statement; if continuation sheets are
+      used, a second frame showing each sheet with its aircraft identification and date visible.
+  - id: ev3
+    description: >-
+      The maintenance record / logbook entry for the same work, showing description, completion
+      date, signature, certificate number and type, and the cross-reference to the Form 337.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Close overhead on the entry, angled so the ruled page does not glare; include the page
+      header or tab so the entry is identifiable to the aircraft record it sits in.
+  - id: ev4
+    description: >-
+      The source documents the entries were transcribed from and justified by: aircraft data
+      plate (or its photograph), the registration record used for block 2 and the registration
+      mark, and the approved data package (STC/TCDS/AD/SB) with revision level and effectivity
+      page, plus the written major/minor classification citing 14 CFR part 43 appendix A.
+    medium: document
+    origin: drafted
+    framing: >-
+      Scans or legible photographs of each source, one per item, with revision blocks and
+      effectivity/applicability statements readable; submitted as a set indexed to the step
+      it supports.
+    assumed: true
+  - id: ev5
+    description: >-
+      Distribution evidence: the three collated sets (wet-signed original plus two copies,
+      including continuation pages) and a dated transmittal record for the FAA copy against
+      the recorded work completion date.
+    medium: document
+    origin: drafted
+    framing: >-
+      One frame showing the three sets fanned so each is countable and the wet original distinguishable
+      by ink; a separate scan of the dated transmittal or submission receipt showing both
+      dates.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 2
+    pages:
+    - 2-14
+    - 2-15
+    - 2-16
+    - 2-17
+    pdf_page_indices:
+    - 62
+    - 63
+    - 64
+    - 65
+    located_by: search
+    cited_by_source: false
+    file: >-
+      references/handbook/faa_h_8083_30b_content_search_complete_faa_form_major_repair_alteration.md
+    id: ref.handbook.30b
+    assumed: true
+  videos:
+  - path: data/videos/AM.I.I.S1/form_337.mp4
+  trainwithaim_video: youtube.com/watch?si=aDKL4-0eYJ9_jZJ0&v=yh05c_zIDQA&feature=youtu.be
+assumptions:
+- id: p.s1.c1
+  statement: >-
+    A written determination classifies the work as repair or alteration and as major or minor
+    before the form is started.
+  reason: >-
+    Handbook: "First consider whether this a repair or an alteration" and whether work "constitutes
+    a major or a minor maintenance action"; assumed reference needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s1.c3
+  statement: >-
+    The classification reached matches the actual work scope and correctly concludes Form
+    337 is required.
+  reason: >-
+    Handbook: "If the maintenance accomplished was a major repair or alteration, the work
+    must be documented on FAA Form 337"; provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s1.c4
+  statement: >-
+    If a certificated repair station did the major repair, the work order plus signed maintenance
+    release alternative is addressed.
+  reason: >-
+    Handbook: signed work order "accompanied by a signed maintenance release may be used in
+    lieu of the FAA Form 337"; uncited extract, SME confirmation needed.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s2.c1
+  statement: >-
+    The assembled data package qualifies as approved data (e.g., STC, TCDS, AD, DER-approved
+    data, FAA-approved SB), not merely acceptable data.
+  reason: >-
+    Handbook: "Major repairs and alterations require 'approved data.' Some examples of approved
+    data are AD notes, STCs, TCDS, DER-specific delegations, and FAA-approved manufacturer
+    Service Bulletins"; assumed reference needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s2.c4
+  statement: >-
+    If no previously approved data exists, a field approval package is initiated instead of
+    proceeding on unapproved data.
+  reason: >-
+    Handbook: "the technician may request that the FAA accomplish a 'Field Approval'"; provisional
+    — handbook not cited by the sheet, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s4.c4
+  statement: >-
+    Block 2 is filled in as part of the front-side entries completed through block 6 before
+    submission.
+  reason: >-
+    Handbook: 'the technician completes the front side of Form 337 through block 6'. Assumed
+    reference; needs subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s5.c2
+  statement: >-
+    The option marked matches the classification of the work: alteration if the aircraft was
+    changed from its previous state, repair if returned to it.
+  reason: >-
+    Handbook: "a repair basically returns the aircraft to its previous or unaltered condition";
+    "An alteration... always changes or modifies the aircraft." Handbook uncited — needs SME
+    confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s6.c3
+  statement: >-
+    Block 5 entries are legible, in permanent ink, with no erasures, overwrites or correction
+    fluid.
+  reason: >-
+    Documentation convention supporting the sheet's configuration-history purpose; not stated
+    verbatim in either source — needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s6.c4
+  statement: >-
+    If the form is being submitted for field approval, Block 5 is complete along with the
+    rest of the front side through Block 6, Block 3 left open.
+  reason: >-
+    Handbook: "completes the front side of Form 337 through block 6 (leaving block 3 open
+    for later FAA approval)"; extract not cited by sheet, confirm with SME.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s7.c3
+  statement: >-
+    The kind of agency marked and the certificate number entered match the credential actually
+    held by the signer.
+  reason: >-
+    Handbook 2-16: a certificated repairman is "not authorized to approve that product for
+    RTS"; requires checking the certificate itself.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s7.c5
+  statement: >-
+    If the job is a field approval, block 6 is completed but block 3 is left blank for FAA
+    entry.
+  reason: >-
+    Handbook: "completes the front side of Form 337 through block 6 (leaving block 3 open
+    for later FAA approval)"; assumed reference, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s8.c3
+  statement: >-
+    The data cited in block 8 is approved data identified by title, number and revision, and
+    it actually covers the work described.
+  reason: >-
+    Handbook p.2-16: "the work must be documented on FAA Form 337 and requires supporting
+    approved data"; assumed reference, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s9.c4
+  statement: >-
+    Student identifies that a repair station major repair may use a signed work order plus
+    maintenance release in lieu of Form 337.
+  reason: >-
+    "a signed copy of the completed customer work order accompanied by a signed maintenance
+    release may be used in lieu of the FAA Form 337"; uncited reference, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s10.c1
+  statement: >-
+    A separate logbook entry exists for the work in addition to the completed Form 337.
+  reason: >-
+    Procedure sheet: "does not replace a logbook entry"; handbook p.2-16: "the work must be
+    documented on FAA Form 337" alongside the 43.9 record entry.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: p.s10.c3
+  statement: >-
+    The entry shows a description of the work, the completion date, and a signature with certificate
+    number and type.
+  reason: >-
+    Handbook: "What—a description of the work performed... When—the date the work was completed...
+    the signature, certificate number, and type of certificate"; uncited source, needs SME
+    confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    The source documents the entries were transcribed from and justified by: aircraft data
+    plate (or its photograph), the registration record used for block 2 and the registration
+    mark, and the approved data package (STC/TCDS/AD/SB) with revision level and effectivity
+    page, plus the written major/minor classification citing 14 CFR part 43 appendix A.
+  reason: Required as document, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    Distribution evidence: the three collated sets (wet-signed original plus two copies, including
+    continuation pages) and a dated transmittal record for the FAA copy against the recorded
+    work completion date.
+  reason: Required as document, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ref.handbook.30b
+  statement: >-
+    FAA-H-8083-30B pages 2-14, 2-15, 2-16, 2-17 are the governing handbook section for this
+    task.
+  reason: >-
+    The procedure sheet cites no available handbook section for this task; this range was
+    located by content search during pack compilation.
+  resolve_by: Confirm the page range with AIM before marking this pack reviewed.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  Confirm the governing reference: the sheet names AC 43.9-1G, while FAA-H-8083-30B pp. 2-14
+  to 2-17 was located during compilation and is flagged assumed — an SME must decide which
+  governs and whether the handbook attributions stand.
+- >-
+  Confirm the 48-hour FAA submission window against the current AC 43.9-1G and 14 CFR 43.9
+  text, since it appears only in the campus sheet.
+- >-
+  Specify the exercise inputs: is this a live aircraft, a scenario packet, or a bench article,
+  and which data plate and registration record the student is expected to work from?
+- >-
+  Rule on block 6 C/D for uncertificated students — whether a training signature or 'FOR TRAINING
+  ONLY' annotation is required, and how that interacts with the 'sign only when work has been
+  completed' note.
+- >-
+  Decide whether the field-approval variant (block 3 left open) is a required condition for
+  every submission or only for a designated scenario.
+- >-
+  State the minimum legibility standard for photographs of block 8 so graders can consistently
+  read revision levels and certificate numbers.

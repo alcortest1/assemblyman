@@ -1,0 +1,1143 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.III.F.S11
+
+schema_version: 1
+status: draft
+acs_code: AM.III.F.S11
+task_no: 10
+title: Replace a wire bundle lacing
+subject: Powerplant
+block: 6
+campus: AIM Fremont
+week: 1
+day: 4
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:07:29Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - references/handbook/faa_h_8083_31b_9_86_9_89.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The finished lacing is a static, wholly external artifact: knot type, knot alignment along
+    one side of the bundle, hitch spacing, wrap counts and trimmed tail length are all readable
+    from well-framed stills with a scale in view, which is why the campus rates this High/completed-visual.
+    What a still cannot settle is tension — whether each hitch is cinched so it will not slide
+    or work loose under vibration — and whether slack was pulled from the wires before measuring,
+    so a tactile pull/slide check must be submitted alongside the photos. The bundle diameter
+    limit is verifiable in a photo only if a rule or caliper is included in the same frame.
+safety:
+- >-
+  Careful clipping of lacing cord ends must be done to avoid accidental wire damage.
+- >-
+  Knots that are not secured with a locking knot may unravel from aircraft vibrations.
+equipment:
+- Eye protection
+- Ear protection
+- Gloves
+- Standard toolbox set
+- Parts bags
+- Pen & paper
+- FOD box
+- Diagonal cutters
+- Waxed lacing cord
+steps:
+- id: dd.s1
+  section: Determine the Distance of Lacing
+  text: Measure the wire bundle distance.
+  note_refs:
+  - 1
+  checks:
+  - id: dd.s1.c1
+    statement: >-
+      The gathered bundle measures 1 inch or less in diameter at its largest point.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "single cord-lacing method and tying tape may be used for wire groups of bundles
+      1 inch in diameter or less"; sheet repeats 1" limit.
+  - id: dd.s1.c2
+    statement: >-
+      All wires intended for the bundle are gathered as one parallel group with no strand
+      crossing out or looping free.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Gather the wires to be bundled together." Uniform bundle is prerequisite to
+      valid length measurement.
+  - id: dd.s1.c3
+    statement: >-
+      Slack is pulled out of the wires before the tape is read, so the bundle lies straight
+      and unbowed.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Pull the slack out of the wires and use a tape measure to identify the distance."
+      Tautness cannot be judged from a still.
+  - id: dd.s1.c4
+    statement: >-
+      A tape-measure reading of the bundle run length is obtained and recorded for the cord
+      calculation.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet directs use of a tape measure; the recorded distance drives the 2x cord length
+      in the next step.
+  error_modes:
+  - id: dd.s1.e1
+    statement: >-
+      Bundle exceeds 1 inch diameter yet single cord-lacing is measured for, defeating the
+      method limit while looking normal.
+    severity: critical
+    origin: drafted
+  - id: dd.s1.e2
+    statement: >-
+      Length measured with slack still in the wires, producing a short reading and insufficient
+      lacing cord.
+    severity: major
+    origin: drafted
+  - id: dd.s1.e3
+    statement: >-
+      Wires pinched, kinked or insulation scuffed while gathering and pulling slack out.
+    severity: minor
+    origin: drafted
+- id: dd.s2
+  section: Determine the Distance of Lacing
+  text: Cut the required length of lacing cord.
+  note_refs:
+  - 2
+  checks:
+  - id: dd.s2.c1
+    statement: >-
+      The cut cord length equals twice the measured bundle distance (e.g., 4 ft bundle → 8
+      ft cord).
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 2: "Multiply the distance by 2. Cut that length of lacing cord."
+      Handbook gives no cord-length figure.
+  - id: dd.s2.c2
+    statement: >-
+      The cord is one continuous piece with no splices, knots or joined segments.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Single cord-lacing method requires one running cord for starting knot, hitches and finish
+      knot.
+  - id: dd.s2.c3
+    statement: The cord used is waxed lacing cord of the type listed for the task.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Equipment list item 9: "Waxed lacing cord"; wax content and cord spec are read from
+      spool label/spec, not appearance.
+  - id: dd.s2.c4
+    statement: >-
+      Cut ends are clean, with no unravelled or frayed strands of the braided cord.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Workmanship implied by use of diagonal cutters and later requirement to inspect for
+      "long strands."
+  error_modes:
+  - id: dd.s2.e1
+    statement: >-
+      Cord cut shorter than 2× the bundle distance, leaving too little to complete the finishing
+      knot.
+    severity: major
+    origin: drafted
+  - id: dd.s2.e2
+    statement: >-
+      Cord cut while resting against installed wiring, nicking insulation with the diagonal
+      cutters.
+    severity: critical
+    origin: drafted
+  - id: dd.s2.e3
+    statement: Cut end frayed or cord unravelling, or grossly excess length wasted.
+    severity: minor
+    origin: drafted
+- id: ts.s1
+  section: Tie a Starting Knot Using the Single Cord-Lacing Method
+  text: Select the starting position.
+  note_refs:
+  - 1
+  checks:
+  - id: ts.s1.c1
+    statement: >-
+      The chosen start point lies on a straight, unobstructed run of bundle, clear of clamps,
+      connectors, splices and breakouts.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Start the lacing at a clear section of the bundle, free of obstacles."
+      Handbook gives no locating requirement.
+  - id: ts.s1.c2
+    statement: >-
+      The gathered bundle at the start point measures 1 inch or less in diameter, qualifying
+      it for single cord lacing.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "single cord-lacing method ... may be used for wire groups of bundles 1 inch
+      in diameter or less"; sheet: "Must be 1” in diameter or less."
+  - id: ts.s1.c3
+    statement: >-
+      Wires are gathered parallel with slack pulled out at the start point, no crossed or
+      protruding strands.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Pull the slack out of the wires"; a clear start section requires the bundle
+      be formed before knotting.
+  error_modes:
+  - id: ts.s1.e1
+    statement: >-
+      Start point selected over a clamp, support, connector backshell or wire breakout, so
+      the knot cannot cinch on the bundle.
+    severity: major
+    origin: drafted
+  - id: ts.s1.e2
+    statement: >-
+      Single cord-lacing started on a bundle larger than 1 inch diameter, which looks correct
+      but is the wrong method.
+    severity: critical
+    origin: drafted
+  - id: ts.s1.e3
+    statement: >-
+      Start point chosen on a bend or where the cord will bear against moving parts or sharp
+      structure.
+    severity: major
+    origin: drafted
+- id: ts.s2
+  section: Tie a Starting Knot Using the Single Cord-Lacing Method
+  text: Wrap the cord.
+  note_refs:
+  - 2
+  checks:
+  - id: ts.s2.c1
+    statement: >-
+      The short working tail extending from the bundle measures approximately 8 inches.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2: "Pass about 8" of cord behind the bundle"; handbook gives no tail length.
+  - id: ts.s2.c2
+    statement: >-
+      The cord fully encircles the bundle behind it, with both ends emerging in front forming
+      a V.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2: "Pull the cord from both sides, making a V around the bundle."
+  - id: ts.s2.c3
+    statement: >-
+      The cord lies flat and untwisted against the bundle and no individual wire is excluded
+      or pinched out of the group.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 1 of prior section: wires gathered with slack pulled out before lacing.
+  - id: ts.s2.c4
+    statement: >-
+      Both cord ends are drawn snug so no slack loop remains behind the bundle before the
+      hitch is tied.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2 requires pulling from both sides; slack behind the bundle is hidden in
+      a still.
+  - id: ts.s2.c5
+    statement: >-
+      The bundle being laced is 1 inch or less in diameter, qualifying it for the single cord-lacing
+      method.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-87: "single cord-lacing method ... may be used for wire groups of bundles
+      1 inch in diameter or less"; sheet: "Must be 1" in diameter or less."
+  error_modes:
+  - id: ts.s2.e1
+    statement: >-
+      Tail left far shorter than 8 inches, leaving too little cord to complete the clove hitch
+      and four-cross locking knot.
+    severity: major
+    origin: drafted
+  - id: ts.s2.e2
+    statement: >-
+      Cord passed around only part of the bundle, leaving one or more wires outside the wrap
+      or pinched between wraps.
+    severity: major
+    origin: drafted
+  - id: ts.s2.e3
+    statement: >-
+      Slack or twisted cord left behind the bundle so the finished starting knot cinches loose
+      and can slip under vibration while still looking correct.
+    severity: critical
+    origin: drafted
+- id: ts.s3
+  section: Tie a Starting Knot Using the Single Cord-Lacing Method
+  text: Tie a clove hitch.
+  note_refs:
+  - 3
+  checks:
+  - id: ts.s3.c1
+    statement: >-
+      The knot shows two turns around the bundle with the working end crossing over and passing
+      under the loop, forming a true clove hitch.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook Fig. 9-148 labels "Cord crosses under loop" and text: "a clove hitch secured
+      by a double-looped overhand knot".
+  - id: ts.s3.c2
+    statement: >-
+      The hitch stays cinched to the bundle and does not slip or loosen when hand tension
+      on the ends is released.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: "Tightly cinch the hitch" and "Keep tension on the ends to avoid the knot from
+      slipping"; handbook: "Starting knot tightened".
+  - id: ts.s3.c3
+    statement: >-
+      The bundle laced by this single-cord clove hitch measures 1 inch or less in diameter.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "single cord-lacing method ... may be used for wire groups of bundles 1 inch
+      in diameter or less"; sheet: "Must be 1" in diameter or less."
+  - id: ts.s3.c4
+    statement: >-
+      Enough short-strand tail remains beyond the hitch to tie the following double-looped
+      overhand knot.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet passes about 8" of cord behind the bundle so the short strand can complete the
+      securing knot.
+  error_modes:
+  - id: ts.s3.e1
+    statement: >-
+      A single half hitch or a granny-style wrap is tied instead of a clove hitch, looking
+      neat but able to slide along the bundle.
+    severity: critical
+    origin: drafted
+  - id: ts.s3.e2
+    statement: >-
+      Hitch is left loose so the cord can be rotated or slid on the bundle, allowing the lacing
+      to unravel in vibration.
+    severity: critical
+    origin: drafted
+  - id: ts.s3.e3
+    statement: >-
+      Cord over-cinched or crossed so wire insulation is pinched, deformed or a wire is pulled
+      out of the bundle lay.
+    severity: major
+    origin: drafted
+  - id: ts.s3.e4
+    statement: >-
+      Turns of the hitch are crossed or misaligned rather than lying flat side by side.
+    severity: minor
+    origin: drafted
+- id: ts.s4
+  section: Tie a Starting Knot Using the Single Cord-Lacing Method
+  text: Secure with a double-looped overhand knot.
+  note_refs:
+  - 4
+  checks:
+  - id: ts.s4.c1
+    statement: >-
+      The starting knot shows a clove hitch locked by a double-looped overhand knot, not a
+      bare hitch.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "recommended knot for starting the single cord-lacing method is a clove hitch
+      secured by a double-looped overhand knot"; sheet steps 3-4.
+  - id: ts.s4.c2
+    statement: >-
+      The short cord crosses over the long cord four times, running back toward the clove
+      hitch.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 4: "Cross the short cord over the long cord four times back towards the clove
+      hitch"; handbook gives no count.
+  - id: ts.s4.c3
+    statement: Clipped tail ends are no shorter than 3/8 inch beyond the finished knot.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.9-88
+    origin: drafted
+    note: >-
+      Figure 9-148 callout states "Trim to 3/8" minimum"; procedure sheet only says clip excess
+      tail cord off.
+  - id: ts.s4.c4
+    statement: >-
+      Both ends were pulled taut so the finished knot cannot be slid or worked loose on the
+      bundle.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 4: "Pull both ends until taut"; tautness and slip resistance require watching
+      the pull, not a still.
+  error_modes:
+  - id: ts.s4.e1
+    statement: >-
+      Locking overhand loops omitted or only partly formed, leaving a knot that looks finished
+      but backs off under vibration.
+    severity: critical
+    origin: drafted
+  - id: ts.s4.e2
+    statement: >-
+      Diagonal cutters nick or cut wire insulation while clipping the tail cord.
+    severity: critical
+    origin: drafted
+  - id: ts.s4.e3
+    statement: >-
+      Knot left slack so the clove hitch slips along the bundle, or tails trimmed flush and
+      the knot unravels.
+    severity: major
+    origin: drafted
+  - id: ts.s4.e4
+    statement: Excessively long, ragged tail ends left on the finished knot.
+    severity: minor
+    origin: drafted
+- id: th.s1
+  section: Tie a Hitch Along the Bundle
+  text: Space the hitch.
+  note_refs:
+  - 1
+  checks:
+  - id: th.s1.c1
+    statement: >-
+      Each new hitch is positioned approximately 6 inches from the previous knot.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: 'An approximate 6" gap provides adequate support.' Handbook gives no
+      spacing figure for intermediate half hitches.
+  - id: th.s1.c2
+    statement: >-
+      Spacing between successive hitches is visibly uniform along the laced length.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: 'Maintain equal distance between each hitch for uniformity and security.'
+  - id: th.s1.c3
+    statement: >-
+      The cord run is held taut to the new hitch location with no slack or sag between knots.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: 'Start the hitch 1" from the end of your hand by pulling the cord taut
+      to that spot.' Tension cannot be judged from a still.
+  - id: th.s1.c4
+    statement: >-
+      Bundle being laced is 1 inch in diameter or less, suiting single cord-lacing.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: 'single cord-lacing method and tying tape may be used for wire groups of bundles
+      1 inch in diameter or less'; sheet repeats 1" limit.
+  error_modes:
+  - id: th.s1.e1
+    statement: >-
+      Cord allowed to go slack while spacing, so the finished hitch slides along the bundle
+      although lacing looks normal.
+    severity: critical
+    origin: drafted
+  - id: th.s1.e2
+    statement: >-
+      Hitch spacing irregular or far beyond 6 inches, leaving unsupported bundle sections.
+    severity: major
+    origin: drafted
+  - id: th.s1.e3
+    statement: >-
+      Hitches crowded within an inch or two of each other, wasting cord and looking untidy.
+    severity: minor
+    origin: drafted
+- id: th.s2
+  section: Tie a Hitch Along the Bundle
+  text: Tie a hitch.
+  note_refs:
+  - 2
+  checks:
+  - id: th.s2.c1
+    statement: >-
+      The completed intermediate knot is a half hitch, with the cord end crossed over and
+      then passed under the loop formed by the run.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook Figure 9-148 labels "Step B—Intermediate half hitches" and "Cord crosses under
+      loop"; procedure sheet describes the over-then-under pass.
+  - id: th.s2.c2
+    statement: >-
+      The new hitch sits in line with the previous knot, so all knots form a single straight
+      row along the bundle.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: "Align the hitch to the previous knot"; handbook is silent on
+      alignment.
+  - id: th.s2.c3
+    statement: >-
+      The hitch is drawn fully tight with no slack loop, and does not slide when the bundle
+      is moved.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      "Pull the end all the way through until the hitch is tight"; tightness is a tension
+      judgement, not visible in a still.
+  - id: th.s2.c4
+    statement: >-
+      The cord run between this hitch and the previous knot lies flat against the bundle without
+      crossing over itself.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by hitch formed on "the loop made by the cord running down the bundle" and final
+      inspection for misaligned knots.
+  error_modes:
+  - id: th.s2.e1
+    statement: >-
+      The end is passed over but not back under the loop, giving a slip knot that looks like
+      a hitch but works loose under vibration.
+    severity: critical
+    origin: drafted
+  - id: th.s2.e2
+    statement: >-
+      Hitch left loose, allowing individual wires to shift or the knot to travel along the
+      bundle.
+    severity: major
+    origin: drafted
+  - id: th.s2.e3
+    statement: >-
+      Hitch offset from the previous knot so the lacing spirals around the bundle.
+    severity: minor
+    origin: drafted
+- id: th.s3
+  section: Tie a Hitch Along the Bundle
+  text: Pull the run of the lacing cord to the next hitch.
+  checks:
+  - id: th.s3.c1
+    statement: >-
+      The run of cord lies straight along the bundle axis between hitches, not spiralled around
+      or crossing other lacing.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Pull the run of the lacing cord to the next hitch" — run forms the
+      straight leg the next hitch loops over.
+  - id: th.s3.c2
+    statement: >-
+      The run is drawn taut with no slack, sag or loose loop between the previous hitch and
+      the next hitch point.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "pulling the cord taut to that spot"; handbook only says "Pull here
+      until tight before finishing knot" for the final knot.
+  - id: th.s3.c3
+    statement: >-
+      The previously tied hitch stays tight and in position while tension is applied to the
+      run.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Keep tension on the ends to avoid the knot from slipping" and hitches
+      must remain aligned.
+  - id: th.s3.c4
+    statement: >-
+      The run is carried outside the bundle, not pulled down between individual wires or over
+      a terminal/connector.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Safety note warns against wire damage; lacing must secure the group without pinching
+      insulation.
+  - id: th.s3.c5
+    statement: >-
+      Distance from the previous hitch to the next hitch point is approximately 6 inches and
+      matches the other gaps.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "An approximate 6" gap provides adequate support"; handbook gives no
+      hitch spacing figure.
+  error_modes:
+  - id: th.s3.e1
+    statement: >-
+      Run left slack, so the bundle shifts and hitches migrate under vibration though the
+      lacing looks complete.
+    severity: critical
+    origin: drafted
+  - id: th.s3.e2
+    statement: >-
+      Tension on the run pulls the previous hitch loose or out of alignment instead of loading
+      the bundle.
+    severity: major
+    origin: drafted
+  - id: th.s3.e3
+    statement: >-
+      Run pulled in between individual wires or across a connector, pinching or chafing insulation.
+    severity: major
+    origin: drafted
+  - id: th.s3.e4
+    statement: >-
+      Run spiralled around the bundle, leaving hitches misaligned along the length.
+    severity: minor
+    origin: drafted
+- id: th.s4
+  section: Tie a Hitch Along the Bundle
+  text: Repeat for as many hitches needed.
+  checks:
+  - id: th.s4.c1
+    statement: >-
+      Successive hitches continue along the full bundle at approximately equal 6" spacing.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Maintain equal distance between each hitch... An approximate 6" gap provides
+      adequate support.' Handbook only shows 'Intermediate half hitches'.
+  - id: th.s4.c2
+    statement: >-
+      All hitch knots lie in a single straight line on the same side of the bundle.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Align the hitch to the previous knot'; handbook figure 9-148 step B shows in-line
+      intermediate half hitches.
+  - id: th.s4.c3
+    statement: >-
+      Every hitch is cinched tight and the cord run between hitches has no slack.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: 'Pull the end all the way through until the hitch is tight'; handbook: 'Pull
+      here until tight before finishing knot'.
+  - id: th.s4.c4
+    statement: Bundle laced by single cord method measures 1 inch in diameter or less.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: 'single cord-lacing method... may be used for wire groups of bundles 1 inch
+      in diameter or less'; sheet: 'Must be 1” in diameter or less.'
+  error_modes:
+  - id: th.s4.e1
+    statement: >-
+      Hitches left loose so lacing can slide along the bundle, though it looks complete.
+    severity: critical
+    origin: drafted
+  - id: th.s4.e2
+    statement: >-
+      Hitch spacing wanders well beyond the 6" interval, leaving unsupported gaps.
+    severity: major
+    origin: drafted
+  - id: th.s4.e3
+    statement: Hitches drift around the circumference instead of staying in one line.
+    severity: minor
+    origin: drafted
+- id: tf.s1
+  section: Tie a Finishing Knnot on a Bundle
+  text: Space to the finishing knot.
+  note_refs:
+  - 1
+  checks:
+  - id: tf.s1.c1
+    statement: >-
+      The gap from the last hitch to the finishing-knot position matches the established hitch
+      spacing, approximately 6 inches.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Maintain equal distance between each hitch"; "approximate 6" gap".
+      Handbook is qualitative only, so the figure is the sheet's.
+  - id: tf.s1.c2
+    statement: >-
+      The lacing run carried forward to the finishing-knot position is held taut, with no
+      slack or loose loop behind the last hitch.
+    observable: video
+    source: handbook FAA-H-8083-31B p.9-88
+    origin: drafted
+    note: >-
+      Figure 9-148 callout: "Pull here until tight before finishing knot." Tautness is a feel/action
+      judgement, not visible in a still.
+  - id: tf.s1.c3
+    statement: >-
+      The chosen finishing-knot location lies on a clear run of bundle, clear of clamps, breakouts
+      and connector backshells.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "provide adequate space to perform the finishing knot"; starting note requires
+      a section "free of obstacles".
+  - id: tf.s1.c4
+    statement: >-
+      Previously tied hitches remain seated and aligned along one side of the bundle after
+      the cord is run forward.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet inspection note: look for "misaligned knots, looseness"; hitches must not be dragged
+      out of line while spacing.
+  error_modes:
+  - id: tf.s1.e1
+    statement: >-
+      Slack is left in the run so the preceding hitch loosens, leaving lacing that looks complete
+      but can migrate.
+    severity: critical
+    origin: drafted
+  - id: tf.s1.e2
+    statement: >-
+      Finishing-knot position spaced far unevenly from prior hitches, breaking the uniform
+      support pattern.
+    severity: major
+    origin: drafted
+  - id: tf.s1.e3
+    statement: >-
+      Finishing point selected over a clamp, tie or breakout so the knot cannot be cinched
+      to the bundle.
+    severity: major
+    origin: drafted
+- id: tf.s2
+  section: Tie a Finishing Knnot on a Bundle
+  text: Wrap the cord.
+  note_refs:
+  - 2
+  checks:
+  - id: tf.s2.c1
+    statement: >-
+      Constant tension is held on the previously tied hitch throughout the wrap, so no slack
+      develops in the run.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2: 'Hold constant tension on the previous hitch.' Tension/tautness cannot
+      be judged from a still.
+  - id: tf.s2.c2
+    statement: >-
+      The cord passes around the bundle twice with the wraps lying flat, adjacent and uncrossed.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: 'Loosely loop the end of the cord around the bundle twice'; handbook Fig. 9-150
+      caption 'Wrap cord twice over bundle' (stated for tying).
+  - id: tf.s2.c3
+    statement: >-
+      The free end hangs clear of the bundle and is not trapped under the gripping hand or
+      the wraps.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: 'Sheet note 2: ''letting the end of the cord hang freely.'''
+  - id: tf.s2.c4
+    statement: >-
+      Enough tail remains hanging to complete the clove hitch and four-cross double-looped
+      overhand knot.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by following steps 3-4; sheet gives no figure for this tail, so length must
+      be measured against knot need.
+    assumed: true
+  error_modes:
+  - id: tf.s2.e1
+    statement: >-
+      Tension on the previous hitch is released while wrapping, loosening earlier hitches
+      although the lacing still looks complete.
+    severity: critical
+    origin: drafted
+  - id: tf.s2.e2
+    statement: >-
+      Tail left too short to form the finishing clove hitch and locking knot, forcing the
+      lacing to be redone.
+    severity: major
+    origin: drafted
+  - id: tf.s2.e3
+    statement: >-
+      Wraps are crossed, twisted, or pinched over the free end so the finishing knot cannot
+      seat evenly.
+    severity: minor
+    origin: drafted
+- id: tf.s3
+  section: Tie a Finishing Knnot on a Bundle
+  text: Tie a clove hitch.
+  note_refs:
+  - 3
+  checks:
+  - id: tf.s3.c1
+    statement: >-
+      The finished hitch shows two full turns of cord around the bundle, not a single turn.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Loosely loop the end of the cord around the bundle twice." Handbook only says
+      clove hitch, without wrap count for this knot.
+  - id: tf.s3.c2
+    statement: >-
+      The cord end crosses over the run from the previous hitch and passes under its own loop.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook Figure 9-148 callout "Cord crosses under loop"; sheet describes the same over-then-under
+      path.
+  - id: tf.s3.c3
+    statement: >-
+      The hitch is cinched with all slack removed and does not slip when tension is released.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Handbook Figure 9-148 "Starting knot tightened"; sheet: "Pull the slack out of the cord
+      until tight." Tautness cannot be seen in a still.
+  - id: tf.s3.c4
+    statement: >-
+      The hitch sits squarely on the bundle, aligned with the lacing run and not pinching
+      or deforming insulation.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires aligned, non-loose knots at inspection; handbook is qualitative here.
+  error_modes:
+  - id: tf.s3.e1
+    statement: >-
+      Only one wrap made, producing a half hitch that looks like a clove hitch but slips under
+      vibration.
+    severity: critical
+    origin: drafted
+  - id: tf.s3.e2
+    statement: >-
+      Cord end fed over instead of under the loop, so the knot capsizes when tension is applied.
+    severity: critical
+    origin: drafted
+  - id: tf.s3.e3
+    statement: Hitch left loose, allowing the lacing run and prior hitches to slacken.
+    severity: major
+    origin: drafted
+  - id: tf.s3.e4
+    statement: >-
+      Hitch over-tightened or skewed, indenting wire insulation or sitting crooked on the
+      bundle.
+    severity: minor
+    origin: drafted
+- id: tf.s4
+  section: Tie a Finishing Knnot on a Bundle
+  text: Secure with a double-looped overhand knot.
+  note_refs:
+  - 4
+  checks:
+  - id: tf.s4.c1
+    statement: >-
+      Four over-and-under passes of the cord end are countable across the taut lacing run
+      at the finishing knot.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Slip the end of the cord over-and-under the taut lacing toward the finishing
+      knot four times." Handbook names the knot only qualitatively.
+  - id: tf.s4.c2
+    statement: >-
+      The locking wraps progress toward the finishing knot and lie flat against the lacing
+      run, not spiralling away.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Sheet directs wraps "toward the finishing knot"; handbook Fig. 9-148 shows "Final knot"
+      with double-looped overhand locking the clove hitch.
+  - id: tf.s4.c3
+    statement: >-
+      The knot and lacing remain taut with no slack after tension is pulled past the finishing
+      knot.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: "Pull tension on the cord past the finishing knot"; handbook Fig. 9-148: "Pull
+      here until tight before finishing knot." Tautness cannot be seen in a still.
+  - id: tf.s4.c4
+    statement: The remaining cord tail measures at least 3/8 inch after trimming.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.9-88
+    origin: drafted
+    note: >-
+      Handbook Fig. 9-148 callout: "Trim to 3/8\" minimum." Procedure sheet says only "Clip
+      excess tail cord off."
+  error_modes:
+  - id: tf.s4.e1
+    statement: >-
+      Fewer than four over-and-under passes, or a plain single overhand, leaving a knot that
+      can vibrate loose while looking finished.
+    severity: critical
+    origin: drafted
+  - id: tf.s4.e2
+    statement: >-
+      Locking wraps not cinched, or tension not held, so the clove hitch slips and lacing
+      goes slack along the bundle.
+    severity: critical
+    origin: drafted
+  - id: tf.s4.e3
+    statement: >-
+      Tail clipped shorter than 3/8 inch or left as a long ragged strand, or diagonal cutters
+      nick wire insulation.
+    severity: major
+    origin: drafted
+- id: tf.s5
+  section: Tie a Finishing Knnot on a Bundle
+  text: Inspect the lacing.
+  note_refs:
+  - 5
+  checks:
+  - id: tf.s5.c1
+    statement: >-
+      All hitch knots lie in a single straight line along one side of the bundle with no knot
+      twisted off-line.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Inspection note: 'Look along the cord lacing looking for misaligned knots'; handbook
+      is silent on alignment.
+  - id: tf.s5.c2
+    statement: >-
+      Gaps between successive hitches are uniform at approximately 6 inches end to end.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet alone: 'approximate 6" gap provides adequate support'; handbook gives
+      no hitch-spacing figure.
+  - id: tf.s5.c3
+    statement: >-
+      Lacing is taut — no hitch can be slid along the bundle or lifted into a slack loop.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Sheet requires checking for 'looseness'; handbook: 'Pull here until tight before finishing
+      knot' — tightness only qualitative.
+  - id: tf.s5.c4
+    statement: >-
+      Cord tails at both end knots are trimmed, retaining at least 3/8 inch beyond the knot.
+    observable: measurement
+    source: handbook FAA-H-8083-31B p.9-88
+    origin: drafted
+    note: >-
+      Handbook Figure 9-148: 'Trim to 3/8" minimum'; procedure sheet only says clip excess
+      tail and check for long strands.
+  - id: tf.s5.c5
+    statement: >-
+      No wire insulation near the clipped tails is nicked, cut, or scored by the diagonal
+      cutters.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Safety note: 'Careful clipping of lacing cord ends must be done to avoid accidental
+      wire damage.'
+  error_modes:
+  - id: tf.s5.e1
+    statement: >-
+      Lacing passes visual inspection but hitches slide freely, giving no real bundle support.
+    severity: critical
+    origin: drafted
+  - id: tf.s5.e2
+    statement: >-
+      Finishing or starting knot lacks its double-looped overhand lock and will unravel under
+      vibration.
+    severity: critical
+    origin: drafted
+  - id: tf.s5.e3
+    statement: >-
+      Tail cord clipped flush or into insulation, nicking a wire beneath the knot.
+    severity: critical
+    origin: drafted
+  - id: tf.s5.e4
+    statement: >-
+      Knots wander around the bundle circumference or spacing is visibly irregular.
+    severity: major
+    origin: drafted
+  - id: tf.s5.e5
+    statement: Long untrimmed cord strands left hanging from end knots.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The full laced run end to end, showing the starting knot, every intermediate hitch,
+      and the finishing knot with all knots lying in a single straight line on one side of
+      the bundle. A tape measure must lie alongside the bundle so successive hitch gaps can
+      be read.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Perpendicular to the bundle axis, far enough back to capture the entire laced length
+      in one frame; tape measure laid parallel and in focus; even lighting with no shadow
+      across the cord runs.
+  - id: ev2
+    description: >-
+      Close-up of the starting knot showing a clove hitch (two turns) locked by a double-looped
+      overhand knot, the four over-under crossings countable, and the clipped tail beyond
+      the knot with a scale reference for the 3/8 inch minimum trim.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Close macro, knot centred and filling most of the frame, 6-tooth rule or steel scale
+      touching the bundle beside the tail; angle chosen so the over/under crossings are not
+      hidden behind the bundle.
+  - id: ev3
+    description: >-
+      Close-up of the finishing knot showing the double wrap, the end crossing over the previous
+      run and passing under its own loop, the four locking passes progressing toward the knot,
+      and the trimmed tail against a scale.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Close macro from the same side as the knot row, scale in contact with the bundle; light
+      raked slightly so cord wraps cast enough relief to be counted.
+  - id: ev4
+    description: >-
+      Bundle diameter at the laced section measured across its largest point to confirm it
+      qualifies for single cord lacing, with the reading legible.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Caliper or rule jaws across the gathered bundle, dial or scale graduations legible in
+      the same frame as the bundle; bundle held straight with slack out.
+    assumed: true
+  - id: ev5
+    description: >-
+      Pull/slide check of the completed lacing: each hitch resists being slid along the bundle
+      or lifted into a slack loop by hand, recorded as a pass/fail per knot. Tautness is tactile
+      and cannot be settled by a still image.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Instructor-witnessed or short recorded attempt to slide each hitch by hand along the
+      bundle; result logged per knot with the student's cord-length calculation (measured
+      run and 2x cut length) recorded alongside.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-31B
+    chapter: 9
+    pages:
+    - 9-86
+    - 9-87
+    - 9-88
+    - 9-89
+    pdf_page_indices:
+    - 501
+    - 502
+    - 503
+    - 504
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_31b_9_86_9_89.md
+  videos:
+  - path: data/videos/AM.III.F.S11/wire_lacing_1.mp4
+  - path: data/videos/AM.III.F.S11/wire_lacing_2.mp4
+  - path: data/videos/AM.III.F.S11/wire_lacing_3.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=PqnihLJxoj8
+assumptions:
+- id: tf.s2.c4
+  statement: >-
+    Enough tail remains hanging to complete the clove hitch and four-cross double-looped overhand
+    knot.
+  reason: >-
+    Implied by following steps 3-4; sheet gives no figure for this tail, so length must be
+    measured against knot need.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    Bundle diameter at the laced section measured across its largest point to confirm it qualifies
+    for single cord lacing, with the reading legible.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    Pull/slide check of the completed lacing: each hitch resists being slid along the bundle
+    or lifted into a slack loop by hand, recorded as a pass/fail per knot. Tautness is tactile
+    and cannot be settled by a still image.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  The approximately 6 inch hitch spacing and 8 inch starting tail are campus figures and are
+  not in the cited handbook pages — confirm the governing spec or manual value before grading
+  against them.
+- >-
+  The 3/8 inch minimum trim comes from machine-extracted figure text (Figure 9-148); confirm
+  against the PDF and confirm it applies to both the starting and finishing knot tails.
+- >-
+  Define the pull/slide check: what hand force or method constitutes a pass, and whether it
+  is instructor-witnessed or student-recorded.
+- >-
+  Confirm whether the intermediate knots are to be graded as half hitches (handbook Figure
+  9-148 Step B labels them "intermediate half hitches") given the procedure sheet says only
+  "tie a hitch".

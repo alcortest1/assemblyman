@@ -1,0 +1,22 @@
+{
+  "acs_code": "AM.I.I.S1",
+  "handbook": "FAA-H-8083-30B",
+  "handbook_key": "30B",
+  "pdf": "data/amtg_handbook.pdf",
+  "located_by": "search",
+  "spec": "content search: complete faa form major repair alteration",
+  "labels": [
+    "2-14",
+    "2-15",
+    "2-16",
+    "2-17"
+  ],
+  "pdf_page_indices": [
+    62,
+    63,
+    64,
+    65
+  ],
+  "cited_by_source": false,
+  "file": "references/handbook/faa_h_8083_30b_content_search_complete_faa_form_major_repair_alteration.md"
+}

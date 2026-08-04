@@ -1,0 +1,658 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.D.S7
+
+schema_version: 1
+status: draft
+acs_code: AM.I.D.S7
+task_no: 6
+title: Fabricate a flexible hose
+subject: General
+block: 3
+campus: AIM Fremont
+week: 3
+day: 1
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:12:35Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - references/handbook/faa_h_8083_30b_9_16_9_23.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The campus rates this High because the outcome of the task is a physical artifact whose
+    acceptance conditions are mostly visible: a dash number printed on the lay line next to
+    matching dash numbers on nipple, B-nut and collar; a single evenly wrapped tape band square
+    to the hose axis; a cut face that is either square and clean or beveled with splayed braid;
+    and a finished length that can be photographed against a tape measure. What a still cannot
+    settle is everything about process and fit-for-service: how snugly the vise was closed
+    (the sheet asks for jaws 'snug against the hose without putting significant tension on
+    it'), the pitch feedback that tells the student the feed pressure was right, whether the
+    tape measurement actually followed the routed path rather than a straight line, and whether
+    the hose material and pressure class suit the system fluid. The handbook also states that
+    'All flexible hose must be proof-tested after assembly,' which no photograph can demonstrate,
+    so the High rating covers workmanship on the cut and match, not airworthiness of the assembly.
+safety:
+- Hydraulic fluid can cause irritation and burns if left on skin.
+- High pressure fluids can cause severe injuries if sprayed at the body.
+- Handling sharp tools presents a cutting hazard.
+equipment:
+- Eye protection
+- Ear protection
+- Gloves
+- Standard toolbox set
+- Parts bags
+- Pen & paper
+- FOD box
+- Rags
+- Hydraulic fluid
+- MS type fittings
+- Flexible hose
+- Cut off wheel
+- Mandrel
+- Safety wire
+- Masking tape
+- Tape measure
+steps:
+- id: dd.s1
+  section: Determine the Distance and Hose
+  text: Measure the route that the hose needs to take.
+  note_refs:
+  - 1
+  checks:
+  - id: dd.s1.c1
+    statement: >-
+      Recorded final hose length equals the measured route length plus 5–8 percent of that
+      length.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "provide slack or bend in the hose line from 5 to 8 percent of its total length";
+      procedure sheet gives same 5-8% and worked example.
+  - id: dd.s1.c2
+    statement: >-
+      The measured distance follows the actual hose route including bends and clamp points,
+      not a straight line between fittings.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Use a tape measure to map the distance" — mapping the route, not point-to-point
+      span.
+  - id: dd.s1.c3
+    statement: >-
+      Route measurement and computed final length are written down before hose is marked or
+      cut.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Worked example implies a recorded calculation; pen & paper listed in required equipment.
+  - id: dd.s1.c4
+    statement: >-
+      The planned route contains no bend tighter than the hose's minimum bend radius.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-22
+    origin: drafted
+    note: >-
+      Handbook: "Never use less than the recommended minimum bend radius specified for the
+      hose"; radii tabulated on p.9-20.
+  error_modes:
+  - id: dd.s1.e1
+    statement: >-
+      Straight-line distance measured instead of the routed path, yielding a hose too short
+      to install without strain.
+    severity: critical
+    origin: drafted
+  - id: dd.s1.e2
+    statement: >-
+      The 5–8 percent expansion allowance is omitted, so the hose will be stretched tightly
+      between fittings.
+    severity: critical
+    origin: drafted
+  - id: dd.s1.e3
+    statement: >-
+      Allowance miscalculated or exceeds 8 percent, giving excessive slack that must be re-measured
+      and re-cut.
+    severity: major
+    origin: drafted
+- id: dd.s2
+  section: Determine the Distance and Hose
+  text: Choose a hose and fitting assembly.
+  note_refs:
+  - 2
+  checks:
+  - id: dd.s2.c1
+    statement: >-
+      The dash number printed on the hose lay line matches the dash number on the nipple,
+      B-nut, and collar.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet requires corresponding dash numbers; handbook: "When the dash number
+      of the hose corresponds with the dash number of the tubing, the proper size hose is
+      being used."
+  - id: dd.s2.c2
+    statement: >-
+      The selected hose material and pressure class are approved for the system fluid and
+      operating pressure.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-16
+    origin: drafted
+    note: >-
+      Handbook: "Do not use for phosphate ester base hydraulic fluid (Skydrol™)" and "always
+      refer to the applicable aircraft maintenance or parts manual."
+  - id: dd.s2.c3
+    statement: >-
+      The chosen MS-type end fittings are complete (socket/collar, nipple, B-nut) and serviceable,
+      with undamaged threads and sealing surfaces.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-18
+    origin: drafted
+    note: >-
+      Handbook: "MS-type end fittings for flexible hose are detachable and may be reused if
+      determined to be serviceable."
+  - id: dd.s2.c4
+    statement: >-
+      The fitting inside diameter matches the hose inside diameter for the selected size.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-18
+    origin: drafted
+    note: >-
+      Handbook: "The inside diameter of the fitting is the same as the inside diameter of
+      the hose to which it is attached."
+  error_modes:
+  - id: dd.s2.e1
+    statement: >-
+      Fitting dash number does not match the hose dash number, producing a mismatched assembly
+      that still looks correct.
+    severity: critical
+    origin: drafted
+  - id: dd.s2.e2
+    statement: >-
+      Hose material selected is incompatible with the system fluid (e.g., Buna-N with Skydrol)
+      or under-rated for pressure.
+    severity: critical
+    origin: drafted
+  - id: dd.s2.e3
+    statement: >-
+      Reused fitting with nicked threads, damaged spur, or a missing collar is accepted as
+      serviceable.
+    severity: major
+    origin: drafted
+- id: dd.s3
+  section: Determine the Distance and Hose
+  text: Mark the hose.
+  note_refs:
+  - 3
+  checks:
+  - id: dd.s3.c1
+    statement: >-
+      The masking tape is wrapped evenly around the hose with its edge perpendicular to the
+      hose axis, not spiraled.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: tape 'wrapped evenly around the hose'; a square tape edge is what guides the
+      later vertical, clean cut.
+  - id: dd.s3.c2
+    statement: >-
+      Distance from the hose end to the tape edge equals the routed length plus 5-8 percent
+      expansion allowance.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: add 5-8% of total length. Handbook: "provide slack or bend in the hose line from
+      5 to 8 percent of its total length".
+  - id: dd.s3.c3
+    statement: >-
+      Exactly one tape band marks the cut location, its edge giving an unambiguous single
+      cut line.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet transfers 'the measurement needed' onto the hose; multiple or stray bands make
+      the intended cut point indeterminate.
+  - id: dd.s3.c4
+    statement: >-
+      The tape does not obscure the hose lay line and dash number used to verify size and
+      no-twist.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-17
+    origin: drafted
+    note: >-
+      Handbook: markings "indicate the natural lay (no twist) of the hose"; handbook does
+      not address tape placement, so confirm with instructor.
+    assumed: true
+  error_modes:
+  - id: dd.s3.e1
+    statement: >-
+      Tape placed at the raw measured route length, omitting the 5-8 percent expansion allowance.
+    severity: critical
+    origin: drafted
+  - id: dd.s3.e2
+    statement: >-
+      Tape spiraled or skewed around the hose, so no square reference edge exists for the
+      cut.
+    severity: major
+    origin: drafted
+  - id: dd.s3.e3
+    statement: >-
+      Tape loose, wrinkled, or bunched, allowing the mark to shift during vise clamping.
+    severity: minor
+    origin: drafted
+- id: ch.s1
+  section: Cut The Hose
+  text: Secure the hose into a table vise.
+  note_refs:
+  - 1
+  checks:
+  - id: ch.s1.c1
+    statement: >-
+      The hose is clamped in the vise jaws, not hand-held, before any cutting is attempted.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "Place hose in vise and cut to desired length using fine tooth hacksaw or
+      cut off wheel."; procedure sheet step 1.
+  - id: ch.s1.c2
+    statement: >-
+      The hose lies horizontally through the jaws with the taped mark protruding clear of
+      the jaw edge.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 1: hose horizontal, "Protrude the taped location to the edge of
+      the vise" so the wheel clears the vise.
+  - id: ch.s1.c3
+    statement: >-
+      The hose shows no flattening, ovalization or jaw impressions where the vise jaws contact
+      it.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 1 requires jaws "snug against the hose"; handbook separately warns of "cold flow"
+      impressions from clamping pressure.
+  - id: ch.s1.c4
+    statement: >-
+      The hose neither slips nor rotates under light hand pressure, yet is not clamped under
+      tension.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Note 1: jaws "snug against the hose without putting significant tension on it" — a hand-feel
+      judgement, not visible in a still.
+  error_modes:
+  - id: ch.s1.e1
+    statement: >-
+      Vise jaws overtightened, crushing the inner tube and wire braid while the hose still
+      looks normal.
+    severity: critical
+    origin: drafted
+  - id: ch.s1.e2
+    statement: >-
+      Taped cut mark clamped inside or behind the jaws, so the hose cannot be cut to the marked
+      length.
+    severity: major
+    origin: drafted
+  - id: ch.s1.e3
+    statement: >-
+      Hose clamped loosely or at an angle, allowing it to shift and yield a skewed cut.
+    severity: major
+    origin: drafted
+- id: ch.s2
+  section: Cut The Hose
+  text: Setup a pneumatic cut off wheel.
+  note_refs:
+  - 2
+  checks:
+  - id: ch.s2.c1
+    statement: >-
+      A composite abrasive cut-off wheel is installed on the tool, not a toothed metal or
+      wood blade.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Connect a composite blade cut off wheel"; handbook only permits generically
+      "fine tooth hacksaw or cut off wheel" (p.9-19).
+  - id: ch.s2.c2
+    statement: >-
+      The wheel is seated square with arbor nut tight and the blade guard in place over the
+      upper wheel.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by safe tool setup for the cutting hazard listed in the sheet's safety section;
+      no handbook figure for tool setup.
+  - id: ch.s2.c3
+    statement: >-
+      The abrasive wheel shows no cracks, chips or heavy wear that would cause it to shatter
+      in use.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet safety: "Handling sharp tools presents a cutting hazard"; serviceable blade is
+      precondition to cutting.
+  - id: ch.s2.c4
+    statement: >-
+      The air line is fully coupled to the tool inlet and holds regulated shop pressure without
+      leaking.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Connect a composite blade cut off wheel to a compressed air source"; no psi
+      value stated by either source.
+  - id: ch.s2.c5
+    statement: >-
+      Air is connected only with the trigger released and the wheel pointed away from the
+      body.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet safety section and note 3 trigger control; only observable while the connection
+      is made.
+  error_modes:
+  - id: ch.s2.e1
+    statement: >-
+      A cracked, chipped or wrong-type blade is fitted; it looks mounted but can disintegrate
+      at speed.
+    severity: critical
+    origin: drafted
+  - id: ch.s2.e2
+    statement: >-
+      Arbor nut left loose or guard omitted, allowing the wheel to walk or fly off during
+      the cut.
+    severity: critical
+    origin: drafted
+  - id: ch.s2.e3
+    statement: >-
+      Quick-disconnect not fully seated, so the coupling blows off or the tool loses speed
+      mid-cut.
+    severity: major
+    origin: drafted
+- id: ch.s3
+  section: Cut The Hose
+  text: Cut the hose to length.
+  note_refs:
+  - 3
+  checks:
+  - id: ch.s3.c1
+    statement: >-
+      The cut end is square and perpendicular to the hose axis, with no visible bevel or skew.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: "Keep the blade as vertical as possible to create a clean cut"; handbook
+      Fig. 9-35 step 1: "cut to desired length using fine tooth hacksaw or cut off wheel."
+  - id: ch.s3.c2
+    statement: >-
+      Cut hose length equals the routed measurement plus 5-8 percent of that length.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: add 5-8% to measured route; handbook p.9-21: "provide slack or bend
+      in the hose line from 5 to 8 percent of its total length."
+  - id: ch.s3.c3
+    statement: >-
+      The cut face is clean: wire or fabric braid not splayed or unravelled, inner tube not
+      crushed, torn or scorched.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note requires a clean cut with the tool doing the cutting; handbook
+      speaks only qualitatively about cutting.
+  - id: ch.s3.c4
+    statement: >-
+      Wheel is spun up before contact and fed slowly with two hands, blade held vertical throughout
+      the cut.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: start wheel just before contacting hose, slowly lower, consistent
+      whining pitch indicates correct feed pressure.
+  error_modes:
+  - id: ch.s3.e1
+    statement: >-
+      Blade tilted during the cut, producing an angled end that will not seat squarely against
+      the nipple.
+    severity: critical
+    origin: drafted
+  - id: ch.s3.e2
+    statement: >-
+      Hose cut to the measured route length with no 5-8 percent added, leaving the assembly
+      short and mechanically loaded.
+    severity: critical
+    origin: drafted
+  - id: ch.s3.e3
+    statement: >-
+      Excessive feed pressure stalls the wheel, fraying the braid and melting or smearing
+      the inner tube at the cut.
+    severity: major
+    origin: drafted
+- id: ch.s4
+  section: Cut The Hose
+  text: Verify the cuts.
+  note_refs:
+  - 4
+  checks:
+  - id: ch.s4.c1
+    statement: >-
+      The cut end face is square to the hose axis with no diagonal taper or ragged edge.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires "the cut end is as flat as possible"; handbook only says cut to desired
+      length with hacksaw or cut off wheel.
+  - id: ch.s4.c2
+    statement: >-
+      The cut end shows no splayed, unraveled or protruding wire/fabric braid strands and
+      no crushed inner tube.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by "verify the cuts" and flat-end requirement; a fully open, undistorted bore
+      is needed for MS nipple entry.
+  - id: ch.s4.c3
+    statement: >-
+      Finished hose length equals the marked dimension including the 5-8 percent expansion
+      allowance.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "provide slack or bend in the hose line from 5 to 8 percent of its total length";
+      sheet gives same 5-8% added to measured route.
+  - id: ch.s4.c4
+    statement: >-
+      No masking tape or adhesive residue remains on the hose cover at the cut end.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet directs unraveling the tape off at 45 degrees toward the hose end after cutting.
+  error_modes:
+  - id: ch.s4.e1
+    statement: >-
+      Cut is angled or beveled, so the nipple seats unevenly, yet the assembly looks finished.
+    severity: critical
+    origin: drafted
+  - id: ch.s4.e2
+    statement: >-
+      Hose cut short of the marked length, leaving no expansion slack for the installed run.
+    severity: major
+    origin: drafted
+  - id: ch.s4.e3
+    statement: >-
+      Tape torn off against the cut direction, leaving adhesive residue or lifted cover braid.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      Close-up of the hose lay line showing the printed dash number, with the nipple, B-nut
+      and collar laid out beside it so their corresponding dash numbers are legible in the
+      same frame.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Perpendicular to the hose, 150-300 mm standoff, raking light across the printed markings
+      so contrasting-colour stencilling reads; scale rule or ruled card in frame; all three
+      fitting parts separated and oriented markings-up.
+  - id: ev2
+    description: >-
+      The marked hose clamped in the table vise before any cutting, showing the tape band
+      protruding clear of the jaw edge and the hose cover where the jaws grip it.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Side-on at jaw height, 400-600 mm standoff, whole vise and 200 mm of hose either side
+      in frame; even overhead light, no shadow across the jaw line; taken with the cut-off
+      tool set down and out of frame.
+  - id: ev3
+    description: >-
+      End-on close-up of the finished cut face showing the inner tube bore, the braid layers
+      and the cover edge.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Camera axis parallel to the hose bore, 100-200 mm standoff, hose end supported so the
+      full face is in focus; diffuse light directly on the face; scale rule laid across the
+      hose OD; cut end wiped clean of debris but not dressed.
+  - id: ev4
+    description: >-
+      Instrumented length verification: tape measure or caliper reading of the finished hose
+      end-to-end length, read out loud or captured with the graduation legible against the
+      hose end, together with the student's spoken confirmation that the vise held the hose
+      against light hand pressure without slipping and without the hose being clamped under
+      tension.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Tape hooked on one hose end, graduation at the far end filling the frame; second read
+      of the same dimension after the hose is rotated 90 degrees. The vise-security confirmation
+      is tactile and cannot be resolved from a still.
+    assumed: true
+  - id: ev5
+    description: >-
+      The measurement worksheet: routed route length as measured, the 5-8 percent allowance
+      computed from it, the resulting target length, and the hose specification/dash number
+      and fitting part numbers selected.
+    medium: document
+    origin: drafted
+    framing: >-
+      Flat scan or square-on photo of the full sheet, all figures legible, dated and signed;
+      must be visibly recorded before the cut photo timestamp.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 9
+    pages:
+    - 9-16
+    - 9-17
+    - 9-18
+    - 9-19
+    - 9-20
+    - 9-21
+    - 9-22
+    - 9-23
+    pdf_page_indices:
+    - 368
+    - 369
+    - 370
+    - 371
+    - 372
+    - 373
+    - 374
+    - 375
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_30b_9_16_9_23.md
+  videos:
+  - path: data/videos/AM.I.D.S7/flex_hose_1.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_2.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_3.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_4.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_5.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_6.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=zMrn-V6u6uA
+assumptions:
+- id: dd.s3.c4
+  statement: >-
+    The tape does not obscure the hose lay line and dash number used to verify size and no-twist.
+  reason: >-
+    Handbook: markings "indicate the natural lay (no twist) of the hose"; handbook does not
+    address tape placement, so confirm with instructor.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    Instrumented length verification: tape measure or caliper reading of the finished hose
+    end-to-end length, read out loud or captured with the graduation legible against the hose
+    end, together with the student's spoken confirmation that the vise held the hose against
+    light hand pressure without slipping and without the hose being clamped under tension.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    The measurement worksheet: routed route length as measured, the 5-8 percent allowance
+    computed from it, the resulting target length, and the hose specification/dash number
+    and fitting part numbers selected.
+  reason: Required as document, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  Does this task end at the verified cut, or does the assessed artifact include MS fitting
+  assembly per Figure 9-35 (socket screwed on counterclockwise, .005"-.031" clearance between
+  nipple hex and socket)? The step list stops at cutting while the fit note says 'completed
+  fabrication'.
+- >-
+  The handbook states all flexible hose must be proof-tested after assembly and recommends
+  testing to at least 1.5 system pressure; must the student produce a proof-test record, and
+  on what stand?
+- >-
+  No numeric tolerance for cut-face squareness or maximum braid splay appears in either the
+  procedure sheet or the extract — an SME must set a pass threshold before graders can apply
+  the 'square and clean' conditions consistently.
+- >-
+  Which value within 5-8 percent should be used, and is any rounding rule applied? The worked
+  example in Note 1 uses 1.9" on 24", roughly 7.9 percent.
+- >-
+  Figure 9-35 step 2 (slit cover to wire braid and twist off) is noted as applying to high-pressure
+  hose only; does the training hose fall in that class, and if so should cover removal be
+  evidenced?
+- >-
+  Should the dash-number match be verified against the mating tubing size as the handbook
+  frames it, in addition to the hose-to-fitting match the procedure sheet requires?
