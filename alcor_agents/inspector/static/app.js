@@ -1884,10 +1884,16 @@ function PhotoAssessmentTab({ acs }) {
               </div>
               ${focused.frame_suggested && !focused.frame_picked && html`
                 <div class="suggested-note">
-                  This frame was <strong>guessed</strong> by matching the step's section
-                  “${focused.section}” to the clip name — no one reviewed it, and it is the
-                  clip's last frame, which is wherever the camera stopped rather than
-                  necessarily the finished state. Check it, or pick another below.
+                  This frame was <strong>guessed</strong>: the step's section
+                  “${focused.section}” was matched to the clip <code>${focused.video}</code>
+                  by name, then
+                  ${focused.frame_position
+                    ? ` step ${focused.frame_position[0]} of ${focused.frame_position[1]} was
+                        taken from ${Math.round(100 * focused.frame_position[0] /
+                                                focused.frame_position[1])}% of the way
+                        through it, assuming the steps run in order at an even pace`
+                    : " the clip's last frame was taken as its finished state"}.
+                  No one reviewed it. Check it, or pick another below.
                 </div>
               `}
               ${focused.frame_url

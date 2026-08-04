@@ -198,6 +198,39 @@ class PhotoTargetTests(unittest.TestCase):
         for target in steps:
             self.assertTrue(target["frame_suggested"])
 
+    def test_steps_in_a_section_advance_through_its_clip(self):
+        """Each step of a section needs its own frame, not the clip's last one.
+
+        Giving all three steps of "Cut the Tubing" the clip's final frame graded
+        "Decide the size of tubing to use" against a photo of tubing already
+        cut — a confident failure on a step performed correctly, which is worse
+        than no frame at all because a wrong verdict is harder to spot than a
+        missing one.
+        """
+        pack, _, _ = server.load_pack("AM.I.D.S1")
+        steps = [t for t in server.photo_targets("AM.I.D.S1", pack)
+                 if t["kind"] == "step" and t.get("frame")]
+        self.assertTrue(steps)
+
+        frames = [(t["video"], t["frame"]) for t in steps]
+        self.assertEqual(len(frames), len(set(frames)), "steps share a suggested frame")
+
+        by_section = {}
+        for target in steps:
+            by_section.setdefault(target["section"], []).append(target)
+        for section, members in by_section.items():
+            with self.subTest(section=section):
+                # Order within a section must follow the clip's timeline, since
+                # the steps are performed in order.
+                names = [t["frame"] for t in members]
+                self.assertEqual(names, sorted(names))
+                # The last step of a section still lands on the clip's final
+                # frame — that is the closest thing to its finished state.
+                clip_frames = server.frame_names("AM.I.D.S1", members[-1]["video"], "detail")
+                self.assertEqual(members[-1]["frame"], clip_frames[-1])
+                index, count = members[-1]["frame_position"]
+                self.assertEqual((index, count), (len(members), len(members)))
+
     def test_targets_use_final_frames_and_prefer_pack_checks(self):
         pack, _, _ = server.load_pack("AM.II.K.S3")
         targets = server.photo_targets("AM.II.K.S3", pack)
