@@ -29,6 +29,10 @@ VIDEO_DIR = ROOT / "data" / "videos"
 OUT_DIR = ROOT / "criteria" / "generated_criteria"
 VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v"}
 
+# Hand-authored steps for operations the AIM sheet omits. Kept out of steps.json
+# because packs/ingest.py rewrites that file from the .docx on every run.
+SUPPLEMENT = "steps_supplement.json"
+
 # Prerequisites and boilerplate, not gradeable work. `Safety & Equipment` is
 # AM.II.K.S3's spelling of the same heading.
 NON_PROCEDURE_SECTIONS = {"before you begin", "safety and equipment", "safety & equipment"}
@@ -127,16 +131,25 @@ def subtasks_for(acs: str) -> list[dict]:
     a sheet's only heading is `Procedure` the variant title supplies the name,
     and where several variants exist each becomes its own subtask — three ways of
     safetying are three different articles to photograph, not one.
+
+    Sections drafted in `steps_supplement.json` for operations the sheet omits
+    come last and are marked `origin: drafted`. They need subtasks of their own or
+    they would have no rubric, and a step with no rubric is silently ungraded.
     """
     data = read_json(TASK_DIR / acs / "steps.json") or {}
     variants = data.get("variants") or []
+    supplement = read_json(TASK_DIR / acs / SUPPLEMENT) or {}
     out: list[dict] = []
 
-    for variant in variants:
-        variant_title = strip_code_prefix(variant.get("variant") or variant.get("title") or "")
+    groups = [(strip_code_prefix(v.get("variant") or v.get("title") or ""),
+               v.get("sections") or [], "sheet") for v in variants]
+    if supplement.get("sections"):
+        groups.append(("", supplement["sections"], "drafted"))
+
+    for variant_title, sections, origin in groups:
         current: dict | None = None
 
-        for section in variant.get("sections") or []:
+        for section in sections:
             name = (section.get("section") or "").strip()
             if name.lower() in NON_PROCEDURE_SECTIONS:
                 continue
@@ -162,6 +175,7 @@ def subtasks_for(acs: str) -> list[dict]:
                 "title": title,
                 "section": name or "Procedure",
                 "variant": variant_title,
+                "origin": origin,
                 "steps": steps,
                 "notes": list(notes),
                 "continuations": [],

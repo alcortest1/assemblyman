@@ -508,6 +508,32 @@ pre.raw {
   padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px;
 }
 .run-bar .estimate { color: var(--muted); font-family: var(--mono); }
+/* Writing controls is a separate, cheaper action than grading, so it gets its
+   own line above the run bar rather than a second button competing with it. */
+.controls-bar { justify-content: space-between; }
+
+/* How many frames of its own span a step is graded on. Lives on the Steps tab
+   rather than beside the models, because it only affects step targets — a
+   subtask is always graded on one frame of the finished article. */
+.step-frames {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px;
+}
+.step-frames label { font-weight: 600; font-size: 12px; }
+.step-frames select {
+  background: var(--panel); color: var(--text); border: 1px solid var(--line);
+  border-radius: 6px; padding: 3px 6px; font-family: var(--mono); font-size: 12px;
+}
+.step-frames .frames-note { color: var(--muted); flex: 1 1 100%; line-height: 1.5; }
+
+/* What a control generation produced, and the warning that it is unread. */
+.variant-note {
+  background: var(--panel-2); border: 1px solid var(--line); border-left: 2px solid var(--accent);
+  border-radius: 7px; padding: 8px 11px; margin: 9px 0;
+  font-size: 12px; color: var(--muted); line-height: 1.55;
+}
+.variant-note strong { color: var(--text); }
 .run-error { margin-top: 10px; color: var(--bad); font-size: 13px; }
 
 .btn {
@@ -556,6 +582,16 @@ pre.raw {
   width: 64px; height: 48px; object-fit: cover; border-radius: 5px;
   border: 1px solid var(--line); flex-shrink: 0; background: var(--panel-2);
 }
+/* The row shows the frame the step ends on, badged with how many frames the
+   grader actually sees. A row that showed one image for a three-frame call
+   would misstate what the run sends. */
+.target-thumb-stack { position: relative; flex-shrink: 0; display: flex; }
+.thumb-count {
+  position: absolute; right: 3px; bottom: 3px; min-width: 13px; text-align: center;
+  background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--text);
+  border: 1px solid var(--line); border-radius: 4px;
+  font-family: var(--mono); font-size: 10px; line-height: 14px; padding: 0 3px;
+}
 .target-text { min-width: 0; }
 .target-label { font-size: 13px; font-weight: 600; }
 .target-sub { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: 11px; margin-top: 2px; }
@@ -566,6 +602,24 @@ pre.raw {
 .detail-frame {
   width: 100%; border-radius: 9px; border: 1px solid var(--line); cursor: zoom-in; display: block;
 }
+/* Every frame a multi-frame target is graded on, in the order the model sees
+   them. Laid out in a row so the progression through the step reads at a
+   glance, and scrolls rather than shrinking past legibility. */
+.frame-strip { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; }
+.frame-shot { margin: 0; flex: 1 1 0; min-width: 96px; }
+.frame-shot img {
+  width: 100%; border-radius: 8px; border: 1px solid var(--line);
+  cursor: zoom-in; display: block;
+}
+.frame-shot figcaption {
+  font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+  text-align: center; margin-top: 3px;
+}
+/* The frame chosen for showing the finished state best, rather than for its
+   position in time — marked because its place in the strip would otherwise
+   read as a later moment than the frame before it. */
+.frame-shot.best img { border-color: var(--good); }
+.frame-shot.best figcaption { color: var(--good); }
 .detail-desc { font-size: 13px; color: var(--muted); margin: 11px 0; }
 
 .criterion-editor { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
@@ -611,6 +665,29 @@ pre.raw {
 .verdict-detail { margin-top: 8px; font-size: 12px; line-height: 1.5; }
 .verdict-detail p { margin: 5px 0; }
 .verdict-meta { color: var(--muted); font-family: var(--mono); font-size: 10.5px; margin-top: 6px; }
+
+/* the negated sheet, beside the criterion it mirrors */
+.negative-editor {
+  margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;
+  border-left: 3px solid color-mix(in srgb, var(--warn) 55%, transparent);
+  padding-left: 11px;
+}
+.negative-pair {
+  color: var(--muted); font-size: 11.5px; margin-top: 3px; line-height: 1.45;
+}
+.negative-pair code { font-family: var(--mono); font-size: 11px; }
+.results-table tr.negative-row {
+  background: color-mix(in srgb, var(--warn) 5%, transparent);
+}
+.results-table tr.negative-row .target-cell { border-left: 3px solid var(--warn); }
+.polarity-panel .polarity-table td { font-variant-numeric: tabular-nums; }
+.polarity-panel .polarity-table td.good { color: var(--good); }
+.polarity-panel .polarity-table td.bad { color: var(--bad); }
+.toggle {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+  color: var(--muted); cursor: pointer;
+}
+.toggle.on { color: var(--text); }
 
 /* match-test variants */
 .variant-block { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }

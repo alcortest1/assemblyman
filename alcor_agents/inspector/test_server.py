@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -510,9 +511,14 @@ class PhotoTargetTests(unittest.TestCase):
         self.assertTrue(targets)
 
         for target in targets:
-            # Every target carries a criterion — that is the deliverable, and it
-            # exists whether or not a photo of the work does yet.
-            self.assertTrue(target["criterion"])
+            # Every target either carries a criterion — the deliverable, which
+            # exists whether or not a photo of the work does yet — or says it
+            # has none. What it must never do is carry something that is not an
+            # acceptance standard while presenting it as one: a reviewer's
+            # description of the footage graded as a criterion returns verdicts
+            # about prose, and `fail` was its most common answer.
+            self.assertTrue(target["criterion"] or target.get("needs_criteria"),
+                            f"{target['target_id']} has neither a criterion nor a flag")
             if target["kind"] in ("step", "section"):
                 # Derived from the pack, so no reviewed segment pinned a frame
                 # to the target itself. A frame can still arrive two ways: it
@@ -787,6 +793,738 @@ class FrameChoiceTests(unittest.TestCase):
         self.assertTrue(names)
         self.assertNotIn("../../../etc/passwd", names)
         self.assertNotIn("t000000_00.jpg", server.frame_names("AM.NOPE.X1", "x", "detail"))
+
+
+class CriterionSplitTests(unittest.TestCase):
+    """A criterion is graded a point at a time, whichever shape it arrives in."""
+
+    SHEET = (
+        "Assess the completed flare.\n\nCriteria\n"
+        "1. The flare is concentric with the tube bore.\n"
+        "2. The sleeve is captive behind the flare.\n\n"
+        "Critical defects\n- The flare is split at the rim.\n\n"
+        "Overall decision\nPASS requires every criterion to pass.\n")
+    STEP = ("- Both wire ends are inserted into the two fittings\n"
+            "- Marker marks are visible at each bend location\n"
+            "- The wire is a single continuous length\n")
+
+    def test_a_sheet_splits_into_criteria_and_restated_defects(self):
+        points = server.sheet_checks(self.SHEET)
+        self.assertEqual([p["id"] for p in points], ["c1", "c2", "d1"])
+        self.assertFalse(points[0]["defect"])
+        # A defect graded as written scores a pass on the defect being present.
+        self.assertTrue(points[2]["defect"])
+        self.assertIn("shows no such defect", points[2]["statement"])
+        # The combining rule is not itself a point.
+        self.assertNotIn("PASS requires", " ".join(p["statement"] for p in points))
+
+    def test_a_step_criterion_splits_on_its_bullets(self):
+        """The shape that never split, and the reason steps could not pass.
+
+        Sent whole, its conditions are ANDed: one unobservable condition
+        abstains the step and one failed condition fails it, so a four-condition
+        step passed 7 times in 753 calls across every saved run.
+        """
+        points = server.sheet_checks(self.STEP)
+        self.assertEqual([p["id"] for p in points], ["c1", "c2", "c3"])
+        self.assertEqual(points[0]["statement"],
+                         "Both wire ends are inserted into the two fittings")
+        # Positive conditions, so none is restated as an absence — a step
+        # criterion has no section that inverts polarity.
+        self.assertFalse(any(p["defect"] for p in points))
+        self.assertNotIn("no such defect", " ".join(p["statement"] for p in points))
+
+    def test_a_single_condition_is_not_a_split(self):
+        """Splitting it would relabel the target as a roll-up of one."""
+        self.assertEqual(server.sheet_checks("- Only one thing to check"), [])
+        self.assertEqual(server.sheet_checks("Just grade the whole thing."), [])
+        self.assertEqual(server.sheet_checks(""), [])
+
+    def test_a_sheet_with_headings_never_falls_through_to_the_bullet_split(self):
+        """Its `Source basis` bullets are provenance, not conditions."""
+        sheet = ("Criteria\n1. The flare is concentric.\n\n"
+                 "Source basis\n- procedure sheet: AIM S1 p.4\n- handbook: AC 43.13 p.9\n")
+        points = server.sheet_checks(sheet)
+        self.assertEqual([p["statement"] for p in points], ["The flare is concentric."])
+
+    def test_conditions_split_whether_or_not_they_carry_a_marker(self):
+        """Under a heading, every line is a condition.
+
+        Requiring a number meant a criterion typed into the browser as bullets,
+        or as plain lines, produced no points at all — and that is not an error
+        anyone sees: the caller falls back to grading the whole sheet in one
+        call, which `apply_thresholds` fails on any single condition. Three
+        saved criteria in this pilot are written exactly that way.
+        """
+        bare = ("Criteria\nThe flare is concentric with the tube bore.\n"
+                "The sleeve is captive behind the flare.\n\n"
+                "Critical defects\nThe flare is split at the rim.\n")
+        bulleted = ("Criteria\n- The flare is concentric with the tube bore.\n"
+                    "- The sleeve is captive behind the flare.\n\n"
+                    "Critical defects\n- The flare is split at the rim.\n")
+        for shape, text in (("bare", bare), ("bulleted", bulleted)):
+            with self.subTest(shape=shape):
+                points = server.sheet_checks(text)
+                self.assertEqual([p["id"] for p in points], ["c1", "c2", "d1"])
+                self.assertEqual(points[0]["statement"],
+                                 "The flare is concentric with the tube bore.")
+                self.assertIn("shows no such defect", points[2]["statement"])
+
+    def test_every_step_target_now_splits(self):
+        """The whole point: no step target may still be graded as one blob."""
+        unsplit = []
+        for acs in ("AM.I.D.S1", "AM.I.E.S1", "AM.II.A.S6", "AM.III.F.S11"):
+            pack, _, _ = server.load_pack(acs)
+            for target in server.photo_targets(acs, pack, 3):
+                if target["kind"] != "step" or not (target.get("criterion") or "").strip():
+                    continue
+                points = server.sheet_checks(target["criterion"])
+                conditions = [l for l in target["criterion"].splitlines()
+                              if re.match(r"\s*[-*•]", l)]
+                if len(conditions) > 1 and not points:
+                    unsplit.append(f"{acs} {target['target_id']}")
+        self.assertEqual(unsplit, [], f"{len(unsplit)} step target(s) still graded whole")
+
+
+class UngradeableIntervalTests(unittest.TestCase):
+    """A reviewed interval with no pack step has no acceptance standard."""
+
+    def test_a_video_description_is_not_offered_as_a_criterion(self):
+        """It is prose about one moment of a clip, not a standard.
+
+        Graded as one it returned `fail` on 39% of 362 calls across saved runs —
+        the highest rate of any criterion source, and none of it about
+        workmanship. The interval stays listed and keeps its description; it
+        simply cannot be graded until someone writes a criterion for it.
+        """
+        found = 0
+        for acs in ("AM.I.E.S1", "AM.II.K.S3"):
+            pack, _, _ = server.load_pack(acs)
+            for target in server.photo_targets(acs, pack, 3):
+                if target.get("criterion_source") != "segment.description":
+                    continue
+                found += 1
+                self.assertEqual(target["criterion"], "", target["target_id"])
+                self.assertTrue(target["needs_criteria"], target["target_id"])
+                # The reviewer's account of the footage is still carried — it is
+                # what an author writes the criterion from.
+                self.assertTrue(target["description"], target["target_id"])
+        self.assertGreater(found, 0, "no such targets found; the test proves nothing")
+
+    def test_an_operator_written_criterion_still_grades(self):
+        """Flagging it must not make the target permanently ungradeable."""
+        pack, _, _ = server.load_pack("AM.II.K.S3")
+        target = next(t for t in server.photo_targets("AM.II.K.S3", pack, 3)
+                      if t.get("criterion_source") == "segment.description")
+        with tempfile.TemporaryDirectory() as tmp:
+            original = server.PHOTO_DIR
+            try:
+                server.PHOTO_DIR = Path(tmp)
+                server.write_criteria_store("AM.II.K.S3", {
+                    target["target_id"]: {"criterion": "- The contact is fully seated.",
+                                          "variants": []}})
+                again = next(t for t in server.photo_targets("AM.II.K.S3", pack, 3)
+                             if t["target_id"] == target["target_id"])
+                self.assertEqual(again["criterion"], "- The contact is fully seated.")
+                self.assertTrue(again["edited"])
+            finally:
+                server.PHOTO_DIR = original
+
+
+class NegativeCriteriaTests(unittest.TestCase):
+    """Match controls: criteria a photo of correct work should not satisfy.
+
+    A run against reference frames cannot tell a grader from a model that agrees
+    with whatever it is handed, because `pass` is the right answer everywhere.
+    These are the only thing in the harness that can.
+    """
+
+    def _target(self, acs="AM.I.D.S1"):
+        pack, _, _ = server.load_pack(acs)
+        return next(t for t in server.photo_targets(acs, pack, 3) if t["kind"] == "step")
+
+    def test_foreign_controls_are_borrowed_from_other_tasks_only(self):
+        """Never from this task, or it would be a criterion the work may satisfy."""
+        pool = server.foreign_criteria("AM.I.D.S1")
+        self.assertGreater(len(pool), 20)
+        self.assertNotIn("AM.I.D.S1", {p["task_code"] for p in pool})
+        # Borrowed verbatim from a real sheet, so it reads like the criteria
+        # around it and cannot be picked out by register.
+        for item in pool[:10]:
+            self.assertTrue(item["criterion"].strip())
+            self.assertFalse(item["criterion"].startswith("The finished work shows no"))
+
+    def test_a_foreign_control_expects_not_pass_rather_than_fail(self):
+        """The subject is absent, so abstaining is correct behaviour.
+
+        Demanding `fail` would score a grader that says "this article is not in
+        the photograph" as wrong, which is the reason `not_pass` exists.
+        """
+        variants, spend = server.negative_variants(
+            "AM.I.D.S1", self._target(), [], None, ("foreign",))
+        self.assertEqual(len(variants), 1)
+        self.assertEqual(variants[0]["expected"], "not_pass")
+        self.assertEqual(variants[0]["negative_kind"], "foreign")
+        # Costs nothing: no model writes it.
+        self.assertEqual(spend, 0.0)
+
+    def test_a_foreign_control_is_stable_between_runs(self):
+        """Two runs of one target must be tested against the same control.
+
+        A control that moved would make a change in the score unattributable.
+        """
+        target = self._target()
+        first, _ = server.negative_variants("AM.I.D.S1", target, [], None, ("foreign",))
+        for _ in range(3):
+            again, _ = server.negative_variants("AM.I.D.S1", target, [], None, ("foreign",))
+            self.assertEqual(again, first)
+
+    def test_generated_controls_carry_the_point_they_came_from(self):
+        """A miss is only readable against the positive verdict for the same
+        condition, so the link between them is part of the control."""
+        points = [{"id": "c1", "statement": "The twists are even and tight.", "defect": False},
+                  {"id": "c2", "statement": "The pigtail is bent back.", "defect": False}]
+
+        def fake(*, model, criterion, subject=None, **kw):
+            return {"error": None, "cost_usd": 0.001, "negatives": [
+                {"kind": "inversion", "criterion": f"NOT({criterion})",
+                 "changed": "reversed", "expected": "fail"},
+                {"kind": "substitution", "criterion": f"SWAP({criterion})",
+                 "changed": "one value", "expected": "fail"}]}
+
+        variants, spend = server.negative_variants(
+            "AM.I.D.S1", self._target(), points, "m",
+            ("inversion", "substitution"), drafter=fake)
+        self.assertEqual(len(variants), 4)
+        self.assertAlmostEqual(spend, 0.002, places=6)
+        for variant in variants:
+            self.assertEqual(variant["expected"], "fail")
+            self.assertIn(variant["negative_of"], ("c1", "c2"))
+            self.assertTrue(variant["positive_criterion"])
+        self.assertEqual({v["negative_of"] for v in variants}, {"c1", "c2"})
+
+    def _batch_drafter(self):
+        def fake(*, model, criterion, subject=None, **kw):
+            return {"error": None, "cost_usd": 0.001, "negatives": [
+                {"kind": "inversion", "criterion": f"NOT({criterion})",
+                 "changed": "reversed", "expected": "fail"}]}
+        return fake
+
+    def test_batch_writes_controls_for_every_requested_target(self):
+        """The button writes a whole selection at once; each target must come
+        back with its own controls, keyed so the browser can file them."""
+        targets = [
+            {"target_id": "section:a", "label": "A",
+             "criterion": "1. The wire is taut.\n2. The pigtail is bent back."},
+            {"target_id": "section:b", "label": "B", "criterion": "1. The cut is square."},
+        ]
+        out = server.negative_variants_batch(
+            "AM.I.D.S1", ["section:a", "section:b"], "m", ("inversion",),
+            targets=targets, drafter=self._batch_drafter())
+
+        self.assertEqual([r["target_id"] for r in out["results"]],
+                         ["section:a", "section:b"])
+        self.assertEqual(out["points"], 3)
+        self.assertEqual(out["variants"], 3)
+        self.assertAlmostEqual(out["cost_usd"], 0.003, places=6)
+        for result in out["results"]:
+            self.assertIsNone(result["error"])
+            for variant in result["variants"]:
+                # Provenance has to survive the batch path or a miss cannot be
+                # read against the positive verdict for the same condition.
+                self.assertEqual(variant["expected"], "fail")
+                self.assertTrue(variant["negative_of"])
+                self.assertTrue(variant["positive_criterion"])
+
+    def test_batch_reports_a_target_with_no_criterion_rather_than_dropping_it(self):
+        """A subtask that silently produced nothing reads as one needing nothing."""
+        targets = [{"target_id": "section:a", "label": "A", "criterion": "1. Taut."},
+                   {"target_id": "section:empty", "label": "B", "criterion": ""}]
+        out = server.negative_variants_batch(
+            "AM.I.D.S1", ["section:a", "section:empty", "section:ghost"], "m",
+            ("inversion",), targets=targets, drafter=self._batch_drafter())
+
+        errors = {r["target_id"]: r["error"] for r in out["results"] if r["error"]}
+        self.assertEqual(errors, {"section:empty": "no_criterion",
+                                  "section:ghost": "unknown_target"})
+        # The one good target is still written, and the failures cost nothing.
+        self.assertEqual(out["variants"], 1)
+        self.assertAlmostEqual(out["cost_usd"], 0.001, places=6)
+
+    def test_batch_drafts_from_unsaved_criterion_text(self):
+        """The browser is the source of truth for an edit in progress, so a
+        control written from the saved text would negate the wrong condition."""
+        targets = [{"target_id": "section:a", "label": "A", "criterion": "1. Old text."}]
+        out = server.negative_variants_batch(
+            "AM.I.D.S1", ["section:a"], "m", ("inversion",),
+            edited={"section:a": "1. Edited text."},
+            targets=targets, drafter=self._batch_drafter())
+        self.assertIn("Edited text", out["results"][0]["variants"][0]["criterion"])
+
+    def test_an_inversion_expects_fail_not_not_pass(self):
+        """The article is in frame and the work contradicts the wording.
+
+        Accepting `unsure` would forgive exactly the behaviour the control
+        exists to catch — a grader declining to commit on something it can see.
+        """
+        self.assertFalse(vlm.expectation_met("fail", "unsure"))
+        self.assertTrue(vlm.expectation_met("fail", "fail"))
+        # Whereas a foreign control tolerates the abstention.
+        self.assertTrue(vlm.expectation_met("not_pass", "unsure"))
+        self.assertFalse(vlm.expectation_met("not_pass", "pass"))
+
+    def test_the_drafter_rejects_replies_it_cannot_use(self):
+        """A control of unknown kind cannot be scored or read, so it is dropped."""
+        def reply(text):
+            return lambda payload, key: {
+                "choices": [{"message": {"content": text}}],
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5}}
+
+        good = vlm.draft_negative_criteria(
+            model="google/gemini-3.6-flash", criterion="The twists are tight.", key="k",
+            post=reply('{"negatives":[{"kind":"inversion","criterion":"The wire is slack.",'
+                       '"changed":"reversed"},{"kind":"nonsense","criterion":"x"},'
+                       '{"kind":"substitution","criterion":""}],"skipped":null}'))
+        self.assertIsNone(good["error"])
+        self.assertEqual(len(good["negatives"]), 1)
+        self.assertEqual(good["negatives"][0]["expected"], "fail")
+
+        # A criterion whose negation could only ever be answered "unsure" is
+        # better skipped than turned into a control that measures nothing.
+        skipped = vlm.draft_negative_criteria(
+            model="google/gemini-3.6-flash", criterion="The alloy is 2024-T3.", key="k",
+            post=reply('{"negatives":[],"skipped":"rests on something a photo cannot settle"}'))
+        self.assertEqual(skipped["negatives"], [])
+        self.assertIn("cannot settle", skipped["skipped"])
+
+        self.assertEqual(
+            vlm.draft_negative_criteria(model="m", criterion="  ", key="k",
+                                        post=reply("{}"))["error"], "no_criterion")
+
+    def test_generated_controls_survive_being_saved(self):
+        """Provenance must reach the store, or a miss cannot be traced back."""
+        with tempfile.TemporaryDirectory() as tmp:
+            original = server.PHOTO_DIR
+            try:
+                server.PHOTO_DIR = Path(tmp)
+                server.write_criteria_store("AM.I.D.S1", {"step:x": {
+                    "criterion": None,
+                    "variants": [{"id": "neg-c1-inv", "label": "c1 inversion",
+                                  "criterion": "The wire is slack.", "expected": "fail",
+                                  "negative_kind": "inversion", "negative_of": "c1",
+                                  "positive_criterion": "The twists are tight."}]}})
+                saved = server.read_criteria_store("AM.I.D.S1")["step:x"]["variants"][0]
+                self.assertEqual(saved["negative_kind"], "inversion")
+                self.assertEqual(saved["negative_of"], "c1")
+            finally:
+                server.PHOTO_DIR = original
+
+
+class NegativeSheetTests(unittest.TestCase):
+    """A negated sheet is the same instrument aimed the wrong way.
+
+    Same sections, same order, split by the same parser into the same number of
+    points — because the whole purpose is to set its pass rate beside the
+    criteria's, and two things counted differently cannot be subtracted.
+    """
+
+    SHEET = (
+        "Assess the completed flare.\n\nCriteria\n"
+        "1. The flare is concentric with the tube bore.\n"
+        "2. The sleeve is captive behind the flare.\n\n"
+        "Critical defects\n- The flare is split at the rim.\n"
+        "- The tube is kinked at the bend.\n\n"
+        "Overall decision\nPASS requires every criterion to pass.\n")
+
+    def _target(self):
+        return {"target_id": "section:flare", "label": "flare_the_line — Flare the Tube",
+                "criterion": self.SHEET}
+
+    def _drafter(self, criteria=None, skipped=()):
+        def fake(*, model, criterion, subject=None, **kw):
+            return {"error": None, "cost_usd": 0.002,
+                    "criteria": criteria if criteria is not None else {
+                        1: {"statement": "The flare is visibly off-centre in the bore.",
+                            "kind": "inversion", "changed": "reversed"},
+                        2: {"statement": "The sleeve is loose ahead of the flare.",
+                            "kind": "substitution", "changed": "behind → ahead"}},
+                    "skipped": list(skipped)}
+        return fake
+
+    def test_the_negation_mirrors_the_sheet_and_splits_the_same_way(self):
+        out = server.negative_sheet("AM.I.D.S1", self._target(), None, "m",
+                                    drafter=self._drafter())
+        self.assertIsNone(out["error"])
+        points = server.sheet_checks(out["criterion"])
+        # Two conditions and two defects in, four points out — the same count
+        # the criterion itself grades on.
+        self.assertEqual(len(points), 4)
+        self.assertEqual([p["of"] for p in out["points"]], ["c1", "c2", "d1", "d2"])
+        self.assertEqual(len(server.sheet_checks(self.SHEET)), len(points))
+        # The roll-up rule is carried over, so the two sides combine identically.
+        self.assertIn("PASS requires every criterion", out["criterion"])
+
+    def test_a_defect_is_negated_by_asserting_its_presence(self):
+        """The polarity that decides whether this measures anything at all.
+
+        A defect is graded as an absence, which correct work passes. Asked to
+        negate one, a model returns the original defect often enough that the
+        control quietly stops controlling — so the inversion is arithmetic:
+        state the defect as present, which correct work fails.
+        """
+        out = server.negative_sheet("AM.I.D.S1", self._target(), None, "m",
+                                    drafter=self._drafter())
+        points = server.sheet_checks(out["criterion"])
+        defect_points = [p for p in points if "flare is split" in p["statement"]]
+        self.assertEqual(len(defect_points), 1)
+        self.assertIn("shows this defect", defect_points[0]["statement"])
+        # And never the absence, which is what the original sheet grades.
+        self.assertNotIn("shows no such defect", defect_points[0]["statement"])
+
+    def test_the_text_never_announces_itself_as_a_control(self):
+        """It reaches a grader verbatim. A sheet saying the work should fail it
+        would be answered by reading the label rather than the photograph."""
+        out = server.negative_sheet("AM.I.D.S1", self._target(), None, "m",
+                                    drafter=self._drafter())
+        lowered = out["criterion"].lower()
+        for giveaway in ("control", "negative", "negated", "should fail", "incorrect"):
+            self.assertNotIn(giveaway, lowered)
+
+    def test_a_skipped_line_renumbers_but_keeps_its_pairing(self):
+        """Ids are positional. A sheet whose first condition could not be
+        negated renumbers c2 to c1, and a control read against the wrong
+        positive is worse than one not paired at all."""
+        out = server.negative_sheet(
+            "AM.I.D.S1", self._target(), None, "m",
+            drafter=self._drafter(
+                criteria={2: {"statement": "The sleeve is loose ahead of the flare.",
+                              "kind": "substitution", "changed": "behind → ahead"}},
+                skipped=[{"n": 1, "why": "concentricity is not settleable here"}]))
+        self.assertEqual(out["points"][0]["id"], "c1")
+        self.assertEqual(out["points"][0]["of"], "c2")
+        self.assertEqual(out["points"][0]["positive"],
+                         "The sleeve is captive behind the flare.")
+        self.assertEqual(len(out["skipped"]), 1)
+
+    def test_every_negative_point_expects_fail(self):
+        """The article is in frame and the wording contradicts it, so an
+        abstention is a miss — `unsure` is the answer for what cannot be seen."""
+        out = server.negative_sheet("AM.I.D.S1", self._target(), None, "m",
+                                    drafter=self._drafter())
+        target = {**self._target(), "negative": out,
+                  "negative_criterion": out["criterion"]}
+        base = {"video": "v", "frame": "f", "frame_url": "u", "step_id": None,
+                "frames": ["f"], "best_view": None, "framing": None,
+                "upload_path": None, "expected": None, "is_control": False,
+                "is_variant": False, "variant_of": None,
+                "polarity": "original", "negative_of": None}
+        items = server.negative_items(target, base)
+        self.assertEqual(len(items), 4)
+        for item in items:
+            self.assertEqual(item["expected"], "fail")
+            self.assertEqual(item["polarity"], "negative")
+            # Rolled up on its own, so the subtask's own verdict stays a
+            # statement about the work rather than about the grader.
+            self.assertEqual(item["rolls_up_to"], "section:flare#negative")
+            self.assertTrue(item["positive_criterion"])
+
+    def test_nothing_is_graded_when_the_run_asks_for_no_negatives(self):
+        target = {**self._target(), "negative_criterion": "1. Anything."}
+        self.assertEqual(server.negative_items(target, {}, include=False), [])
+
+    def test_unsaved_text_from_the_browser_beats_what_is_on_disk(self):
+        """The same rule the criteria follow: a control read on screen and not
+        yet saved is still the one the next run grades."""
+        target = {**self._target(), "negative_criterion": "Criteria\nOld line.\nSecond."}
+        items = server.negative_items(target, {}, True,
+                                      "Criteria\nNew line.\nAnother new line.")
+        self.assertEqual([i["criterion"] for i in items],
+                         ["New line.", "Another new line."])
+
+    def test_the_report_pairs_pass_rates_and_states_the_gap(self):
+        results = [
+            {"model": "m", "polarity": "original", "verdict": "pass"},
+            {"model": "m", "polarity": "original", "verdict": "pass"},
+            {"model": "m", "polarity": "original", "verdict": "fail"},
+            {"model": "m", "polarity": "original", "verdict": "unsure"},
+            {"model": "m", "polarity": "negative", "verdict": "fail"},
+            {"model": "m", "polarity": "negative", "verdict": "fail"},
+            {"model": "m", "polarity": "negative", "verdict": "pass"},
+            {"model": "m", "polarity": "negative", "error": "http_500"},
+        ]
+        rollups = [{"model": "m", "polarity": "original", "verdict": "pass"},
+                   {"model": "m", "polarity": "negative", "verdict": "fail"}]
+        report = server.polarity_report(results, rollups)
+        self.assertEqual(report["original"]["pass_rate"], 0.5)
+        # The errored call is excluded from the rate rather than counted a miss.
+        self.assertEqual(report["negative"]["graded"], 3)
+        self.assertAlmostEqual(report["negative"]["pass_rate"], 1 / 3, places=4)
+        self.assertAlmostEqual(report["point_gap"], 0.5 - 1 / 3, places=4)
+        self.assertEqual(report["models"]["m"]["original"]["pass"], 2)
+        self.assertEqual(report["negative_subtasks"]["pass_rate"], 0.0)
+
+    def test_a_sheet_with_no_structure_is_left_to_the_per_point_controls(self):
+        """One unstructured condition has no sheet to mirror, and a negation
+        that invented one would not be split the way the original is."""
+        out = server.negative_sheet(
+            "AM.I.D.S1", {"target_id": "t", "label": "L", "criterion": "Grade the whole thing."},
+            None, "m", drafter=self._drafter())
+        self.assertEqual(out["error"], "unsplittable")
+
+    def test_a_batch_names_the_targets_that_produced_nothing(self):
+        targets = [{"target_id": "section:a", "label": "A", "criterion": self.SHEET},
+                   {"target_id": "section:empty", "label": "B", "criterion": ""}]
+        out = server.negative_sheets_batch(
+            "AM.I.D.S1", ["section:a", "section:empty", "section:ghost"], "m",
+            targets=targets, drafter=self._drafter())
+        errors = {r["target_id"]: r["error"] for r in out["results"] if r["error"]}
+        self.assertEqual(errors, {"section:empty": "no_criterion",
+                                  "section:ghost": "unknown_target"})
+        self.assertEqual(out["sheets"], 1)
+        self.assertEqual(out["points"], 4)
+        self.assertAlmostEqual(out["cost_usd"], 0.002, places=6)
+
+    def test_a_truncated_reply_is_retried_before_being_called_unparseable(self):
+        """A reasoning model spends its budget thinking and the JSON arrives cut
+        off. Reported as "no negatable line", that reads as a sheet not worth
+        controlling — which is how a seven-point sheet yielded one control."""
+        replies = ['{"criteria": [{"n": 1, "statement": "Cut off her',
+                   '{"criteria": [{"n": 1, "statement": "The flare is off-centre.",'
+                   ' "kind": "inversion", "changed": "reversed"}]}']
+        budgets = []
+
+        def post(payload, key):
+            budgets.append(payload["max_tokens"])
+            return {"choices": [{"message": {"content": replies[len(budgets) - 1]}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 10}}
+
+        out = vlm.draft_negative_sheet(model="m", criterion=self.SHEET, key="k", post=post)
+        self.assertIsNone(out["error"])
+        self.assertEqual(len(out["criteria"]), 1)
+        # Retried with room rather than with the same budget again.
+        self.assertEqual(len(budgets), 2)
+        self.assertGreater(budgets[1], budgets[0])
+
+
+class StepFrameSamplingTests(unittest.TestCase):
+    """A step is a slice of work, so it is graded on frames of its own span."""
+
+    WINDOW = [f"t{i:02d}.jpg" for i in range(10)]
+
+    def test_k_frames_are_equidistant_with_both_ends_included(self):
+        """The sampling rule, stated as the spec states it.
+
+        k=1 is the frame the step ends on, because the state a step is graded
+        on is the state it finishes in. Above one the frames span the whole
+        window with both ends included — k=4 lands at 0, 33, 66 and 100 per
+        cent, not at four evenly spaced interior points.
+        """
+        self.assertEqual(server.sample_frames(self.WINDOW, 1), ["t09.jpg"])
+        self.assertEqual(server.sample_frames(self.WINDOW, 2), ["t00.jpg", "t09.jpg"])
+        self.assertEqual(server.sample_frames(self.WINDOW, 3),
+                         ["t00.jpg", "t04.jpg", "t09.jpg"])
+        self.assertEqual(server.sample_frames(self.WINDOW, 4),
+                         ["t00.jpg", "t03.jpg", "t06.jpg", "t09.jpg"])
+        for k in range(2, 9):
+            picked = server.sample_frames(self.WINDOW, k)
+            self.assertEqual(picked[0], self.WINDOW[0])
+            self.assertEqual(picked[-1], self.WINDOW[-1])
+
+    def test_a_short_window_is_deduplicated_rather_than_padded(self):
+        """Repeating a frame would bill for the same image several times."""
+        self.assertEqual(server.sample_frames(["a", "b"], 4), ["a", "b"])
+        self.assertEqual(server.sample_frames(["a"], 3), ["a"])
+        self.assertEqual(server.sample_frames([], 3), [])
+        self.assertEqual(server.sample_frames(["a", "b"], 0), [])
+
+    def test_one_frame_reproduces_the_single_frame_behaviour_exactly(self):
+        """`frames_per_step=1` must not move any frame that already existed.
+
+        The frame each target carries is the key past runs are compared on, so
+        a change that shifted it would silently invalidate every saved run
+        rather than adding a new capability alongside them.
+        """
+        for acs in ("AM.I.D.S1", "AM.I.E.S1", "AM.II.A.S6"):
+            pack, _, _ = server.load_pack(acs)
+            one = {t["target_id"]: t for t in server.photo_targets(acs, pack, 1)}
+            many = server.photo_targets(acs, pack, 3)
+            self.assertTrue(one)
+            for target in many:
+                self.assertEqual(target["frame"], one[target["target_id"]]["frame"],
+                                 f"{acs} {target['target_id']} moved its frame")
+                # And the last sampled frame is that same frame, so a reader
+                # taking `frames[-1]` and one taking `frame` cannot disagree.
+                if target.get("frames"):
+                    self.assertEqual(target["frames"][-1], target["frame"])
+
+    def test_only_steps_and_reviewed_intervals_are_sampled(self):
+        """A subtask is graded against the finished article, not moments of it.
+
+        Its slice of the clip spans the whole subtask, so sampling across that
+        would weigh three frames of work in progress against a criterion
+        written about the completed result.
+        """
+        pack, _, _ = server.load_pack("AM.I.E.S1")
+        targets = server.photo_targets("AM.I.E.S1", pack, 3)
+        by_kind = {}
+        for target in targets:
+            by_kind.setdefault(target["kind"], []).append(target)
+        self.assertTrue(by_kind["step"])
+        self.assertTrue(by_kind["subtask"])
+        self.assertTrue(by_kind["section"])
+        for target in by_kind["step"] + by_kind["subtask"]:
+            if target.get("frame_exists"):
+                self.assertTrue(target.get("frames"), target["target_id"])
+        for target in by_kind["section"]:
+            self.assertFalse(target.get("frames"), target["target_id"])
+
+    def test_a_step_samples_its_own_span_not_the_whole_clip(self):
+        """Successive steps must not all be shown the same three frames."""
+        pack, _, _ = server.load_pack("AM.I.D.S1")
+        steps = [t for t in server.photo_targets("AM.I.D.S1", pack, 3)
+                 if t["kind"] == "step" and t.get("frames")]
+        self.assertGreater(len(steps), 3)
+        for target in steps:
+            self.assertLessEqual(len(target["frames"]), 3)
+        # Every step's set differs from every other step's on the same clip.
+        by_clip = {}
+        for target in steps:
+            by_clip.setdefault(target["video"], []).append(tuple(target["frames"]))
+        for clip, sets in by_clip.items():
+            self.assertEqual(len(sets), len(set(sets)), f"{clip} repeats a frame set")
+
+    def test_a_requested_count_is_clamped_rather_than_trusted(self):
+        """Every frame is billed on every call of every model."""
+        self.assertEqual(server.clamp_frames_per_step("4"), 4)
+        self.assertEqual(server.clamp_frames_per_step(1), 1)
+        self.assertEqual(server.clamp_frames_per_step(9999), server.MAX_STEP_FRAMES)
+        for junk in (None, "", "three", 0, -2, [3]):
+            self.assertEqual(server.clamp_frames_per_step(junk), server.STEP_FRAMES)
+
+    def test_best_view_is_added_to_the_span_never_substituted_for_it(self):
+        """The sampled frames establish what the step's end state is.
+
+        A picked frame that flattered the work would otherwise be the only
+        evidence of it, which is the failure this whole path exists to avoid.
+        """
+        pack, _, _ = server.load_pack("AM.I.D.S1")
+        target = next(t for t in server.photo_targets("AM.I.D.S1", pack, 3)
+                      if t["kind"] == "step" and t.get("frames"))
+        sampled = list(target["frames"])
+        clip_frames = server.frame_names("AM.I.D.S1", target["video"], "detail")
+        elsewhere = next(f for f in clip_frames if f not in sampled)
+
+        result = server.add_best_view(
+            "AM.I.D.S1", target, picker=lambda **kw: {"frame": elsewhere, "cost_usd": 0.001})
+        self.assertEqual(result["frame"], elsewhere)
+        self.assertEqual(target["frames"], [*sampled, elsewhere])
+        self.assertEqual(target["best_view"], elsewhere)
+        self.assertEqual(len(target["frame_urls"]), len(target["frames"]))
+
+    def test_no_suitable_frame_leaves_the_sample_standing(self):
+        """"No frame shows finished work" is an answer, not a failure.
+
+        Adding the least bad frame anyway would present a mid-action image to
+        the grader as the clearest view of the result.
+        """
+        pack, _, _ = server.load_pack("AM.I.D.S1")
+        target = next(t for t in server.photo_targets("AM.I.D.S1", pack, 3)
+                      if t["kind"] == "step" and t.get("frames"))
+        sampled = list(target["frames"])
+        server.add_best_view("AM.I.D.S1", target,
+                             picker=lambda **kw: {"frame": None, "none_suitable": True})
+        self.assertEqual(target["frames"], sampled)
+        self.assertIsNone(target.get("best_view"))
+
+    def test_an_uploaded_photo_is_never_joined_by_video_frames(self):
+        """An upload already is the thing the sampling tries to reconstruct."""
+        target = {"uploaded": True, "video": "clip", "frames": ["u.jpg"],
+                  "upload_path": "/tmp/u.jpg"}
+        self.assertIsNone(server.add_best_view("AM.I.D.S1", target))
+        self.assertEqual(target["frames"], ["u.jpg"])
+
+
+class SequenceGradingTests(unittest.TestCase):
+    """Frames of one step read differently from photos of separate subjects."""
+
+    def _frames(self, count: int) -> list[Path]:
+        found = sorted((server.FRAME_SETS["detail"] / "AM.II.K.S3").rglob("t*.jpg"))
+        if len(found) < count:
+            self.skipTest("not enough extracted frames available")
+        return found[:count]
+
+    def _sent(self, **kwargs) -> str:
+        captured = {}
+
+        def fake_post(payload, key):
+            captured["text"] = payload["messages"][1]["content"][0]["text"]
+            captured["images"] = sum(
+                1 for p in payload["messages"][1]["content"] if p.get("type") == "image_url")
+            return {"choices": [{"message": {"content": '{"verdict":"pass","confidence":0.9}'}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 5}}
+
+        result = vlm.grade(model="anthropic/claude-opus-5", criterion="The wire is taut.",
+                           key="k", post=fake_post, **kwargs)
+        self.assertIsNone(result["error"])
+        return captured["text"], captured["images"]
+
+    def test_a_sequence_is_graded_on_its_end_state(self):
+        """The rule that keeps extra frames from simply raising the pass rate.
+
+        "Any photo may satisfy the criterion" is right for a submission of
+        several subjects and wrong for one piece of work photographed while it
+        was being made: it would pass a wire seated at the halfway mark and
+        pulled loose by the end.
+        """
+        text, images = self._sent(image_paths=self._frames(3), sequence=True)
+        self.assertEqual(images, 3)
+        self.assertIn("chronological order", text)
+        self.assertIn("SAME", text)
+        self.assertIn("END of the step", text)
+        self.assertNotIn("A criterion is met if any photo shows it met", text)
+
+    def test_a_multi_photo_submission_keeps_the_any_photo_rule(self):
+        """Task-level evidence is several subjects, and unchanged by this."""
+        text, images = self._sent(image_paths=self._frames(3), sequence=False)
+        self.assertEqual(images, 3)
+        self.assertIn("A criterion is met if any photo shows it met", text)
+        self.assertNotIn("END of the step", text)
+
+    def test_one_frame_carries_no_sequence_wording(self):
+        text, images = self._sent(image_paths=self._frames(1), sequence=True)
+        self.assertEqual(images, 1)
+        self.assertNotIn("chronological order", text)
+
+    def test_a_named_best_view_is_flagged_to_the_grader(self):
+        """Its position in the sequence would otherwise mislead.
+
+        It is the clearest view of the result, not a later moment than the
+        frame before it.
+        """
+        plain, _ = self._sent(image_paths=self._frames(3), sequence=True)
+        named, _ = self._sent(image_paths=self._frames(3), sequence=True,
+                              best_view="t000004_00.jpg")
+        self.assertNotIn("clearest view", plain)
+        self.assertIn("clearest view", named)
+
+    def test_the_estimate_counts_every_image(self):
+        """Image tokens dominate, so assuming one would understate the bill.
+
+        Cost is linear in images but not proportional to them: the prompt and
+        the reply are paid for once however many frames are attached, which is
+        why three frames cost near twice one rather than three times it.
+        """
+        one, two, three = (vlm.estimate_cost(["anthropic/claude-opus-5"], 10, k)
+                           for k in (1, 2, 3))
+        self.assertAlmostEqual(three["total_usd"] - one["total_usd"],
+                               2 * (two["total_usd"] - one["total_usd"]), places=6)
+        self.assertGreater(three["total_usd"], one["total_usd"] * 1.5)
+        self.assertLess(three["total_usd"], one["total_usd"] * 3)
+        # More frames buy more images, never more calls.
+        self.assertEqual(one["calls"], three["calls"])
+        # An omitted count must not silently become free.
+        self.assertEqual(vlm.estimate_cost(["anthropic/claude-opus-5"], 10)["total_usd"],
+                         one["total_usd"])
 
 
 class GradingTests(unittest.TestCase):

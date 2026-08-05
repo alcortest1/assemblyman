@@ -1,0 +1,90 @@
+{
+  "acs_code": "AM.I.D.S8",
+  "origin": "drafted",
+  "rationale": "The AIM skill sheet's step list ends at 'Deburr the tubing ends', but the task title, the campus photo-fit note ('completed connection') and the sheet's own equipment list (Flareless Sleeve, B-nut, Mandrel) all require the presetting operation, which the sheet never documents. These sections were drafted from FAA-H-8083-30B pages 9-5 to 9-8 (the pages the sheet itself cites) and cross-checked against the first-person clips, where presetting is visible in flareless_fitting_2_rf and flareless_fitting_3_rf. They are NOT from the AIM sheet and have not been reviewed by a subject-matter expert.",
+  "sources": [
+    "references/handbook/faa_h_8083_30b_9_5_9_8.md",
+    "data/videos/AM.I.D.S8/flareless_fitting_2_rf.mp4",
+    "data/videos/AM.I.D.S8/flareless_fitting_3_rf.mp4"
+  ],
+  "sections": [
+    {
+      "section": "Preset the Sleeve",
+      "steps": [
+        {
+          "text": "Slip the nut, then the sleeve, over the tube and lubricate the fitting and nut threads with hydraulic fluid.",
+          "text_clean": "Slip the nut, then the sleeve, over the tube and lubricate the fitting and nut threads with hydraulic fluid.",
+          "note_refs": [1]
+        },
+        {
+          "text": "Place the fitting in a vise and hold the tube firmly and squarely on the fitting seat so it bottoms in the fitting.",
+          "text_clean": "Place the fitting in a vise and hold the tube firmly and squarely on the fitting seat so it bottoms in the fitting.",
+          "note_refs": [2]
+        },
+        {
+          "text": "Tighten the nut until the cutting edge of the sleeve grips the tube, turning the tube back and forth while tightening until it no longer turns.",
+          "text_clean": "Tighten the nut until the cutting edge of the sleeve grips the tube, turning the tube back and forth while tightening until it no longer turns.",
+          "note_refs": [2]
+        },
+        {
+          "text": "Final-tighten the nut the number of turns specified for the tube material and outside diameter.",
+          "text_clean": "Final-tighten the nut the number of turns specified for the tube material and outside diameter.",
+          "note_refs": [3]
+        }
+      ],
+      "notes": [
+        {
+          "text": "Handbook p. 9-6, presetting step 1: cut the tube to the correct length with the ends perfectly square, and deburr the inside and outside of the tube, before the nut and sleeve go on. Lubricate the threads of the fitting and nut with hydraulic fluid."
+        },
+        {
+          "text": "Handbook p. 9-6, presetting step 2: the tube must bottom firmly in the fitting. To find the point at which the sleeve's cutting edge grips, slowly turn the tube back and forth while tightening the nut; when the tube no longer turns, the nut is ready for final tightening."
+        },
+        {
+          "text": "Handbook p. 9-6, presetting step 3: for aluminum alloy tubing up to and including 1/2\" outside diameter, tighten the nut from 1 to 1-1/6 turns. For steel tubing and aluminum alloy tubing over 1/2\" outside diameter, tighten from 1-1/6 to 1-1/2 turns. The tube material and outside diameter must be known before this step can be graded. CAUTION: the fraction 1-1/6 is machine-extracted from the PDF and is typographically suspect (1-1/8 or 1-1/16 are the plausible readings); verify it against the source PDF before any turn-count criterion is graded."
+        }
+      ],
+      "safety": [],
+      "equipment": [],
+      "you_need_to": []
+    },
+    {
+      "section": "Inspect the Preset Connection",
+      "steps": [
+        {
+          "text": "Disconnect the tubing from the fitting.",
+          "text_clean": "Disconnect the tubing from the fitting.",
+          "note_refs": []
+        },
+        {
+          "text": "Verify the tube extends 3/32\" to 1/8\" beyond the sleeve pilot.",
+          "text_clean": "Verify the tube extends 3/32\" to 1/8\" beyond the sleeve pilot.",
+          "note_refs": [1]
+        },
+        {
+          "text": "Verify the sleeve pilot contacts the tube or is within the maximum clearance for the tube material.",
+          "text_clean": "Verify the sleeve pilot contacts the tube or is within the maximum clearance for the tube material.",
+          "note_refs": [2]
+        },
+        {
+          "text": "Verify the sleeve pilot does not move on the tube except in rotation.",
+          "text_clean": "Verify the sleeve pilot does not move on the tube except in rotation.",
+          "note_refs": [3]
+        }
+      ],
+      "notes": [
+        {
+          "text": "Handbook p. 9-6: after presetting the sleeve, disconnect the tubing from the fitting and check that the tube extends 3/32\" to 1/8\" beyond the sleeve pilot; otherwise blowoff may occur."
+        },
+        {
+          "text": "Handbook p. 9-6: the sleeve pilot should contact the tube or have a maximum clearance of 0.005\" for aluminum alloy tubing or 0.015\" for corrosion-resistant steel tubing."
+        },
+        {
+          "text": "Handbook p. 9-6: a slight collapse of the tube at the sleeve cut is permissible. No movement of the sleeve pilot, except rotation, is permissible."
+        }
+      ],
+      "safety": [],
+      "equipment": [],
+      "you_need_to": []
+    }
+  ]
+}

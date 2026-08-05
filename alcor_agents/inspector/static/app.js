@@ -1070,31 +1070,49 @@ const fmtUSD = (n) =>
    graded as written scores "the tube is kinked" as a pass on a kinked tube. */
 const POINT_HEADINGS = ["criteria", "critical defects", "overall decision", "source basis"];
 
+/* A criterion line without its bullet or number, if it had one. */
+function stripMarker(line) {
+  const match = line.match(/^\d+[.)]\s+(.+)/) || line.match(/^[-*•]\s+(.+)/);
+  return (match ? match[1] : line).trim();
+}
+
 function parsePoints(criterion) {
   const points = [];
   let heading = null;
+  let sawHeading = false;
   for (const raw of String(criterion || "").split("\n")) {
     const line = raw.trim();
     if (!line) continue;
     const lowered = line.toLowerCase().replace(/:$/, "");
-    if (POINT_HEADINGS.includes(lowered)) { heading = lowered; continue; }
+    if (POINT_HEADINGS.includes(lowered)) { heading = lowered; sawHeading = true; continue; }
+    /* Under a heading, every line is a condition — numbered, bulleted or bare.
+       Requiring a marker meant a criterion typed into the editor as plain lines
+       produced no points at all, and the whole sheet went to the grader as one
+       call that any single failed condition fails. */
     if (heading === "criteria") {
-      const match = line.match(/^\d+[.)]\s+(.+)/);
-      if (match) {
-        points.push({ id: `c${points.filter((p) => !p.defect).length + 1}`,
-                      statement: match[1].trim(), defect: false });
-      }
+      points.push({ id: `c${points.filter((p) => !p.defect).length + 1}`,
+                    statement: stripMarker(line), defect: false });
     } else if (heading === "critical defects") {
-      const match = line.match(/^[-*•]\s+(.+)/);
-      if (match) {
-        points.push({ id: `d${points.filter((p) => p.defect).length + 1}`,
-                      statement: `The finished work shows no such defect: ${
-                        match[1].trim().replace(/\.$/, "")}.`,
-                      defect: true });
-      }
+      points.push({ id: `d${points.filter((p) => p.defect).length + 1}`,
+                    statement: `The finished work shows no such defect: ${
+                      stripMarker(line).replace(/\.$/, "")}.`,
+                    defect: true });
     }
   }
-  return points;
+  if (points.length || sawHeading) return points;
+
+  /* No headings, so this is a step criterion: a bare list of conditions, each
+     already one requirement and all of them positive. None is restated as an
+     absence — a step criterion has no section that inverts polarity. */
+  for (const raw of String(criterion || "").split("\n")) {
+    const line = raw.trim();
+    const match = line.match(/^[-*•]\s+(.+)/) || line.match(/^\d+[.)]\s+(.+)/);
+    if (match && match[1].trim()) {
+      points.push({ id: `c${points.length + 1}`, statement: match[1].trim(), defect: false });
+    }
+  }
+  /* One point is not a split — it is the whole criterion with an id attached. */
+  return points.length > 1 ? points : [];
 }
 
 const CRITERION_SOURCE_LABELS = {
@@ -1382,12 +1400,136 @@ function CriterionEditor({ acs, target, draft, onDraft, onSaved, models }) {
   `;
 }
 
+/* The same subtask's criteria, aimed the wrong way: same sections, same
+   numbering, every line rewritten so that correct work contradicts it. It is
+   graded exactly as the original is — split into points, one call each, rolled
+   up the same way — and every point expects `fail`.
+
+   Shown beside the criterion rather than tucked under it, because the pair is
+   the measurement: a reference frame is footage an instructor accepted, so a
+   pass against the original tells you nothing on its own. What it costs to
+   accept is the gap between the two pass rates. */
+function NegativeCriterionEditor({ acs, target, draft, onDraft, onSaved, models }) {
+  const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState(null);
+
+  const stored = target.negative || null;
+  const negative = draft !== undefined ? draft : stored;
+  const text = (negative && negative.criterion) || "";
+  const dirty = draft !== undefined
+    && (draft && draft.criterion) !== (stored && stored.criterion);
+  const points = parsePoints(text);
+  const positivePoints = parsePoints(target.criterion || "");
+  /* The criterion moved after this was written, so the control now negates
+     wording nobody is grading. Worth saying loudly: the two sides would still
+     produce a tidy-looking comparison, of two different things. */
+  const stale = Boolean(negative && negative.of_criterion
+    && negative.of_criterion.trim() !== (target.criterion || "").trim());
+
+  const generate = async () => {
+    setGenerating(true); setError(null);
+    const made = await postJSON(`/api/photo/negatives/${acs}`, {
+      target_id: target.target_id,
+      criterion: target.criterion || "",
+      model: (models && models[1]) || undefined,
+    });
+    setGenerating(false);
+    if (!made || made.error) {
+      return setError((made && (made.message || made.error)) || "Could not negate this criterion");
+    }
+    onDraft(target.target_id, made);
+  };
+
+  const save = async (value) => {
+    setSaving(true);
+    const saved = await postJSON(`/api/photo/prompts/${acs}`, {
+      target_id: target.target_id, negative: value,
+    });
+    setSaving(false);
+    if (saved && saved.saved) onSaved(target.target_id, saved.negative || null);
+  };
+
+  return html`
+    <div class="criterion-editor negative-editor">
+      <div class="criterion-head">
+        <span class="eyebrow">Negative criterion — correct work should fail every line</span>
+        ${negative && negative.model && html`
+          <${Pill} kind="accent">${String(negative.model).split("/")[1]}<//>`}
+        ${dirty && html`<${Pill} kind="warn">unsaved<//>`}
+        ${stale && html`<${Pill} kind="warn">criterion changed since<//>`}
+      </div>
+      ${!negative
+        ? html`
+          <p class="criterion-hint">
+            None written. Generating one negates the criterion above line for line —
+            ${positivePoints.length || 1} condition${positivePoints.length === 1 ? "" : "s"},
+            one model call — and returns it here to be read before it is saved.
+          </p>`
+        : html`
+          <textarea class="criterion-input" rows=${Math.min(16, Math.max(4, text.split("\n").length + 1))}
+                    value=${text} spellcheck="false"
+                    onInput=${(e) => onDraft(target.target_id,
+                      { ...negative, criterion: e.target.value })} />
+          <div class="criteria-points">
+            <div class="eyebrow">
+              Graded as ${points.length} point${points.length === 1 ? "" : "s"}, each
+              expecting <strong>fail</strong>
+              ${positivePoints.length > points.length && html`
+                <span class="blocked"> · ${positivePoints.length - points.length} of the
+                  criterion's ${positivePoints.length} could not be negated</span>`}
+            </div>
+            <ol>
+              ${points.map((c, i) => {
+                const pair = ((negative.points || [])[i]) || {};
+                return html`
+                  <li key=${c.id} class=${c.defect ? "defect" : ""}>
+                    ${c.defect && html`<${Pill} kind="warn">defect<//>`}
+                    ${c.statement}
+                    ${pair.positive && html`
+                      <div class="negative-pair">
+                        negates <code>${pair.of}</code>: ${pair.positive}
+                      </div>`}
+                  </li>`;
+              })}
+            </ol>
+          </div>
+          ${(negative.skipped || []).length > 0 && html`
+            <div class="draft-aside">
+              <strong>Not negated:</strong>
+              <ul>${negative.skipped.map((s, i) => html`
+                <li key=${i}><code>${s.section} ${s.n}</code> — ${s.why}</li>`)}</ul>
+            </div>`}
+        `}
+      ${error && html`<p class="run-error">${error}</p>`}
+      <div class="criterion-actions">
+        <button class="btn" disabled=${generating || !(target.criterion || "").trim()}
+                onClick=${generate}>
+          ${generating ? "Negating…" : negative ? "Rewrite" : "Generate negative criterion"}
+        </button>
+        <button class="btn" disabled=${saving || !dirty || !text.trim()}
+                onClick=${() => save({ ...negative, criterion: text })}>
+          ${saving ? "Saving…" : "Save"}
+        </button>
+        ${stored && html`
+          <button class="btn ghost" onClick=${() => save(null)}>Clear</button>`}
+        <span class="criterion-hint">
+          Machine-drafted and unreviewed. A control nobody read becomes a number in a
+          report just as easily as a criterion nobody read.
+        </span>
+      </div>
+    </div>
+  `;
+}
+
 /* Match test: the same photo against reworded criteria, each labelled with the
    verdict it ought to get. Editing a criterion until it no longer describes the
    photo and watching whether the verdict follows is the only way to tell a
    model that is grading from one that is agreeing with whatever it is handed. */
 function VariantEditor({ acs, target, variants, onChange, onSaved }) {
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generated, setGenerated] = useState(null);
 
   const update = (i, patch) =>
     onChange(target.target_id, variants.map((v, j) => (j === i ? { ...v, ...patch } : v)));
@@ -1399,6 +1541,26 @@ function VariantEditor({ acs, target, variants, onChange, onSaved }) {
       criterion: seed || "",
       expected: "fail",
     }]);
+
+  /* Written per criteria point, because a point is already one condition and
+     negating one at a time keeps the control as sharp as the thing it tests.
+     Appended for review rather than saved: the operator saves them through the
+     ordinary button once they have read them. */
+  const generate = async () => {
+    setGenerating(true);
+    const made = await postJSON(`/api/photo/negatives/${acs}`, {
+      target_id: target.target_id,
+      criterion: target.criterion,
+    });
+    setGenerating(false);
+    if (!made || made.error) return;
+    setGenerated(made);
+    const existing = new Set(variants.map((v) => (v.criterion || "").trim()));
+    onChange(target.target_id, [
+      ...variants,
+      ...(made.variants || []).filter((v) => !existing.has((v.criterion || "").trim())),
+    ]);
+  };
 
   const save = async () => {
     setSaving(true);
@@ -1445,8 +1607,23 @@ function VariantEditor({ acs, target, variants, onChange, onSaved }) {
         </div>
       `)}
 
+      ${generated && html`
+        <div class="variant-note">
+          ${generated.variants.length} control${generated.variants.length === 1 ? "" : "s"}
+          written from ${generated.points} criteria
+          point${generated.points === 1 ? "" : "s"}, ${fmtUSD(generated.cost_usd)}.
+          <strong>Read them before running.</strong> A generated criterion nobody
+          checked becomes a number in a report; one that is merely unverifiable
+          earns an honest abstention and measures nothing.
+        </div>`}
+
       <div class="criterion-actions">
-        <button class="btn" onClick=${() => add(target.criterion || "")}>
+        <button class="btn" disabled=${generating || !(target.criterion || "").trim()}
+                onClick=${generate}
+                title="Write criteria this work should fail: the condition reversed, one specific swapped, and a real criterion borrowed from another task">
+          ${generating ? "Writing…" : "Generate controls"}
+        </button>
+        <button class="btn ghost" onClick=${() => add(target.criterion || "")}>
           Add from current criterion
         </button>
         <button class="btn ghost" onClick=${() => add("")}>Add blank</button>
@@ -1620,6 +1797,71 @@ function SheetCell({ results }) {
   `;
 }
 
+/* The criteria against their own negations. Every reference frame is work an
+   instructor accepted, so the positive pass rate on its own is unreadable — a
+   model that passes everything produces the same number as one that grades. The
+   negated sheet is the same photograph, the same points and the same roll-up
+   against a criterion the work does not satisfy, so the distance between the two
+   rates is the part of the run that is about grading.
+
+   Shown per model, because it is the models that differ: an aggregate would let
+   one careful grader carry one that agrees with everything. */
+function PolarityPanel({ polarity, models }) {
+  const pct = (v) => (v === null || v === undefined ? "—" : `${(v * 100).toFixed(0)}%`);
+  const rows = models
+    .map((m) => ({ model: m, ...(polarity.models || {})[m] }))
+    .filter((r) => r.original);
+  const tone = (gap) => (gap === null || gap === undefined ? ""
+    : gap >= 0.4 ? "good" : gap >= 0.2 ? "" : "bad");
+  return html`
+    <div class="card polarity-panel">
+      <h3>Pass rate: criteria vs their negations</h3>
+      <table class="results-table polarity-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Criteria</th>
+            <th>Negated</th>
+            <th>Drop</th>
+            <th>Subtasks passed</th>
+            <th>Negated subtasks passed</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r) => html`
+            <tr key=${r.model}>
+              <td class="target-cell"><div class="target-label">
+                ${r.model.split("/")[1] || r.model}</div></td>
+              <td>${pct(r.original.pass_rate)}
+                <span class="cond-tally">${r.original.pass}/${r.original.graded}</span></td>
+              <td>${pct(r.negative.pass_rate)}
+                <span class="cond-tally">${r.negative.pass}/${r.negative.graded}</span></td>
+              <td class=${tone(r.point_gap)}>
+                <strong>${r.point_gap === null || r.point_gap === undefined
+                  ? "—" : `${(r.point_gap * 100).toFixed(0)} pts`}</strong></td>
+              <td>${pct(r.original_subtasks.pass_rate)}
+                <span class="cond-tally">
+                  ${r.original_subtasks.pass}/${r.original_subtasks.subtasks}</span></td>
+              <td>${pct(r.negative_subtasks.pass_rate)}
+                <span class="cond-tally">
+                  ${r.negative_subtasks.pass}/${r.negative_subtasks.subtasks}</span></td>
+            </tr>
+          `)}
+        </tbody>
+      </table>
+      <p class="warn-note">
+        Every point of a negated sheet expects <code>fail</code>: the article is in frame
+        and the wording contradicts it. A point that comes back <code>unsure</code> is a
+        miss too — the photograph could settle it — but it is not the same miss as a
+        <code>pass</code>, which is a grader accepting a description of work that is not
+        in front of it. A drop close to the criteria's own pass rate is the result this
+        run is looking for; a negated rate near the original means the verdicts are not
+        tracking the text.
+      </p>
+    </div>
+  `;
+}
+
 function ResultsGrid({ run, models, restored }) {
   const byTarget = useMemo(() => {
     const map = new Map();
@@ -1643,7 +1885,24 @@ function ResultsGrid({ run, models, restored }) {
       const row = map.get(parent);
       (row.cells[r.model] = row.cells[r.model] || []).push(r);
     });
-    return [...map.values()];
+    /* A negated sheet sits directly under the criterion it negates, because the
+       pair is the reading: the same photograph, the same points, one criterion
+       that describes it and one that does not. Apart, they are two tables and
+       the comparison is left to the reader's memory. */
+    const rows = [...map.values()];
+    const originals = rows.filter((r) => (r.polarity || "original") !== "negative");
+    const negatives = new Map();
+    rows.filter((r) => r.polarity === "negative")
+      .forEach((r) => negatives.set(r.negative_of || String(r.target_id).split("#")[0], r));
+    const ordered = [];
+    originals.forEach((row) => {
+      ordered.push(row);
+      const paired = negatives.get(row.target_id);
+      if (paired) { ordered.push(paired); negatives.delete(row.target_id); }
+    });
+    // A negative row whose original is not in this run still gets shown;
+    // dropping it would hide a graded result because its partner is missing.
+    return [...ordered, ...negatives.values()];
   }, [run]);
 
   const disagree = (row) => {
@@ -1716,6 +1975,9 @@ function ResultsGrid({ run, models, restored }) {
         `}
       </div>
 
+      ${s.polarity && s.polarity.negative && s.polarity.negative.graded > 0
+        && html`<${PolarityPanel} polarity=${s.polarity} models=${models} />`}
+
       <div class="card">
         <table class="results-table">
           <thead>
@@ -1727,10 +1989,14 @@ function ResultsGrid({ run, models, restored }) {
           <tbody>
             ${byTarget.map((row) => html`
               <tr key=${row.target_id} class=${(row.is_control ? "control-row " : "") +
+                                                (row.polarity === "negative"
+                                                  ? "negative-row " : "") +
                                                 (disagree(row) ? "disagree" : "")}>
                 <td class="target-cell">
                   ${row.is_control && html`<${Pill} kind="warn">control<//>`}
                   ${row.is_variant && html`<${Pill} kind="accent">variant<//>`}
+                  ${row.polarity === "negative" && html`
+                    <${Pill} kind="warn">negative criterion<//>`}
                   ${row.expected && html`<span class="expect-tag">expect ${row.expected}</span>`}
                   <div class="target-label">${row.label}</div>
                   <code>${row.frame}</code>
@@ -1801,10 +2067,23 @@ function PhotoAssessmentTab({ acs }) {
   const [models, setModels] = useState([]);
   const [drafts, setDrafts] = useState({});
   const [variantDrafts, setVariantDrafts] = useState({});
+  // Negated sheets generated but not yet saved. Held here for the same reason
+  // criterion edits are: the browser is the source of truth for what the next
+  // run grades, and a control the operator is still reading has to be gradeable
+  // without being written to disk first.
+  const [negativeDrafts, setNegativeDrafts] = useState({});
+  const [gradeNegative, setGradeNegative] = useState(true);
   const [focus, setFocus] = useState(null);
   const [kind, setKind] = useState("subtask");
+  // How many frames of its own span a step-level target is graded on. A step is
+  // a slice of work rather than a finished article, and one frame of it is a
+  // guess at the instant it ended — a guess that lands mid-action often enough
+  // that most conditions came back unobservable. Subtask targets are unaffected.
+  const [stepFrames, setStepFrames] = useState(3);
   const [query, setQuery] = useState("");
   const [running, setRunning] = useState(false);
+  const [generatingAll, setGeneratingAll] = useState(false);
+  const [generatedAll, setGeneratedAll] = useState(null);
   const [run, setRun] = useState(null);
   // Whether the grid below is this session's run or the last one on disk. They
   // look identical, and a restored run is easily misread as confirmation that
@@ -1816,19 +2095,12 @@ function PhotoAssessmentTab({ acs }) {
   useEffect(() => {
     api("/api/photo/models").then((c) => { setConfig(c); if (c) setModels(c.defaults); });
   }, []);
+  // Changing task discards the work in progress, because none of it belongs to
+  // the new one: a selection, a criterion draft and a run are all about the
+  // task they were made against.
   useEffect(() => {
-    setTargets(null); setSelected(new Set()); setRun(null); setFocus(null);
-    setDrafts({}); setVariantDrafts({});
-    api(`/api/photo/targets/${acs}`).then((d) => {
-      const list = (d && d.targets) || [];
-      setTargets(list);
-      // Focus the first row of the tab actually being shown. Focusing
-      // targets[0] put the detail pane on a target the visible list did not
-      // contain — on a segmented task that meant a reviewed interval while the
-      // Subtasks tab was open.
-      const first = list.find((t) => t.kind === "section") || list[0];
-      if (first) setFocus(first.target_id);
-    });
+    setSelected(new Set()); setRun(null); setFocus(null);
+    setDrafts({}); setVariantDrafts({}); setNegativeDrafts({}); setGeneratedAll(null);
     // Runs are written to build/photo_eval/<ACS>/ and were being kept there
     // and never read: a reload, or a trip to another task and back, wiped the
     // results grid and the only way to see the verdicts again was to pay for
@@ -1838,6 +2110,29 @@ function PhotoAssessmentTab({ acs }) {
       if (last) { setRun(last); setRestored(true); }
     });
   }, [acs]);
+
+  // Targets are refetched when the frame count changes too — the frames a step
+  // is graded on are computed server-side, so the thumbnails and the run would
+  // otherwise disagree about what was sent. Deliberately separate from the
+  // effect above: changing how many frames a step is shown is a change to the
+  // evidence, not to the task, and it must not throw away a selection or an
+  // unsaved criterion edit. Both are keyed by target id, which does not move.
+  useEffect(() => {
+    setTargets(null);
+    api(`/api/photo/targets/${acs}?frames=${stepFrames}`).then((d) => {
+      const list = (d && d.targets) || [];
+      setTargets(list);
+      // Focus the first row of the tab actually being shown. Focusing
+      // targets[0] put the detail pane on a target the visible list did not
+      // contain — on a segmented task that meant a reviewed interval while the
+      // Subtasks tab was open.
+      setFocus((current) => {
+        if (current && list.some((t) => t.target_id === current)) return current;
+        const first = list.find((t) => t.kind === "section") || list[0];
+        return first ? first.target_id : null;
+      });
+    });
+  }, [acs, stepFrames]);
 
   const filtered = useMemo(() => {
     if (!targets) return [];
@@ -1907,6 +2202,24 @@ function PhotoAssessmentTab({ acs }) {
   const framed = useMemo(
     () => chosen.filter((t) => t.frame_exists && effective(t).trim()).length,
     [chosen, drafts]);
+  // Controls are written from criteria text alone, so a target needs a
+  // criterion but not yet a photo — unlike a run, which needs both.
+  const withCriteria = useMemo(
+    () => chosen.filter((t) => effective(t).trim()), [chosen, drafts]);
+
+  const negativeFor = (t) => (negativeDrafts[t.target_id] !== undefined
+    ? negativeDrafts[t.target_id] : t.negative || null);
+  const negativeText = (t) => ((negativeFor(t) || {}).criterion || "").trim();
+  // Points the negated sheets add to the run. Counted the same way the criteria
+  // are — one call per point — because that is what they are; a negative sheet
+  // costed as one call understated a seven-point subtask sevenfold.
+  const negativePoints = useMemo(
+    () => (!gradeNegative ? 0 : chosen
+      .filter((t) => t.frame_exists && negativeText(t))
+      .reduce((n, t) => n + Math.max(1, parsePoints(negativeText(t)).length), 0)),
+    [chosen, negativeDrafts, gradeNegative]);
+  const withNegative = useMemo(
+    () => chosen.filter((t) => negativeText(t)).length, [chosen, negativeDrafts]);
   const noPhoto = chosen.filter((t) => !t.frame_exists).length;
   const noCriterion = chosen.filter((t) => t.frame_exists && !effective(t).trim()).length;
   const runnable = framed > 0;
@@ -1920,15 +2233,28 @@ function PhotoAssessmentTab({ acs }) {
       .reduce((n, t) => n + Math.max(1, pointsFor(t).length), 0),
     [targets, selected, drafts]);
 
+  // Frames sent per call, averaged over the selection. A step carries several
+  // and a subtask one, so a mixed selection is neither — and image tokens are
+  // most of the bill, so an estimate that assumed one frame understated a
+  // step-heavy run by about half.
+  const imagesPerCall = useMemo(() => {
+    const gradeable = chosen.filter((t) => t.frame_exists && effective(t).trim());
+    if (!gradeable.length) return 1;
+    const total = gradeable.reduce(
+      (n, t) => n + Math.max(1, (t.frames || []).length) * Math.max(1, pointsFor(t).length), 0);
+    return total / gradeable.reduce((n, t) => n + Math.max(1, pointsFor(t).length), 0);
+  }, [chosen, drafts]);
+
   const estimate = useMemo(() => {
     if (!config) return null;
-    const calls = points + variantCount;
+    const calls = points + variantCount + negativePoints;
+    const images = 1500 * imagesPerCall + 400;
     const per = models
       .map((id) => config.models.find((m) => m.id === id))
       .filter(Boolean)
-      .reduce((sum, m) => sum + calls * ((1900 * m.in_per_m + 250 * m.out_per_m) / 1e6), 0);
-    return { calls: calls * models.length, usd: per };
-  }, [config, models, points, variantCount]);
+      .reduce((sum, m) => sum + calls * ((images * m.in_per_m + 250 * m.out_per_m) / 1e6), 0);
+    return { calls: calls * models.length, usd: per, images: imagesPerCall };
+  }, [config, models, points, variantCount, negativePoints, imagesPerCall]);
 
   const toggle = (id) => setSelected((prev) => {
     const next = new Set(prev);
@@ -1958,6 +2284,58 @@ function PhotoAssessmentTab({ acs }) {
       ? variantDrafts[target.target_id]
       : target.variants || [];
 
+  /* A negated sheet for every selected subtask in one request, rather than
+     opening each one and pressing its own button. They land in the editors
+     unsaved: a batch is exactly where an unread generated criterion would slip
+     through into a run and come back out as a number. */
+  const generateControls = async () => {
+    setGeneratingAll(true); setError(null); setGeneratedAll(null);
+    const criteria = {};
+    Object.entries(drafts).forEach(([id, text]) => { if (text.trim()) criteria[id] = text; });
+    const made = await postJSON(`/api/photo/negatives/${acs}`, {
+      target_ids: withCriteria.map((t) => t.target_id),
+      criteria,
+      model: models[1] || undefined,
+    });
+    setGeneratingAll(false);
+    if (!made || made.error) return setError((made && made.error) || "Could not write controls");
+    setNegativeDrafts((prev) => {
+      const next = { ...prev };
+      (made.results || []).forEach((r) => {
+        // Re-running the button replaces a target's control rather than
+        // stacking a second one beside it: there is one negation of a
+        // criterion, and two would double the run without a second question.
+        if (!r.error && (r.criterion || "").trim()) next[r.target_id] = r;
+      });
+      return next;
+    });
+    setGeneratedAll(made);
+  };
+
+  const saveNegative = async (id, value) => {
+    const saved = await postJSON(`/api/photo/prompts/${acs}`, {
+      target_id: id, negative: value,
+    });
+    if (!saved || !saved.saved) return;
+    setTargets((ts) => ts.map((t) => t.target_id === id
+      ? { ...t, negative: saved.negative || null,
+          negative_criterion: (saved.negative || {}).criterion || null } : t));
+    setNegativeDrafts((d) => { const next = { ...d }; delete next[id]; return next; });
+  };
+
+  /* Everything generated in this session, written to disk in one pass. The
+     per-subtask Save exists so a control can be read and kept one at a time;
+     this exists because reading forty and saving them one at a time is how a
+     batch ends up half-saved and a run ends up half-comparable. */
+  const saveAllNegatives = async () => {
+    const pending = Object.entries(negativeDrafts)
+      .filter(([, value]) => value && (value.criterion || "").trim());
+    if (!pending.length) return;
+    setGeneratingAll(true);
+    for (const [id, value] of pending) await saveNegative(id, value);
+    setGeneratingAll(false);
+  };
+
   const start = async () => {
     setRunning(true); setError(null);
     const criteria = {};
@@ -1975,13 +2353,24 @@ function PhotoAssessmentTab({ acs }) {
     targets.filter((t) => selected.has(t.target_id) && t.frame_picked).forEach((t) => {
       frames[t.target_id] = { video: t.video, frame: t.frame };
     });
+    // The negated sheets, from the browser rather than from disk, so a control
+    // that has been generated and read but not yet saved is still what gets
+    // graded — the same rule the criteria themselves follow.
+    const negatives = {};
+    targets.filter((t) => selected.has(t.target_id)).forEach((t) => {
+      const text = negativeText(t);
+      if (text) negatives[t.target_id] = text;
+    });
     const result = await postJSON("/api/photo/run", {
       task_code: acs,
       models,
       target_ids: [...selected],
       criteria,
       variants,
+      negatives,
+      include_negative: gradeNegative,
       frames,
+      frames_per_step: stepFrames,
     });
     setRunning(false);
     if (!result || result.error) setError((result && result.error) || "Run failed");
@@ -2025,11 +2414,62 @@ function PhotoAssessmentTab({ acs }) {
           `)}
         </div>
 
+        <div class="run-bar controls-bar">
+          <span>
+            <strong>${withNegative}</strong> of <strong>${withCriteria.length}</strong>${" "}
+            selected ${withCriteria.length === 1 ? "subtask has" : "subtasks have"} a
+            negative criterion${withCriteria.length
+              ? " · one drafting call per subtask" : ""}
+          </span>
+          <label class=${"toggle" + (gradeNegative ? " on" : "")}>
+            <input type="checkbox" checked=${gradeNegative}
+                   onChange=${() => setGradeNegative((v) => !v)} />
+            Grade them alongside the criteria
+          </label>
+          <button class="btn"
+                  disabled=${generatingAll || keyMissing || !withCriteria.length}
+                  onClick=${generateControls}
+                  title="Rewrite each selected subtask's criteria into a sheet the same work should fail — same sections, same numbering, every line reversed">
+            ${generatingAll ? "Writing…" : "Generate negative criteria"}
+          </button>
+          ${Object.keys(negativeDrafts).length > 0 && html`
+            <button class="btn ghost" disabled=${generatingAll} onClick=${saveAllNegatives}>
+              Save ${Object.keys(negativeDrafts).length} unsaved
+            </button>`}
+        </div>
+        ${generatedAll && html`
+          <div class="run-warning">
+            ${generatedAll.sheets} negative
+            criteri${generatedAll.sheets === 1 ? "on" : "a"} written,
+            ${generatedAll.points} graded point${generatedAll.points === 1 ? "" : "s"},
+            ${fmtUSD(generatedAll.cost_usd)}.
+            They are <strong>unsaved</strong> — open each subtask, read it, and save.
+            ${generatedAll.skipped > 0 && html`
+              <div>
+                ${generatedAll.skipped} line${generatedAll.skipped === 1 ? "" : "s"} could
+                not be negated and were left out. A negative sheet shorter than the
+                criterion it mirrors is a weaker control, not a cleaner one — each
+                subtask lists which.
+              </div>`}
+            ${(generatedAll.results || []).filter((r) => r.error).length > 0 && html`
+              <div>
+                ${(generatedAll.results || []).filter((r) => r.error).length} subtask(s)
+                produced none:
+                ${(generatedAll.results || []).filter((r) => r.error)
+                  .map((r) => `${r.target_id} (${r.error})`).join(", ")}
+              </div>`}
+          </div>
+        `}
+
         <div class="run-bar">
           <span><strong>${points}</strong> criteria points across <strong>${framed}</strong>
             ${framed === 1 ? "target" : "targets"} × <strong>${models.length}</strong> models
+            ${negativePoints > 0 ? ` + ${negativePoints} negative points` : ""}
             ${variantCount > 0 ? ` + ${variantCount} variants` : ""}</span>
-          ${estimate && html`<span class="estimate">≈ ${estimate.calls} calls · ${fmtUSD(estimate.usd)}</span>`}
+          ${estimate && html`<span class="estimate">≈ ${estimate.calls} calls
+            ${estimate.images > 1.05
+              ? html` · ${estimate.images.toFixed(1)} frames each` : ""}
+            · ${fmtUSD(estimate.usd)}</span>`}
           <button class="btn primary"
                   disabled=${running || keyMissing || !runnable || !models.length}
                   onClick=${start}>
@@ -2062,6 +2502,30 @@ function PhotoAssessmentTab({ acs }) {
                         onClick=${() => setKind(id)}>${label}</button>
               `)}
             </div>
+            ${/* Only on the Steps tab, because it only affects step targets. A
+                  subtask is graded against the finished article and always on
+                  one frame of it, so offering the control while the Subtasks
+                  tab is open would imply a choice that does not exist there. */
+              kind === "step" && html`
+              <div class="step-frames">
+                <label for="step-frames">Frames per step</label>
+                <select id="step-frames" value=${String(stepFrames)}
+                        onChange=${(e) => setStepFrames(Number(e.target.value))}>
+                  ${[1, 2, 3, 4, 5, 6].map((k) => html`
+                    <option key=${k} value=${String(k)}>${k}</option>`)}
+                </select>
+                <span class="frames-note">
+                  ${stepFrames === 1
+                    ? html`The single frame each step ends on.`
+                    : html`Spread evenly across each step's own span, ending on the
+                           frame it finishes at${stepFrames >= 3
+                             ? ` — 0%, ${[...Array(stepFrames - 2)].map((_, i) =>
+                                 Math.round(100 * (i + 1) / (stepFrames - 1))).join("%, ")}%, 100%`
+                             : " — 0%, 100%"}.`}
+                  ${" "}Plus one frame picked as the clearest view of the finished state.
+                </span>
+              </div>
+            `}
             <input class="search" placeholder="Filter targets…" value=${query}
                    onInput=${(e) => setQuery(e.target.value)} />
             <div class="bulk">
@@ -2088,8 +2552,13 @@ function PhotoAssessmentTab({ acs }) {
                                 onClick=${(e) => e.stopPropagation()}
                                 onChange=${() => toggle(t.target_id)} />`}
                 ${t.frame_url
-                  ? html`<img class="target-thumb" src=${t.frame_url} alt=${t.frame}
-                              loading="lazy" />`
+                  ? html`<div class="target-thumb-stack"
+                              title=${(t.frames || [t.frame]).join("\n")}>
+                      <img class="target-thumb" src=${t.frame_url} alt=${t.frame}
+                           loading="lazy" />
+                      ${(t.frames || []).length > 1 &&
+                        html`<span class="thumb-count">${t.frames.length}</span>`}
+                    </div>`
                   : html`<div class="target-thumb none" title="No frame chosen yet">no photo</div>`}
                 <div class="target-text">
                   <div class="target-label">${t.label}</div>
@@ -2108,6 +2577,8 @@ function PhotoAssessmentTab({ acs }) {
                             : "criteria sheet")
                         : t.video || t.section || ""}
                     </span>
+                    ${(t.frames || []).length > 1 &&
+                      html`<${Pill}>${t.frames.length} frames<//>`}
                     ${t.frame_suggested && html`<${Pill} kind="warn">frame guessed<//>`}
                     ${t.frame_reviewed && html`<${Pill} kind="good">reviewed frame<//>`}
                     ${t.needs_criteria
@@ -2169,7 +2640,35 @@ function PhotoAssessmentTab({ acs }) {
                   <strong>no one reviewed it</strong>. Check it, or pick another below.
                 </div>
               `}
-              ${focused.frame_url
+              ${/* Every frame the grader will be shown, in the order it sees
+                    them. Showing only the last would say a step is graded on
+                    one photo when it is graded on several, and the detail pane
+                    is where an operator checks what a run will actually send. */
+                (focused.frames || []).length > 1
+                ? html`<${F}>
+                    <div class="frame-strip">
+                      ${focused.frames.map((f, i) => html`
+                        <figure key=${f}
+                                class=${"frame-shot" + (f === focused.best_view ? " best" : "")}>
+                          <img src=${(focused.frame_urls || [])[i]} alt=${f} loading="lazy"
+                               onClick=${() => setLightbox({ src: (focused.frame_urls || [])[i],
+                                                caption: `${focused.video} · ${f}` })} />
+                          <figcaption>
+                            ${f === focused.best_view ? "best view"
+                              : i === focused.frames.length - 1 ? "ends" : `${i + 1}`}
+                          </figcaption>
+                        </figure>`)}
+                    </div>
+                    <div class="suggested-note">
+                      Graded on <strong>${focused.frames.length} frames</strong> of this
+                      step's own span${focused.frame_window
+                        ? html` (${focused.frame_window} frames long)` : ""}, spread evenly
+                      and ending on the frame the step finishes at. The verdict is about
+                      the state the work is in at the <strong>end</strong>; the earlier
+                      frames are there to see past a hand or a tool that covers it.
+                    </div>
+                  <//>`
+                : focused.frame_url
                 ? html`<img class="detail-frame" src=${focused.frame_url} alt=${focused.frame}
                             onClick=${() => setLightbox({ src: focused.frame_url,
                                              caption: `${focused.video} · ${focused.frame}` })} />`
@@ -2252,6 +2751,20 @@ function PhotoAssessmentTab({ acs }) {
               <${CriterionEditor} acs=${acs} target=${focused}
                                   draft=${drafts[focused.target_id]}
                                   onDraft=${onDraft} onSaved=${onSaved} models=${models} />
+              <${NegativeCriterionEditor} acs=${acs} target=${focused}
+                                draft=${negativeDrafts[focused.target_id]}
+                                models=${models}
+                                onDraft=${(id, value) =>
+                                  setNegativeDrafts((d) => ({ ...d, [id]: value }))}
+                                onSaved=${(id, value) => {
+                                  setTargets((ts) => ts.map((t) => t.target_id === id
+                                    ? { ...t, negative: value,
+                                        negative_criterion: (value || {}).criterion || null }
+                                    : t));
+                                  setNegativeDrafts((d) => {
+                                    const next = { ...d }; delete next[id]; return next;
+                                  });
+                                }} />
               <${VariantEditor} acs=${acs} target=${focused}
                                 variants=${variantsFor(focused)}
                                 onChange=${(id, list) =>

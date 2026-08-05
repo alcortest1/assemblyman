@@ -60,6 +60,10 @@ VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v"}
 
 GENERATOR = "packs/compile_pack.py"
 SCHEMA_VERSION = 1
+
+# Hand-authored steps for operations the AIM sheet omits. Kept out of steps.json
+# because packs/ingest.py rewrites that file from the .docx on every run.
+SUPPLEMENT = "steps_supplement.json"
 CAMPUS = "AIM Fremont"  # every pilot task in tasks.csv is taught here
 
 # Sections that carry prerequisites and boilerplate rather than gradeable work.
@@ -108,47 +112,64 @@ def section_key(name: str, taken: set[str]) -> str:
     return key
 
 
-def procedure_steps(acs: str) -> list[dict]:
-    """Flatten steps.json into ordered steps with their section and notes resolved.
+def section_steps(section: dict, taken: set[str], origin: str) -> list[dict]:
+    """Ordered steps for one section of steps.json or of the supplement.
 
     `note_refs` are 1-based indices into the section's Senior Mechanic Notes,
     which is where nearly all the acceptance detail lives — the step line itself
     is usually just an imperative ("Tie a hitch.").
+    """
+    steps = section.get("steps") or []
+    if not steps or section.get("section") in NON_PROCEDURE_SECTIONS:
+        return []
+    name = section.get("section") or "Procedure"
+    key = section_key(name, taken)
+    notes = [(n.get("text") or "").strip() for n in section.get("notes") or []]
+    out = []
+    for index, step in enumerate(steps, start=1):
+        refs = [r for r in (step.get("note_refs") or []) if isinstance(r, int)]
+        out.append({
+            "id": f"{key}.s{index}",
+            "section": name,
+            "text": (step.get("text_clean") or step.get("text") or "").strip(),
+            "note_refs": refs,
+            "notes": [notes[r - 1] for r in refs if 1 <= r <= len(notes)],
+            "position": f"{index} of {len(steps)}",
+            "origin": origin,
+        })
+    return out
+
+
+def procedure_steps(acs: str) -> list[dict]:
+    """Sheet steps from steps.json, then any drafted steps from the supplement.
+
+    Sheet steps are emitted first and claim their mnemonics first, so adding a
+    supplement never renumbers an existing id — ids travel in every verdict,
+    dataset label and eval row, and must stay put.
     """
     data = read_json(TASK_DIR / acs / "steps.json") or {}
     out: list[dict] = []
     taken: set[str] = set()
     for variant in data.get("variants") or []:
         for section in variant.get("sections") or []:
-            steps = section.get("steps") or []
-            if not steps or section.get("section") in NON_PROCEDURE_SECTIONS:
-                continue
-            name = section.get("section") or "Procedure"
-            key = section_key(name, taken)
-            notes = [(n.get("text") or "").strip() for n in section.get("notes") or []]
-            for index, step in enumerate(steps, start=1):
-                refs = [r for r in (step.get("note_refs") or []) if isinstance(r, int)]
-                out.append({
-                    "id": f"{key}.s{index}",
-                    "section": name,
-                    "text": (step.get("text_clean") or step.get("text") or "").strip(),
-                    "note_refs": refs,
-                    "notes": [notes[r - 1] for r in refs if 1 <= r <= len(notes)],
-                    "position": f"{index} of {len(steps)}",
-                })
+            out.extend(section_steps(section, taken, "sheet"))
+    for section in (read_json(TASK_DIR / acs / SUPPLEMENT) or {}).get("sections") or []:
+        out.extend(section_steps(section, taken, "drafted"))
     return out
 
 
 def collect(acs: str, field: str) -> list[str]:
-    """Union of a steps.json section field (safety, equipment) in source order."""
+    """Union of a section field (safety, equipment) in source order."""
     data = read_json(TASK_DIR / acs / "steps.json") or {}
+    supplement = read_json(TASK_DIR / acs / SUPPLEMENT) or {}
+    sections = [s for v in data.get("variants") or [] for s in v.get("sections") or []]
+    sections += supplement.get("sections") or []
     out: list[str] = []
-    for variant in data.get("variants") or []:
-        for section in variant.get("sections") or []:
-            for item in section.get(field) or []:
-                text = (item.get("text") or "").strip()
-                if text and text not in out:
-                    out.append(text)
+    for section in sections:
+        for item in section.get(field) or []:
+            text = (item.get("text") or "").strip()
+            if text and text not in out:
+                out.append(text)
     return out
 
 
@@ -214,6 +235,25 @@ def source_bundle(acs: str, row: dict) -> str:
     sheet = read_text(TASK_DIR / acs / "procedure.md").strip()
     if sheet:
         sections.append(f"FULL PROCEDURE SHEET\n{sheet}")
+
+    # Supplemental steps travel with their provenance for the same reason an
+    # uncited handbook range does: a check resting on an operation the campus
+    # never wrote down must be reviewable as such.
+    supplement = read_json(TASK_DIR / acs / SUPPLEMENT) or {}
+    if supplement.get("sections"):
+        lines = []
+        for section in supplement["sections"]:
+            lines.append(f"## {section.get('section')}")
+            for index, step in enumerate(section.get("steps") or [], start=1):
+                lines.append(f"{index}. {step.get('text_clean') or step.get('text')}")
+            for index, note in enumerate(section.get("notes") or [], start=1):
+                lines.append(f"   note {index}: {note.get('text')}")
+        sections.append(
+            "SUPPLEMENTAL STEPS — NOT from the AIM procedure sheet. Drafted to cover "
+            "operations the sheet omits; treat any standard taken from them as "
+            "provisional and say so.\n"
+            f"Rationale: {supplement.get('rationale', '')}\n" + "\n".join(lines)
+        )
 
     for reference in handbook_references(acs):
         text = read_text(TASK_DIR / acs / (reference.get("file") or "")).strip()
@@ -346,6 +386,12 @@ def compile_task(acs: str, row: dict, model: str, workers: int,
             })
 
         entry = {"id": step["id"], "section": step["section"], "text": step["text"]}
+        if step.get("origin") == "drafted":
+            # Not a step the campus wrote. A reviewer reading this pack has to be
+            # able to tell an operation drafted from the handbook apart from one
+            # the AIM sheet actually specifies.
+            entry["origin"] = "drafted"
+            entry["assumed"] = True
         if step["note_refs"]:
             entry["note_refs"] = step["note_refs"]
         # pack_lint requires at least one check per step. A step the model could
@@ -363,6 +409,26 @@ def compile_task(acs: str, row: dict, model: str, workers: int,
         if errors:
             entry["error_modes"] = errors
         pack_steps.append(entry)
+
+    # Each drafted step carries assumed: true, and pack_lint pairs assumed items
+    # with assumptions entries one-for-one by id, so each needs its own entry.
+    # The reason names the section, because that is the level at which the scope
+    # question actually gets settled.
+    drafted_sections: dict[str, str] = {}
+    for step in steps:
+        if step.get("origin") != "drafted":
+            continue
+        drafted_sections.setdefault(step["section"], step["id"].split(".")[0])
+        assumptions.append({
+            "id": step["id"],
+            "statement": step["text"],
+            "reason": f"The AIM procedure sheet documents no '{step['section']}' steps; "
+                      "this one was drafted from the handbook and the reference video to "
+                      "cover an operation the sheet omits.",
+            "resolve_by": f"Confirm with AIM that '{step['section']}' forms part of the "
+                          "graded submission, ideally against a corrected procedure sheet, "
+                          "before marking this pack reviewed.",
+        })
 
     # --- task level -------------------------------------------------------
     fit = row.get("photo_fit_level") or "Unrated"
@@ -452,6 +518,15 @@ def compile_task(acs: str, row: dict, model: str, workers: int,
         f"{GENERATOR} from the procedure sheet and handbook, and has not been reviewed "
         "by a subject-matter expert.",
     )
+    if drafted_sections:
+        names = ", ".join(f"'{n}'" for n in drafted_sections)
+        open_questions.insert(1, (
+            f"The AIM procedure sheet documents no steps for {names}, yet the task title "
+            "and the sheet's own equipment list call for that work. Those steps were "
+            "drafted from the handbook and the reference video and carry "
+            "`origin: drafted`. Confirm with AIM whether they form part of the graded "
+            "submission, and ask for a corrected procedure sheet if they do."
+        ))
     if not videos:
         open_questions.append(
             "No reference video exists for this task, so no frame of correct work is "
@@ -475,6 +550,7 @@ def compile_task(acs: str, row: dict, model: str, workers: int,
             "drafted_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "reviewed_by": None,
             "sources": ["procedure.md", "steps.json", "tasks.csv"]
+            + ([SUPPLEMENT] if (TASK_DIR / acs / SUPPLEMENT).exists() else [])
             + [r["file"] for r in handbook if r.get("file")],
             "note": "Checks, error modes and evidence were drafted from the procedure "
                     "sheet and handbook. Nothing here has been through subject-matter "

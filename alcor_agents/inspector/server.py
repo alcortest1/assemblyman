@@ -22,6 +22,8 @@ import re
 import os
 import sys
 import time
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from http.server import HTTPServer, SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -64,6 +66,21 @@ PHOTO_DIR = ROOT / "build" / "photo_eval"
 
 VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v"}
 
+# How many frames of a step's own footage a grader is shown. One frame is a
+# guess at the instant a step ended, and the guess lands mid-action often enough
+# that 81% of the conditions inside a step call came back unobservable — hands
+# over the work, a tool still on it, the article in a fixture. Several frames
+# spread across the step let an occluded condition be settled from the moment it
+# was visible instead. `1` reproduces the single-frame behaviour exactly.
+STEP_FRAMES = 3
+# A ceiling, because every frame is billed on every call of every model: a run
+# of 23 steps across 3 models is 69 calls, and each frame added puts 69 more
+# images through the API.
+MAX_STEP_FRAMES = 12
+# Candidates offered to the best-view picker. Enough to cover the tail of a step
+# without paying for a frame every quarter-second.
+BEST_VIEW_SAMPLE = 12
+
 
 def read_json(path: Path):
     try:
@@ -98,6 +115,56 @@ def frame_names(acs: str, video: str, which: str) -> list[str]:
     # Filenames encode timestamps (`t000012_25.jpg`), so lexical order is
     # chronological order once zero-padded.
     return sorted(p.name for p in directory.glob("t*.jpg"))
+
+
+def clamp_frames_per_step(value, default: int = STEP_FRAMES) -> int:
+    """Read a requested frames-per-step, refusing anything unusable.
+
+    Every frame is billed on every call of every model, so this is a number a
+    typo can make expensive. Out-of-range and unparseable values fall back to
+    the default rather than raising: a bad query string should not take the
+    photo tab down, and the response says which value was used.
+    """
+    try:
+        k = int(value)
+    except (TypeError, ValueError):
+        return default
+    return min(MAX_STEP_FRAMES, k) if k >= 1 else default
+
+
+def frame_at(names: list[str], fraction: float) -> int:
+    """Index of the frame `fraction` of the way through `names`.
+
+    Shared by the single-frame suggestion and the window it is the end of, so
+    the two cannot drift: whatever `k=1` returns is exactly the frame the
+    one-frame path used to pick.
+    """
+    if not names:
+        return 0
+    cut = round(len(names) * min(1.0, max(0.0, fraction))) - 1
+    return min(len(names) - 1, max(0, cut))
+
+
+def sample_frames(window: list[str], k: int) -> list[str]:
+    """`k` frames spread evenly across the frames one step occupies.
+
+    The work a step is graded on is the state it *ends* in, so a single frame is
+    the last one — that is what `k=1` returns, unchanged from the behaviour this
+    replaces. Above one, the frames are equidistant across the whole window with
+    both ends included: `k=2` is start and end, `k=3` start/middle/end, `k=4`
+    lands at 0, 33, 66 and 100 percent.
+
+    A window shorter than `k` cannot supply `k` distinct frames, and repeating
+    one to make up the count would bill for the same image several times, so the
+    result is deduplicated and may be shorter than asked for.
+    """
+    if not window or k <= 0:
+        return []
+    if k == 1 or len(window) == 1:
+        return [window[-1]]
+    last = len(window) - 1
+    picked = [window[round(last * i / (k - 1))] for i in range(k)]
+    return list(dict.fromkeys(picked))
 
 
 def videos_for(acs: str) -> list[dict]:
@@ -799,10 +866,25 @@ def read_criteria_store(acs: str) -> dict:
     store: dict[str, dict] = {}
     for target_id, value in raw.items():
         if isinstance(value, str):
-            store[target_id] = {"criterion": value, "variants": []}
+            store[target_id] = {"criterion": value, "variants": [], "negative": None}
         elif isinstance(value, dict):
             variants = [v for v in (value.get("variants") or []) if isinstance(v, dict)]
-            store[target_id] = {"criterion": value.get("criterion"), "variants": variants}
+            negative = value.get("negative")
+            store[target_id] = {
+                "criterion": value.get("criterion"), "variants": variants,
+                # Carried through rather than rebuilt from the two fields that
+                # existed when this normaliser was written. An uploaded photo
+                # was recorded here by the upload endpoint and then dropped on
+                # the next load — and pruned on the next save — so a real
+                # assessment photo was written to disk and never graded.
+                "upload": value.get("upload"),
+                # The negated sheet, its point map and what wrote it. Stored
+                # whole rather than as text alone: a control's result is only
+                # readable beside the point it negates, and the map is the only
+                # thing that pairs them.
+                "negative": negative if isinstance(negative, dict)
+                            and (negative.get("criterion") or "").strip() else None,
+            }
     return store
 
 
@@ -813,6 +895,7 @@ def write_criteria_store(acs: str, store: dict) -> None:
         target_id: entry
         for target_id, entry in store.items()
         if (entry.get("criterion") or "").strip() or entry.get("variants")
+        or entry.get("negative") or entry.get("upload")
     }
     path = PHOTO_DIR / acs / "prompts.json"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -920,12 +1003,45 @@ def read_subtask_criteria(acs: str) -> dict[str, dict]:
     return entries
 
 
-def sheet_checks(criterion: str) -> list[dict]:
-    """Split a subtask criterion into the points it will be graded on.
+SHEET_HEADINGS = ("criteria", "critical defects", "overall decision", "source basis")
 
-    Sent whole, a sheet comes back as one verdict: you learn the subtask failed
+
+def strip_marker(line: str) -> str:
+    """A criterion line without its bullet or number, if it had one."""
+    match = (re.match(r"\d+[.)]\s+(.+)", line) or re.match(r"[-*•]\s+(.+)", line))
+    return (match.group(1) if match else line).strip()
+
+
+def sheet_checks(criterion: str) -> list[dict]:
+    """Split a criterion into the points it will be graded on.
+
+    Sent whole, a criterion comes back as one verdict: you learn the work failed
     and never which of its conditions did. Each point is graded on its own call
     instead, so a failure names itself.
+
+    Two shapes arrive here and both must split. A **subtask sheet** is a
+    structured instrument with `Criteria` and `Critical defects` headings. A
+    **step criterion** is a bare list of `- ` bullets, which is what
+    `compile_pack.py` drafts and what `_criterion_for_step` assembles.
+
+    Only the sheet shape used to split. A step criterion fell through to a
+    single call carrying every condition at once, and `apply_thresholds` fails a
+    criterion on one failed condition and abstains on one unobservable one — so
+    a four-condition step could only pass when all four cleared, which across
+    every saved run happened 7 times in 753 calls. Worse, the reasoning that let
+    `_criterion_for_step` include `measurement` and `document` checks was that
+    each check gets its own call and a measurement "takes nothing else with
+    it" — true of sheets, false of steps, so those checks dragged whole steps to
+    `unsure`. Splitting the bullet shape is what makes that reasoning true.
+
+    Under a heading, **every line is a condition**, with or without a number or
+    a bullet in front of it. The drafted sheets number their conditions, so the
+    parser used to require it — and a criterion typed into the browser as a
+    bullet list, or as plain lines, produced no points at all. It was not
+    reported as unparseable: `sheet_checks` returned nothing, the caller fell
+    back to grading the whole criterion in one call, and a ten-condition sheet
+    came back as a single verdict that `apply_thresholds` fails on any one
+    condition. Three saved criteria in this pilot are written that way.
 
     Two kinds of point, and they do not have the same polarity. A numbered
     criterion is a condition to be met. A critical defect is the opposite — it
@@ -944,26 +1060,511 @@ def sheet_checks(criterion: str) -> list[dict]:
         if not stripped:
             continue
         heading = stripped.lower().rstrip(":")
-        if heading in ("criteria", "critical defects", "overall decision", "source basis"):
+        if heading in SHEET_HEADINGS:
             section = heading
             continue
         if section == "criteria":
-            numbered = re.match(r"\d+[.)]\s+(.+)", stripped)
-            if numbered:
-                checks.append({"id": f"c{sum(1 for c in checks if not c['defect']) + 1}",
-                               "statement": numbered.group(1).strip(), "defect": False})
+            checks.append({"id": f"c{sum(1 for c in checks if not c['defect']) + 1}",
+                           "statement": strip_marker(stripped), "defect": False})
         elif section == "critical defects":
-            bullet = re.match(r"[-*•]\s+(.+)", stripped)
-            if bullet:
-                defect = bullet.group(1).strip().rstrip(".")
-                checks.append({
-                    "id": f"d{sum(1 for c in checks if c['defect']) + 1}",
-                    # Phrased so it stays grammatical whatever the defect's own
-                    # wording is — "No <defect>" breaks on "Tube is kinked".
-                    "statement": f"The finished work shows no such defect: {defect}.",
-                    "defect": True,
-                })
-    return checks
+            defect = strip_marker(stripped).rstrip(".")
+            checks.append({
+                "id": f"d{sum(1 for c in checks if c['defect']) + 1}",
+                # Phrased so it stays grammatical whatever the defect's own
+                # wording is — "No <defect>" breaks on "Tube is kinked".
+                "statement": f"The finished work shows no such defect: {defect}.",
+                "defect": True,
+            })
+    if checks or section is not None:
+        return checks
+
+    # No headings anywhere, so this is a step criterion: a bare list of
+    # conditions, each already one requirement. They are conditions to be met,
+    # never defects, so none is restated — a step criterion has no section that
+    # inverts polarity, and restating one would negate a condition that was
+    # written positively.
+    for line in (criterion or "").splitlines():
+        stripped = line.strip()
+        bullet = re.match(r"[-*•]\s+(.+)", stripped) or re.match(r"\d+[.)]\s+(.+)", stripped)
+        if bullet and bullet.group(1).strip():
+            checks.append({"id": f"c{len(checks) + 1}",
+                           "statement": bullet.group(1).strip(), "defect": False})
+    # One point is not a split — it is the whole criterion with a point id
+    # attached, and returning it would relabel every single-condition target as
+    # a roll-up of one. The caller falls back to grading the criterion whole,
+    # which for one condition is the same call either way.
+    return checks if len(checks) > 1 else []
+
+
+def parse_sheet(criterion: str) -> dict:
+    """The shape of a criterion, as opposed to the points it grades on.
+
+    `sheet_checks` answers "what will be graded"; this answers "what does the
+    instrument look like", which is what a negative sheet has to reproduce. It
+    keeps the intro paragraph — it names the article and is the only line saying
+    what the photograph is of — the numbered conditions and defect bullets in
+    their own sections and in order, and the roll-up rule, so the negation can
+    be rebuilt in the original's own shape rather than in whatever shape a model
+    felt like emitting.
+
+    A step criterion has no headings at all, just `- ` bullets. It comes back as
+    `shape: "bullets"` with everything in `criteria`, and is reassembled the
+    same way — a negated step criterion that grew headings would be split
+    differently from the criterion it is the control for.
+    """
+    intro: list[str] = []
+    criteria: list[dict] = []
+    defects: list[dict] = []
+    tail: dict[str, list[str]] = {}
+    section = None
+    for line in (criterion or "").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        heading = stripped.lower().rstrip(":")
+        if heading in SHEET_HEADINGS:
+            section = heading
+            tail.setdefault(section, [])
+            continue
+        if section == "criteria":
+            criteria.append({"n": len(criteria) + 1, "text": strip_marker(stripped)})
+        elif section == "critical defects":
+            defects.append({"n": len(defects) + 1, "text": strip_marker(stripped)})
+        elif section is None:
+            intro.append(stripped)
+        else:
+            tail[section].append(stripped)
+
+    if section is not None:
+        return {"shape": "sheet", "intro": "\n".join(intro), "criteria": criteria,
+                "defects": defects,
+                "overall": "\n".join(tail.get("overall decision") or [])}
+
+    # No headings: a bare list of conditions. Anything that is not a bullet is
+    # prose above the list and stays as the intro.
+    for line in (criterion or "").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        bullet = re.match(r"[-*•]\s+(.+)", stripped) or re.match(r"\d+[.)]\s+(.+)", stripped)
+        if bullet and bullet.group(1).strip():
+            criteria.append({"n": len(criteria) + 1, "text": bullet.group(1).strip()})
+        else:
+            intro.append(stripped)
+    return {"shape": "bullets", "intro": "\n".join(intro), "criteria": criteria,
+            "defects": [], "overall": ""}
+
+
+def assemble_negative_sheet(parsed: dict, criteria: dict) -> tuple[str, list]:
+    """Rebuild a sheet from negated lines, in the original's own shape.
+
+    Returns the text and the map from each point the splitter will produce back
+    to the point it negates. The map cannot be inferred afterwards: ids are
+    positional, so a sheet whose second condition was skipped renumbers c3 to
+    c2, and reading a control's result against the wrong positive is worse than
+    not pairing them at all.
+
+    The defects arrive already inverted, and arithmetically rather than by a
+    model. A defect point is graded as "the work shows no such defect", which
+    correct work passes; its negation is the assertion that the defect is
+    *present*, which correct work fails. That is a mechanical transform of the
+    line, so it is done here — and it has to leave the `Critical defects`
+    section, because a line under that heading is restated as an absence by the
+    splitter and would land back where it started.
+
+    No banner, no "control sheet" heading, nothing inside the graded text that
+    says what this is. Statements reach a grader verbatim, and a sheet
+    announcing itself as the one the work should fail would be answered by
+    reading the label rather than the photograph — which is the behaviour the
+    control exists to detect.
+    """
+    lines: list[str] = []
+    mapping: list[dict] = []
+    if parsed.get("intro"):
+        lines.append(parsed["intro"])
+
+    kept = [(item, criteria[item["n"]]) for item in parsed.get("criteria") or []
+            if item["n"] in criteria]
+    numbered: list[str] = []
+    for original, negated in kept:
+        numbered.append(negated["statement"])
+        mapping.append({"of": f"c{original['n']}",
+                        "kind": negated.get("kind") or "inversion",
+                        "changed": negated.get("changed") or "",
+                        "positive": original["text"]})
+    for original in parsed.get("defects") or []:
+        defect = original["text"].rstrip(".")
+        numbered.append(f"The finished work shows this defect: {defect}.")
+        mapping.append({"of": f"d{original['n']}", "kind": "presence",
+                        "changed": "stated as present rather than absent",
+                        "positive": original["text"]})
+
+    if numbered:
+        if parsed.get("shape") == "sheet":
+            lines += ["", "Criteria"]
+        else:
+            lines.append("")
+        for i, statement in enumerate(numbered, start=1):
+            lines.append(f"{i}. {statement}" if parsed.get("shape") == "sheet"
+                         else f"- {statement}")
+            mapping[i - 1]["id"] = f"c{i}"
+
+    if parsed.get("overall"):
+        lines += ["", "Overall decision", parsed["overall"]]
+    return "\n".join(lines).strip(), mapping
+
+
+def negative_sheet(acs: str, target: dict, criterion: str | None = None,
+                   model: str | None = None, drafter=None) -> dict:
+    """Negate one subtask's whole criterion, point for point.
+
+    One call per subtask rather than one per point. The per-point drafter it
+    replaces cost seven calls for a seven-point sheet and returned seven loose
+    lines that no roll-up could reassemble, so the run could say a control was
+    missed but never that the subtask, graded against a criterion that does not
+    describe it, still passed.
+    """
+    drafter = drafter or vlm.draft_negative_sheet
+    text = (criterion if criterion is not None else target.get("criterion") or "").strip()
+    if not text:
+        return {"error": "no_criterion", "criterion": None, "points": [],
+                "skipped": [], "cost_usd": 0.0}
+
+    parsed = parse_sheet(text)
+    if not parsed["criteria"] and not parsed["defects"]:
+        # A single unstructured condition. There is nothing to mirror, and a
+        # one-line control is what `negative_variants` already writes.
+        return {"error": "unsplittable", "criterion": None, "points": [],
+                "skipped": [], "cost_usd": 0.0}
+
+    subject = target.get("step_title") or target.get("label") or ""
+    drafted = drafter(model=model, criterion=text, subject=subject)
+    spend = drafted.get("cost_usd") or 0.0
+    if drafted.get("error"):
+        return {"error": drafted["error"], "message": drafted.get("message"),
+                "criterion": None, "points": [], "skipped": [], "cost_usd": spend}
+
+    negative, mapping = assemble_negative_sheet(parsed, drafted.get("criteria") or {})
+    if not mapping:
+        return {"error": "no_points", "criterion": None, "points": [],
+                "skipped": drafted.get("skipped") or [], "cost_usd": spend}
+    return {"error": None, "criterion": negative, "points": mapping,
+            "skipped": drafted.get("skipped") or [],
+            "source_points": len(parsed["criteria"]) + len(parsed["defects"]),
+            # The exact text this negates, so a criterion edited afterwards can
+            # be seen to have left its control behind.
+            "of_criterion": text,
+            "model": model,
+            "drafted_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "reviewed_by": None,
+            "cost_usd": round(spend, 6)}
+
+
+def negative_sheets_batch(acs: str, target_ids: list[str], model: str | None = None,
+                          edited: dict | None = None, targets: list[dict] | None = None,
+                          drafter=None, workers: int = 4) -> dict:
+    """Negate a whole selection of subtasks in one pass.
+
+    `edited` carries criteria the operator changed but has not saved: the
+    browser is the source of truth for those, and a control drafted from the
+    text on disk would be the negation of a criterion nobody is grading.
+    """
+    edited = edited or {}
+    if targets is None:
+        pack, _, _ = load_pack(acs)
+        targets = photo_targets(acs, pack)
+    by_id = {t["target_id"]: t for t in targets}
+
+    def one(target_id: str) -> dict:
+        target = by_id.get(target_id)
+        if not target:
+            return {"target_id": target_id, "error": "unknown_target",
+                    "criterion": None, "points": [], "skipped": [], "cost_usd": 0.0}
+        return {"target_id": target_id,
+                **negative_sheet(acs, target, edited.get(target_id),
+                                 model, drafter=drafter)}
+
+    if not target_ids:
+        results: list[dict] = []
+    else:
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(target_ids)))) as pool:
+            results = list(pool.map(one, target_ids))
+    return {
+        "results": results,
+        "sheets": sum(1 for r in results if r.get("criterion")),
+        "points": sum(len(r.get("points") or []) for r in results),
+        # Lines the drafter declined, totalled where an operator will see them:
+        # a negative sheet shorter than the criterion it mirrors is a weaker
+        # control, and the count is the only warning of that.
+        "skipped": sum(len(r.get("skipped") or []) for r in results),
+        "cost_usd": round(sum(r.get("cost_usd") or 0 for r in results), 6),
+    }
+
+
+NEGATIVE_SUFFIX = "#negative"
+
+
+def negative_items(target: dict, base: dict, include: bool = True,
+                   inline: object = None) -> list[dict]:
+    """Grading points for a subtask's negated sheet.
+
+    Built through `sheet_checks`, like the criterion they mirror, so a negative
+    point is one condition and one call — the split the positive side already
+    depends on. Without it a negated sheet would arrive as a single call
+    carrying every wrong condition at once, and `apply_thresholds` fails a
+    criterion on one failed condition, so it would come back `fail` the moment
+    any one line landed. That reads like a control working perfectly while
+    saying nothing about the other lines.
+
+    Every point expects `fail`. The article is in frame and the wording
+    contradicts it, so an abstention is a miss: `unsure` is what a grader
+    returns when it cannot see, and a control that cannot be seen has measured
+    nothing.
+    """
+    if not include:
+        return []
+    if isinstance(inline, str):
+        text = inline.strip()
+    elif isinstance(inline, dict):
+        text = (inline.get("criterion") or "").strip()
+    else:
+        text = (target.get("negative_criterion") or "").strip()
+    if not text:
+        return []
+
+    parent = f"{target['target_id']}{NEGATIVE_SUFFIX}"
+    label = f"{target['label']} — negated"
+    # Which positive point each control negates, where a stored map says so.
+    # Ids are positional, so this cannot be recovered by matching c1 to c1 on a
+    # sheet that skipped a line.
+    paired = {p.get("id"): p for p in ((target.get("negative") or {}).get("points") or [])
+              if isinstance(p, dict)}
+    shared = {**base, "polarity": "negative", "negative_of": target["target_id"],
+              "expected": "fail"}
+    checks = sheet_checks(text)
+    if not checks:
+        return [{**shared, "target_id": parent, "label": label, "criterion": text}]
+    return [{**shared,
+             "target_id": f"{parent}::{check['id']}",
+             "label": f"{label} · {check['id']}",
+             "criterion": check["statement"],
+             "rolls_up_to": parent,
+             "parent_label": label,
+             "parent_criterion": text,
+             "check_id": check["id"],
+             "negative_of_point": (paired.get(check["id"]) or {}).get("of"),
+             "positive_criterion": (paired.get(check["id"]) or {}).get("positive")}
+            for check in checks]
+
+
+def polarity_report(results: list[dict], rollups: list[dict]) -> dict:
+    """Pass rates for the criteria and for their negations, side by side.
+
+    The question a positive-only run cannot answer. Every reference frame shows
+    work an instructor accepted, so a grader that passes everything and a grader
+    that reads produce the same numbers; the negated sheet is the same work
+    against a criterion it does not satisfy, and the gap between the two pass
+    rates is the part of the result that is about grading rather than about the
+    photographs.
+
+    Counted at both levels because they answer different questions. Points say
+    how often a single condition was waved through; subtasks say how often the
+    roll-up — which is what a student would actually be told — came back `pass`
+    against a criterion describing work that is not in the photograph.
+    """
+    def tally(rows: list[dict]) -> dict:
+        graded = [r for r in rows if not r.get("error")]
+        passed = sum(1 for r in graded if r.get("verdict") == "pass")
+        failed = sum(1 for r in graded if r.get("verdict") == "fail")
+        return {
+            "points": len(rows), "graded": len(graded), "pass": passed, "fail": failed,
+            "unsure": len(graded) - passed - failed,
+            "errors": len(rows) - len(graded),
+            "pass_rate": round(passed / len(graded), 4) if graded else None,
+        }
+
+    def subtasks(rows: list[dict]) -> dict:
+        verdicts = Counter(r.get("verdict") for r in rows)
+        return {"subtasks": len(rows), "pass": verdicts["pass"],
+                "fail": verdicts["fail"], "review": verdicts["review"],
+                "pass_rate": round(verdicts["pass"] / len(rows), 4) if rows else None}
+
+    def gap(original: dict, negative: dict) -> float | None:
+        if original.get("pass_rate") is None or negative.get("pass_rate") is None:
+            return None
+        return round(original["pass_rate"] - negative["pass_rate"], 4)
+
+    def side(rows: list[dict], rolls: list[dict], polarity: str) -> tuple[dict, dict]:
+        return (tally([r for r in rows if (r.get("polarity") or "original") == polarity]),
+                subtasks([r for r in rolls if (r.get("polarity") or "original") == polarity]))
+
+    report: dict = {"models": {}}
+    for model in sorted({r.get("model") for r in results if r.get("model")}):
+        mine = [r for r in results if r.get("model") == model]
+        my_rolls = [r for r in rollups if r.get("model") == model]
+        original, original_rolls = side(mine, my_rolls, "original")
+        negative, negative_rolls = side(mine, my_rolls, "negative")
+        report["models"][model] = {
+            "original": original, "negative": negative,
+            "original_subtasks": original_rolls, "negative_subtasks": negative_rolls,
+            "point_gap": gap(original, negative),
+            "subtask_gap": gap(original_rolls, negative_rolls),
+        }
+    original, original_rolls = side(results, rollups, "original")
+    negative, negative_rolls = side(results, rollups, "negative")
+    report.update({
+        "original": original, "negative": negative,
+        "original_subtasks": original_rolls, "negative_subtasks": negative_rolls,
+        "point_gap": gap(original, negative),
+        "subtask_gap": gap(original_rolls, negative_rolls),
+    })
+    return report
+
+
+def foreign_criteria(acs: str, limit: int = 400) -> list[dict]:
+    """Real criteria points belonging to tasks other than `acs`.
+
+    The third kind of match control, and the only one that costs nothing to
+    make: a condition about an article that is simply not in this photograph.
+    A grader doing its job answers `unsure` — the subject is absent, not
+    violated — so the expectation is `not_pass` rather than `fail`, which is
+    exactly the distinction `EXPECTATIONS` was written for.
+
+    Borrowed verbatim rather than invented. A real criterion from a real pack
+    reads like the ones around it, so a model cannot pick the control out by
+    register, which is the failure a synthetic distractor invites.
+    """
+    pool: list[dict] = []
+    root = SUBTASK_CRITERIA_DIR
+    if not root.is_dir():
+        return pool
+    for directory in sorted(p for p in root.iterdir() if p.is_dir()):
+        if directory.name == acs:
+            continue
+        for sheet in sorted(read_subtask_criteria(directory.name).values(),
+                            key=lambda s: s["code"]):
+            for point in sheet_checks(sheet["criterion"]):
+                # Defects are already phrased as absences, and an absence about
+                # an article that is not present reads as trivially satisfied —
+                # the wrong shape for a control. Conditions only.
+                if point["defect"]:
+                    continue
+                pool.append({"task_code": directory.name, "subtask": sheet["code"],
+                             "criterion": point["statement"]})
+                if len(pool) >= limit:
+                    return pool
+    return pool
+
+
+def negative_variants(acs: str, target: dict, points: list[dict], model: str | None = None,
+                      kinds: tuple[str, ...] = ("inversion", "substitution", "foreign"),
+                      drafter=None) -> tuple[list[dict], float]:
+    """Build match-test controls for one target, one control per criteria point.
+
+    Per point rather than per target: a point is already a single condition, so
+    negating one at a time keeps the control as sharp as the thing it tests, and
+    a miss names the condition it missed.
+
+    Returns the variants and what the drafting cost. Variants are returned, not
+    saved — an operator should be able to read a control before it is graded,
+    and a generated criterion nobody looked at is exactly the kind of thing that
+    quietly becomes a number in a report.
+    """
+    drafter = drafter or vlm.draft_negative_criteria
+    subject = target.get("step_title") or target.get("label") or ""
+    variants: list[dict] = []
+    spend = 0.0
+
+    if "foreign" in kinds:
+        pool = foreign_criteria(acs)
+        if pool:
+            # Deterministic pick, so re-generating a target does not silently
+            # change what it was tested against between two runs.
+            seed = sum(map(ord, target["target_id"]))
+            borrowed = pool[seed % len(pool)]
+            variants.append({
+                "id": f"neg-foreign-{seed % len(pool)}",
+                "label": f"foreign · {borrowed['task_code']} {borrowed['subtask']}",
+                "criterion": borrowed["criterion"],
+                "expected": "not_pass",
+                "negative_kind": "foreign",
+            })
+
+    wanted = tuple(k for k in kinds if k in ("inversion", "substitution"))
+    if not wanted or not model:
+        return variants, spend
+
+    for point in points:
+        drafted = drafter(model=model, criterion=point["statement"], subject=subject)
+        spend += drafted.get("cost_usd") or 0
+        if drafted.get("error"):
+            continue
+        for negative in drafted.get("negatives") or []:
+            if negative["kind"] not in wanted:
+                continue
+            variants.append({
+                "id": f"neg-{point['id']}-{negative['kind'][:3]}",
+                "label": f"{point['id']} {negative['kind']} · {negative['changed']}"[:70],
+                "criterion": negative["criterion"],
+                "expected": negative["expected"],
+                "negative_kind": negative["kind"],
+                # What it was made from, so a miss can be read against the
+                # positive verdict for the same condition.
+                "negative_of": point["id"],
+                "positive_criterion": point["statement"],
+            })
+    return variants, spend
+
+
+def negative_variants_batch(acs: str, target_ids: list[str], model: str | None = None,
+                            kinds: tuple[str, ...] = ("inversion", "substitution", "foreign"),
+                            edited: dict | None = None, targets: list[dict] | None = None,
+                            drafter=None, workers: int = 4) -> dict:
+    """Write controls for a whole selection of targets in one pass.
+
+    `edited` carries criteria the operator has changed but not saved: the
+    browser is the source of truth for those, so a control must be drafted from
+    what is on screen rather than from what is on disk.
+
+    Targets that yield nothing are reported with a reason rather than dropped —
+    a subtask that silently produced no controls reads as one that needs none.
+    """
+    edited = edited or {}
+    if targets is None:
+        pack, _, _ = load_pack(acs)
+        targets = photo_targets(acs, pack)
+    by_id = {t["target_id"]: t for t in targets}
+
+    def one(target_id: str) -> dict:
+        target = by_id.get(target_id)
+        if not target:
+            return {"target_id": target_id, "error": "unknown_target",
+                    "variants": [], "points": 0, "cost_usd": 0.0}
+        criterion = (edited.get(target_id) or target.get("criterion") or "").strip()
+        if not criterion:
+            return {"target_id": target_id, "error": "no_criterion",
+                    "variants": [], "points": 0, "cost_usd": 0.0}
+        points = sheet_checks(criterion) or [{"id": "c1", "statement": criterion,
+                                              "defect": False}]
+        variants, spend = negative_variants(acs, target, points, model, kinds,
+                                            drafter=drafter)
+        return {"target_id": target_id, "error": None, "variants": variants,
+                "points": len(points), "cost_usd": round(spend, 6)}
+
+    # One drafting call per criteria point, so a task with forty points is forty
+    # sequential round trips if this is not fanned out. Targets are independent;
+    # points within a target stay in order.
+    if not target_ids:
+        results: list[dict] = []
+    else:
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(target_ids)))) as pool:
+            results = list(pool.map(one, target_ids))
+    return {
+        "results": results,
+        "points": sum(r["points"] for r in results),
+        "variants": sum(len(r["variants"]) for r in results),
+        "cost_usd": round(sum(r["cost_usd"] for r in results), 6),
+    }
 
 
 def frame_candidates(acs: str) -> list[dict]:
@@ -985,7 +1586,66 @@ def frame_candidates(acs: str) -> list[dict]:
     return out
 
 
-def photo_targets(acs: str, pack: dict | None) -> list[dict]:
+BEST_VIEW_MODEL = "google/gemini-3.6-flash"
+
+
+def add_best_view(acs: str, target: dict, model: str | None = None,
+                  picker=None) -> dict | None:
+    """Append the frame of a step that best shows the state it ends in.
+
+    The equidistant sample is blind: it lands where the arithmetic puts it, and
+    on head-mounted footage that is regularly a hand or a tool across the
+    workpiece. This asks a model which frame of this step's own span actually
+    shows the finished article, and adds it to the set — so the grader sees both
+    the step's progression and its clearest view of the result.
+
+    It is an addition, never a replacement. The sampled frames establish what
+    the step's end state *is*; a picked frame that flattered the work would
+    otherwise be the only evidence of it.
+
+    Returns the picker's own result for reporting, or None where there was
+    nothing to pick from — an uploaded photo, a hand-picked frame, or a span too
+    short to offer a choice.
+    """
+    if target.get("uploaded") or target.get("frame_picked"):
+        return None
+    clip, frames = target.get("video"), target.get("frames") or []
+    if not clip or not frames:
+        return None
+    names = frame_names(acs, clip, "detail")
+    span = target.get("frame_span")
+    if span and len(span) == 2 and names:
+        window = names[frame_at(names, span[0]): frame_at(names, span[1]) + 1]
+    else:
+        window = [f for f in names if f in set(frames)]
+    # Nothing to choose between: the sample already is the span.
+    if len(window) <= len(frames):
+        return None
+    step = max(1, len(window) // BEST_VIEW_SAMPLE)
+    sampled = window[::step][:BEST_VIEW_SAMPLE]
+    if window[-1] not in sampled:
+        sampled.append(window[-1])
+
+    picker = picker or vlm.pick_best_frame
+    result = picker(
+        model=model or BEST_VIEW_MODEL,
+        image_paths=[FRAME_SETS["detail"] / acs / clip / n for n in sampled],
+        description=target.get("criterion") or target.get("label") or "")
+    chosen = result.get("frame")
+    # No frame shows the finished article is a real answer on this footage, and
+    # the sampled frames still stand. Adding the least bad frame anyway would
+    # present a mid-action image as the clearest view of the result.
+    if not chosen or chosen in frames:
+        return result
+    target["frames"] = [*frames, chosen]
+    target["frame_urls"] = [*(target.get("frame_urls") or []),
+                            f"/files/build/frames/{acs}/{clip}/{chosen}"]
+    target["best_view"] = chosen
+    return result
+
+
+def photo_targets(acs: str, pack: dict | None,
+                  frames_per_step: int = STEP_FRAMES) -> list[dict]:
     """Build gradeable (frame, criterion) pairs for a task.
 
     Two sources, in order of precision:
@@ -1003,6 +1663,13 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
     A target without a frame is still worth having: the criterion is the
     deliverable, and the photo it will grade is usually one a student has yet to
     take.
+
+    `frames_per_step` is how many frames of its own footage a step-level target
+    carries. Both sources give a step a span rather than an instant — a reviewed
+    interval states its `frame_start` and `frame_end`, and a pack step occupies
+    the slice between the previous step's boundary and its own — so both are
+    sampled the same way. `frame` remains the last of them, which is the frame
+    each target used to carry on its own.
     """
     resolve = segment_step_resolver(pack)
     store = read_criteria_store(acs)
@@ -1020,21 +1687,59 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
     clip_subtasks: dict[str, set[str]] = {}
     saw_clip_level = False
 
+    def with_frames(target: dict, clip: str, window: list[str],
+                    span: list[float] | None = None) -> dict:
+        """Attach the frames of a step's own footage, sampled across its span.
+
+        The last of them is the target's `frame`, so every reader that wants one
+        frame keeps getting the one it got before. `frames` is what the grader is
+        actually shown, and it is always non-empty where a frame exists — a
+        one-frame target lists itself, rather than making each caller decide
+        whether an absent list means one frame or none.
+        """
+        picked = sample_frames(window, frames_per_step)
+        if not picked:
+            return target
+        target.update({
+            "frames": picked,
+            "frame_urls": [f"/files/build/frames/{acs}/{clip}/{f}" for f in picked],
+            # The span they were drawn from, so the UI can say what "3 frames"
+            # covers without recomputing the slice arithmetic.
+            "frame_span": span,
+            "frame_window": len(window),
+        })
+        return target
+
     def apply_store(target: dict) -> dict:
         entry = store.get(target["target_id"]) or {}
         upload = entry.get("upload")
         if upload and (PHOTO_DIR / acs / "uploads" / upload).is_file():
-            # An operator-supplied photo beats anything derived from the video.
+            # An operator-supplied photo beats anything derived from the video —
+            # including the sampled frames, which are an attempt to reconstruct
+            # from footage the very thing an uploaded photo already is.
             target.update({
                 "frame": upload,
                 "frame_url": f"/files/build/photo_eval/{acs}/uploads/{upload}",
                 "frame_exists": True, "frame_suggested": False, "uploaded": True,
                 "upload_path": str(PHOTO_DIR / acs / "uploads" / upload),
+                "frames": [upload],
+                "frame_urls": [f"/files/build/photo_eval/{acs}/uploads/{upload}"],
+                "frame_span": None, "frame_window": None,
             })
         override = (entry.get("criterion") or "").strip()
         target["criterion"] = override or target["criterion_default"]
         target["edited"] = bool(override)
         target["variants"] = entry.get("variants") or []
+        negative = entry.get("negative") or None
+        target["negative"] = negative
+        target["negative_criterion"] = (negative or {}).get("criterion")
+        # Whether the stored control still mirrors the criterion on screen. An
+        # edited criterion leaves its negation behind describing the previous
+        # wording, and grading the two against each other then compares a
+        # criterion with the control for a different one.
+        target["negative_stale"] = bool(
+            negative and (negative.get("of_criterion") or "").strip()
+            and (negative.get("of_criterion") or "").strip() != target["criterion"].strip())
         return target
 
     def drafted_for(step_id: str | None) -> dict:
@@ -1066,10 +1771,35 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
                 built = _criterion_for_step(step)
                 criterion, source, excluded = built["criterion"], built["source"], built["excluded"]
             else:
-                criterion = (segment.get("short_description") or "").strip()
-                source, excluded = "segment.description", []
+                # No pack step owns this interval, so there is no acceptance
+                # standard for the work in it. There *is* a reviewer's
+                # description of the footage — "Static first-person overhead of
+                # the workbench: laptop and open handbook at the top…" — and
+                # that used to become the criterion, which is not a weaker
+                # criterion but a different kind of thing: prose about one
+                # moment of a clip, graded against a photograph of another.
+                # Across saved runs those 90 targets returned `fail` on 39% of
+                # 362 calls, the highest of any source and none of it about
+                # workmanship. It is also the circularity `DRAFT_PROMPT` exists
+                # to prevent, arriving by a door that prompt does not cover.
+                #
+                # So the interval is still listed, still carries its
+                # description, and still takes a criterion an operator writes —
+                # but it is not gradeable until one exists, and says so.
+                criterion, source, excluded = "", "segment.description", []
+            # A reviewed interval states the frames it spans, so its window is
+            # evidence rather than the even-pace guess a pack step gets. Both
+            # end on the frame the work was last seen on, which is why both are
+            # sampled by the same rule.
+            clip_names = frame_names(acs, video, "detail")
+            opening = segment.get("frame_start")
+            opens_at = clip_names.index(opening) if opening in clip_names else None
+            ends_at = clip_names.index(frame) if frame in clip_names else None
+            interval = (clip_names[opens_at:ends_at + 1]
+                        if opens_at is not None and ends_at is not None and opens_at <= ends_at
+                        else [frame])
             target_id = f"{video}:{segment.get('seq')}"
-            targets.append(apply_store({
+            targets.append(apply_store(with_frames({
                 "target_id": target_id,
                 # A reviewed interval *inside* a subtask — the code calls these
                 # sub-subtasks. It is step-level evidence, not a subtask, and
@@ -1096,8 +1826,14 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
                 "description": segment.get("short_description"),
                 "criterion_default": criterion,
                 "criterion_source": source,
+                # Flagged the same way a clip-derived subtask with no sheet is,
+                # so the tab already knows how to show it and the run already
+                # knows to skip it.
+                "needs_criteria": not criterion,
                 "frame_candidates": candidates,
-            }))
+            }, video, interval, (
+                [round(opens_at / len(clip_names), 3), round((ends_at + 1) / len(clip_names), 3)]
+                if opens_at is not None and ends_at is not None and clip_names else None))))
 
         # A clip that carries reviewed intervals also anchors the subtasks built
         # below: `saw_clip_level` is what tells them a segmented account of this
@@ -1278,8 +2014,7 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
         names = frames_of(clip)
         if not names:
             return None
-        cut = round(len(names) * min(1.0, max(0.0, fraction))) - 1
-        return names[min(len(names) - 1, max(0, cut))]
+        return names[frame_at(names, fraction)]
 
     def blank_frame(target: dict, section_title: str | None = None,
                     position: tuple[int, int] | None = None) -> dict:
@@ -1303,6 +2038,11 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
         share = peers.index(section_title) if section_title in peers else 0
         index, count = position or (1, 1)
         fraction = (share + (index / count if count else 1)) / len(peers)
+        # Where that slice *starts*, which the single-frame path never needed.
+        # A step runs from the end of the previous step's slice to its own, and
+        # that span is the footage of this step — the frames the grader is shown
+        # are sampled across it rather than taken from its final instant alone.
+        opening = (share + ((index - 1) / count if count else 0)) / len(peers)
 
         frame = suggest_frame(clip, fraction)
         if not frame:
@@ -1319,7 +2059,18 @@ def photo_targets(acs: str, pack: dict | None) -> list[dict]:
             "frame_share": [share + 1, len(peers)] if len(peers) > 1 else None,
             "frame_fraction": round(fraction, 3),
         })
-        return target
+        # Steps only. A subtask target is graded against the finished article,
+        # and its slice of the clip spans the whole subtask — sampling across
+        # that would hand the grader three moments of work in progress to weigh
+        # against a criterion written about the completed result. A step has no
+        # such thing as a completed result: it is a slice of work by
+        # construction, which is why the frames of its own span are the best
+        # account of it available.
+        if target.get("kind") != "step":
+            return target
+        names = frames_of(clip)
+        window = names[frame_at(names, opening): frame_at(names, fraction) + 1]
+        return with_frames(target, clip, window, [round(opening, 3), round(fraction, 3)])
 
     # One target per pack section — the level the work is actually filmed and
     # taught at. Without these the tab jumped straight from individual steps to
@@ -1643,7 +2394,12 @@ class Handler(SimpleHTTPRequestHandler):
         if len(parts) == 3 and parts[0] == "photo" and parts[1] == "targets":
             acs = parts[2]
             pack, _, _ = load_pack(acs)
-            return self.send_json({"task_code": acs, "targets": photo_targets(acs, pack)})
+            frames_per_step = clamp_frames_per_step((query.get("frames") or [None])[0])
+            return self.send_json({
+                "task_code": acs,
+                "frames_per_step": frames_per_step,
+                "targets": photo_targets(acs, pack, frames_per_step),
+            })
 
         if len(parts) == 3 and parts[0] == "photo" and parts[1] == "runs":
             acs = parts[2]
@@ -1717,10 +2473,37 @@ class Handler(SimpleHTTPRequestHandler):
                         # null when they genuinely do not know — an unscored
                         # probe is still worth running.
                         "expected": v.get("expected") if v.get("expected") in vlm.EXPECTATIONS else None,
+                        # Provenance for a generated control: which kind it is,
+                        # and which criteria point it was made from. A miss is
+                        # only readable against the positive verdict for the
+                        # same condition, and without these the two cannot be
+                        # put side by side.
+                        **{k: v[k] for k in
+                           ("negative_kind", "negative_of", "positive_criterion")
+                           if v.get(k)},
                     }
                     for i, v in enumerate(body.get("variants") or [])
                     if isinstance(v, dict) and (v.get("criterion") or "").strip()
                 ]
+            # The negated sheet, saved the same way an edited criterion is: it
+            # is a criterion, graded by the same splitter against the same
+            # frame, and the only thing that makes it a control is the verdict
+            # it is expected to earn.
+            if "negative" in body:
+                negative = body.get("negative")
+                if isinstance(negative, dict) and (negative.get("criterion") or "").strip():
+                    entry["negative"] = {
+                        "criterion": negative["criterion"].strip(),
+                        "points": [p for p in (negative.get("points") or [])
+                                   if isinstance(p, dict)],
+                        "skipped": negative.get("skipped") or [],
+                        "of_criterion": (negative.get("of_criterion") or "").strip() or None,
+                        "model": negative.get("model"),
+                        "drafted_at": negative.get("drafted_at"),
+                        "reviewed_by": negative.get("reviewed_by"),
+                    }
+                else:
+                    entry["negative"] = None
             store[target_id] = entry
             write_criteria_store(acs, store)
             saved = read_criteria_store(acs).get(target_id) or {}
@@ -1729,6 +2512,7 @@ class Handler(SimpleHTTPRequestHandler):
                 "target_id": target_id,
                 "edited": bool((saved.get("criterion") or "").strip()),
                 "variants": saved.get("variants") or [],
+                "negative": saved.get("negative"),
             })
 
         if parts == ["photo", "draft"]:
@@ -1925,9 +2709,70 @@ class Handler(SimpleHTTPRequestHandler):
             result["of"] = len(names)
             return self.send_json(result)
 
+        # Generate match-test controls for one target. Returned, not saved: a
+        # generated criterion nobody read is exactly the kind of thing that
+        # quietly becomes a number in a report, so the operator saves it through
+        # the ordinary prompts endpoint once they have looked at it.
+        if len(parts) == 3 and parts[0] == "photo" and parts[1] == "negatives":
+            acs = parts[2]
+            kinds = tuple(k for k in (body.get("kinds") or
+                                      ["inversion", "substitution", "foreign"])
+                          if k in ("inversion", "substitution", "foreign"))
+            model = body.get("model") or BEST_VIEW_MODEL
+            pack, _, _ = load_pack(acs)
+            by_id = {t["target_id"]: t for t in photo_targets(acs, pack)}
+
+            # The default shape is a whole negated sheet — same sections, same
+            # numbering, split into points by the same parser — because that is
+            # the only shape whose result can be set beside the original's. The
+            # per-point controls remain available for a target with a single
+            # unstructured condition, which has no sheet to mirror.
+            if (body.get("shape") or "sheet") == "sheet":
+                edited = body.get("criteria") if isinstance(body.get("criteria"), dict) else {}
+                batch = body.get("target_ids")
+                if batch is None:
+                    target = by_id.get(body.get("target_id"))
+                    if not target:
+                        return self.send_error(404, "Unknown target")
+                    return self.send_json({
+                        "target_id": target["target_id"],
+                        **negative_sheet(acs, target,
+                                         (body.get("criterion") or "").strip() or None,
+                                         model),
+                    })
+                if not isinstance(batch, list) or not batch:
+                    return self.send_error(400, "target_ids must be a non-empty list")
+                return self.send_json(negative_sheets_batch(
+                    acs, batch, model, edited, targets=list(by_id.values())))
+
+            # `target_ids` writes controls for a whole selection in one request;
+            # `target_id` is the original single-target form the per-subtask
+            # button still uses. Both run the same drafting path.
+            batch = body.get("target_ids")
+            if batch is None:
+                target_id = body.get("target_id")
+                target = by_id.get(target_id)
+                if not target:
+                    return self.send_error(404, "Unknown target")
+                criterion = (body.get("criterion") or target.get("criterion") or "").strip()
+                if not criterion:
+                    return self.send_error(400, "This target has no criterion to negate")
+                points = sheet_checks(criterion) or [{"id": "c1", "statement": criterion,
+                                                      "defect": False}]
+                variants, spend = negative_variants(acs, target, points, model, kinds)
+                return self.send_json({"target_id": target_id, "variants": variants,
+                                       "points": len(points), "cost_usd": round(spend, 6)})
+
+            if not isinstance(batch, list) or not batch:
+                return self.send_error(400, "target_ids must be a non-empty list")
+            edited = body.get("criteria") if isinstance(body.get("criteria"), dict) else {}
+            return self.send_json(negative_variants_batch(
+                acs, batch, model, kinds, edited, targets=list(by_id.values())))
+
         if parts == ["photo", "estimate"]:
             return self.send_json(vlm.estimate_cost(
-                body.get("models") or [], int(body.get("calls_per_model") or 0)))
+                body.get("models") or [], int(body.get("calls_per_model") or 0),
+                float(body.get("images_per_call") or 1)))
 
         if parts == ["photo", "run"]:
             return self.handle_photo_run(body)
@@ -1942,7 +2787,9 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_error(400, "task_code, models and target_ids are required")
 
         pack, _, _ = load_pack(acs)
-        targets = [t for t in photo_targets(acs, pack) if t["target_id"] in wanted]
+        frames_per_step = clamp_frames_per_step(body.get("frames_per_step"))
+        targets = [t for t in photo_targets(acs, pack, frames_per_step)
+                   if t["target_id"] in wanted]
         # Criteria edited in the browser but not yet saved arrive with the run.
         inline = body.get("criteria") or {}
         for target in targets:
@@ -1964,12 +2811,35 @@ class Handler(SimpleHTTPRequestHandler):
             # task; the name lands in a filesystem path.
             if frame not in frame_names(acs, video, "detail") or not path.is_file():
                 continue
+            # A frame chosen by hand is a decision about which photograph the
+            # criterion is tried against, so it replaces the sample rather than
+            # joining it. Sampling around it would grade footage the operator
+            # looked at and passed over.
             target.update({
                 "video": video, "frame": frame, "frame_exists": True,
                 "frame_url": f"/files/build/frames/{acs}/{video}/{frame}",
+                "frames": [frame], "frame_picked": True,
+                "frame_urls": [f"/files/build/frames/{acs}/{video}/{frame}"],
             })
 
+        # One extra frame per target: the one that best shows the state the work
+        # ends in. The sample is equidistant and therefore blind — it lands where
+        # the arithmetic puts it, which on this footage is regularly a hand or a
+        # tool across the workpiece. This asks a model which frame of the step
+        # actually shows the finished article, and appends it. Chosen once per
+        # target and shared by every model grading it, so the cost is one call
+        # per target rather than one per cell.
+        if body.get("best_view", True):
+            for target in targets:
+                add_best_view(acs, target, body.get("best_view_model"))
+
         inline_variants = body.get("variants") or {}
+        # The negated sheets, from the browser where the operator may have
+        # edited them, falling back to what was saved. Graded on the same frames
+        # as the criteria they mirror — a control tried against different
+        # evidence measures the evidence, not the grader.
+        inline_negatives = body.get("negatives") or {}
+        include_negative = bool(body.get("include_negative", True))
         items = []
         for target in targets:
             if not (target["frame_exists"] and target["criterion"]):
@@ -1978,6 +2848,12 @@ class Handler(SimpleHTTPRequestHandler):
                 "upload_path": target.get("upload_path"),
                 "video": target["video"], "frame": target["frame"],
                 "frame_url": target["frame_url"], "step_id": target["step_id"],
+                "polarity": "original", "negative_of": None,
+                # Every frame the grader is shown, in the order it sees them.
+                # `frame` remains the last — the state the step ends in — so a
+                # reader wanting one frame still gets the one it always got.
+                "frames": target.get("frames") or [],
+                "best_view": target.get("best_view"),
                 "expected": None,
                 "is_control": False, "is_variant": False, "variant_of": None,
                 "framing": target.get("framing"),
@@ -2008,6 +2884,15 @@ class Handler(SimpleHTTPRequestHandler):
             else:
                 items.append({**base, "target_id": target["target_id"],
                               "label": target["label"], "criterion": target["criterion"]})
+
+            # The same subtask graded against a criterion that does not describe
+            # it. Its points are built exactly as the originals are — same
+            # splitter, same roll-up, one call per point — so the two verdicts
+            # are the same measurement and the pass rates can be subtracted.
+            # What differs is only the verdict each point is expected to earn.
+            items.extend(negative_items(target, base, include_negative,
+                                        inline_negatives.get(target["target_id"])))
+
             # Match test: the same frame against reworded criteria. Unsaved
             # variants arrive with the run so the browser stays the source of
             # truth for work in progress.
@@ -2020,6 +2905,12 @@ class Handler(SimpleHTTPRequestHandler):
                     "target_id": f"{target['target_id']}#{variant.get('id')}",
                     "label": f"{target['label']} → {variant.get('label') or 'variant'}",
                     "video": target["video"], "frame": target["frame"],
+                    # The same frames as the point it varies, or the match test
+                    # compares a reworded criterion against different evidence
+                    # and attributes the difference to the wording.
+                    "frames": target.get("frames") or [],
+                    "best_view": target.get("best_view"),
+                    "upload_path": target.get("upload_path"),
                     "frame_url": target["frame_url"], "criterion": criterion,
                     "step_id": target["step_id"],
                     "expected": variant.get("expected") if variant.get("expected") in vlm.EXPECTATIONS else None,
@@ -2030,22 +2921,46 @@ class Handler(SimpleHTTPRequestHandler):
 
         jobs = []
         for item in items:
-            frame_path = item.get("upload_path") or (
-                str(FRAME_SETS["detail"] / acs / item["video"] / item["frame"])
-                if item.get("video") and item.get("frame") else None
-            )
+            if item.get("upload_path"):
+                paths = [item["upload_path"]]
+            elif item.get("video") and item.get("frames"):
+                paths = [str(FRAME_SETS["detail"] / acs / item["video"] / f)
+                         for f in item["frames"]]
+            elif item.get("video") and item.get("frame"):
+                paths = [str(FRAME_SETS["detail"] / acs / item["video"] / item["frame"])]
+            else:
+                paths = []
             base_cell = {
                 "target_id": item["target_id"], "label": item["label"],
                 "frame": item["frame"], "video": item["video"],
+                # Which frames produced this verdict. A cell graded on three
+                # frames and one graded on one are not the same measurement, and
+                # a saved run that does not say which it was cannot be compared
+                # with an earlier one.
+                "frames": item.get("frames") or ([item["frame"]] if item.get("frame") else []),
+                "best_view": item.get("best_view"),
                 "criterion": item["criterion"],
                 "expected": item["expected"], "is_control": item["is_control"],
                 "is_variant": item.get("is_variant", False),
                 "variant_of": item.get("variant_of"),
+                # Which side of the comparison this verdict belongs to, carried
+                # on the result itself. A saved run is regrouped from its
+                # results, and a polarity inferred from the id would be one
+                # `#negative` string away from silently mixing the two.
+                "polarity": item.get("polarity") or "original",
+                "negative_of": item.get("negative_of"),
+                "negative_of_point": item.get("negative_of_point"),
+                "positive_criterion": item.get("positive_criterion"),
             }
             for model_id in model_ids:
                 jobs.append({
                     "model": model_id, "criterion": item["criterion"], "context": context,
-                    "image_path": frame_path,
+                    "image_paths": paths,
+                    # Frames of one step in chronological order, not a set of
+                    # photographs of different subjects. The grader is told which
+                    # it is looking at, because the two are read differently.
+                    "sequence": len(paths) > 1 and not item.get("upload_path"),
+                    "best_view": item.get("best_view"),
                     "mode": "correctness",
                     "cell": {**base_cell, "mode": "correctness",
                              "rolls_up_to": item.get("rolls_up_to"),
@@ -2091,6 +3006,8 @@ class Handler(SimpleHTTPRequestHandler):
                 continue
             entry = rollups.setdefault(f"{parent}|{result['model']}", {
                 "target_id": parent, "model": result["model"],
+                "polarity": result.get("polarity") or "original",
+                "negative_of": result.get("negative_of"),
                 "checks": 0, "passed": 0, "failed": [], "unsettled": [],
             })
             entry["checks"] += 1
@@ -2129,6 +3046,10 @@ class Handler(SimpleHTTPRequestHandler):
                 "scored": len(scored),
                 "scored_correct": scored_hits,
                 "match_accuracy": round(scored_hits / len(scored), 3) if scored else None,
+                # The criteria against their own negations, which is the only
+                # part of the run that separates a grader from a model agreeing
+                # with whatever it is handed.
+                "polarity": polarity_report(results, list(rollups.values())),
             },
         }
         out = PHOTO_DIR / acs / f"{run['run_id']}.json"

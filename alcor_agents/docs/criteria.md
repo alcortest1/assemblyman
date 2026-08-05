@@ -159,8 +159,8 @@ All eleven tasks, after one sweep at about $15 of Opus 5:
 | AM.I.C.S3 | 4 | 16 | 12 | 8 | 30B 6-3..6-6 *(searched)* |
 | AM.I.C.S5 | 7 | 27 | 22 | 11 | 30B 6-3..6-6 *(searched)* |
 | AM.I.D.S1 | 23 | 95 | 73 | 27 | 30B 9-1..9-7 |
-| AM.I.D.S7 | 7 | 29 | 21 | 11 | 30B 9-16..9-23 |
-| AM.I.D.S8 | 3 | 12 | 11 | 7 | 30B 9-5..9-8 |
+| AM.I.D.S7 | 14 | 56 | 45 | 20 | 30B 9-16..9-23 *(+drafted steps)* |
+| AM.I.D.S8 | 11 | 44 | 37 | 14 | 30B 9-5..9-8 *(+drafted steps)* |
 | AM.I.E.S1 | 13 | 27 | 23 | 177 | 30B 7-77..7-80 *(hand-compiled)* |
 | AM.I.I.S1 | 10 | 41 | 31 | 14 | 30B 2-14..2-17 *(searched)* |
 | AM.II.A.S6 | 32 | 136 | 105 | 37 | 31B 4-85..4-96 |
@@ -175,6 +175,19 @@ counts rise only by the handful of steps no reviewed segment covered.
 AM.III.M.S5 is the one task with no source video — "not AIM developed" in the
 workbook — so it has criteria and no frames at all, permanently. That is the case
 that settles the design: a criterion cannot depend on a photograph existing.
+
+*(+drafted steps)* marks a task whose AIM skill sheet stops before the work its
+own title describes. AM.I.D.S8's sheet ends at "Deburr the tubing ends" and
+AM.I.D.S7's at "Verify the cuts", yet both sheets list equipment — flareless
+sleeve, B-nut and mandrel; MS fittings and hydraulic fluid — that no documented
+step ever touches. The missing operations are drafted in
+`tasks/<ACS>/steps_supplement.json` from the handbook pages the sheet itself
+cites, cross-checked against the reference video, and every step from that file
+carries `origin: drafted` and `assumed: true` with an entry in `assumptions:`.
+The supplement is a separate file because `packs/ingest.py` rewrites `steps.json`
+from the `.docx` on every run, so a step added there would not survive the next
+ingest. These steps are proposals about scope, not campus standards, and the
+packs stay `draft` until AIM confirms them.
 
 ## Running it
 
@@ -251,6 +264,29 @@ as written, "Tube is kinked or collapsed flat at the bend" scores a `pass` on a
 kinked tube, which is not merely wrong but backwards, and reads as a clean
 result.
 
+**A step criterion splits too**, and for a while it did not. A sheet carries
+`Criteria` and `Critical defects` headings; a step criterion is a bare list of
+`- ` bullets, which is what `compile_pack.py` drafts and what
+`_criterion_for_step` assembles. Only the sheet shape was recognised, so every
+step fell through to a single call carrying all its conditions at once — and
+`apply_thresholds` fails a criterion on one failed condition and abstains on one
+unobservable one. A four-condition step could therefore only pass when all four
+cleared, which across every saved run happened **7 times in 753 calls**.
+
+That also quietly invalidated the reasoning behind `_criterion_for_step`
+including `measurement` and `document` checks: it argued each check gets its own
+call, so a measurement "comes back `unsure` on its own line and takes nothing
+else with it". True of sheets, false of steps — those checks dragged whole steps
+to `unsure`. Splitting the bullet shape is what makes the argument true.
+
+Reviewed intervals split on the same rule, since their criterion is a pack-checks
+bullet list. The cost is real: a full run of AM.I.E.S1 goes from 174 calls to
+270. Projected against the saved replies, point-level results go from 1% `pass`
+to 29%, and the step roll-up from 1% to 7%.
+
+A single condition is deliberately *not* split. Splitting it would relabel the
+target as a roll-up of one, and the call is identical either way.
+
 The grid reports the other way round. Sixty-two points across seven subtasks is
 sixty-two rows of near-identical text, so the points are regrouped into one row
 per subtask and one cell per model, each cell listing its own points and their
@@ -266,6 +302,46 @@ point is graded against a reference frame: footage of work an instructor
 accepted. That inference is the row's whole caveat and is stated beneath it. A
 model that passes everything scores like one that grades, which is what the match
 test exists to separate.
+
+### How sure a grader must be, and what that never buys
+
+`DEFAULT_PASS_THRESHOLD` is **0.60**, set from the replies rather than from
+principle. The graders reach 0.95 on 40% of the observable conditions of a
+subtask sheet but only 22% of a step's, and on hard footage never: across
+AM.I.D.S1's 23 steps, **zero of 93 conditions cleared 0.95**, so no step could
+pass whatever its workmanship. Their affirmative answers cluster at 0.70–0.90.
+What they express there is ordinary reading of a photograph, not the
+near-certainty 0.95 demands, and holding out for near-certainty converted every
+ordinary yes into an abstention.
+
+Lowering it does not weaken what protects a bad crimp. `apply_thresholds` keeps
+both rules that carry the safety weight, at any threshold: **a condition the
+photo cannot show never passes**, and **one failed condition fails the whole
+criterion**. What changes is only how sure a grader must be about something it
+can actually see. Re-thresholding every saved run from 0.95 to 0.60 moves
+1003 `fail` verdicts not at all — it converts 306 abstentions into passes.
+
+Thresholds live in `apply_thresholds` rather than in the prompt precisely so they
+can be retuned against a saved run without spending another call, which is how
+the figure above was chosen.
+
+### An interval with no pack step has no criterion
+
+Where a reviewed interval resolves to no pack step, there is no acceptance
+standard for the work in it. There *is* a reviewer's description of the footage,
+and that used to become the criterion — which is not a weaker criterion but a
+different kind of thing: prose about one moment of a clip, graded against a
+photograph of another. Ninety targets across AM.I.E.S1 and AM.II.K.S3 were built
+this way, and they returned `fail` on **39% of 362 calls**, the highest rate of
+any criterion source and none of it about workmanship. It is also the
+circularity `DRAFT_PROMPT` exists to prevent — a model describing what it sees
+and that description becoming the standard — arriving by a door that prompt does
+not cover.
+
+Those intervals are still listed and still carry their description, which is what
+an author writes a criterion *from*. They are flagged `needs_criteria`, so the
+tab shows them and the run skips them, exactly as it already did for a
+clip-derived subtask with no sheet.
 
 ### Which frame a criterion is tried against
 
@@ -308,6 +384,58 @@ than the frame — name overlap put "Insert the Pin into the Electrical Connecto
 on `elect_conn_2` on the words *electrical* and *connector*, but the work was
 filmed in `elect_conn_5`, and a subtask whose frame comes from one clip while its
 clip says another is filed under the wrong roll-up.
+
+### A step is graded on several frames of its own span
+
+Everything above chooses **one** frame, and for a subtask that is the right
+number: it is graded against the finished article, and moments of it in progress
+are not evidence about that. A step is not a finished article. It is a slice of
+work by construction, its frame is a guess at the instant the slice ended, and
+the guess lands mid-action often enough to dominate the results — across every
+saved run, **81% of the conditions inside a step call came back unobservable**,
+objecting to a hand, a tool or a fixture rather than to the work.
+
+So a step-level target carries `frames_per_step` frames of its own span instead,
+sampled by `sample_frames()`:
+
+| k | frames |
+|---|---|
+| 1 | the frame the step ends on — identical to the single-frame behaviour |
+| 2 | start and end |
+| 3 | start, middle, end |
+| 4 | 0%, 33%, 66%, 100% |
+
+Both ends are always included and the window is deduplicated, so a step shorter
+than *k* frames sends what it has rather than paying for the same image twice.
+The span itself comes from whichever source the target has: a reviewed interval
+states its `frame_start` and `frame_end`, and a pack step occupies the slice
+between the previous step's boundary and its own. `frame` remains the last of
+them, so every saved run stays comparable — `frames_per_step=1` moves no frame
+that already existed, and there is a test that asserts exactly that across three
+tasks.
+
+One further frame is added at run time: the one a model picks as the clearest
+view of the state the work ends in, searched over the step's own span. It is an
+**addition, never a substitution** — the sampled frames are what establish what
+that end state is, and a picked frame that flattered the work would otherwise be
+the only evidence of it. Where no frame shows finished work the picker says so
+and the sample stands, because presenting a mid-action image as the clearest view
+of a result is worse than presenting no such view at all. It costs one call per
+target, shared by every model grading it.
+
+The wording matters as much as the frames. A task-level submission is several
+photographs of **different subjects**, and any one of them may satisfy a
+condition. Frames of one step are the opposite: one piece of work photographed
+repeatedly while it was being made. Graded under the any-photo rule they would
+pass a wire that was seated at the halfway mark and pulled loose by the end — the
+pass rate would rise, and rise for the wrong reason. `sequence_note()` says
+instead that the verdict is about the state at the **end** of the step, that
+earlier frames exist only to see past what occludes it there, and that a
+condition the final frame shows unmet is never credited from an earlier one.
+
+Cost is linear in frames but not proportional to them: the prompt and the reply
+are paid for once however many are attached, so three frames land near twice the
+price of one rather than three times it.
 
 ### It is still not an assessment photo
 

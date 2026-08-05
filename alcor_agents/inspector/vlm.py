@@ -1073,6 +1073,271 @@ def draft_step_rubric(*, model: str, sources: str, step: str, adjust: str | None
             "latency_s": result["latency_s"], **parsed}
 
 
+# ------------------------------------------------------------ match controls
+#
+# A run against reference frames cannot tell a grader from a rubber stamp: the
+# footage shows work an instructor accepted, so `pass` is the right answer
+# everywhere and a model that passes everything scores like one that reads. The
+# only way to separate them is to hand the same photograph a criterion it should
+# NOT satisfy and see whether the verdict follows.
+#
+# Writing one is harder than it sounds, and there are two ways to write a
+# control that measures nothing. An *unverifiable* negation — "the alloy is
+# 2024-T3" — is answered `unsure` by a grader behaving perfectly, so it tests
+# observability rather than reading. An *absurd* negation is rejected by anything
+# that parses English. What discriminates is a negation that is plausible, about
+# the same article in the same frame, and positively contradicted by the work in
+# front of it, so that only `fail` is correct and abstaining is a miss.
+
+NEGATIVE_PROMPT = """\
+You are writing CONTROL criteria for an aircraft-maintenance grading pilot.
+
+You are given ONE acceptance criterion — a single condition that correct work \
+satisfies — and the article it is about. Write versions of it that correct work \
+VIOLATES, so that a grader looking at a photograph of correct work must answer \
+FAIL.
+
+This exists to catch a model that agrees with whatever it is handed. A control \
+only catches that if the correct answer is unambiguously FAIL. Two kinds:
+
+INVERSION — reverse the condition itself. "The twists are even and tight" \
+becomes "the wire between the bolt heads is untwisted and hangs visibly slack". \
+The article is the same and still in frame; what it must look like is now the \
+opposite.
+
+SUBSTITUTION — change exactly ONE specific: a direction, a count, a position, a \
+named part, an orientation. "Routed so tension pulls the bolt in the tightening \
+direction" becomes "...in the loosening direction". Everything else stays \
+word-for-word. This catches a model matching vocabulary rather than reading.
+
+EVERY CONTROL MUST
+  * describe the SAME visible article as the original, in the same photograph
+  * be a plausible way this work actually goes wrong, in the register a rubric \
+uses — an instructor reading it should not be able to tell it is synthetic
+  * be POSITIVELY CONTRADICTED by correct work: something the photograph shows \
+is not so, not something the photograph cannot settle
+  * stay roughly the length of the original
+
+NEVER
+  * Never negate an unobservable property. "The alloy is not 2024-T3", "the \
+torque is below 40 in-lb", "the interior is corroded" are answered "cannot \
+tell" by a grader doing its job, and a control that earns an abstention has \
+measured nothing.
+  * Never write something absurd or impossible. "The wire is made of cheese" is \
+rejected by anything that reads English and proves nothing about grading.
+  * Never introduce a measurement, scale reference or instrument the original \
+criterion did not already require.
+  * Never merely delete the condition or write "the opposite of the above". \
+State the wrong condition in full, as a rubric would.
+
+If the criterion is one whose negation cannot satisfy these rules — because it \
+rests on something a photograph cannot settle in the first place — return an \
+empty `negatives` list and say why in `skipped`. A missing control is honest; a \
+control that can only ever be answered "unsure" is not.
+
+Reply with JSON only, no prose around it:
+{"negatives": [
+   {"kind": "inversion" | "substitution",
+    "criterion": "<the wrong condition, stated in full>",
+    "changed": "<what you altered, under 12 words>"}
+ ],
+ "skipped": "<why no usable control exists for this criterion, or null>"}
+
+One inversion and one substitution where both work; fewer if only one does."""
+
+
+def draft_negative_criteria(
+    *, model: str, criterion: str, subject: str | None = None,
+    key: str | None = None, max_tokens: int = 2400, post=_post,
+) -> dict:
+    """Write controls a photograph of *correct* work should fail.
+
+    Returns `negatives`, each carrying the verdict it ought to get. Inversions
+    and substitutions expect `fail` rather than `not_pass`: the article is in
+    frame and the work contradicts the wording, so an abstention is a miss and
+    scoring it as a pass would forgive the exact behaviour the control is for.
+
+    `max_tokens` has to leave room for the reply *after* the model has thought.
+    At 900 the reasoning models spent the budget before finishing the JSON and
+    the reply came back truncated mid-string — `unparsed`, which the caller
+    skips silently — so a seven-point sheet yielded one control and read as a
+    sheet that only had one worth writing.
+    """
+    if not (criterion or "").strip():
+        return {"error": "no_criterion", "message": "Nothing to negate."}
+    parts = [f"CRITERION\n{criterion.strip()}"]
+    if subject and subject.strip():
+        parts.append(f"THE ARTICLE IN THE PHOTOGRAPH\n{subject.strip()}")
+    parts.append("Write the controls for THIS criterion.")
+
+    result = _complete(model=model, system=NEGATIVE_PROMPT, user_text="\n\n".join(parts),
+                       max_tokens=max_tokens, key=key, post=post)
+    if result.get("error"):
+        return result
+    parsed = parse_json_object(result["text"])
+    if parsed is None:
+        return {"error": "unparsed", "message": "Reply was not JSON.",
+                "raw_text": result["text"][:800], "cost_usd": result["cost_usd"]}
+    negatives = []
+    for item in parsed.get("negatives") or []:
+        text = str((item or {}).get("criterion") or "").strip()
+        kind = str((item or {}).get("kind") or "").strip().lower()
+        if not text or kind not in ("inversion", "substitution"):
+            continue
+        negatives.append({"kind": kind, "criterion": text,
+                          "changed": (item.get("changed") or "").strip(),
+                          "expected": "fail"})
+    return {"error": None, "negatives": negatives,
+            "skipped": parsed.get("skipped"),
+            "cost_usd": result["cost_usd"], "latency_s": result["latency_s"]}
+
+
+# A control written one condition at a time is sharp, but it is not a criterion:
+# it is a loose line with no sheet around it, so it cannot be graded the way the
+# real thing is graded and its result cannot be put beside the real thing's. What
+# answers "does the pass rate fall when the criterion no longer describes the
+# work" is a whole sheet, negated point for point and graded by the same splitter
+# — same numbering, same defect section, same roll-up. That is what this drafts.
+#
+# The defects section inverts the other way round, and getting it backwards is
+# the failure that would quietly invalidate the whole comparison. A sheet's
+# defect is a thing whose *presence* fails the work, and `sheet_checks` grades it
+# as an absence ("shows no such defect: tube end crushed flat"), which correct
+# work passes. So the negated defect is the state correct work actually shows —
+# "tube end is open and round" — whose absence is then false, and the point
+# fails. Negating the defect into a second, different defect would leave it
+# passing and the negative sheet would score like the original.
+
+NEGATIVE_SHEET_PROMPT = """\
+You are writing a CONTROL grading sheet for an aircraft-maintenance pilot.
+
+You are given a subtask's real grading criteria: numbered conditions correct \
+work satisfies, and critical defects whose presence fails the work. Rewrite it \
+into a sheet that correct work FAILS — the same instrument, aimed the wrong way.
+
+This exists to catch a grader that agrees with whatever it is handed. It only \
+catches that if, on a photograph of correct work, the right answer to every \
+line is unambiguously FAIL.
+
+Rewrite the NUMBERED CRITERIA only — one output for each input, same number, \
+same order. The sheet's critical defects are handled elsewhere and are shown to \
+you only as context; do not rewrite them. Each line is either:
+  INVERSION — reverse the condition. "The twists are even and tight" becomes \
+"the wire between the bolt heads is untwisted and hangs visibly slack".
+  SUBSTITUTION — change exactly ONE specific: a direction, a count, a position, \
+a named part, an orientation. "Routed so tension pulls the bolt in the \
+tightening direction" becomes "...in the loosening direction". Everything else \
+stays word-for-word.
+
+EVERY LINE MUST
+  * describe the SAME visible article as the line it replaces, in the same \
+photograph
+  * be POSITIVELY CONTRADICTED by correct work: something the photograph shows \
+is not so, not something the photograph cannot settle
+  * stay roughly the length of the line it replaces, and read like a rubric — \
+an instructor should not be able to pick it out as synthetic
+  * never negate an unobservable property. "The alloy is not 2024-T3", "the \
+torque is below 40 in-lb" are answered "cannot tell" by a grader doing its job, \
+and a line that earns an abstention has measured nothing.
+  * never introduce a measurement, scale reference, rule or instrument the \
+original line did not already require. "Twist density measured against a rule in \
+frame shows 1-3 per inch" cannot be answered from a photograph with no rule in \
+it, so it measures the framing rather than the grading.
+  * never be absurd. "The wire is made of cheese" proves nothing about grading.
+
+Where a line rests on something a photograph cannot settle in the first place, \
+omit it from `criteria` and record it in `skipped` with its number. A missing \
+line is honest; one that can only be answered "unsure" is not.
+
+Keep it short. Reply with JSON only, no prose around it and no repetition of \
+the original text:
+{"criteria": [{"n": 1, "statement": "<the wrong condition, in full>",
+               "kind": "inversion" | "substitution",
+               "changed": "<what you altered, under 12 words>"}],
+ "skipped":  [{"n": 2, "why": "<short reason>"}]}"""
+
+
+def draft_negative_sheet(
+    *, model: str, criterion: str, subject: str | None = None,
+    key: str | None = None, max_tokens: int = 4000, post=_post,
+) -> dict:
+    """Negate a criterion sheet's numbered conditions, line for line.
+
+    Returns the negated lines keyed by the number they replace, so the caller
+    can rebuild the sheet in the original's own shape rather than trusting a
+    model to reproduce headings. A line the model declined to negate is reported
+    in `skipped` rather than dropped: a negative sheet with four of seven points
+    is a weaker control than one with seven, and the operator can only know that
+    if the three are named.
+
+    Critical defects are not asked for. A defect is graded as an absence, so
+    negating one means naming the condition correct work *does* show — and asked
+    for that, the model returned the original defect unchanged about a third of
+    the time. Restated as a defect, that line reads "the work shows no such
+    defect" about a defect that is genuinely absent, so it comes back `pass` on
+    correct work and the control silently stops controlling. The caller inverts
+    them arithmetically instead, where the polarity cannot be got wrong.
+    """
+    if not (criterion or "").strip():
+        return {"error": "no_criterion", "message": "Nothing to negate."}
+    parts = [f"GRADING CRITERIA\n{criterion.strip()}"]
+    if subject and subject.strip():
+        parts.append(f"THE ARTICLE IN THE PHOTOGRAPH\n{subject.strip()}")
+    parts.append("Write the control sheet for THESE criteria.")
+    user_text = "\n\n".join(parts)
+
+    # A reasoning model spends the budget thinking before it answers, and a
+    # reply cut off mid-string parses as nothing at all — which the caller reads
+    # as "this sheet had no negatable line". Retried once with room rather than
+    # reported as a sheet that could not be negated.
+    attempts = []
+    for budget in (max_tokens, max_tokens * 2):
+        result = _complete(model=model, system=NEGATIVE_SHEET_PROMPT,
+                           user_text=user_text, max_tokens=budget, key=key, post=post)
+        attempts.append(result)
+        if result.get("error"):
+            break
+        parsed = parse_json_object(result["text"])
+        if parsed is not None:
+            break
+    else:
+        parsed = None
+    spend = round(sum(a.get("cost_usd") or 0 for a in attempts), 6)
+    if attempts[-1].get("error"):
+        return {**attempts[-1], "cost_usd": spend}
+    if parsed is None:
+        return {"error": "unparsed",
+                "message": f"Reply was not JSON after {len(attempts)} attempt(s); "
+                           "the model may have been cut off mid-reply.",
+                "raw_text": attempts[-1]["text"][:800], "cost_usd": spend}
+
+    criteria: dict[int, dict] = {}
+    for item in parsed.get("criteria") or []:
+        if not isinstance(item, dict):
+            continue
+        text = str(item.get("statement") or "").strip()
+        try:
+            number = int(item.get("n"))
+        except (TypeError, ValueError):
+            continue
+        if not text or number < 1:
+            continue
+        kind = str(item.get("kind") or "inversion").strip().lower()
+        criteria[number] = {
+            "statement": text,
+            "kind": kind if kind in ("inversion", "substitution") else "inversion",
+            "changed": str(item.get("changed") or "").strip(),
+        }
+
+    skipped = [
+        {"n": item.get("n"), "section": item.get("section") or "criteria",
+         "why": str(item.get("why") or "").strip()}
+        for item in (parsed.get("skipped") or []) if isinstance(item, dict)
+    ]
+    return {"error": None, "criteria": criteria, "skipped": skipped,
+            "cost_usd": spend, "latency_s": attempts[-1]["latency_s"]}
+
+
 def build_adequacy_prompt(description: str, framing: str | None = None) -> str:
     parts = [f"THE PHOTO IS REQUIRED TO SHOW\n{description.strip()}"]
     if framing and framing.strip():
@@ -1081,15 +1346,81 @@ def build_adequacy_prompt(description: str, framing: str | None = None) -> str:
     return "\n\n".join(parts)
 
 
-def build_user_prompt(criterion: str, context: str | None = None) -> str:
+def build_user_prompt(criterion: str, context: str | None = None,
+                      count: int = 1) -> str:
     parts = [f"CRITERION\n{criterion.strip()}"]
     if context and context.strip():
         parts.append(f"TASK CONTEXT (background only — do not grade against this)\n{context.strip()}")
-    parts.append("Grade the attached photo against the CRITERION.")
+    # Plural where several images are attached, or the instruction contradicts
+    # the note below it about how many there are.
+    parts.append(f"Grade the attached {'photos' if count > 1 else 'photo'} "
+                 "against the CRITERION.")
     return "\n\n".join(parts)
 
 
-DEFAULT_PASS_THRESHOLD = 0.95
+def sequence_note(count: int, best_view: str | None = None) -> str:
+    """How to read several frames of the *same* work at successive moments.
+
+    A task-level submission is several photographs of different subjects, and
+    any one of them may satisfy a condition. Frames of one step are not that:
+    they are one piece of work photographed repeatedly while it was being made,
+    so "any frame shows it met" would pass a wire that was seated at the halfway
+    mark and pulled loose by the end. What is being graded is the state the work
+    is in when the step finishes, and the earlier frames are there to see past
+    the hand or the tool that occludes it in the last one.
+
+    That asymmetry is the whole reason for the extra wording. Without it the
+    additional frames raise the pass rate by letting a grader pick whichever
+    moment looked best, which is precisely the wrong way for it to rise.
+    """
+    lines = [
+        f"{count} frames are attached, in chronological order. They are the SAME "
+        "piece of work at successive moments of one step — not photographs of "
+        "different subjects.",
+        "",
+        "Grade the state the work is in at the END of the step. The final frame "
+        "shows that state.",
+        "",
+        "Use the earlier frames only to see what the final frame cannot show you: "
+        "a feature a hand or tool covers at the end, a face that has turned away "
+        "from the camera, a detail that was in focus earlier. Judge such a feature "
+        "as it was LAST clearly seen.",
+        "",
+        "Never credit a condition the final frame shows unmet because an earlier "
+        "frame showed it met. Work that was correct mid-step and is wrong at the "
+        "end is wrong.",
+    ]
+    if best_view:
+        # Named rather than merely appended, because its position in the
+        # sequence is otherwise misleading: it is the clearest view of the
+        # result, not a later moment than the frame before it.
+        lines += [
+            "",
+            "One of the attached frames was selected as the clearest view of the "
+            "finished state rather than for its position in time. Where it "
+            "disagrees with another frame about what is visible, prefer it — it "
+            "was chosen because the view is better, not because the work changed.",
+        ]
+    return "\n".join(lines)
+
+
+# The probability a condition must reach before it counts as satisfied.
+#
+# Set from the replies rather than from principle. Across every saved run the
+# graders reach 0.95 on 40% of the observable conditions of a subtask sheet but
+# only 22% of a step's, and on the harder footage they never reach it at all —
+# on AM.I.D.S1's 23 steps, zero of 93 conditions cleared 0.95, so no step could
+# pass whatever its workmanship. Their affirmative answers cluster at 0.70-0.90:
+# what the models express there is ordinary reading of a photograph, not the
+# near-certainty 0.95 asks for, and holding out for near-certainty converted
+# every ordinary yes into an abstention.
+#
+# Lowering it does not weaken what protects a bad crimp. `apply_thresholds`
+# keeps both rules that carry the safety weight, at any threshold: a condition
+# the photo cannot show never passes, and one failed condition fails the whole
+# criterion. What changes is only how sure a grader must be about something it
+# can actually see.
+DEFAULT_PASS_THRESHOLD = 0.60
 DEFAULT_FAIL_THRESHOLD = 0.20
 
 
@@ -1282,6 +1613,8 @@ def grade(
     mode: str = "correctness",
     framing: str | None = None,
     image_paths: list[Path] | None = None,
+    sequence: bool = False,
+    best_view: str | None = None,
     pass_at: float = DEFAULT_PASS_THRESHOLD,
     fail_at: float = DEFAULT_FAIL_THRESHOLD,
 ) -> dict:
@@ -1291,6 +1624,11 @@ def grade(
     the finished work is right, and the pack requires several photos to show
     that, so forcing it through a single frame guarantees a failure that says
     nothing about the work. `image_path` remains for the single-photo case.
+
+    `sequence` says those images are frames of ONE piece of work at successive
+    moments rather than photographs of different subjects. The two are read
+    differently and the difference decides verdicts, so it is an explicit flag
+    and not something inferred from the count — see `sequence_note`.
 
     `mode` selects the grader: "correctness" judges the work, "adequacy" judges
     whether the photo is usable evidence at all.
@@ -1319,12 +1657,13 @@ def grade(
         text = (f"CRITERION AND SCORING RUBRIC\n{criterion.strip()}\n\n"
                 "Grade the attached photo of the finished work against this rubric.")
     else:
-        text = build_user_prompt(criterion, context)
+        text = build_user_prompt(criterion, context, len(paths))
     # With several photos the model must be told they are one submission, or it
     # grades whichever it happened to look at last.
     if len(paths) > 1:
-        text += (
-            f"\n\n{len(paths)} photos are attached, numbered in order. They are ONE "
+        text += "\n\n" + (
+            sequence_note(len(paths), best_view) if sequence else
+            f"{len(paths)} photos are attached, numbered in order. They are ONE "
             "submission covering this work between them. A criterion is met if any "
             "photo shows it met; judge the set, not each photo separately."
         )
@@ -1444,6 +1783,8 @@ def grade_many(jobs: list[dict], key: str | None = None, workers: int = 4, post=
             criterion=job["criterion"],
             context=job.get("context"),
             mode=job.get("mode", "correctness"),
+            sequence=bool(job.get("sequence")),
+            best_view=job.get("best_view"),
             pass_at=pass_at, fail_at=fail_at,
             framing=job.get("framing"),
             key=key,
@@ -1457,9 +1798,18 @@ def grade_many(jobs: list[dict], key: str | None = None, workers: int = 4, post=
         return list(pool.map(run, jobs))
 
 
-def estimate_cost(model_ids: list[str], calls_per_model: int) -> dict:
-    """Rough pre-run estimate. A 960px frame lands near 1.5k image tokens."""
+def estimate_cost(model_ids: list[str], calls_per_model: int,
+                  images_per_call: float = 1) -> dict:
+    """Rough pre-run estimate. A 960px frame lands near 1.5k image tokens.
+
+    `images_per_call` is what makes a multi-frame run's estimate honest. Cost is
+    linear in images but not proportional to them — the prompt and the reply are
+    paid for once however many frames are attached — so three frames land near
+    twice the price of one rather than three times it. An estimate that silently
+    assumed one frame understated a k=3 run by about half.
+    """
     IMAGE_TOKENS, TEXT_IN, TEXT_OUT = 1500, 400, 250
+    images = max(1.0, float(images_per_call))
     total = 0.0
     per_model = {}
     for model_id in model_ids:
@@ -1467,9 +1817,10 @@ def estimate_cost(model_ids: list[str], calls_per_model: int) -> dict:
         if not meta:
             continue
         cost = calls_per_model * (
-            (IMAGE_TOKENS + TEXT_IN) * meta["in_per_m"] + TEXT_OUT * meta["out_per_m"]
+            (IMAGE_TOKENS * images + TEXT_IN) * meta["in_per_m"] + TEXT_OUT * meta["out_per_m"]
         ) / 1e6
         per_model[model_id] = round(cost, 4)
         total += cost
     return {"total_usd": round(total, 4), "per_model": per_model,
-            "calls": calls_per_model * len(per_model)}
+            "calls": calls_per_model * len(per_model),
+            "images_per_call": images}
