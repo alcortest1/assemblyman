@@ -1,0 +1,1454 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.D.S7
+
+schema_version: 1
+status: draft
+acs_code: AM.I.D.S7
+task_no: 6
+title: Fabricate a flexible hose
+subject: General
+block: 3
+campus: AIM Fremont
+week: 3
+day: 1
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-05T17:46:08Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - steps_supplement.json
+  - references/handbook/faa_h_8083_30b_9_16_9_23.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The campus rates this High because the graded object is a finished artifact: a cut hose
+    with fittings, where a still shows the things that matter most — the dash number on the
+    lay line matching the dash numbers on nipple, socket and B-nut, a square unfrayed cut
+    face, an untwisted lay line, and a continuous gap between nipple hex and socket. What
+    a photo cannot settle is anything about the making of it or its integrity under load:
+    the 5–8 percent allowance is only checkable against a written measurement record, the
+    socket's left-hand (counterclockwise) engagement and the identity of the assembly lubricant
+    leave no visual trace, and the .005"–.031" clearance and the proof-test hold are instrumented
+    readings, not appearances. Note also that the fitting-assembly and proof-test evidence
+    below rests on supplemental steps not present in the campus sheet, so those acceptance
+    points are provisional.
+safety:
+- Hydraulic fluid can cause irritation and burns if left on skin.
+- High pressure fluids can cause severe injuries if sprayed at the body.
+- Handling sharp tools presents a cutting hazard.
+equipment:
+- Eye protection
+- Ear protection
+- Gloves
+- Standard toolbox set
+- Parts bags
+- Pen & paper
+- FOD box
+- Rags
+- Hydraulic fluid
+- MS type fittings
+- Flexible hose
+- Cut off wheel
+- Mandrel
+- Safety wire
+- Masking tape
+- Tape measure
+steps:
+- id: dd.s1
+  section: Determine the Distance and Hose
+  text: Measure the route that the hose needs to take.
+  note_refs:
+  - 1
+  checks:
+  - id: dd.s1.c1
+    statement: >-
+      The recorded final hose dimension equals the measured route length plus 5–8 percent
+      of that length.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: add 5-8% of total length. Handbook p.9-21: "provide slack or bend in the hose
+      line from 5 to 8 percent of its total length".
+  - id: dd.s1.c2
+    statement: >-
+      The tape is run along the actual routing path through every bend, not pulled straight
+      between end points.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 1: "Use a tape measure to map the distance"; a straight-line reading understates
+      the route.
+  - id: dd.s1.c3
+    statement: >-
+      Measured route length, the slack allowance and the resulting final dimension are written
+      down before marking.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet equipment list includes pen & paper; worked example shows 24" + 1.9" = 25.9" recorded.
+  - id: dd.s1.c4
+    statement: >-
+      The planned route contains no bend tighter than the minimum bend radius listed for that
+      hose size.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-22
+    origin: drafted
+    note: >-
+      "Never use less than the recommended minimum bend radius specified for the hose"; radii
+      tabulated in Figure 9-37.
+  error_modes:
+  - id: dd.s1.e1
+    statement: >-
+      Slack allowance omitted, so the hose is cut to the bare measured route length and loads
+      the fittings when pressurized.
+    severity: critical
+    origin: drafted
+  - id: dd.s1.e2
+    statement: >-
+      Route measured as a straight line between end points, ignoring bends, giving a short
+      final dimension.
+    severity: critical
+    origin: drafted
+  - id: dd.s1.e3
+    statement: >-
+      Arithmetic or unit error in adding the 5–8 percent allowance, or the figure never recorded
+      before marking.
+    severity: major
+    origin: drafted
+- id: dd.s2
+  section: Determine the Distance and Hose
+  text: Choose a hose and fitting assembly.
+  note_refs:
+  - 2
+  checks:
+  - id: dd.s2.c1
+    statement: >-
+      The dash number printed on the hose lay line and the dash numbers on the nipple, B-nut
+      and collar are identical.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet requires corresponding dash numbers; handbook p.9-19: "When the dash
+      number of the hose corresponds with the dash number of the tubing, the proper size hose
+      is being used."
+  - id: dd.s2.c2
+    statement: >-
+      The hose lay line markings are legible and show specification number, size, and quarter/year
+      of manufacture.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-17
+    origin: drafted
+    note: >-
+      "Most hydraulic hose is marked to identify its type, the quarter and year of manufacture";
+      markings "repeated at intervals of not more than 9 inches."
+  - id: dd.s2.c3
+    statement: >-
+      The selected hose type and pressure class are approved for the system's fluid and operating
+      pressure per the applicable manual.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-17
+    origin: drafted
+    note: >-
+      "to make the correct hose selection, always refer to the applicable aircraft maintenance
+      or parts manual"; Skydrol hose marked "Skydrol use."
+  - id: dd.s2.c4
+    statement: >-
+      The MS-type nipple, socket/collar and B-nut show no thread damage, nicks or distortion
+      that would bar reuse.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-21
+    origin: drafted
+    note: >-
+      "detachable fittings used on flexible hoses may be detached and reused if they are not
+      damaged; otherwise, new fittings must be used."
+  error_modes:
+  - id: dd.s2.e1
+    statement: >-
+      Hose and fitting dash numbers do not match, so the fitting ID differs from the hose
+      ID.
+    severity: critical
+    origin: drafted
+  - id: dd.s2.e2
+    statement: >-
+      Hose material is incompatible with the system fluid (e.g., Buna-N or neoprene selected
+      for Skydrol).
+    severity: critical
+    origin: drafted
+  - id: dd.s2.e3
+    statement: >-
+      Fitting assembly is mixed from different kits or a damaged/deformed reusable fitting
+      is selected.
+    severity: major
+    origin: drafted
+- id: dd.s3
+  section: Determine the Distance and Hose
+  text: Mark the hose.
+  note_refs:
+  - 3
+  checks:
+  - id: dd.s3.c1
+    statement: >-
+      The tape band's marked edge sits at the finished length: measured route plus 5–8 percent
+      added allowance.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: add 5-8% to measured distance. Handbook p.9-19/9-21: "provide slack
+      or bend in the hose line from 5 to 8 percent of its total length".
+  - id: dd.s3.c2
+    statement: >-
+      Masking tape is wrapped evenly and square to the hose axis, its edge forming one continuous
+      unspiraled line around the circumference.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires tape "wrapped evenly around the hose"; the tape edge is the cut guide,
+      so it must be a single crisp perpendicular line.
+  - id: dd.s3.c3
+    statement: >-
+      The hose lay line runs straight along the taped section, showing the hose was not twisted
+      while marking.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-21
+    origin: drafted
+    note: >-
+      Handbook: "This stripe should not spiral around the hose." Stated for installation;
+      applying it to the marking step needs SME confirmation.
+    assumed: true
+  - id: dd.s3.c4
+    statement: >-
+      The dash number and lay-line markings needed for identification remain legible and are
+      not buried under the tape wrap.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet marks the hose on its lay line by dash number; markings must stay readable for
+      fitting-size verification at assembly.
+  error_modes:
+  - id: dd.s3.e1
+    statement: >-
+      Tape placed at the raw measured distance with the 5–8 percent expansion allowance omitted,
+      so the hose is short but looks correctly marked.
+    severity: critical
+    origin: drafted
+  - id: dd.s3.e2
+    statement: >-
+      Tape wrapped spirally or with a ragged, doubled edge, leaving no single defined cut
+      line.
+    severity: major
+    origin: drafted
+  - id: dd.s3.e3
+    statement: >-
+      Tape applied loosely so it can slide along the hose, or wrapped over the dash number
+      and lay line.
+    severity: minor
+    origin: drafted
+- id: ch.s1
+  section: Cut The Hose
+  text: Secure the hose into a table vise.
+  note_refs:
+  - 1
+  checks:
+  - id: ch.s1.c1
+    statement: >-
+      The hose is clamped in the vise jaws, not hand-held or resting loose, before any cutting.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-19 Fig. 9-35 step 1: "Place hose in vise and cut to desired length using
+      fine tooth hacksaw or cut off wheel."
+  - id: ch.s1.c2
+    statement: >-
+      The taped cut line protrudes just past the jaw edge, clear of the jaws and unobstructed.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 1: "Protrude the taped location to the edge of the vise"; handbook is silent
+      on mark placement.
+  - id: ch.s1.c3
+    statement: >-
+      The hose runs horizontally through the jaws with its axis square to the jaw faces and
+      no kink or bend in the clamped span.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: 'Sheet note 1: "Place the hose horizontally through the vise jaws."'
+  - id: ch.s1.c4
+    statement: >-
+      Jaws are closed only snug, so the hose is not stretched or compressed out of round.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 1: "snug against the hose without putting significant tension on it"; snugness
+      judged only as jaws are closed.
+  error_modes:
+  - id: ch.s1.e1
+    statement: >-
+      Vise over-tightened, flattening the hose and collapsing the synthetic inner tube while
+      the outer cover still looks normal.
+    severity: critical
+    origin: drafted
+  - id: ch.s1.e2
+    statement: >-
+      Taped mark clamped inside or behind the jaws, so the cut cannot be made at the mark
+      or the blade will strike the vise.
+    severity: major
+    origin: drafted
+  - id: ch.s1.e3
+    statement: >-
+      Hose clamped too loosely or with excessive unsupported overhang, letting it rotate or
+      whip and yielding an angled, ragged cut.
+    severity: major
+    origin: drafted
+- id: ch.s2
+  section: Cut The Hose
+  text: Setup a pneumatic cut off wheel.
+  note_refs:
+  - 2
+  checks:
+  - id: ch.s2.c1
+    statement: >-
+      A composite abrasive wheel — not a toothed or metal-cutting blade — is fitted to the
+      tool.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2: 'Connect a composite blade cut off wheel to a compressed air source.'
+      Handbook only says 'cut off wheel' generically.
+  - id: ch.s2.c2
+    statement: >-
+      The wheel is free of cracks, chips or gouges and the guard is in place over it.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by safe use of the sheet's specified cut off wheel; handbook gives no wheel-condition
+      wording. Needs SME confirmation of guard requirement.
+    assumed: true
+  - id: ch.s2.c3
+    statement: >-
+      Air supply is coupled to the tool inlet and regulated to the tool's rated inlet pressure.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires connection to 'a compressed air source'; the pressure figure comes from
+      tool manufacturer data, not either source. Needs SME confirmation.
+    assumed: true
+  - id: ch.s2.c4
+    statement: >-
+      Tool spins up true, with no wheel wobble or unusual vibration, before touching the hose.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 3 requires starting the wheel just before contact and a consistent whining
+      noise, implying a verified free run-up.
+  error_modes:
+  - id: ch.s2.e1
+    statement: >-
+      A cracked, expired or wrong-type wheel is mounted; it looks intact but can shatter at
+      speed.
+    severity: critical
+    origin: drafted
+  - id: ch.s2.e2
+    statement: >-
+      Regulator set above the tool's rated pressure, over-speeding the composite wheel.
+    severity: critical
+    origin: drafted
+  - id: ch.s2.e3
+    statement: Arbor nut left loose or wheel mounted without its flange/guard.
+    severity: critical
+    origin: drafted
+  - id: ch.s2.e4
+    statement: >-
+      A toothed blade is fitted in place of the composite wheel, tearing the hose braid.
+    severity: major
+    origin: drafted
+- id: ch.s3
+  section: Cut The Hose
+  text: Cut the hose to length.
+  note_refs:
+  - 3
+  checks:
+  - id: ch.s3.c1
+    statement: >-
+      The cut face is square to the hose axis, with no angled, stepped or ragged edge.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Keep the blade as vertical as possible to create a clean cut"; handbook only
+      says cut to length with hacksaw or cut off wheel.
+  - id: ch.s3.c2
+    statement: >-
+      Cut end shows no splayed or unravelled wire braid and no melted, smeared or collapsed
+      inner tube.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Derived from the sheet's clean-cut requirement and cut-off-wheel pressure cues; handbook
+      gives no cut-quality standard.
+  - id: ch.s3.c3
+    statement: >-
+      Finished hose length equals the routed distance plus 5–8 percent, cut at the taped mark.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: add 5-8% of total length. Handbook p.9-21: "slack or bend in the hose line from
+      5 to 8 percent of its total length" (installation context).
+  - id: ch.s3.c4
+    statement: >-
+      Wheel is spun up before touching the hose and lowered slowly with two hands at steady
+      pitch.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 3: start wheel just before contact, "allowing the tool to do the cutting";
+      pitch change indicates pressure.
+  error_modes:
+  - id: ch.s3.e1
+    statement: >-
+      Excess feed pressure crushes or melts the inner tube while the outer cover still looks
+      intact.
+    severity: critical
+    origin: drafted
+  - id: ch.s3.e2
+    statement: Hose cut short of the mark, leaving no 5–8 percent expansion allowance.
+    severity: critical
+    origin: drafted
+  - id: ch.s3.e3
+    statement: >-
+      Blade held off vertical, giving an angled or ragged end with frayed wire braid.
+    severity: major
+    origin: drafted
+- id: ch.s4
+  section: Cut The Hose
+  text: Verify the cuts.
+  note_refs:
+  - 4
+  checks:
+  - id: ch.s4.c1
+    statement: >-
+      The cut end face is flat and square across the hose axis, with no oblique taper or step.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 4: "Ensure the cut end is as flat as possible"; handbook only says
+      cut with fine tooth hacksaw or cut off wheel.
+  - id: ch.s4.c2
+    statement: >-
+      Finished hose length equals the measured route plus 5-8 percent expansion allowance.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure note 1 adds 5-8%; handbook p.9-21: "provide slack or bend in the hose line
+      from 5 to 8 percent of its total length".
+  - id: ch.s4.c3
+    statement: >-
+      All masking tape and adhesive residue is removed from the cut end region.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note 4 requires unravelling the tape off the cut end at a 45° angle;
+      handbook silent on marking tape.
+  - id: ch.s4.c4
+    statement: >-
+      Cut end shows no splayed or frayed wire braid strands and the inner tube is round, not
+      collapsed or smeared.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Rests on the sheet's "clean cut" / "as flat as possible" workmanship standard; handbook
+      gives no cut-end condition wording.
+  error_modes:
+  - id: ch.s4.e1
+    statement: >-
+      Hose cut short, omitting the 5-8 percent expansion allowance, so the finished assembly
+      is under mechanical load.
+    severity: critical
+    origin: drafted
+  - id: ch.s4.e2
+    statement: >-
+      Blade held off-vertical, producing a visibly oblique or stepped cut face that will not
+      seat in the fitting.
+    severity: major
+    origin: drafted
+  - id: ch.s4.e3
+    statement: >-
+      Frayed braid whiskers or rubber debris left in the bore after cutting, or tape residue
+      left on the cut end.
+    severity: minor
+    origin: drafted
+- id: ae.s1
+  section: Assemble the End Fitting
+  text: >-
+    Slit the hose cover down to the wire braid at the fitting location and twist the cover
+    off with pliers.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 1
+  checks:
+  - id: ae.s1.c1
+    statement: >-
+      The cover is removed cleanly around the full circumference at the fitting location,
+      leaving continuous bare wire braid with no cover tags or rubber remnants.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Fig. 9-35 step 2: "slit cover with knife to wire braid... After slitting cover, twist
+      off with pair of pliers." Step itself is supplemental, needs SME confirmation.
+    assumed: true
+  - id: ae.s1.c2
+    statement: >-
+      The exposed wire braid shows no cut, nicked, broken or splayed strands and the inner
+      tube is not exposed or scored.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Fig. 9-35 step 2: "taking care to not damage underlying materials." Supplemental step;
+      applicability requires SME confirmation.
+    assumed: true
+  - id: ae.s1.c3
+    statement: >-
+      The stripped length equals the fitting socket insertion depth, so the cover ends where
+      the socket will seat.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook only says "locate length of hose to be cut off"; no dimension given, so length
+      comes from the fitting manufacturer. Needs SME confirmation.
+    assumed: true
+  - id: ae.s1.c4
+    statement: The hose is confirmed as high-pressure type before any cover is removed.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Fig. 9-35: "NOTE: Step 2 applies to high-pressure hose only"; type established from
+      lay-line spec number and parts manual.
+    assumed: true
+  error_modes:
+  - id: ae.s1.e1
+    statement: >-
+      Knife cut passes through the wire braid into the synthetic inner tube, leaving a hose
+      that looks assembled but will burst or leak.
+    severity: critical
+    origin: drafted
+  - id: ae.s1.e2
+    statement: >-
+      Cover stripped from a medium- or low-pressure hose that does not require stripping,
+      destroying its protective outer braid.
+    severity: major
+    origin: drafted
+  - id: ae.s1.e3
+    statement: >-
+      Cover stripped at the wrong location or to the wrong length, so the socket cannot seat
+      on bare braid.
+    severity: major
+    origin: drafted
+  - id: ae.s1.e4
+    statement: >-
+      Ragged cover edge with torn tags or embedded cover fragments left on the braid.
+    severity: minor
+    origin: drafted
+- id: ae.s2
+  section: Assemble the End Fitting
+  text: >-
+    Place the hose in a vise and screw the socket onto the hose counterclockwise.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 2
+  checks:
+  - id: ae.s2.c1
+    statement: >-
+      The socket is run fully onto the hose so no bare wire braid or stripped cover shows
+      between the socket lip and the hose cover.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook Fig. 9-35 step 3: "place hose in vise and screw socket on hose counterclockwise";
+      full-seating depth not stated verbatim — needs SME confirmation.
+    assumed: true
+  - id: ae.s2.c2
+    statement: >-
+      The socket was threaded onto the hose by counterclockwise rotation, consistent with
+      its left-hand thread.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook Fig. 9-35 step 3: "screw socket on hose counterclockwise"; direction is indistinguishable
+      in a finished still. Supplemental step, needs SME confirmation.
+    assumed: true
+  - id: ae.s2.c3
+    statement: >-
+      The hose cover and wire braid at the socket entry are undamaged, with no cut, unraveled
+      or pushed-back strands.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook Fig. 9-35 cautions slitting cover "taking care to not damage underlying materials";
+      applied here provisionally, needs SME confirmation.
+    assumed: true
+  - id: ae.s2.c4
+    statement: >-
+      The hose is held in the vise firmly without flattening, kinking or collapsing the inner
+      tube.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook says only "place hose in vise"; clamping force qualitative and judged while
+      clamped. Provisional, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: ae.s2.e1
+    statement: >-
+      Socket turned clockwise, gouging the cover and never engaging the left-hand thread while
+      appearing installed.
+    severity: critical
+    origin: drafted
+  - id: ae.s2.e2
+    statement: >-
+      Socket not run fully on, so the hose does not bottom and required nipple clearance cannot
+      be achieved.
+    severity: critical
+    origin: drafted
+  - id: ae.s2.e3
+    statement: >-
+      Vise jaws over-tightened, crushing or kinking the hose at the clamp point.
+    severity: major
+    origin: drafted
+- id: ae.s3
+  section: Assemble the End Fitting
+  text: Lubricate the inside of the hose and the nipple threads liberally.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 3
+  checks:
+  - id: ae.s3.c1
+    statement: >-
+      A wet lubricant film is visible on the hose inner tube bore and on the nipple threads
+      before assembly.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Fig. 9-35 step 4: "Lubricate inside of hose and nipple threads liberally." From a supplemental
+      step; needs subject-matter confirmation.
+    assumed: true
+  - id: ae.s3.c2
+    statement: >-
+      The lubricant used is a vegetable soap liquid, not a petroleum product, for hose rated
+      for Skydrol/HYJET service.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Caution: "Do not use any petroleum product with hose designed for synthetic fluids...
+      use a vegetable soap liquid." Requires hose lay line and lubricant SDS; supplemental
+      step, confirm with SME.
+    assumed: true
+  - id: ae.s3.c3
+    statement: >-
+      Lubricant is applied to full depth of the socketed hose end and around the entire thread
+      circumference, not a single spot dab.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      "Lubricate inside of hose and nipple threads liberally" — coverage only evidenced while
+      applying. Supplemental step; needs SME confirmation.
+    assumed: true
+  - id: ae.s3.c4
+    statement: >-
+      The hose bore and threads are free of grit, chips or rag lint carried in with the lubricant.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet FOD box and rag provisions imply contamination control; no handbook
+      figure for this step. Provisional supplemental step.
+    assumed: true
+  error_modes:
+  - id: ae.s3.e1
+    statement: >-
+      Petroleum-based oil or grease used as assembly lubricant on a Skydrol/HYJET-rated hose,
+      which looks correctly lubricated but degrades the inner tube.
+    severity: critical
+    origin: drafted
+  - id: ae.s3.e2
+    statement: >-
+      Sparse or dry lubrication, so the nipple shears, rolls or extrudes the inner tube during
+      insertion.
+    severity: major
+    origin: drafted
+  - id: ae.s3.e3
+    statement: >-
+      Excess lubricant runs onto the wire braid or picks up FOD that is driven into the hose
+      bore.
+    severity: minor
+    origin: drafted
+- id: ae.s4
+  section: Assemble the End Fitting
+  text: >-
+    Screw the nipple into the socket with a wrench on the nipple hex, leaving .005" to .031"
+    clearance between the nipple hex and the socket.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 4
+  checks:
+  - id: ae.s4.c1
+    statement: >-
+      Clearance between the nipple hex and the socket face measures between .005" and .031".
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Fig. 9-35 step 5: "leave .005" to .031" clearance between nipple hex and socket"; feeler
+      gauge or shim stock required.
+  - id: ae.s4.c2
+    statement: >-
+      A continuous gap remains all the way around the joint; the hex is not bottomed metal-to-metal
+      on the socket.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Derived from the required ".005" to .031" clearance"; only presence of a gap, not its
+      size, is visible. Supplemental step needs SME confirmation.
+    assumed: true
+  - id: ae.s4.c3
+    statement: >-
+      Nipple hex flats and socket are unmarred — no rounding, gouging or slipped-wrench scoring.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook directs "using wrench on hex of nipple"; reusable MS fittings per p.9-21 "may
+      be detached and reused if they are not damaged". Inference from supplemental step.
+    assumed: true
+  - id: ae.s4.c4
+    statement: >-
+      If the assembly is fabricated per MIL-H-8790, the exposed wire braid is coated with
+      the specified sealant.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      "Hose assemblies fabricated per MIL-H-8790 must have the exposed wire braid coated with
+      a special sealant"; hose spec read from lay line/paperwork.
+    assumed: true
+  error_modes:
+  - id: ae.s4.e1
+    statement: >-
+      Nipple run fully home, bottoming the hex on the socket and crushing the inner tube —
+      looks like a tight, correct joint.
+    severity: critical
+    origin: drafted
+  - id: ae.s4.e2
+    statement: >-
+      Nipple left short so clearance exceeds .031", leaving the hose under-gripped and liable
+      to blow off under pressure.
+    severity: critical
+    origin: drafted
+  - id: ae.s4.e3
+    statement: >-
+      Wrench applied to the socket or B-nut instead of the nipple hex, rounding or scoring
+      the fitting so it cannot be reused.
+    severity: major
+    origin: drafted
+- id: pt.s1
+  section: Proof-Test the Hose Assembly
+  text: >-
+    Cap or plug the assembly and connect it to the test stand, bleeding all trapped air before
+    tightening when testing with a liquid.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 1
+  checks:
+  - id: pt.s1.c1
+    statement: >-
+      Both ends of the hose assembly are closed — one capped or plugged, the other connected
+      to the test stand port.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental step 1; handbook mentions only 'tightening the cap or plug' without stating
+      connection arrangement. Provisional, needs SME confirmation.
+    assumed: true
+  - id: pt.s1.c2
+    statement: >-
+      All trapped air was bled from the assembly before the cap or plug was tightened for
+      a liquid test.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-19: "When testing with a liquid, all trapped air is bled from the assembly
+      prior to tightening the cap or plug."
+  - id: pt.s1.c3
+    statement: >-
+      The test medium matches the hose's service per the manufacturer's instructions for that
+      assembly.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      "hydraulic, fuel, and oil lines are generally tested using hydraulic oil or water, whereas
+      air or instrument lines are tested with dry, oil-free air or nitrogen"; "follow the
+      hose manufacturer's instructions".
+    assumed: true
+  - id: pt.s1.c4
+    statement: >-
+      If a gas medium is used, the assembly is fully submerged in water before pressurization.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      "Hose tests, using a gas, are conducted underwater." Handbook extract reached via supplemental
+      step, so provisional pending SME review.
+    assumed: true
+  error_modes:
+  - id: pt.s1.e1
+    statement: >-
+      Cap or plug tightened with air still trapped in a liquid-filled assembly, giving a compressible,
+      invalid and hazardous proof test.
+    severity: critical
+    origin: drafted
+  - id: pt.s1.e2
+    statement: >-
+      Wrong test medium selected — e.g. petroleum hydraulic oil in a Skydrol hose, or unfiltered
+      shop air in an instrument line.
+    severity: critical
+    origin: drafted
+  - id: pt.s1.e3
+    statement: >-
+      Cap, plug or stand fitting loose or wrong dash size, so the assembly leaks at the closure
+      instead of holding pressure.
+    severity: major
+    origin: drafted
+- id: pt.s2
+  section: Proof-Test the Hose Assembly
+  text: >-
+    Apply the proof-test pressure specified by the hose manufacturer for the assembly.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 2
+  checks:
+  - id: pt.s2.c1
+    statement: >-
+      The pressure applied equals the proof-test pressure the hose manufacturer specifies
+      for this assembly.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook: "in all cases, follow the hose manufacturer's instructions for proof-test
+      pressure and fluid to be used"; step itself is supplemental, unreviewed.
+    assumed: true
+  - id: pt.s2.c2
+    statement: >-
+      A repaired or overhauled assembly using existing hardware is pressurized to at least
+      1.5 times system pressure.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook: "it is recommended that the hose be tested to at least 1.5 system pressure"
+      before installation on the aircraft.
+  - id: pt.s2.c3
+    statement: >-
+      The gauge reading reached does not exceed the maximum proof pressure listed for that
+      hose part number.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-20
+    origin: drafted
+    note: >-
+      Figure 9-37 lists "Max. Proof Pressure (PSI)" per MIL part number; supplemental step
+      wording is unreviewed.
+    assumed: true
+  - id: pt.s2.c4
+    statement: >-
+      Full test pressure is reached and held steady, not momentarily spiked, while the assembly
+      is observed.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook: "All flexible hose must be proof-tested after assembly and applying pressure
+      to the inside of the hose assembly."
+    assumed: true
+  error_modes:
+  - id: pt.s2.e1
+    statement: >-
+      An arbitrary round pressure is used instead of the manufacturer's specified proof pressure;
+      assembly looks tested but is unverified.
+    severity: critical
+    origin: drafted
+  - id: pt.s2.e2
+    statement: >-
+      Pressure is driven above the maximum proof pressure, weakening the hose with no visible
+      external damage.
+    severity: critical
+    origin: drafted
+  - id: pt.s2.e3
+    statement: >-
+      Test is stopped short of full proof pressure or the gauge is misread, so the assembly
+      is recorded as passed.
+    severity: major
+    origin: drafted
+- id: pt.s3
+  section: Proof-Test the Hose Assembly
+  text: >-
+    Inspect the assembly under pressure and confirm it holds proof pressure without leaking.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 3
+  checks:
+  - id: pt.s3.c1
+    statement: >-
+      The gauge shows the manufacturer's specified proof pressure reached and held without
+      decay during the test.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      "All flexible hose must be proof-tested after assembly"; "follow the hose manufacturer's
+      instructions for proof-test pressure". Provisional; needs SME confirmation.
+    assumed: true
+  - id: pt.s3.c2
+    statement: >-
+      A repaired or overhauled assembly using existing hardware and new hose is tested to
+      at least 1.5 times system pressure.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      "it is recommended that the hose be tested to at least 1.5 system pressure"; system
+      pressure value comes from paperwork. Provisional, needs SME confirmation.
+    assumed: true
+  - id: pt.s3.c3
+    statement: >-
+      No leakage, weeping or bubbling appears at the nipple/socket junction, cap or braid
+      while the assembly is held at pressure.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Handbook requires proof test "by applying pressure to the inside of the hose assembly";
+      gas tests "are conducted underwater". Provisional, needs SME confirmation.
+    assumed: true
+  - id: pt.s3.c4
+    statement: >-
+      After depressurizing, the fitting ends and braid are dry with no fluid staining or wet
+      seepage tracks.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-19
+    origin: drafted
+    note: >-
+      Residue is the visible trace of the leakage the handbook's proof test is meant to detect.
+      Provisional, needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: pt.s3.e1
+    statement: >-
+      Assembly is pressurized to system pressure only, or an arbitrary pressure, and logged
+      as proof-tested.
+    severity: critical
+    origin: drafted
+  - id: pt.s3.e2
+    statement: >-
+      Pressure is applied with trapped air still in the assembly, masking a slow leak and
+      creating a stored-energy hazard.
+    severity: critical
+    origin: drafted
+  - id: pt.s3.e3
+    statement: >-
+      Seepage at the nipple hex is wiped off and the assembly is passed as dry.
+    severity: major
+    origin: drafted
+  - id: pt.s3.e4
+    statement: >-
+      Gas test performed in open air rather than underwater, so small leaks go undetected.
+    severity: major
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The completed hose assembly laid out full length with a tape measure alongside it, and
+      the student's written measurement record (route length, slack allowance, final dimension)
+      in the same frame or attached.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Straight-on overhead, whole assembly in frame end to end, tape measure zeroed at one
+      fitting shoulder and readable at the other; even diffuse light, no glare on the tape
+      face.
+  - id: ev2
+    description: >-
+      Close-up of the hose lay line dash number together with the dash numbers stamped on
+      the nipple, socket/collar and B-nut, all legible in one frame for comparison.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Macro, 150–250 mm from the markings, hose rotated so the lay line runs straight and
+      unspiralled through frame; raking light across the stamped fitting marks so they read
+      against the metal.
+  - id: ev3
+    description: >-
+      End-on close-up of the finished cut face before or after fitting installation, showing
+      the cut plane square to the hose axis, no splayed wire braid, no collapsed or smeared
+      inner tube, and no masking tape or adhesive residue.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Camera on the hose centreline looking directly into the bore, 100–150 mm, machinist's
+      rule or scale card in frame; bright even light into the bore so the inner tube wall
+      is visible.
+  - id: ev4
+    description: >-
+      Feeler-gauge reading of the clearance between the nipple hex and the socket, recorded
+      as a number, with the gauge blade shown entering the gap. A still alone cannot distinguish
+      .004" from .031".
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Feeler gauge blade inserted in the gap with the stamped blade size legible; camera perpendicular
+      to the joint axis, 200 mm, hard side light to make the gap read as a shadow line.
+    assumed: true
+  - id: ev5
+    description: >-
+      Proof-test record: gauge reading at the pressure the hose manufacturer specifies for
+      this assembly, held without decay, with the manufacturer's specified proof pressure
+      and medium cited from the applicable document. Provisional — proof testing is not in
+      the campus step list.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Gauge face square to camera and fully legible at pressure, with the assembly and both
+      closures visible in a second frame of the same stand; steady light, no reflection across
+      the dial glass.
+    assumed: true
+  - id: ev6
+    description: >-
+      Reference document identifying the lubricant used for assembly and the hose's fluid
+      compatibility class.
+    medium: document
+    origin: drafted
+    framing: >-
+      Legible page or label image; product name and the hose specification/lay-line marking
+      both readable.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 9
+    pages:
+    - 9-16
+    - 9-17
+    - 9-18
+    - 9-19
+    - 9-20
+    - 9-21
+    - 9-22
+    - 9-23
+    pdf_page_indices:
+    - 368
+    - 369
+    - 370
+    - 371
+    - 372
+    - 373
+    - 374
+    - 375
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_30b_9_16_9_23.md
+  videos:
+  - path: data/videos/AM.I.D.S7/flex_hose_1.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_2.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_3.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_4.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_5.mp4
+  - path: data/videos/AM.I.D.S7/flex_hose_6.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=zMrn-V6u6uA
+assumptions:
+- id: dd.s3.c3
+  statement: >-
+    The hose lay line runs straight along the taped section, showing the hose was not twisted
+    while marking.
+  reason: >-
+    Handbook: "This stripe should not spiral around the hose." Stated for installation; applying
+    it to the marking step needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ch.s2.c2
+  statement: >-
+    The wheel is free of cracks, chips or gouges and the guard is in place over it.
+  reason: >-
+    Implied by safe use of the sheet's specified cut off wheel; handbook gives no wheel-condition
+    wording. Needs SME confirmation of guard requirement.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ch.s2.c3
+  statement: >-
+    Air supply is coupled to the tool inlet and regulated to the tool's rated inlet pressure.
+  reason: >-
+    Sheet requires connection to 'a compressed air source'; the pressure figure comes from
+    tool manufacturer data, not either source. Needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s1.c1
+  statement: >-
+    The cover is removed cleanly around the full circumference at the fitting location, leaving
+    continuous bare wire braid with no cover tags or rubber remnants.
+  reason: >-
+    Fig. 9-35 step 2: "slit cover with knife to wire braid... After slitting cover, twist
+    off with pair of pliers." Step itself is supplemental, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s1.c2
+  statement: >-
+    The exposed wire braid shows no cut, nicked, broken or splayed strands and the inner tube
+    is not exposed or scored.
+  reason: >-
+    Fig. 9-35 step 2: "taking care to not damage underlying materials." Supplemental step;
+    applicability requires SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s1.c3
+  statement: >-
+    The stripped length equals the fitting socket insertion depth, so the cover ends where
+    the socket will seat.
+  reason: >-
+    Handbook only says "locate length of hose to be cut off"; no dimension given, so length
+    comes from the fitting manufacturer. Needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s1.c4
+  statement: The hose is confirmed as high-pressure type before any cover is removed.
+  reason: >-
+    Fig. 9-35: "NOTE: Step 2 applies to high-pressure hose only"; type established from lay-line
+    spec number and parts manual.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s2.c1
+  statement: >-
+    The socket is run fully onto the hose so no bare wire braid or stripped cover shows between
+    the socket lip and the hose cover.
+  reason: >-
+    Handbook Fig. 9-35 step 3: "place hose in vise and screw socket on hose counterclockwise";
+    full-seating depth not stated verbatim — needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s2.c2
+  statement: >-
+    The socket was threaded onto the hose by counterclockwise rotation, consistent with its
+    left-hand thread.
+  reason: >-
+    Handbook Fig. 9-35 step 3: "screw socket on hose counterclockwise"; direction is indistinguishable
+    in a finished still. Supplemental step, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s2.c3
+  statement: >-
+    The hose cover and wire braid at the socket entry are undamaged, with no cut, unraveled
+    or pushed-back strands.
+  reason: >-
+    Handbook Fig. 9-35 cautions slitting cover "taking care to not damage underlying materials";
+    applied here provisionally, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s2.c4
+  statement: >-
+    The hose is held in the vise firmly without flattening, kinking or collapsing the inner
+    tube.
+  reason: >-
+    Handbook says only "place hose in vise"; clamping force qualitative and judged while clamped.
+    Provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s3.c1
+  statement: >-
+    A wet lubricant film is visible on the hose inner tube bore and on the nipple threads
+    before assembly.
+  reason: >-
+    Fig. 9-35 step 4: "Lubricate inside of hose and nipple threads liberally." From a supplemental
+    step; needs subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s3.c2
+  statement: >-
+    The lubricant used is a vegetable soap liquid, not a petroleum product, for hose rated
+    for Skydrol/HYJET service.
+  reason: >-
+    Caution: "Do not use any petroleum product with hose designed for synthetic fluids...
+    use a vegetable soap liquid." Requires hose lay line and lubricant SDS; supplemental step,
+    confirm with SME.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s3.c3
+  statement: >-
+    Lubricant is applied to full depth of the socketed hose end and around the entire thread
+    circumference, not a single spot dab.
+  reason: >-
+    "Lubricate inside of hose and nipple threads liberally" — coverage only evidenced while
+    applying. Supplemental step; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s3.c4
+  statement: >-
+    The hose bore and threads are free of grit, chips or rag lint carried in with the lubricant.
+  reason: >-
+    Procedure sheet FOD box and rag provisions imply contamination control; no handbook figure
+    for this step. Provisional supplemental step.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s4.c2
+  statement: >-
+    A continuous gap remains all the way around the joint; the hex is not bottomed metal-to-metal
+    on the socket.
+  reason: >-
+    Derived from the required ".005" to .031" clearance"; only presence of a gap, not its
+    size, is visible. Supplemental step needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s4.c3
+  statement: >-
+    Nipple hex flats and socket are unmarred — no rounding, gouging or slipped-wrench scoring.
+  reason: >-
+    Handbook directs "using wrench on hex of nipple"; reusable MS fittings per p.9-21 "may
+    be detached and reused if they are not damaged". Inference from supplemental step.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s4.c4
+  statement: >-
+    If the assembly is fabricated per MIL-H-8790, the exposed wire braid is coated with the
+    specified sealant.
+  reason: >-
+    "Hose assemblies fabricated per MIL-H-8790 must have the exposed wire braid coated with
+    a special sealant"; hose spec read from lay line/paperwork.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s1.c1
+  statement: >-
+    Both ends of the hose assembly are closed — one capped or plugged, the other connected
+    to the test stand port.
+  reason: >-
+    Supplemental step 1; handbook mentions only 'tightening the cap or plug' without stating
+    connection arrangement. Provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s1.c3
+  statement: >-
+    The test medium matches the hose's service per the manufacturer's instructions for that
+    assembly.
+  reason: >-
+    "hydraulic, fuel, and oil lines are generally tested using hydraulic oil or water, whereas
+    air or instrument lines are tested with dry, oil-free air or nitrogen"; "follow the hose
+    manufacturer's instructions".
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s1.c4
+  statement: >-
+    If a gas medium is used, the assembly is fully submerged in water before pressurization.
+  reason: >-
+    "Hose tests, using a gas, are conducted underwater." Handbook extract reached via supplemental
+    step, so provisional pending SME review.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s2.c1
+  statement: >-
+    The pressure applied equals the proof-test pressure the hose manufacturer specifies for
+    this assembly.
+  reason: >-
+    Handbook: "in all cases, follow the hose manufacturer's instructions for proof-test pressure
+    and fluid to be used"; step itself is supplemental, unreviewed.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s2.c3
+  statement: >-
+    The gauge reading reached does not exceed the maximum proof pressure listed for that hose
+    part number.
+  reason: >-
+    Figure 9-37 lists "Max. Proof Pressure (PSI)" per MIL part number; supplemental step wording
+    is unreviewed.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s2.c4
+  statement: >-
+    Full test pressure is reached and held steady, not momentarily spiked, while the assembly
+    is observed.
+  reason: >-
+    Handbook: "All flexible hose must be proof-tested after assembly and applying pressure
+    to the inside of the hose assembly."
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s3.c1
+  statement: >-
+    The gauge shows the manufacturer's specified proof pressure reached and held without decay
+    during the test.
+  reason: >-
+    "All flexible hose must be proof-tested after assembly"; "follow the hose manufacturer's
+    instructions for proof-test pressure". Provisional; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s3.c2
+  statement: >-
+    A repaired or overhauled assembly using existing hardware and new hose is tested to at
+    least 1.5 times system pressure.
+  reason: >-
+    "it is recommended that the hose be tested to at least 1.5 system pressure"; system pressure
+    value comes from paperwork. Provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s3.c3
+  statement: >-
+    No leakage, weeping or bubbling appears at the nipple/socket junction, cap or braid while
+    the assembly is held at pressure.
+  reason: >-
+    Handbook requires proof test "by applying pressure to the inside of the hose assembly";
+    gas tests "are conducted underwater". Provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: pt.s3.c4
+  statement: >-
+    After depressurizing, the fitting ends and braid are dry with no fluid staining or wet
+    seepage tracks.
+  reason: >-
+    Residue is the visible trace of the leakage the handbook's proof test is meant to detect.
+    Provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ae.s1
+  statement: >-
+    Slit the hose cover down to the wire braid at the fitting location and twist the cover
+    off with pliers.
+  reason: >-
+    The AIM procedure sheet documents no 'Assemble the End Fitting' steps; this one was drafted
+    from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Assemble the End Fitting' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ae.s2
+  statement: >-
+    Place the hose in a vise and screw the socket onto the hose counterclockwise.
+  reason: >-
+    The AIM procedure sheet documents no 'Assemble the End Fitting' steps; this one was drafted
+    from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Assemble the End Fitting' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ae.s3
+  statement: Lubricate the inside of the hose and the nipple threads liberally.
+  reason: >-
+    The AIM procedure sheet documents no 'Assemble the End Fitting' steps; this one was drafted
+    from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Assemble the End Fitting' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ae.s4
+  statement: >-
+    Screw the nipple into the socket with a wrench on the nipple hex, leaving .005" to .031"
+    clearance between the nipple hex and the socket.
+  reason: >-
+    The AIM procedure sheet documents no 'Assemble the End Fitting' steps; this one was drafted
+    from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Assemble the End Fitting' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: pt.s1
+  statement: >-
+    Cap or plug the assembly and connect it to the test stand, bleeding all trapped air before
+    tightening when testing with a liquid.
+  reason: >-
+    The AIM procedure sheet documents no 'Proof-Test the Hose Assembly' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Proof-Test the Hose Assembly' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: pt.s2
+  statement: >-
+    Apply the proof-test pressure specified by the hose manufacturer for the assembly.
+  reason: >-
+    The AIM procedure sheet documents no 'Proof-Test the Hose Assembly' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Proof-Test the Hose Assembly' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: pt.s3
+  statement: >-
+    Inspect the assembly under pressure and confirm it holds proof pressure without leaking.
+  reason: >-
+    The AIM procedure sheet documents no 'Proof-Test the Hose Assembly' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Proof-Test the Hose Assembly' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    Feeler-gauge reading of the clearance between the nipple hex and the socket, recorded
+    as a number, with the gauge blade shown entering the gap. A still alone cannot distinguish
+    .004" from .031".
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    Proof-test record: gauge reading at the pressure the hose manufacturer specifies for this
+    assembly, held without decay, with the manufacturer's specified proof pressure and medium
+    cited from the applicable document. Provisional — proof testing is not in the campus step
+    list.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev6
+  statement: >-
+    Reference document identifying the lubricant used for assembly and the hose's fluid compatibility
+    class.
+  reason: Required as document, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  The AIM procedure sheet documents no steps for 'Assemble the End Fitting', 'Proof-Test the
+  Hose Assembly', yet the task title and the sheet's own equipment list call for that work.
+  Those steps were drafted from the handbook and the reference video and carry `origin: drafted`.
+  Confirm with AIM whether they form part of the graded submission, and ask for a corrected
+  procedure sheet if they do.
+- >-
+  The campus step list ends at 'Verify the cuts', yet the task title says fabricate and the
+  equipment list names MS fittings, mandrel and hydraulic fluid. Does the graded deliverable
+  include end-fitting assembly and proof test, or only a cut blank?
+- >-
+  The handbook's 5–8 percent is stated as installation slack (p. 9-21); the campus sheet applies
+  it to cut length. An SME must confirm the allowance is intended to be added to the fabricated
+  length.
+- >-
+  Which hose specification and pressure class students use, since the cover-slitting step
+  applies to high-pressure hose only and the lubricant caution depends on synthetic-fluid
+  compatibility.
+- >-
+  What proof-test pressure and medium the campus will accept as 'the manufacturer's specification'
+  in a shop setting, and whether a burst test stand is actually available to students.
+- >-
+  Whether the mandrel and safety wire in the equipment list belong to a step that is missing
+  from the sheet entirely.
+- >-
+  Acceptance tolerance on 'square' for the cut face — no angular limit is given in either
+  the sheet or the handbook extract.

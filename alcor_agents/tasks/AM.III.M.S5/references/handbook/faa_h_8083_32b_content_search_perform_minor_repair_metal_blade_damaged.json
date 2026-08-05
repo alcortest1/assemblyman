@@ -1,0 +1,22 @@
+{
+  "acs_code": "AM.III.M.S5",
+  "handbook": "FAA-H-8083-32B",
+  "handbook_key": "32B",
+  "pdf": "data/amt_powerplant_handbook.pdf",
+  "located_by": "search",
+  "spec": "content search: perform minor repair metal blade damaged",
+  "labels": [
+    "10-44",
+    "10-45",
+    "10-46",
+    "10-47"
+  ],
+  "pdf_page_indices": [
+    411,
+    412,
+    413,
+    414
+  ],
+  "cited_by_source": false,
+  "file": "references/handbook/faa_h_8083_32b_content_search_perform_minor_repair_metal_blade_damaged.md"
+}

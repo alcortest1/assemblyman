@@ -78,6 +78,34 @@ struct StreamView: View {
       VStack(spacing: 10) {
         topBar
 
+        // A stalled feed is otherwise indistinguishable from a very still scene: the last
+        // frame stays on screen and nothing says the glasses stopped sending. Rebuilding says
+        // so quietly — the operator has their hands full, and this is a status, not a
+        // decision they have to make.
+        if viewModel.isReconnecting || viewModel.isFeedStalled {
+          HStack {
+            HStack(spacing: 7) {
+              if viewModel.isReconnecting {
+                Spinner(size: 11, color: .white)
+              } else {
+                Icon(glyph: .triangleAlert, size: 12, color: .white)
+              }
+              Text(
+                viewModel.isReconnecting
+                  ? "Reconnecting to the glasses…"
+                  : "No frames for \(viewModel.secondsSinceLastFrame)s"
+              )
+              .font(Theme.body(11, weight: .semibold))
+              .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Theme.accent800.opacity(0.9))
+            .overlay { Rectangle().strokeBorder(.white.opacity(0.4), lineWidth: Theme.hairline) }
+            Spacer(minLength: 0)
+          }
+        }
+
         // Keep the session identity and the expanded controls on separate rows. Together
         // they are wider than the content area on an iPhone, so sharing an HStack caused
         // the fixed-width controls panel to compress or cover the room code.
@@ -318,17 +346,9 @@ struct StreamView: View {
     let diagnostics = viewModel.relay.frameSink.diagnostics
     let compositor = viewModel.relay.frameSink.compositor
     if diagnostics.framesOffered > 0 {
-      Text(
-        "\(diagnostics.framesForwarded)/\(diagnostics.framesOffered) · \(diagnostics.pixelFormatDescription)"
-          + (diagnostics.isPixelFormatSupported == false ? " · UNSUPPORTED" : "")
-          // Present only while burning in an overlay, so its absence is as informative as
-          // its value when the viewer reports a bare feed.
-          + (compositor.isCompositing ? " · OVERLAY \(diagnostics.framesComposited)" : "")
-          + (compositor.lastFailure.map { " · \($0)" } ?? "")
-          // A relay with no audio looks healthy from every other angle, so the reason has to
-          // be on screen rather than only in the log.
-          + (viewModel.relay.microphoneIssue.map { " · MIC: \($0)" } ?? "")
-      )
+      // Assembled in steps rather than one expression: as a single concatenation with
+      // interpolation and three conditionals the type checker gives up on it.
+      Text(Self.diagnosticsText(diagnostics, compositor, viewModel.relay.microphoneIssue))
       .font(Theme.body(9).monospacedDigit())
       .foregroundStyle(
         diagnostics.isPixelFormatSupported == false || compositor.lastFailure != nil
@@ -338,6 +358,39 @@ struct StreamView: View {
       .padding(.vertical, 2)
       .background(Theme.accent900.opacity(0.5))
     }
+  }
+
+  private static func diagnosticsText(
+    _ diagnostics: LiveKitFrameSink.Diagnostics,
+    _ compositor: RelayFrameCompositor,
+    _ microphoneIssue: String?
+  ) -> String {
+    var parts: [String] = [
+      "\(diagnostics.framesForwarded)/\(diagnostics.framesOffered)",
+      diagnostics.pixelFormatDescription,
+    ]
+    if diagnostics.isPixelFormatSupported == false {
+      parts.append("UNSUPPORTED")
+    }
+    // Present only while burning in an overlay, so its absence is as informative as its
+    // value when a viewer reports a bare feed. A climbing skip count means compositing
+    // cannot keep up with the frame rate — degradation, not failure.
+    if compositor.isCompositing {
+      var overlay = "OVERLAY \(diagnostics.framesComposited)"
+      if diagnostics.framesSkippedComposite > 0 {
+        overlay += "/skip \(diagnostics.framesSkippedComposite)"
+      }
+      parts.append(overlay)
+    }
+    if let failure = compositor.lastFailure {
+      parts.append(failure)
+    }
+    // A relay with no audio looks healthy from every other angle, so the reason belongs on
+    // screen rather than only in the log.
+    if let microphoneIssue {
+      parts.append("MIC: \(microphoneIssue)")
+    }
+    return parts.joined(separator: " · ")
   }
   #endif
 

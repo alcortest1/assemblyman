@@ -1,0 +1,88 @@
+{
+  "acs_code": "AM.I.D.S7",
+  "origin": "drafted",
+  "rationale": "The AIM skill sheet's step list ends at 'Verify the cuts', but the task title asks for a fabricated flexible hose and the sheet's own equipment list (MS type fittings, Mandrel, Safety wire, Hydraulic fluid) names hardware no documented step touches. These sections were drafted from FAA-H-8083-30B pages 9-16 to 9-23 (the pages the sheet itself cites) — Figure 9-35 'Assembly of MS fitting to flexible hose' and the 'Flexible Hose Testing' passage — and cross-checked against the first-person clips, where the two-wrench socket-and-nipple assembly is visible in flex_hose_5 and a burst test stand with a pressure gauge in flex_hose_6. They are NOT from the AIM sheet and have not been reviewed by a subject-matter expert.",
+  "sources": [
+    "references/handbook/faa_h_8083_30b_9_16_9_23.md",
+    "data/videos/AM.I.D.S7/flex_hose_5.mp4",
+    "data/videos/AM.I.D.S7/flex_hose_6.mp4"
+  ],
+  "sections": [
+    {
+      "section": "Assemble the End Fitting",
+      "steps": [
+        {
+          "text": "Slit the hose cover down to the wire braid at the fitting location and twist the cover off with pliers.",
+          "text_clean": "Slit the hose cover down to the wire braid at the fitting location and twist the cover off with pliers.",
+          "note_refs": [1]
+        },
+        {
+          "text": "Place the hose in a vise and screw the socket onto the hose counterclockwise.",
+          "text_clean": "Place the hose in a vise and screw the socket onto the hose counterclockwise.",
+          "note_refs": [2]
+        },
+        {
+          "text": "Lubricate the inside of the hose and the nipple threads liberally.",
+          "text_clean": "Lubricate the inside of the hose and the nipple threads liberally.",
+          "note_refs": [3]
+        },
+        {
+          "text": "Screw the nipple into the socket with a wrench on the nipple hex, leaving .005\" to .031\" clearance between the nipple hex and the socket.",
+          "text_clean": "Screw the nipple into the socket with a wrench on the nipple hex, leaving .005\" to .031\" clearance between the nipple hex and the socket.",
+          "note_refs": [4]
+        }
+      ],
+      "notes": [
+        {
+          "text": "Handbook p. 9-19, Figure 9-35 step 2: locate the length of hose to be cut off and slit the cover with a knife down to the wire braid, taking care not to damage the underlying materials; after slitting, twist the cover off with a pair of pliers. This step applies to high-pressure hose only."
+        },
+        {
+          "text": "Handbook p. 9-19, Figure 9-35 step 3: place the hose in a vise and screw the socket on counterclockwise — the socket carries a left-hand thread, so it tightens the opposite way to a conventional fitting."
+        },
+        {
+          "text": "Handbook p. 9-19, Figure 9-35 step 4 caution: do not use any petroleum product with hose designed for synthetic fluids (Skydrol and/or HYJET). Use a vegetable soap liquid as the assembly lubricant for those hoses."
+        },
+        {
+          "text": "Handbook p. 9-19, Figure 9-35 step 5: use a wrench on the hex of the nipple and leave .005\" to .031\" clearance between the nipple hex and the socket. Hose assemblies fabricated per MIL-H-8790 must have the exposed wire braid coated with a special sealant. Disassemble in reverse order."
+        }
+      ],
+      "safety": [],
+      "equipment": [],
+      "you_need_to": []
+    },
+    {
+      "section": "Proof-Test the Hose Assembly",
+      "steps": [
+        {
+          "text": "Cap or plug the assembly and connect it to the test stand, bleeding all trapped air before tightening when testing with a liquid.",
+          "text_clean": "Cap or plug the assembly and connect it to the test stand, bleeding all trapped air before tightening when testing with a liquid.",
+          "note_refs": [1]
+        },
+        {
+          "text": "Apply the proof-test pressure specified by the hose manufacturer for the assembly.",
+          "text_clean": "Apply the proof-test pressure specified by the hose manufacturer for the assembly.",
+          "note_refs": [2]
+        },
+        {
+          "text": "Inspect the assembly under pressure and confirm it holds proof pressure without leaking.",
+          "text_clean": "Inspect the assembly under pressure and confirm it holds proof pressure without leaking.",
+          "note_refs": [3]
+        }
+      ],
+      "notes": [
+        {
+          "text": "Handbook p. 9-19: all flexible hose must be proof-tested after assembly by applying pressure to the inside of the hose assembly. Hydraulic, fuel and oil lines are generally tested using hydraulic oil or water; air and instrument lines are tested with dry, oil-free air or nitrogen. When testing with a liquid, all trapped air is bled from the assembly prior to tightening the cap or plug. Tests using a gas are conducted underwater."
+        },
+        {
+          "text": "Handbook p. 9-19: in all cases follow the hose manufacturer's instructions for proof-test pressure and the fluid to be used for the specific hose assembly. When a hose has been repaired or overhauled using existing hardware and new hose material, it is recommended that the hose be tested to at least 1.5 times system pressure before it is installed on the aircraft."
+        },
+        {
+          "text": "Handbook p. 9-21, Figure 9-38: a hydraulic hose burst test stand is used for testing flexible hose. A new hose can be operationally checked after installation using system pressure."
+        }
+      ],
+      "safety": [],
+      "equipment": [],
+      "you_need_to": []
+    }
+  ]
+}

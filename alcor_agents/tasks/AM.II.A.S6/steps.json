@@ -1,0 +1,579 @@
+{
+  "acs_code": "AM.II.A.S6",
+  "task": "Prepare and install a patch to repair an aircraft or component.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.II.A.S6 – Prepare and Install a Patch to Repair an Aircraft or Component.docx",
+      "title": "AM.II.A.S6 – Prepare and Install a Patch to Repair an Aircraft or Component",
+      "variant": "AM.II.A.S6 – Prepare and Install a Patch to Repair an Aircraft or Component",
+      "sections": [
+        {
+          "section": "Before You Begin",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": [
+            {
+              "text": "Be currently enrolled in or have completed Block 05: Metallic Structures."
+            },
+            {
+              "text": "Review pages 4-85 to 4-96 from chapter 4 in the FAA-H-8083-31B."
+            },
+            {
+              "text": "Ask the AI Assistant about the inspection criteria of a metal patch."
+            }
+          ]
+        },
+        {
+          "section": "Safety and Equipment",
+          "steps": [],
+          "notes": [],
+          "safety": [
+            {
+              "text": "Cutting and forming metal can make sharp edges on the material, posing a hazard."
+            },
+            {
+              "text": "Riveting is a loud and repetitive process; hearing protection should be used."
+            },
+            {
+              "text": "When possible, clamp down and secure material being drilled or riveted."
+            }
+          ],
+          "equipment": [
+            {
+              "text": "Eye protection"
+            },
+            {
+              "text": "Ear protection"
+            },
+            {
+              "text": "Gloves"
+            },
+            {
+              "text": "Standard toolbox set"
+            },
+            {
+              "text": "Parts bags"
+            },
+            {
+              "text": "Pen & paper"
+            },
+            {
+              "text": "FOD box"
+            },
+            {
+              "text": "Rivets"
+            },
+            {
+              "text": "Rivet gun and sets"
+            },
+            {
+              "text": "Bucking bar"
+            },
+            {
+              "text": "Pneumatic drill"
+            },
+            {
+              "text": "Drill bit set"
+            },
+            {
+              "text": "Sandpaper (multiple grit)"
+            },
+            {
+              "text": "Files (flat, half-round, and rat tail)"
+            },
+            {
+              "text": "Ball peen hammer"
+            },
+            {
+              "text": "Punch set"
+            },
+            {
+              "text": "Dividers"
+            },
+            {
+              "text": "Scale (12” / 6”)"
+            },
+            {
+              "text": "Cleco (pins and clamps) and pliers"
+            },
+            {
+              "text": "Deburr tool"
+            },
+            {
+              "text": "Marker"
+            }
+          ],
+          "you_need_to": []
+        },
+        {
+          "section": "Identify the Damage",
+          "steps": [
+            {
+              "text": "Inspect the area for damage.",
+              "text_clean": "Inspect the area for damage.",
+              "note_refs": []
+            },
+            {
+              "text": "Measure the extent of the damage1.",
+              "text_clean": "Measure the extent of the damage.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Mark the repair area with a marker around all of the damage.",
+              "text_clean": "Mark the repair area with a marker around all of the damage.",
+              "note_refs": []
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use a steel scale to find the damage’s height and length."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Remove the Damage",
+          "steps": [
+            {
+              "text": "Cut out or stop the damage from spreading1.",
+              "text_clean": "Cut out or stop the damage from spreading.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Smooth and deburr all cut edges2.",
+              "text_clean": "Smooth and deburr all cut edges.",
+              "note_refs": [
+                2
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Use a hole saw to cut the damaged area out. If the crack is within limits for a scab patch, carefully stop-drill the ends of the crack."
+            },
+            {
+              "text": "Start with a coarse-grit sandpaper progressing to a fine-grit, to remove sharp edges and scratches from cutting and sanding."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Create the Patch Doubler",
+          "steps": [],
+          "notes": [],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Flush patches need a doubler to attach to under the skin",
+          "steps": [],
+          "notes": [
+            {
+              "text": "Use a steel scale to measure the length and height of the opening."
+            },
+            {
+              "text": "Add the opening’s length and height to the required edge distances and pitches (e.g., ED + Pitch + ED + Opening + ED + P + ED = doubler dimension)."
+            },
+            {
+              "text": "Use appropriate cutting tools (stomp shear, beverly shear, aviation snips). If the doubler has corners, cut an 1/8” radius on them."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Create the Patch Filler",
+          "steps": [
+            {
+              "text": "Transfer the opening’s shape1.",
+              "text_clean": "Transfer the opening’s shape.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Remove and cut out the shape2.",
+              "text_clean": "Remove and cut out the shape.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Size material to fit the shape3.",
+              "text_clean": "Size material to fit the shape.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Deburr edges and smooth scratches with sandpaper.",
+              "text_clean": "Deburr edges and smooth scratches with sandpaper.",
+              "note_refs": []
+            }
+          ],
+          "notes": [
+            {
+              "text": "Place a piece of sheet metal larger than the opening against the underside, pressing it flush. Use a fine-tip marker to trace the shape accurately."
+            },
+            {
+              "text": "Use a cutting tool to cut close to the marked line, leaving a small amount of material outside the line."
+            },
+            {
+              "text": "Use a file to carefully remove material until the patch fits the opening."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Perform Rivet Layout",
+          "steps": [
+            {
+              "text": "Choose the rivet for the repair1.",
+              "text_clean": "Choose the rivet for the repair.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Determine and plot the edge distance2.",
+              "text_clean": "Determine and plot the edge distance.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Determine the pitch and plot each rivet3.",
+              "text_clean": "Determine the pitch and plot each rivet.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Calculate the required rivet diameter and length."
+            },
+            {
+              "text": "Calculate the distance needed from each edge. Mark that distance from all edges with a marker."
+            },
+            {
+              "text": "Calculate the needed pitch. Mark a dot at that interval on each material."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Drill the Holes",
+          "steps": [
+            {
+              "text": "Center punch the holes in the skin1.",
+              "text_clean": "Center punch the holes in the skin.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Drill pilot holes through the marks2.",
+              "text_clean": "Drill pilot holes through the marks.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Drill the patch doubler3.",
+              "text_clean": "Drill the patch doubler.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Drill the patch filler4.",
+              "text_clean": "Drill the patch filler.",
+              "note_refs": [
+                4
+              ]
+            },
+            {
+              "text": "Step up to the next drill bit size5.",
+              "text_clean": "Step up to the next drill bit size.",
+              "note_refs": [
+                5
+              ]
+            },
+            {
+              "text": "Drill all holes up to the finished size.",
+              "text_clean": "Drill all holes up to the finished size.",
+              "note_refs": []
+            },
+            {
+              "text": "Deburr all drilled holes from both sides.",
+              "text_clean": "Deburr all drilled holes from both sides.",
+              "note_refs": []
+            }
+          ],
+          "notes": [
+            {
+              "text": "Place the point of the center punch directly on a mark for a rivet."
+            },
+            {
+              "text": "Firmly grip the shaft of the punch like a mug handle, leaving the top of the punch exposed."
+            },
+            {
+              "text": "Hold the punch steady against the material."
+            },
+            {
+              "text": "Lightly tap the top of the center punch with a hammer. One light blow is enough; too heavy and the metal will warp."
+            },
+            {
+              "text": "Repeat for all rivet mark locations on the skin."
+            },
+            {
+              "text": "Use a bit that is the same size as or slightly smaller than the rivet diameter (e.g., rivet diameter of 4/32” needs at most a 1/8” drill bit; #40 drill bits are preferred)."
+            },
+            {
+              "text": "Install drill bit into pneumatic drill with flutes fully exposed."
+            },
+            {
+              "text": "Ensure your fingers grip only the smooth shank of the bit. Tighten with a drill chuck key."
+            },
+            {
+              "text": "Position the drill bit apex into a center punch indentation."
+            },
+            {
+              "text": "Hold the drill with one hand (finger off the trigger), apply slight pressure into the material."
+            },
+            {
+              "text": "Use your other hand to rotate the chuck clockwise until two slivers of metal are seen spiraling from the bit apex."
+            },
+            {
+              "text": "Keep the drill perpendicular to the material with moderate pressure and pull the trigger fully until all the way through."
+            },
+            {
+              "text": "Anticipate the drill bit’s exit on the back of the material to avoid pushing the chuck into the skin."
+            },
+            {
+              "text": "Bisect the holes in the skin with the edge distance line on the doubler. Transfer holes from the skin to the doubler. Secure in place with cleco clamps, if possible. Drill a hole and hold it aligned with a cleco pin."
+            },
+            {
+              "text": "Drill lay out holes. Fit into the opening and transfer holes from the filler to the doubler."
+            },
+            {
+              "text": "Drill holes in doubler and secure with cleco pins."
+            },
+            {
+              "text": "Ensure that it is at least 0.003” larger than the rivet diameter for ream dimension (e.g. a -4 rivet is 0.125” and needs a #30 drill bit, 0.1285”)."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Set up Rivet Gun",
+          "steps": [
+            {
+              "text": "Choose the set and spring1.",
+              "text_clean": "Choose the set and spring.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Install the set and spring on the rivet gun2.",
+              "text_clean": "Install the set and spring on the rivet gun.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Set rivet gun pressure3.",
+              "text_clean": "Set rivet gun pressure.",
+              "note_refs": [
+                3
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Set and spring selection"
+            },
+            {
+              "text": "Universal head rivet set and spring setup: concave recess on tip of the set the same size as rivet head. Uses a cone-shaped retaining spring."
+            },
+            {
+              "text": "Countersunk head rivet set and spring setup: disk-shaped head on set. Uses a cylinder shaped retaining spring."
+            },
+            {
+              "text": "For universal rivets:"
+            },
+            {
+              "text": "Insert the set into the gun with the concave head pointing out."
+            },
+            {
+              "text": "Slide the spring over the set down to the threads."
+            },
+            {
+              "text": "Place the tang of the spring in the palm of your hand and close your fingers tightly around the spring, set, and gun."
+            },
+            {
+              "text": "Rotate the gun in the tightening direction while holding the spring until you feel a high rise in torque."
+            },
+            {
+              "text": "Connect the gun to a source of compressed air:"
+            },
+            {
+              "text": "Moderately press the set head into a block of wood. Keep it there while setting pressure."
+            },
+            {
+              "text": "Place your free hand on the gun regulator valve for adjustments. This is the brass valve with an arrow from 0 to max."
+            },
+            {
+              "text": "Pull the trigger fully while twisting the regulator until a manageable recoil is found."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Rivet the Material",
+          "steps": [
+            {
+              "text": "Insert a rivet1.",
+              "text_clean": "Insert a rivet.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Align the rivet gun2.",
+              "text_clean": "Align the rivet gun.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Position the bucking bar3.",
+              "text_clean": "Position the bucking bar.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Buck the rivet4.",
+              "text_clean": "Buck the rivet.",
+              "note_refs": [
+                4
+              ]
+            },
+            {
+              "text": "Check the shop head dimensions5.",
+              "text_clean": "Check the shop head dimensions.",
+              "note_refs": [
+                5
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Press a rivet through all the sheets of material to be joined. Hold in place with a finger."
+            },
+            {
+              "text": "Press the rivet set snug into the rivet head. Keep the rivet gun perpendicular to the material and stabilize your wrist to control the recoil."
+            },
+            {
+              "text": "Grip the bucking bar with your other hand so that you can comfortably pull towards yourself. Place its hardened surface on the rivet shank directly in line with the rivet gun set."
+            },
+            {
+              "text": "Pull the trigger all the way for 1 to 3 seconds while firmly pulling the bucking bar towards the material. Keep the bucking bar perpendicular to avoid joggling the rivet shank. Equal the pushing pressure on the rivet gun with the pulling pressure on the bucking bar. Keep the rivet head flush to the skin."
+            },
+            {
+              "text": "Measure the height and width of the shop head; preferred height = 0.5D, preferred width = 1.5D."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        },
+        {
+          "section": "Remove the Rivet",
+          "steps": [
+            {
+              "text": "Center punch the rivet head1.",
+              "text_clean": "Center punch the rivet head.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Drill into the rivet head2.",
+              "text_clean": "Drill into the rivet head.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Remove the rivet head3.",
+              "text_clean": "Remove the rivet head.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Punch out the rivet shank4.",
+              "text_clean": "Punch out the rivet shank.",
+              "note_refs": [
+                4
+              ]
+            },
+            {
+              "text": "Inspect the hole for damage5.",
+              "text_clean": "Inspect the hole for damage.",
+              "note_refs": [
+                5
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Place the point of the center punch in the middle of the rivet head. Lightly tap the punch with a hammer."
+            },
+            {
+              "text": "Use a drill bit smaller than the diameter of the rivet (e.g., only drill down to the bottom of the rivet head)."
+            },
+            {
+              "text": "Insert a smaller diameter punch than the drilled hole in the rivet head. Press it in firmly and roll it around in a big circle to shear off the rivet head."
+            },
+            {
+              "text": "Use a punch equal to the rivet diameter to knock it through the hole."
+            },
+            {
+              "text": "Look for irregular hole shapes."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 32,
+      "note_count": 51
+    }
+  ]
+}

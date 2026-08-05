@@ -1,0 +1,1226 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.D.S8
+
+schema_version: 1
+status: draft
+acs_code: AM.I.D.S8
+task_no: 7
+title: Fabricate a flareless-fitting-tube connection
+subject: General
+block: 3
+campus: AIM Fremont
+week: 3
+day: 3
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-05T17:59:03Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - steps_supplement.json
+  - references/handbook/faa_h_8083_30b_9_5_9_8.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The campus rates this High because the graded object is a finished artifact whose most
+    telling errors are geometric and stay visible after the fact: nut-behind-sleeve stacking
+    order, sleeve orientation, a square burr-free cut, a nut drawn down square on the fitting,
+    and — after disconnection — a continuous witness ring from the sleeve cutting edge and
+    tube visibly projecting past the sleeve pilot. What a still cannot settle is everything
+    defined by process or by thousandths: whether the tube was bottomed on the seat, whether
+    threads were lubricated, the number of turns counted from the grip point ('when the tube
+    no longer turns'), the 0.005"/0.015" pilot clearance, and whether the pilot moves axially.
+    Note also that the presetting and inspection operations are not on the AIM procedure sheet,
+    which ends at 'Deburr the tubing ends' — the standards below come verbatim from the handbook
+    pages the sheet cites, but their inclusion as graded steps is provisional.
+safety:
+- >-
+  Over-tightening flareless fitting may deform the tubing too much, causing line failure.
+- Installation of sleeves without lubrication may cause stress cracks.
+equipment:
+- Rigid Tubing
+- Cutting Tool
+- Sand Paper
+- Debur Tool
+- Flareless Sleeve
+- B-nut
+- Mandrel
+steps:
+- id: ct.s1
+  section: Cut the Tubing
+  text: Measure needed length of tubing.
+  checks:
+  - id: ct.s1.c1
+    statement: >-
+      The marked length matches the length required for the assembly, including fitting engagement
+      allowance.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "Cut the tube to the correct length"; procedure sheet step 1 requires
+      measuring needed length.
+  - id: ct.s1.c2
+    statement: >-
+      The layout mark is a single crisp line encircling the tube perpendicular to its axis.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Sheet note 1: "Align the marked line and sharp cutting wheel precisely"; handbook p.9-6
+      "with the ends perfectly square."
+  - id: ct.s1.c3
+    statement: >-
+      The required length is established from the applicable drawing, manual or routing data
+      before marking.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Before You Begin: "Use all relevant data... Maintenance, Overhaul, and Service Manuals."
+  - id: ct.s1.c4
+    statement: >-
+      The scale is zeroed flush against the tube end with no slack or parallax when the mark
+      is struck.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Measuring technique implied by step 1; only observable while the measurement is being
+      taken.
+  error_modes:
+  - id: ct.s1.e1
+    statement: >-
+      Tube marked short, so the finished tube cannot bottom firmly in the fitting seat.
+    severity: critical
+    origin: drafted
+  - id: ct.s1.e2
+    statement: >-
+      Mark laid out at an angle or not carried around the tube, guaranteeing a non-square
+      cut.
+    severity: major
+    origin: drafted
+  - id: ct.s1.e3
+    statement: >-
+      Multiple or smeared trial marks left on the tube, obscuring the intended cut line.
+    severity: minor
+    origin: drafted
+- id: ct.s2
+  section: Cut the Tubing
+  text: Cut the tubing.
+  note_refs:
+  - 1
+  checks:
+  - id: ct.s2.c1
+    statement: >-
+      The cut end is square to the tube axis within a squareness check against a machinist
+      square.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "Cut the tube to the correct length, with the ends perfectly square." Sheet
+      states only "Cut the tubing."
+  - id: ct.s2.c2
+    statement: Finished tube length matches the length measured and marked in step 1.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Sheet: "Measure needed length of tubing"; handbook: "Cut the tube to the correct length."
+  - id: ct.s2.c3
+    statement: >-
+      The tube at and near the cut shows no flattening, ovality or crush marks from the cutting
+      wheel.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet directs the wheel be tightened only "slightly snug" and re-tightened progressively,
+      which prevents pinching the tube.
+  - id: ct.s2.c4
+    statement: >-
+      The end is severed cleanly with no torn, ragged or partially broken-off metal or multiple
+      off-track cut grooves.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: "Continue re-tightening and rotating the cutting tool until cleanly cut through
+      tubing."
+  error_modes:
+  - id: ct.s2.e1
+    statement: >-
+      Cutting wheel over-tightened, ovalizing or partially collapsing the tube at the cut.
+    severity: critical
+    origin: drafted
+  - id: ct.s2.e2
+    statement: >-
+      End cut noticeably out of square, so the tube cannot bottom squarely on the fitting
+      seat.
+    severity: critical
+    origin: drafted
+  - id: ct.s2.e3
+    statement: >-
+      Wheel wanders off the mark, leaving spiral or double cut tracks and a torn end.
+    severity: major
+    origin: drafted
+  - id: ct.s2.e4
+    statement: Cut to the wrong length relative to the mark.
+    severity: minor
+    origin: drafted
+- id: ct.s3
+  section: Cut the Tubing
+  text: Deburr the tubing ends.
+  note_refs:
+  - 2
+  - 3
+  checks:
+  - id: ct.s3.c1
+    statement: >-
+      Both the inside and outside edges of the tube end are free of raised burrs and ragged
+      metal.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "Deburr the inside and outside of the tube"; sheet note 2 requires inside
+      diameter smooth.
+  - id: ct.s3.c2
+    statement: >-
+      The bore at the deburred end measures the original inside diameter, with no bell-mouthing
+      or wall thinning.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet note 2: "check the inside diameter is smooth and the original size returned";
+      handbook is silent on any dimension.
+  - id: ct.s3.c3
+    statement: >-
+      The tube end remains perpendicular to the tube axis after deburring and sanding.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "Cut the tube to the correct length, with the ends perfectly square";
+      squareness must survive deburring.
+  - id: ct.s3.c4
+    statement: >-
+      No metal chips, swarf or abrasive grit remain inside the tube bore or on the end face.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Implied by sanding with lubricated paper and by contamination risk; handbook states
+      no cleanliness requirement here.
+  error_modes:
+  - id: ct.s3.e1
+    statement: >-
+      Over-deburring bells or thins the tube end, so the sleeve cannot grip sound wall at
+      presetting.
+    severity: critical
+    origin: drafted
+  - id: ct.s3.e2
+    statement: >-
+      Abrasive grit or metal chips left in the bore and carried into the system.
+    severity: critical
+    origin: drafted
+  - id: ct.s3.e3
+    statement: >-
+      Inside burr left in place, restricting flow and visible as a ragged lip in the bore.
+    severity: major
+    origin: drafted
+  - id: ct.s3.e4
+    statement: >-
+      Outside edge left sharp or scratched by sandpaper, marring the sleeve seating area.
+    severity: minor
+    origin: drafted
+- id: ps.s1
+  section: Preset the Sleeve
+  text: >-
+    Slip the nut, then the sleeve, over the tube and lubricate the fitting and nut threads
+    with hydraulic fluid.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 1
+  checks:
+  - id: ps.s1.c1
+    statement: >-
+      The nut is on the tube first, behind the sleeve, so the sleeve sits between the nut
+      and the tube end.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "Slip the nut, then the sleeve, over the tube (step 1)"; procedure sheet
+      states the same order.
+  - id: ps.s1.c2
+    statement: >-
+      The sleeve is oriented with its cutting edge and pilot facing the tube end that will
+      enter the fitting.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-8
+    origin: drafted
+    note: >-
+      Figure 9-14 labels "Sleeve pilot"/"Sleeve cutting edge" toward the fitting; drafted
+      supplemental step, needs subject-matter confirmation.
+    assumed: true
+  - id: ps.s1.c3
+    statement: >-
+      The tube end is cut square to the tube axis and free of burrs inside and outside before
+      the nut and sleeve go on.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "Cut the tube to the correct length, with the ends perfectly square.
+      Deburr the inside and outside of the tube." Squareness needs a square/gauge.
+  - id: ps.s1.c4
+    statement: >-
+      Hydraulic fluid is applied to the threads of both the fitting and the nut before assembly.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "lubricate the threads of the fitting and nut with hydraulic fluid";
+      sheet safety note warns dry sleeves cause stress cracks.
+  error_modes:
+  - id: ps.s1.e1
+    statement: >-
+      Sleeve slipped on backwards, cutting edge facing away from the fitting, so it cannot
+      bite the tube.
+    severity: critical
+    origin: drafted
+  - id: ps.s1.e2
+    statement: >-
+      Nut and fitting threads assembled dry, risking galling and stress cracking of the sleeve.
+    severity: critical
+    origin: drafted
+  - id: ps.s1.e3
+    statement: >-
+      Sleeve installed before the nut, so the nut cannot be drawn onto the fitting.
+    severity: major
+    origin: drafted
+  - id: ps.s1.e4
+    statement: >-
+      Nut and sleeve installed over an out-of-square or burred tube end, now hidden under
+      the sleeve.
+    severity: major
+    origin: drafted
+- id: ps.s2
+  section: Preset the Sleeve
+  text: >-
+    Place the fitting in a vise and hold the tube firmly and squarely on the fitting seat
+    so it bottoms in the fitting.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 2
+  checks:
+  - id: ps.s2.c1
+    statement: >-
+      The fitting body is clamped in the vise so it cannot rotate, with jaws off the threads
+      and sealing cone.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "Place the fitting in a vise (step 2)"; the jaw-placement detail is inferred
+      and this step is supplemental, so SME confirmation is needed.
+    assumed: true
+  - id: ps.s2.c2
+    statement: >-
+      The tube axis is coaxial with the fitting, not cocked or side-loaded, with the nut hand-started
+      straight.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "hold the tubing firmly and squarely on the seat in the fitting"; step is
+      supplemental and unreviewed by an SME.
+    assumed: true
+  - id: ps.s2.c3
+    statement: >-
+      The tube is bottomed firmly against the seat in the fitting before the nut is tightened.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "(The tube must bottom firmly in the fitting.)" Seating cannot be seen once
+      assembled; supplemental step, needs SME confirmation.
+    assumed: true
+  - id: ps.s2.c4
+    statement: >-
+      The sleeve grip point is found by turning the tube back and forth while tightening until
+      it no longer turns.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "slowly turn the tube back and forth while tightening the nut. When the tube
+      no longer turns, the nut is ready for tightening."
+    assumed: true
+  error_modes:
+  - id: ps.s2.e1
+    statement: >-
+      Nut tightened before the tube is bottomed on the seat, presetting the sleeve at the
+      wrong location on the tube.
+    severity: critical
+    origin: drafted
+  - id: ps.s2.e2
+    statement: >-
+      Tube held cocked in the fitting, so the sleeve cutting edge bites unevenly around the
+      tube circumference.
+    severity: critical
+    origin: drafted
+  - id: ps.s2.e3
+    statement: >-
+      Vise jaws clamped on the fitting threads or sealing cone, marring the sealing surface.
+    severity: major
+    origin: drafted
+- id: ps.s3
+  section: Preset the Sleeve
+  text: >-
+    Tighten the nut until the cutting edge of the sleeve grips the tube, turning the tube
+    back and forth while tightening until it no longer turns.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 2
+  checks:
+  - id: ps.s3.c1
+    statement: >-
+      At completion the tube can no longer be rotated by hand within the sleeve.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "slowly turn the tube back and forth while tightening the nut. When the tube
+      no longer turns, the nut is ready for tightening." Supplemental step, needs SME confirmation.
+    assumed: true
+  - id: ps.s3.c2
+    statement: >-
+      Tube stays bottomed firmly and squarely on the fitting seat throughout nut tightening.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "hold the tubing firmly and squarely on the seat in the fitting. (The tube
+      must bottom firmly in the fitting.)" Provisional supplemental step.
+    assumed: true
+  - id: ps.s3.c3
+    statement: >-
+      Nut is stopped at the grip point, with no final-tightening turns yet applied.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook separates grip point from step 3: "the nut is ready for tightening"; final
+      turns are a distinct operation. Provisional.
+    assumed: true
+  - id: ps.s3.c4
+    statement: >-
+      Tube is coaxial with the fitting and nut, not cocked or offset at the junction.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Rests on handbook "firmly and squarely on the seat in the fitting"; squareness is visible
+      at the joint. Provisional supplemental step.
+    assumed: true
+  error_modes:
+  - id: ps.s3.e1
+    statement: >-
+      Nut run down well past the grip point, over-presetting the sleeve while the joint still
+      looks normal.
+    severity: critical
+    origin: drafted
+  - id: ps.s3.e2
+    statement: >-
+      Tube not held bottomed in the seat, so the sleeve bites with the tube unseated or cocked.
+    severity: critical
+    origin: drafted
+  - id: ps.s3.e3
+    statement: >-
+      Tube never rotated during tightening, so the grip point is guessed rather than found.
+    severity: major
+    origin: drafted
+- id: ps.s4
+  section: Preset the Sleeve
+  text: >-
+    Final-tighten the nut the number of turns specified for the tube material and outside
+    diameter.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 3
+  checks:
+  - id: ps.s4.c1
+    statement: >-
+      Nut is turned the specified amount past the grip point: 1 to 1-1/6 turns for aluminum
+      alloy up to 1/2" OD, 1-1/6 to 1-1/2 turns for steel or aluminum over 1/2" OD.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "tighten the nut from 1 to 11/6 turns... tighten from 11/6 to 11/2 turns";
+      step is supplemental, and the fraction is typographically suspect.
+    assumed: true
+  - id: ps.s4.c2
+    statement: >-
+      Turn count is taken from the point at which the tube no longer turns, not from finger-tight
+      or first thread contact.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "When the tube no longer turns, the nut is ready for tightening." Reference
+      point only evidenced by watching the tightening.
+    assumed: true
+  - id: ps.s4.c3
+    statement: >-
+      Tube material and outside diameter are identified so the correct turn range can be selected.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental note: "tube material and outside diameter must be known before this step
+      can be graded"; provisional, needs SME confirmation.
+    assumed: true
+  - id: ps.s4.c4
+    statement: >-
+      Finished connection shows the nut drawn down squarely on the fitting body with the tube
+      axially aligned and no wrench galling or rounded flats.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Workmanship expectation for the completed preset; supplemental section, not SME reviewed.
+    assumed: true
+  error_modes:
+  - id: ps.s4.e1
+    statement: >-
+      Nut final-tightened less than the specified turns, so the sleeve never fully bites and
+      the joint can blow off while looking correctly assembled.
+    severity: critical
+    origin: drafted
+  - id: ps.s4.e2
+    statement: >-
+      Nut tightened past the maximum turns, over-deforming or collapsing the tube and setting
+      up line failure.
+    severity: critical
+    origin: drafted
+  - id: ps.s4.e3
+    statement: >-
+      Turns counted from finger-tight instead of from the grip point, giving an out-of-range
+      preset that must be redone with a new sleeve.
+    severity: major
+    origin: drafted
+  - id: ps.s4.e4
+    statement: >-
+      Wrench slippage marks, galling or rounded corners on the B-nut or fitting hex.
+    severity: minor
+    origin: drafted
+- id: ip.s1
+  section: Inspect the Preset Connection
+  text: Disconnect the tubing from the fitting.
+  origin: drafted
+  assumed: true
+  checks:
+  - id: ip.s1.c1
+    statement: >-
+      The tube assembly is fully separated from the fitting, with the nut backed off and the
+      tube end free.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "After presetting the sleeve, disconnect the tubing from the fitting and check
+      the following points"; disassembly is prerequisite to inspection.
+  - id: ip.s1.c2
+    statement: >-
+      The preset sleeve remains on the tube in its swaged position, not slid off or removed
+      with the nut.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Drafted supplemental step; preset evidence is destroyed if sleeve is displaced. Inference
+      needs subject-matter confirmation.
+    assumed: true
+  - id: ip.s1.c3
+    statement: >-
+      Tube end, sleeve pilot and nut/fitting threads show no gouging, galling or cross-threading
+      from disassembly.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental step drafted from p.9-6 presetting sequence; handbook states no damage
+      standard for disassembly. Needs SME confirmation.
+    assumed: true
+  - id: ip.s1.c4
+    statement: >-
+      Tube material and outside diameter are recorded so the correct pilot-clearance limit
+      can be applied in later checks.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "maximum clearance of 0.005" for aluminum alloy tubing or 0.015" for steel
+      tubing" — limit depends on material/OD.
+    assumed: true
+  error_modes:
+  - id: ip.s1.e1
+    statement: >-
+      Nut is re-tightened or the joint reassembled and snugged before inspection, adding turns
+      and over-swaging the sleeve.
+    severity: critical
+    origin: drafted
+  - id: ip.s1.e2
+    statement: >-
+      Tube is pulled or twisted out while the nut is still partially tight, bending the tube
+      or shifting the sleeve pilot.
+    severity: major
+    origin: drafted
+  - id: ip.s1.e3
+    statement: >-
+      Sleeve is stripped off or pushed along the tube during disassembly, destroying the preset
+      evidence.
+    severity: major
+    origin: drafted
+- id: ip.s2
+  section: Inspect the Preset Connection
+  text: Verify the tube extends 3/32" to 1/8" beyond the sleeve pilot.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 1
+  checks:
+  - id: ip.s2.c1
+    statement: >-
+      The tube end protrudes beyond the sleeve pilot by 3/32" to 1/8" as measured with a rule
+      or caliper.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "The tube should extend 3⁄32" to 1⁄8" beyond the sleeve pilot; otherwise,
+      blowoff may occur." Step is supplemental; needs SME confirmation.
+    assumed: true
+  - id: ip.s2.c2
+    statement: >-
+      The tube, nut and sleeve are off the fitting with the sleeve pilot and tube end fully
+      exposed and unobstructed.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "disconnect the tubing from the fitting and check the following points" —
+      measurement is impossible with the tube seated.
+    assumed: true
+  - id: ip.s2.c3
+    statement: >-
+      Tube visibly projects past the sleeve pilot rather than sitting flush with or recessed
+      behind it.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Gross condition of the handbook's "extend ... beyond the sleeve pilot" requirement;
+      exact dimension still needs measuring.
+    assumed: true
+  - id: ip.s2.c4
+    statement: >-
+      The extension is measured from the sleeve pilot face, with the sleeve left in its preset
+      position and not slid along the tube.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental sheet places this check after presetting; a repositioned sleeve invalidates
+      the reading. Needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: ip.s2.e1
+    statement: >-
+      Tube extends less than 3/32" (or is flush with the pilot), leaving a plausible-looking
+      joint prone to blowoff.
+    severity: critical
+    origin: drafted
+  - id: ip.s2.e2
+    statement: >-
+      Extension read from the nut face or with the sleeve shifted, producing a false in-tolerance
+      value.
+    severity: critical
+    origin: drafted
+  - id: ip.s2.e3
+    statement: Tube extends more than 1/8" beyond the sleeve pilot.
+    severity: major
+    origin: drafted
+- id: ip.s3
+  section: Inspect the Preset Connection
+  text: >-
+    Verify the sleeve pilot contacts the tube or is within the maximum clearance for the tube
+    material.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 2
+  checks:
+  - id: ip.s3.c1
+    statement: >-
+      Clearance between the sleeve pilot and the tube is zero contact, or no more than 0.005"
+      (aluminum alloy) / 0.015" (corrosion-resistant steel).
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "sleeve pilot should contact the tube or have a maximum clearance of
+      0.005" for aluminum alloy tubing or 0.015" for steel tubing"; step is supplemental,
+      needs SME confirmation.
+    assumed: true
+  - id: ip.s3.c2
+    statement: >-
+      The tube material and outside diameter are identified so the correct clearance limit
+      is selected.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental step distinguishes aluminum alloy from corrosion-resistant steel limits;
+      material data must be established from spec. Needs SME confirmation.
+    assumed: true
+  - id: ip.s3.c3
+    statement: >-
+      The pilot area of the tube shows no crack, split or gross collapse; only slight deformation
+      at the sleeve cut is present.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Handbook: "A slight collapse of the tube at the sleeve cut is permissible." Gross collapse
+      or splitting invalidates the pilot contact judgement.
+  - id: ip.s3.c4
+    statement: >-
+      Sleeve remains on the tube with the pilot region exposed and clean, so clearance can
+      be gauged.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental inspection step requires the disconnected tube/sleeve be presented for
+      pilot inspection; needs SME confirmation.
+    assumed: true
+  error_modes:
+  - id: ip.s3.e1
+    statement: >-
+      Clearance judged by eye only and never gauged, so an over-clearance pilot passes while
+      the assembly looks normal.
+    severity: critical
+    origin: drafted
+  - id: ip.s3.e2
+    statement: >-
+      Steel limit (0.015") applied to aluminum alloy tubing, accepting a pilot gap that exceeds
+      0.005".
+    severity: critical
+    origin: drafted
+  - id: ip.s3.e3
+    statement: >-
+      Tube is cracked or grossly collapsed at the sleeve cut yet accepted as "slight deformation."
+    severity: major
+    origin: drafted
+- id: ip.s4
+  section: Inspect the Preset Connection
+  text: Verify the sleeve pilot does not move on the tube except in rotation.
+  origin: drafted
+  assumed: true
+  note_refs:
+  - 3
+  checks:
+  - id: ip.s4.c1
+    statement: >-
+      The sleeve pilot resists axial sliding along the tube when hand-pressure is applied,
+      permitting only rotation.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "No movement of the sleeve pilot, except rotation, is permissible."
+      Only an attempted push/pull shows it.
+    assumed: true
+  - id: ip.s4.c2
+    statement: >-
+      Tube deformation at the sleeve cut is limited to a slight collapse, with no crushing,
+      kinking or split.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-6: "A slight collapse of the tube at the sleeve cut is permissible." Step
+      itself is supplemental, not AIM-sheet text.
+    assumed: true
+  - id: ip.s4.c3
+    statement: >-
+      A continuous witness ring from the sleeve cutting edge is visible around the full tube
+      circumference.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-6
+    origin: drafted
+    note: >-
+      Rests on "Tighten the nut until the cutting edge of the sleeve grips the tube"; grip
+      evidence inferred, needs SME confirmation.
+    assumed: true
+  - id: ip.s4.c4
+    statement: >-
+      The nut and sleeve remain assembled on the tube after disconnection so pilot retention
+      can be assessed.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Supplemental inspect section step 1 disconnects the tube from the fitting only; sleeve
+      stays preset on tube.
+    assumed: true
+  error_modes:
+  - id: ip.s4.e1
+    statement: >-
+      Sleeve pilot slides axially on the tube (under-preset), yet the assembly still looks
+      correctly made.
+    severity: critical
+    origin: drafted
+  - id: ip.s4.e2
+    statement: >-
+      Tube crushed, kinked or split at the sleeve cut from over-tightening the nut.
+    severity: major
+    origin: drafted
+  - id: ip.s4.e3
+    statement: >-
+      Sleeve forced with pliers or a tool during the movement check, marring the tube surface.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The cut and deburred tube end before the nut and sleeve are installed: end face square
+      to the axis, inside and outside edges free of raised burrs and ragged metal, bore clear
+      of chips and abrasive grit, and no flattening or crush marks from the cutting wheel.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Close, near-macro, tube end filling most of the frame at a slight oblique so both the
+      end face and a short length of the bore are visible; a machinist scale or caliper jaw
+      laid alongside for scale; diffuse light with no specular glare off the cut edge.
+  - id: ev2
+    description: >-
+      The nut and sleeve staged on the tube before it enters the fitting, showing the nut
+      on first (behind the sleeve) and the sleeve's cutting edge and pilot facing the tube
+      end that will enter the fitting.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Side elevation, tube horizontal, camera perpendicular to the tube axis, close enough
+      that the sleeve's pilot and cutting-edge taper are distinguishable; plain contrasting
+      background; light raking across the sleeve to reveal its profile.
+  - id: ev3
+    description: >-
+      The completed preset connection still assembled: fitting body clamped in the vise with
+      jaws clear of the threads and sealing cone, nut drawn down squarely on the fitting body,
+      tube coaxial with the fitting and not cocked, and no galling or rounded flats on the
+      nut.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Three-quarter view at working distance showing vise jaws, fitting, nut and at least
+      3" of tube in one frame; second-priority tighter view of the nut-to-fitting joint line;
+      even shop lighting, no shadow across the joint.
+  - id: ev4
+    description: >-
+      Instrumented post-disconnection inspection of the tube end: rule or caliper reading
+      of tube protrusion beyond the sleeve pilot, and the gauged sleeve-pilot-to-tube clearance,
+      with the tube material and outside diameter stated so the correct clearance limit can
+      be applied.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Recorded reading (value and instrument) with a supporting close photo of the caliper
+      or rule in place on the sleeve pilot face and tube end; sleeve left in its preset position,
+      not slid along the tube.
+    assumed: true
+  - id: ev5
+    description: >-
+      Continuous capture of the tightening and retention checks: tube held bottomed and square
+      on the seat, the grip point found by turning the tube back and forth until it no longer
+      turns, the counted final-tightening turns taken from that point, and the hand-pressure
+      check that the sleeve pilot rotates but does not slide axially on the tube.
+    medium: video
+    origin: drafted
+    framing: >-
+      Fixed or shoulder-level view of the vise, unbroken take, close enough to read a witness
+      mark on the nut against the fitting for turn counting; audible or on-screen count; second
+      segment close on the sleeve while axial hand pressure is applied.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 9
+    pages:
+    - 9-5
+    - 9-6
+    - 9-7
+    - 9-8
+    pdf_page_indices:
+    - 357
+    - 358
+    - 359
+    - 360
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_30b_9_5_9_8.md
+  videos:
+  - path: data/videos/AM.I.D.S8/flareless_fitting_1_rf.mp4
+  - path: data/videos/AM.I.D.S8/flareless_fitting_2_rf.mp4
+  - path: data/videos/AM.I.D.S8/flareless_fitting_3_rf.mp4
+  trainwithaim_video: >-
+    https://www.youtube.com/watch?si=XNyBGdnnD8MFlwmB&v=Jvi5eEIQFck&feature=youtu.be
+assumptions:
+- id: ps.s1.c2
+  statement: >-
+    The sleeve is oriented with its cutting edge and pilot facing the tube end that will enter
+    the fitting.
+  reason: >-
+    Figure 9-14 labels "Sleeve pilot"/"Sleeve cutting edge" toward the fitting; drafted supplemental
+    step, needs subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s2.c1
+  statement: >-
+    The fitting body is clamped in the vise so it cannot rotate, with jaws off the threads
+    and sealing cone.
+  reason: >-
+    Handbook: "Place the fitting in a vise (step 2)"; the jaw-placement detail is inferred
+    and this step is supplemental, so SME confirmation is needed.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s2.c2
+  statement: >-
+    The tube axis is coaxial with the fitting, not cocked or side-loaded, with the nut hand-started
+    straight.
+  reason: >-
+    Handbook: "hold the tubing firmly and squarely on the seat in the fitting"; step is supplemental
+    and unreviewed by an SME.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s2.c3
+  statement: >-
+    The tube is bottomed firmly against the seat in the fitting before the nut is tightened.
+  reason: >-
+    Handbook: "(The tube must bottom firmly in the fitting.)" Seating cannot be seen once
+    assembled; supplemental step, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s2.c4
+  statement: >-
+    The sleeve grip point is found by turning the tube back and forth while tightening until
+    it no longer turns.
+  reason: >-
+    Handbook: "slowly turn the tube back and forth while tightening the nut. When the tube
+    no longer turns, the nut is ready for tightening."
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s3.c1
+  statement: >-
+    At completion the tube can no longer be rotated by hand within the sleeve.
+  reason: >-
+    Handbook: "slowly turn the tube back and forth while tightening the nut. When the tube
+    no longer turns, the nut is ready for tightening." Supplemental step, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s3.c2
+  statement: >-
+    Tube stays bottomed firmly and squarely on the fitting seat throughout nut tightening.
+  reason: >-
+    Handbook: "hold the tubing firmly and squarely on the seat in the fitting. (The tube must
+    bottom firmly in the fitting.)" Provisional supplemental step.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s3.c3
+  statement: >-
+    Nut is stopped at the grip point, with no final-tightening turns yet applied.
+  reason: >-
+    Handbook separates grip point from step 3: "the nut is ready for tightening"; final turns
+    are a distinct operation. Provisional.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s3.c4
+  statement: >-
+    Tube is coaxial with the fitting and nut, not cocked or offset at the junction.
+  reason: >-
+    Rests on handbook "firmly and squarely on the seat in the fitting"; squareness is visible
+    at the joint. Provisional supplemental step.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s4.c1
+  statement: >-
+    Nut is turned the specified amount past the grip point: 1 to 1-1/6 turns for aluminum
+    alloy up to 1/2" OD, 1-1/6 to 1-1/2 turns for steel or aluminum over 1/2" OD.
+  reason: >-
+    Handbook: "tighten the nut from 1 to 11/6 turns... tighten from 11/6 to 11/2 turns"; step
+    is supplemental, and the fraction is typographically suspect.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s4.c2
+  statement: >-
+    Turn count is taken from the point at which the tube no longer turns, not from finger-tight
+    or first thread contact.
+  reason: >-
+    Handbook: "When the tube no longer turns, the nut is ready for tightening." Reference
+    point only evidenced by watching the tightening.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s4.c3
+  statement: >-
+    Tube material and outside diameter are identified so the correct turn range can be selected.
+  reason: >-
+    Supplemental note: "tube material and outside diameter must be known before this step
+    can be graded"; provisional, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s4.c4
+  statement: >-
+    Finished connection shows the nut drawn down squarely on the fitting body with the tube
+    axially aligned and no wrench galling or rounded flats.
+  reason: >-
+    Workmanship expectation for the completed preset; supplemental section, not SME reviewed.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s1.c2
+  statement: >-
+    The preset sleeve remains on the tube in its swaged position, not slid off or removed
+    with the nut.
+  reason: >-
+    Drafted supplemental step; preset evidence is destroyed if sleeve is displaced. Inference
+    needs subject-matter confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s1.c3
+  statement: >-
+    Tube end, sleeve pilot and nut/fitting threads show no gouging, galling or cross-threading
+    from disassembly.
+  reason: >-
+    Supplemental step drafted from p.9-6 presetting sequence; handbook states no damage standard
+    for disassembly. Needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s1.c4
+  statement: >-
+    Tube material and outside diameter are recorded so the correct pilot-clearance limit can
+    be applied in later checks.
+  reason: >-
+    Handbook: "maximum clearance of 0.005" for aluminum alloy tubing or 0.015" for steel tubing"
+    — limit depends on material/OD.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s2.c1
+  statement: >-
+    The tube end protrudes beyond the sleeve pilot by 3/32" to 1/8" as measured with a rule
+    or caliper.
+  reason: >-
+    Handbook: "The tube should extend 3⁄32" to 1⁄8" beyond the sleeve pilot; otherwise, blowoff
+    may occur." Step is supplemental; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s2.c2
+  statement: >-
+    The tube, nut and sleeve are off the fitting with the sleeve pilot and tube end fully
+    exposed and unobstructed.
+  reason: >-
+    Handbook: "disconnect the tubing from the fitting and check the following points" — measurement
+    is impossible with the tube seated.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s2.c3
+  statement: >-
+    Tube visibly projects past the sleeve pilot rather than sitting flush with or recessed
+    behind it.
+  reason: >-
+    Gross condition of the handbook's "extend ... beyond the sleeve pilot" requirement; exact
+    dimension still needs measuring.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s2.c4
+  statement: >-
+    The extension is measured from the sleeve pilot face, with the sleeve left in its preset
+    position and not slid along the tube.
+  reason: >-
+    Supplemental sheet places this check after presetting; a repositioned sleeve invalidates
+    the reading. Needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s3.c1
+  statement: >-
+    Clearance between the sleeve pilot and the tube is zero contact, or no more than 0.005"
+    (aluminum alloy) / 0.015" (corrosion-resistant steel).
+  reason: >-
+    Handbook p.9-6: "sleeve pilot should contact the tube or have a maximum clearance of 0.005"
+    for aluminum alloy tubing or 0.015" for steel tubing"; step is supplemental, needs SME
+    confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s3.c2
+  statement: >-
+    The tube material and outside diameter are identified so the correct clearance limit is
+    selected.
+  reason: >-
+    Supplemental step distinguishes aluminum alloy from corrosion-resistant steel limits;
+    material data must be established from spec. Needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s3.c4
+  statement: >-
+    Sleeve remains on the tube with the pilot region exposed and clean, so clearance can be
+    gauged.
+  reason: >-
+    Supplemental inspection step requires the disconnected tube/sleeve be presented for pilot
+    inspection; needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s4.c1
+  statement: >-
+    The sleeve pilot resists axial sliding along the tube when hand-pressure is applied, permitting
+    only rotation.
+  reason: >-
+    Handbook p.9-6: "No movement of the sleeve pilot, except rotation, is permissible." Only
+    an attempted push/pull shows it.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s4.c2
+  statement: >-
+    Tube deformation at the sleeve cut is limited to a slight collapse, with no crushing,
+    kinking or split.
+  reason: >-
+    Handbook p.9-6: "A slight collapse of the tube at the sleeve cut is permissible." Step
+    itself is supplemental, not AIM-sheet text.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s4.c3
+  statement: >-
+    A continuous witness ring from the sleeve cutting edge is visible around the full tube
+    circumference.
+  reason: >-
+    Rests on "Tighten the nut until the cutting edge of the sleeve grips the tube"; grip evidence
+    inferred, needs SME confirmation.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ip.s4.c4
+  statement: >-
+    The nut and sleeve remain assembled on the tube after disconnection so pilot retention
+    can be assessed.
+  reason: >-
+    Supplemental inspect section step 1 disconnects the tube from the fitting only; sleeve
+    stays preset on tube.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ps.s1
+  statement: >-
+    Slip the nut, then the sleeve, over the tube and lubricate the fitting and nut threads
+    with hydraulic fluid.
+  reason: >-
+    The AIM procedure sheet documents no 'Preset the Sleeve' steps; this one was drafted from
+    the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Preset the Sleeve' forms part of the graded submission, ideally
+    against a corrected procedure sheet, before marking this pack reviewed.
+- id: ps.s2
+  statement: >-
+    Place the fitting in a vise and hold the tube firmly and squarely on the fitting seat
+    so it bottoms in the fitting.
+  reason: >-
+    The AIM procedure sheet documents no 'Preset the Sleeve' steps; this one was drafted from
+    the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Preset the Sleeve' forms part of the graded submission, ideally
+    against a corrected procedure sheet, before marking this pack reviewed.
+- id: ps.s3
+  statement: >-
+    Tighten the nut until the cutting edge of the sleeve grips the tube, turning the tube
+    back and forth while tightening until it no longer turns.
+  reason: >-
+    The AIM procedure sheet documents no 'Preset the Sleeve' steps; this one was drafted from
+    the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Preset the Sleeve' forms part of the graded submission, ideally
+    against a corrected procedure sheet, before marking this pack reviewed.
+- id: ps.s4
+  statement: >-
+    Final-tighten the nut the number of turns specified for the tube material and outside
+    diameter.
+  reason: >-
+    The AIM procedure sheet documents no 'Preset the Sleeve' steps; this one was drafted from
+    the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Preset the Sleeve' forms part of the graded submission, ideally
+    against a corrected procedure sheet, before marking this pack reviewed.
+- id: ip.s1
+  statement: Disconnect the tubing from the fitting.
+  reason: >-
+    The AIM procedure sheet documents no 'Inspect the Preset Connection' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Inspect the Preset Connection' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ip.s2
+  statement: Verify the tube extends 3/32" to 1/8" beyond the sleeve pilot.
+  reason: >-
+    The AIM procedure sheet documents no 'Inspect the Preset Connection' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Inspect the Preset Connection' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ip.s3
+  statement: >-
+    Verify the sleeve pilot contacts the tube or is within the maximum clearance for the tube
+    material.
+  reason: >-
+    The AIM procedure sheet documents no 'Inspect the Preset Connection' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Inspect the Preset Connection' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ip.s4
+  statement: Verify the sleeve pilot does not move on the tube except in rotation.
+  reason: >-
+    The AIM procedure sheet documents no 'Inspect the Preset Connection' steps; this one was
+    drafted from the handbook and the reference video to cover an operation the sheet omits.
+  resolve_by: >-
+    Confirm with AIM that 'Inspect the Preset Connection' forms part of the graded submission,
+    ideally against a corrected procedure sheet, before marking this pack reviewed.
+- id: ev4
+  statement: >-
+    Instrumented post-disconnection inspection of the tube end: rule or caliper reading of
+    tube protrusion beyond the sleeve pilot, and the gauged sleeve-pilot-to-tube clearance,
+    with the tube material and outside diameter stated so the correct clearance limit can
+    be applied.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    Continuous capture of the tightening and retention checks: tube held bottomed and square
+    on the seat, the grip point found by turning the tube back and forth until it no longer
+    turns, the counted final-tightening turns taken from that point, and the hand-pressure
+    check that the sleeve pilot rotates but does not slide axially on the tube.
+  reason: Required as video, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  The AIM procedure sheet documents no steps for 'Preset the Sleeve', 'Inspect the Preset
+  Connection', yet the task title and the sheet's own equipment list call for that work. Those
+  steps were drafted from the handbook and the reference video and carry `origin: drafted`.
+  Confirm with AIM whether they form part of the graded submission, and ask for a corrected
+  procedure sheet if they do.
+- >-
+  Verify the fraction rendered as "1-1/6" against the source FAA-H-8083-30B PDF (1-1/8 and
+  1-1/16 are both plausible) before any turn-count criterion is graded.
+- >-
+  Confirm with an SME whether presetting and post-preset inspection are in scope for AM.I.D.S8
+  at all, since the AIM sheet's step list ends at 'Deburr the tubing ends'.
+- >-
+  Fix the tube material and outside diameter used in the exercise, and require students to
+  state them, or neither the turn range nor the clearance limit can be selected.
+- >-
+  Resolve whether the 0.015" limit applies to 'steel' (p. 9-6 body) or 'corrosion-resistant
+  steel' (Fig. 9-14 caption, p. 9-8) tubing.
+- >-
+  Confirm whether the campus method is the fitting-in-a-vise procedure or a presetting tool,
+  which p. 9-5 also permits ('preset with the proper size presetting tool or operation');
+  the turn-count evidence differs.
+- >-
+  Set a tolerance or pass/fail wording for cut squareness and for the 'continuous witness
+  ring' check, neither of which is quantified in the extract.

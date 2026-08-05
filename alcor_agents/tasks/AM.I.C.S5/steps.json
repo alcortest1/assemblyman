@@ -1,0 +1,95 @@
+{
+  "acs_code": "AM.I.C.S5",
+  "task": "Calculate weight and balance for an aircraft after an equipment change.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.I.C.S5 - Calculate Weight and Balance for an Aircraft After an Equipment Change_.docx",
+      "title": "AM.I.C.S5 - Calculate Weight and Balance for an Aircraft After an Equipment Change.",
+      "variant": "AM.I.C.S5 - Calculate Weight and Balance for an Aircraft After an Equipment Change.",
+      "sections": [
+        {
+          "section": "Procedure",
+          "steps": [
+            {
+              "text": "Identify the weight at the landing gear locations1.",
+              "text_clean": "Identify the weight at the landing gear locations.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Identify the arms of each weight2.",
+              "text_clean": "Identify the arms of each weight.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Multiply the weight by the arm3.",
+              "text_clean": "Multiply the weight by the arm.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Find the total weight4.",
+              "text_clean": "Find the total weight.",
+              "note_refs": [
+                4
+              ]
+            },
+            {
+              "text": "Find the total moment5.",
+              "text_clean": "Find the total moment.",
+              "note_refs": [
+                5
+              ]
+            },
+            {
+              "text": "Divide the total moment by the total weight6.",
+              "text_clean": "Divide the total moment by the total weight.",
+              "note_refs": [
+                6
+              ]
+            },
+            {
+              "text": "Determine if the CG is in range7.",
+              "text_clean": "Determine if the CG is in range.",
+              "note_refs": [
+                7
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "Commonly, aircraft are weighed on scales at 3 locations, either by load cells installed on jacks or roll-on scales at the landing gear. Read each scale for their individual weight; Tricycle gear aircraft will identify these as right-hand and left-hand main landing gear and nose gear (e.g., 1,250 RMLG; 1,200 LMLG; 1,125 NG)."
+            },
+            {
+              "text": "The arm of each weight is its distance from the datum in inches. If a location is in front of the datum, this value will be a negative number (e.g., 120\" RMLG; 120\" LMLG; -45\" NG)."
+            },
+            {
+              "text": "Multiply each weight by its own arm (e.g., 1,250 x 120 = 150,000; 1,200 x 120 = 144,000; 1,125 x -45 = -50,625)."
+            },
+            {
+              "text": "Add each weight together (e.g., 1,250 + 1,200 + 1,125 = 3,575 LBS)."
+            },
+            {
+              "text": "Add each moment together (e.g., 150,000 + 144,000 + -50,625 = 243,375)."
+            },
+            {
+              "text": "Divide the total moment by the total weight (e.g., 243,375 / 3,575 = 68.07\" CG)."
+            },
+            {
+              "text": "The aircraft CG range is found on the TCDS or a given value. If the CG range is 64\"-70\" on this aircraft, then the CG is within range."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 7,
+      "note_count": 7
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Python virtualenv
+.venv/
+__pycache__/
+*.pyc
+
+# Local secrets — never commit. The repo-root .gitignore also covers .env*.
+.env
+.env.*
+
+# Datasets and corpora — fetched or licensed, not source. Includes the
+# confidential AIM procedure docs and ~95 GB of external datasets.
+data/
+
+# Generated artifacts — frames, indexes, segments, and sheets derived from data/.
+build/
+
+# Model-drafted grading sheets and their reports, written by
+# packs/generate_criteria.py and packs/atom_criteria.py from data/. Re-drafted
+# whenever the model or the source procedure changes, so the scripts are the
+# source and these are their output.
+criteria/
+
+# Synthetic negative examples and their artifacts, written by
+# erroneous_video_pipeline. Derived from the confidential AIM footage and
+# regenerable from it, so the pipeline is the source and these are its output.
+generated_errors/
+
+# macOS
+.DS_Store

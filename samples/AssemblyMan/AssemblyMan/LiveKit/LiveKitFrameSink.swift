@@ -36,6 +36,9 @@ final class LiveKitFrameSink: Sendable {
     var framesOffered: UInt64 = 0
     var framesForwarded: UInt64 = 0
     var framesComposited: UInt64 = 0
+    /// Frames published without the overlay because a composite was still running. A steady
+    /// climb here means compositing cannot keep up with the frame rate.
+    var framesSkippedComposite: UInt64 = 0
     var firstPixelFormat: OSType?
     var isPixelFormatSupported: Bool?
 
@@ -57,7 +60,16 @@ final class LiveKitFrameSink: Sendable {
     var capturer: BufferCapturer?
     var isArmed = false
     var diagnostics = Diagnostics()
+    /// Set while a composite is in flight. Frames arriving meanwhile are published raw
+    /// rather than queued — see `capture`.
+    var isCompositingFrame = false
   }
+
+  /// Compositing happens here, never on the thread the frame arrived on.
+  private let compositeQueue = DispatchQueue(
+    label: "com.alcorlabs.assemblyman.relay.composite",
+    qos: .userInitiated
+  )
 
   private let state = OSAllocatedUnfairLock(initialState: State())
   private let onFirstFrame: @Sendable () -> Void
@@ -120,20 +132,48 @@ final class LiveKitFrameSink: Sendable {
     // Outside the lock: `capture` is non-blocking, but there is no reason to hold a lock
     // across a call into another library.
     //
-    // With the on-device overlay showing, the viewer should see it too, so the overlay is
-    // composited in before publishing. With no overlay set this whole branch is skipped and
-    // the buffer reaches WebRTC exactly as it arrived — the common case stays zero-copy.
-    if compositor.isCompositing,
-      let source = CMSampleBufferGetImageBuffer(sampleBuffer),
-      let composited = compositor.composite(source) {
-      // The composite is a fresh buffer, so the presentation time has to be carried across
-      // by hand or WebRTC paces the stream from its own clock and the video stutters.
+    // With the on-device overlay showing, the viewer should see it too. With no overlay set
+    // this whole branch is skipped and the buffer reaches WebRTC exactly as it arrived — the
+    // common case stays zero-copy.
+    //
+    // Compositing is a synchronous GPU render, and this is the DAT SDK's frame delivery
+    // thread. Doing it here blocked that thread roughly thirty times a second while on-device
+    // segmentation competed for the same GPU; the camera pipeline backed up, the app froze,
+    // and the phone dropped out of the room. So the render is moved off this thread, and a
+    // frame arriving while one is still running is published raw rather than queued. Losing
+    // an overlay on some frames is invisible; stalling the capture pipeline is not.
+    if compositor.isCompositing, let source = CMSampleBufferGetImageBuffer(sampleBuffer) {
       let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
       let timeStampNs = presentationTime.isValid
         ? Int64(CMTimeGetSeconds(presentationTime) * Double(NSEC_PER_SEC))
         : VideoCapturer.createTimeStampNs()
-      capturer.capture(composited, timeStampNs: timeStampNs, rotation: ._0)
-      state.withLock { $0.diagnostics.framesComposited &+= 1 }
+
+      let shouldComposite = state.withLock { state -> Bool in
+        guard !state.isCompositingFrame else {
+          state.diagnostics.framesSkippedComposite &+= 1
+          return false
+        }
+        state.isCompositingFrame = true
+        return true
+      }
+
+      if shouldComposite {
+        compositeQueue.async { [weak self] in
+          guard let self else { return }
+          let composited = self.compositor.composite(source)
+          // Publishing from this queue is safe — the capturer hands buffers to WebRTC's own
+          // queue — and only one composite runs at a time, so frame order is preserved.
+          if let composited {
+            capturer.capture(composited, timeStampNs: timeStampNs, rotation: ._0)
+            self.state.withLock { $0.diagnostics.framesComposited &+= 1 }
+          } else {
+            capturer.capture(source, timeStampNs: timeStampNs, rotation: ._0)
+          }
+          self.state.withLock { $0.isCompositingFrame = false }
+        }
+      } else {
+        capturer.capture(source, timeStampNs: timeStampNs, rotation: ._0)
+      }
     } else {
       capturer.capture(sampleBuffer)
     }

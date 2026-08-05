@@ -1,0 +1,438 @@
+schema_version: 1
+status: draft   # -> reviewed only after AIM subject-matter review
+
+acs_code: AM.II.K.S3
+task_no: 9
+title: Assemble an aircraft electrical connector
+subject: Airframe
+block: 6
+campus: AIM Fremont
+week: 2
+day: 1
+
+photo_assessment:
+  fit: High
+  rationale: >-
+    The finished assembly is a static artifact and most acceptance criteria are
+    visual: strip length, insulation clearance at the pin barrel, conductor
+    visibility in the inspection window, and pin seating in the connector face.
+    Two criteria are not visual (pull test, continuity) and are called out below.
+
+safety:
+  - Small pin terminations can be damaged if mishandled when installing into the connectors.
+  - >-
+    Avoid sharp edges contacting the connector's rubber insert when removing and
+    installing pins, to preserve wire security.
+
+equipment:
+  - Eye protection
+  - Ear protection
+  - Gloves
+  - Standard toolbox set
+  - Parts bags
+  - Pen & paper
+  - FOD box
+  - Electrical wire
+  - Wire strippers
+  - DNC wire crimpers
+  - Install and remover tool
+  - Pin and receiver
+  - Electrical connector
+
+steps:
+  # ------------------------------------------------------------ prepare the wire
+  - id: pw.s1
+    section: Prepare the Wire
+    text: Select the correct wire gauge for the pin and receiver.
+    note_refs: [1]
+    checks:
+      - id: pw.s1.c1
+        statement: The wire gauge used is one the selected pin is rated to accept.
+        observable: document
+    error_modes:
+      - id: pw.s1.e1
+        statement: >-
+          Wire gauge outside the pin's compatible range, giving a crimp that
+          cannot develop full strength.
+        severity: critical
+
+  - id: pw.s2
+    section: Prepare the Wire
+    text: Cut the wire to the required length.
+    checks:
+      - id: pw.s2.c1
+        statement: The cut is square and the conductor strands are not splayed or nicked.
+        observable: photo
+    error_modes:
+      - id: pw.s2.e1
+        statement: Ragged or angled cut leaving splayed strands.
+        severity: minor
+
+  - id: pw.s3
+    section: Prepare the Wire
+    text: Strip 1/8" of insulation off the wire ends.
+    checks:
+      - id: pw.s3.c1
+        statement: Stripped length is approximately 1/8 inch.
+        observable: measurement
+      - id: pw.s3.c2
+        statement: No conductor strands are cut, nicked or missing from the strip operation.
+        observable: photo
+    error_modes:
+      - id: pw.s3.e1
+        statement: Strip too long, leaving bare conductor exposed outside the pin barrel.
+        severity: major
+      - id: pw.s3.e2
+        statement: Strip too short, so the conductor does not reach the bottom of the barrel.
+        severity: major
+      - id: pw.s3.e3
+        statement: Nicked or severed strands reducing conductor cross-section.
+        severity: critical
+
+  - id: pw.s4
+    section: Prepare the Wire
+    text: Insert the wire into the pin.
+    note_refs: [2]
+    checks:
+      - id: pw.s4.c1
+        statement: The wire seats at the base of the pin opening.
+        observable: photo
+      - id: pw.s4.c2
+        statement: >-
+          Conductor is visible in the pin's inspection window, confirming full
+          insertion before crimping.
+        observable: photo
+        assumed: true
+    error_modes:
+      - id: pw.s4.e1
+        statement: Wire bottomed short, so the crimp captures insulation rather than conductor.
+        severity: critical
+
+  # ------------------------------------------------------- set up the DNC crimper
+  - id: cs.s1
+    section: Set Up the DNC Crimper
+    text: Open the crimper jaws all the way.
+    note_refs: [1]
+    checks:
+      - id: cs.s1.c1
+        statement: Handles are squeezed to release and left resting open before setup.
+        observable: video
+    error_modes:
+      - id: cs.s1.e1
+        statement: Turret changed with the jaws under load.
+        severity: minor
+
+  - id: cs.s2
+    section: Set Up the DNC Crimper
+    text: Insert the crimper turret on the tool face.
+    note_refs: [2]
+    checks:
+      - id: cs.s2.c1
+        statement: The turret is keyed into the tool face cut-outs and tangs, seated flat.
+        observable: photo
+    error_modes:
+      - id: cs.s2.e1
+        statement: Turret misaligned on its keying features.
+        severity: major
+
+  - id: cs.s3
+    section: Set Up the DNC Crimper
+    text: Secure the turret set screws.
+    checks:
+      - id: cs.s3.c1
+        statement: Set screws are tightened so the turret cannot shift during crimping.
+        observable: photo
+    error_modes:
+      - id: cs.s3.e1
+        statement: Set screws left loose, allowing turret movement mid-crimp.
+        severity: major
+
+  - id: cs.s4
+    section: Set Up the DNC Crimper
+    text: Turn the handle dial to the wire size being crimped.
+    note_refs: [3]
+    checks:
+      - id: cs.s4.c1
+        statement: The handle dial reads the gauge of the wire being crimped.
+        observable: photo
+      - id: cs.s4.c2
+        statement: The cotter key is reinstalled after the selection is made.
+        observable: photo
+    error_modes:
+      - id: cs.s4.e1
+        statement: Dial set to the wrong gauge, giving an under- or over-compressed crimp.
+        severity: critical
+      - id: cs.s4.e2
+        statement: Cotter key left out, allowing the selector to drift.
+        severity: major
+
+  - id: cs.s5
+    section: Set Up the DNC Crimper
+    text: Rotate the turret to the corresponding wire termination size.
+    note_refs: [4]
+    checks:
+      - id: cs.s5.c1
+        statement: >-
+          The correct crimper hole is positioned over the opening and the turret
+          is pressed down until it clicks home.
+        observable: photo
+    error_modes:
+      - id: cs.s5.e1
+        statement: Turret not clicked into detent, leaving the hole misaligned.
+        severity: major
+
+  # -------------------------------------------------------------- crimp the wire
+  - id: cw.s1
+    section: Crimp the Wire
+    text: With the pin positioned on the wire end, insert it into the crimper jaws.
+    note_refs: [1]
+    checks:
+      - id: cw.s1.c1
+        statement: The pin is fed through the back of the crimper, viewed from the turret side.
+        observable: video
+    error_modes:
+      - id: cw.s1.e1
+        statement: Pin inserted from the wrong side, crimping the wrong part of the barrel.
+        severity: critical
+
+  - id: cw.s2
+    section: Crimp the Wire
+    text: Close the crimper handles.
+    note_refs: [2]
+    checks:
+      - id: cw.s2.c1
+        statement: Handles are squeezed firmly until the tool releases, completing a full cycle.
+        observable: video
+    error_modes:
+      - id: cw.s2.e1
+        statement: Partial cycle, producing an incomplete crimp.
+        severity: critical
+
+  - id: cw.s3
+    section: Crimp the Wire
+    text: Release the jaws, removing the wire.
+    checks:
+      - id: cw.s3.c1
+        statement: The termination is withdrawn without deforming the pin.
+        observable: photo
+    error_modes:
+      - id: cw.s3.e1
+        statement: Pin bent or scored on removal.
+        severity: major
+
+  - id: cw.s4
+    section: Crimp the Wire
+    text: Inspect the termination.
+    note_refs: [3]
+    checks:
+      - id: cw.s4.c1
+        statement: >-
+          The crimped barrel shows a clean, symmetrical indent with no cracking
+          or splitting.
+        observable: photo
+      - id: cw.s4.c2
+        statement: No bare conductor is exposed between the insulation and the pin barrel.
+        observable: photo
+      - id: cw.s4.c3
+        statement: >-
+          Pull test: the termination withstands a pull as if pulling it apart and
+          retains the same strength as the wire itself.
+        observable: measurement
+        assumed: true
+    error_modes:
+      - id: cw.s4.e1
+        statement: Termination pulls off or slips under load.
+        severity: critical
+      - id: cw.s4.e2
+        statement: Cracked or split barrel from over-compression.
+        severity: critical
+
+  # ---------------------------------------------- insert the pin into the connector
+  - id: ip.s1
+    section: Insert the Pin into the Electrical Connector
+    text: Obtain the electrical connector pair and delineate the pin and receiver sides.
+    note_refs: [1]
+    checks:
+      - id: ip.s1.c1
+        statement: >-
+          The pin side is identified as the flat face with craters; the receiver
+          side as the one with wells for the termination.
+        observable: photo
+    error_modes:
+      - id: ip.s1.e1
+        statement: Sides confused, so the termination is installed in the wrong half.
+        severity: critical
+
+  - id: ip.s2
+    section: Insert the Pin into the Electrical Connector
+    text: Prepare the wire in the installer tool.
+    note_refs: [2]
+    checks:
+      - id: ip.s2.c1
+        statement: >-
+          The wire sits in the installer tool's side channel, pulled taut with the
+          termination contacting the tool.
+        observable: video
+    error_modes:
+      - id: ip.s2.e1
+        statement: Termination not seated against the tool, so insertion depth is wrong.
+        severity: major
+
+  - id: ip.s3
+    section: Insert the Pin into the Electrical Connector
+    text: Install the termination into the correct connector location.
+    note_refs: [3]
+    checks:
+      - id: ip.s3.c1
+        statement: >-
+          The termination is pressed in from the back side until internal
+          resistance is felt, and the tool is withdrawn leaving the wire installed.
+        observable: video
+      - id: ip.s3.c2
+        statement: >-
+          The termination occupies the connector location called for by the wiring
+          layout, read against the numbers printed on the connector face.
+        observable: photo
+    error_modes:
+      - id: ip.s3.e1
+        statement: Pin installed in the wrong numbered location.
+        severity: critical
+      - id: ip.s3.e2
+        statement: >-
+          Installer tool dragged across the rubber insert, damaging the seal that
+          retains the wire.
+        severity: major
+
+  - id: ip.s4
+    section: Insert the Pin into the Electrical Connector
+    text: Inspect the installed pin.
+    note_refs: [4]
+    checks:
+      - id: ip.s4.c1
+        statement: A tug on the wire confirms the termination is seated and locked.
+        observable: measurement
+      - id: ip.s4.c2
+        statement: The pin face sits flush and square with the surrounding connector face.
+        observable: photo
+    error_modes:
+      - id: ip.s4.e1
+        statement: Termination backs out under a light pull — not locked.
+        severity: critical
+      - id: ip.s4.e2
+        statement: Pin proud of or recessed below the connector face.
+        severity: major
+
+  # ------------------------------------------------------------ test the connector
+  - id: tc.s1
+    section: Test the Connector
+    text: Check the wire for continuity.
+    note_refs: [1]
+    checks:
+      - id: tc.s1.c1
+        statement: >-
+          A multimeter shows appropriate continuity through the wire, termination
+          and connector.
+        observable: measurement
+    error_modes:
+      - id: tc.s1.e1
+        statement: Open circuit, indicating a failed crimp or unseated pin.
+        severity: critical
+      - id: tc.s1.e2
+        statement: Continuity between adjacent pins, indicating a short.
+        severity: critical
+
+  - id: tc.s2
+    section: Test the Connector
+    text: Check for the correct location.
+    note_refs: [2]
+    checks:
+      - id: tc.s2.c1
+        statement: >-
+          Wire locations match across both connector halves, read from the numbers
+          printed on each face.
+        observable: photo
+      - id: tc.s2.c2
+        statement: The halves position and twist together fully.
+        observable: photo
+    error_modes:
+      - id: tc.s2.e1
+        statement: Mismatched pin numbering between halves.
+        severity: critical
+
+evidence:
+  required:
+    - id: ev1
+      description: >-
+        Close view of the crimped termination before installation, showing the
+        barrel indent, the insulation-to-barrel transition and any inspection window.
+      medium: photo
+      framing: >-
+        Macro, perpendicular to the barrel axis, whole pin in frame and in focus.
+    - id: ev2
+      description: >-
+        Stripped wire end alongside a scale reference, so the 1/8" strip length
+        can be verified.
+      medium: photo
+      framing: Rule or known-size reference laid against the stripped conductor.
+    - id: ev3
+      description: >-
+        Face of the connector with the termination installed, close enough to read
+        the printed location numbers.
+      medium: photo
+      framing: >-
+        Square to the connector face, even lighting, no glare on the printed
+        numbering.
+    - id: ev4
+      description: Pull-test and continuity results.
+      medium: measurement
+      assumed: true
+      framing: >-
+        Instructor-recorded pass/fail or meter reading; neither is determinable
+        from a still photograph.
+
+references:
+  handbook:
+    - handbook: FAA-H-8083-31B
+      chapter: 9
+      pages: ["9-92", "9-93", "9-94"]
+      pdf_page_indices: [507, 508, 509]
+      cited_by_source: true
+      file: references/handbook/faa_h_8083_31b_9_92_9_94.md
+  videos:
+    - path: data/videos/AM.II.K.S3/elect_conn_2.mp4
+    - path: data/videos/AM.II.K.S3/elect_conn_3.mp4
+    - path: data/videos/AM.II.K.S3/elect_conn_4.mp4
+    - path: data/videos/AM.II.K.S3/elect_conn_5.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=PqnihLJxoj8
+
+assumptions:
+  - id: pw.s4.c2
+    statement: The pin type in use has a conductor inspection window.
+    reason: >-
+      The source sheet says only to seat the wire at the base of the pin opening.
+      Inspection-window checking is standard practice for MIL-spec contacts and
+      is the single most photo-checkable insertion criterion, but the sheet does
+      not name the pin part number, so window presence is not established.
+    resolve_by: Confirm the pin part number used at AIM Fremont.
+  - id: cw.s4.c3
+    statement: The pull test is a required acceptance criterion.
+    reason: >-
+      The source sheet describes it, but it is a tactile test that a single photo
+      cannot evidence. Treating it as photo-checkable would let a weak crimp pass.
+    resolve_by: Decide with Alcor whether the instructor records the result.
+  - id: ev4
+    statement: >-
+      Pull-test and continuity results are captured outside the photo submission.
+    reason: >-
+      Both are explicit acceptance criteria in the source sheet and neither is
+      visual. This is the main limit on single-photo assessment for this task.
+    resolve_by: Decide the capture method with Alcor during pilot scoping.
+
+open_questions:
+  - >-
+    Crimper setup steps (dial, turret, cotter key) are process checks, not
+    artifact checks. If assessment is a single photo of finished work, these are
+    unverifiable after the fact — confirm whether setup is assessed at all.
+  - >-
+    Reading connector location numbers requires enough resolution and glare-free
+    lighting; this is the small-text case worth testing early in the pilot.

@@ -1,0 +1,379 @@
+schema_version: 1
+status: draft   # -> reviewed only after AIM subject-matter review
+
+acs_code: AM.I.E.S1
+task_no: 3
+title: Install safety wire on nuts, bolts, and turnbuckles
+subject: General
+block: 2
+campus: AIM Fremont
+week: 3
+day: 2
+
+photo_assessment:
+  fit: High
+  rationale: >-
+    Finished safetying is a static, external artifact. Wrap count, wrap pitch,
+    wire direction, pigtail treatment and overall silhouette are all readable
+    from a single well-framed photograph without disassembly.
+
+# This ACS code is taught as three procedure variants. A submitted photo must be
+# scored against the variant the student actually performed, because acceptance
+# criteria differ (6-8 wraps per inch on bolts vs. exactly 4 wraps per wire on a
+# turnbuckle). The variant is not inferable from the workbook and must be
+# supplied by the instructor or student at capture time.
+variants:
+  - id: bolts_hand
+    label: Bolts, by hand
+    source: data/drive-download-aim-procedures-confidential/AM.I.E.S1 – Perform the Wire Safety on Bolts (By Hand).docx
+  - id: bolts_pliers
+    label: Bolts, with safety wire pliers
+    source: data/drive-download-aim-procedures-confidential/AM.I.E.S1 – Perform the Wire Safety on Bolts (With Safety Wire Pliers).docx
+  - id: turnbuckle_hand
+    label: Turnbuckle, by hand
+    source: data/drive-download-aim-procedures-confidential/AM.I.E.S1 – Perform the Wire Safety on a Turnbuckle (By Hand).docx
+
+steps:
+  # ---------------------------------------------------------------- bolts, by hand
+  - id: bh.s1
+    variant: bolts_hand
+    text: Thread the wire into the bolt.
+    note_refs: [1]
+    checks:
+      - id: bh.s1.c1
+        statement: >-
+          The wire is routed so that tension from the wrap pulls the bolt in the
+          tightening direction.
+        observable: photo
+      - id: bh.s1.c2
+        statement: Both strands leave the starting hole at roughly equal length.
+        observable: photo
+      - id: bh.s1.c3
+        statement: The wires meet the bolt hole at approximately 90 degrees.
+        observable: photo
+    error_modes:
+      - id: bh.s1.e1
+        statement: Wire routed in the loosening direction.
+        severity: critical
+      - id: bh.s1.e2
+        statement: Strands grossly unequal, leaving too little wire to finish the run.
+        severity: major
+
+  - id: bh.s2
+    variant: bolts_hand
+    text: Perform wire wraps.
+    note_refs: [2]
+    checks:
+      - id: bh.s2.c1
+        statement: Twist density measures 6-8 wraps per inch.
+        observable: measurement
+      - id: bh.s2.c2
+        statement: Wraps are uniform and tight, with no visible slack between the fasteners.
+        observable: photo
+    error_modes:
+      - id: bh.s2.e1
+        statement: Fewer than 6 or more than 8 wraps per inch.
+        severity: major
+      - id: bh.s2.e2
+        statement: Over-twisting; the run is taut to the point of work-hardening the wire.
+        severity: major
+      - id: bh.s2.e3
+        statement: Visible slack in the span between fasteners.
+        severity: major
+
+  - id: bh.s3
+    variant: bolts_hand
+    text: Pigtail the wire.
+    note_refs: [3]
+    checks:
+      - id: bh.s3.c1
+        statement: The pigtail shows defined wraps and is curled back toward the bolt head.
+        observable: photo
+      - id: bh.s3.c2
+        statement: The curled end lies parallel to the surface and presents no sharp end.
+        observable: photo
+    error_modes:
+      - id: bh.s3.e1
+        statement: Cut end left straight and uncurled — a sharp/FOD hazard.
+        severity: critical
+      - id: bh.s3.e2
+        statement: Pigtail left overly long or with undefined wraps.
+        severity: minor
+
+  - id: bh.s4
+    variant: bolts_hand
+    text: Inspect the safety.
+    note_refs: [4]
+    checks:
+      - id: bh.s4.c1
+        statement: >-
+          A spare wire cannot be slid between the bolt head and the wire wrapping
+          around it (the tightness test).
+        observable: measurement
+      - id: bh.s4.c2
+        statement: The wire cannot be lifted over the bolt head.
+        observable: measurement
+    error_modes:
+      - id: bh.s4.e1
+        statement: Safety is loose enough to admit a probe wire under the wrap.
+        severity: critical
+      - id: bh.s4.e2
+        statement: Wire can ride up and off the bolt head.
+        severity: critical
+
+  # ------------------------------------------------------------- bolts, w/ pliers
+  - id: bp.s1
+    variant: bolts_pliers
+    text: Thread the wire into the bolt.
+    note_refs: [1]
+    checks:
+      - id: bp.s1.c1
+        statement: >-
+          The wire is routed so that tension from the wrap pulls the bolt in the
+          tightening direction.
+        observable: photo
+      - id: bp.s1.c2
+        statement: Both strands leave the starting hole at roughly equal length.
+        observable: photo
+    error_modes:
+      - id: bp.s1.e1
+        statement: Wire routed in the loosening direction.
+        severity: critical
+
+  - id: bp.s2
+    variant: bolts_pliers
+    text: Measure the distance to safety.
+    note_refs: [2]
+    checks:
+      - id: bp.s2.c1
+        statement: >-
+          The plier jaws are locked on the wire at the next fastener hole, so the
+          twisted length matches the span.
+        observable: video
+    error_modes:
+      - id: bp.s2.e1
+        statement: Twisted length does not match the span, leaving slack or over-tension.
+        severity: major
+
+  - id: bp.s3
+    variant: bolts_pliers
+    text: Perform wire wraps.
+    note_refs: [3]
+    checks:
+      - id: bp.s3.c1
+        statement: Twist density measures 6-8 wraps per inch.
+        observable: measurement
+      - id: bp.s3.c2
+        statement: Wraps are uniform, with no slack in the span.
+        observable: photo
+    error_modes:
+      - id: bp.s3.e1
+        statement: Fewer than 6 or more than 8 wraps per inch.
+        severity: major
+      - id: bp.s3.e2
+        statement: >-
+          Pliers released under load, producing an abrupt change in twist pitch
+          partway along the run.
+        severity: minor
+
+  - id: bp.s4
+    variant: bolts_pliers
+    text: Pigtail the wire.
+    note_refs: [4]
+    checks:
+      - id: bp.s4.c1
+        statement: The pigtail shows defined wraps and is curled back toward the bolt head.
+        observable: photo
+      - id: bp.s4.c2
+        statement: The curled end lies parallel to the surface and presents no sharp end.
+        observable: photo
+    error_modes:
+      - id: bp.s4.e1
+        statement: Cut end left straight and uncurled — a sharp/FOD hazard.
+        severity: critical
+      - id: bp.s4.e2
+        statement: Tooling marks from the plier jaws on the finished wraps.
+        severity: minor
+
+  - id: bp.s5
+    variant: bolts_pliers
+    text: Inspect the safety.
+    note_refs: [5]
+    checks:
+      - id: bp.s5.c1
+        statement: >-
+          A spare wire cannot be slid between the bolt head and the wire wrapping
+          around it.
+        observable: measurement
+      - id: bp.s5.c2
+        statement: The wire cannot be lifted over the bolt head.
+        observable: measurement
+    error_modes:
+      - id: bp.s5.e1
+        statement: Safety is loose enough to admit a probe wire under the wrap.
+        severity: critical
+
+  # ---------------------------------------------------------- turnbuckle, by hand
+  - id: tb.s1
+    variant: turnbuckle_hand
+    text: Cut two pieces of safety wire.
+    note_refs: [1]
+    checks:
+      - id: tb.s1.c1
+        statement: Two wires are used, each cut to approximately 30 inches.
+        observable: measurement
+    error_modes:
+      - id: tb.s1.e1
+        statement: Only one wire used, or wire too short to complete both ends.
+        severity: major
+
+  - id: tb.s2
+    variant: turnbuckle_hand
+    text: Insert and position the wires.
+    note_refs: [2]
+    checks:
+      - id: tb.s2.c1
+        statement: >-
+          Each wire is inserted through the turnbuckle barrel into two even
+          strands, with the second wire mirroring the first in the opposite
+          direction.
+        observable: photo
+      - id: tb.s2.c2
+        statement: Strands lie streamlined along the barrel toward the cable ends.
+        observable: photo
+    error_modes:
+      - id: tb.s2.e1
+        statement: Strands not mirrored, leaving the turnbuckle secured in one direction only.
+        severity: critical
+      - id: tb.s2.e2
+        statement: Wire stands proud of the barrel instead of lying streamlined.
+        severity: minor
+
+  - id: tb.s3
+    variant: turnbuckle_hand
+    text: Perform the wraps on the ends of the wires.
+    note_refs: [3]
+    checks:
+      - id: tb.s3.c1
+        statement: Exactly 4 tight wraps per wire at each end.
+        observable: photo
+      - id: tb.s3.c2
+        statement: Wraps are tightly coiled with no gaps between turns.
+        observable: photo
+      - id: tb.s3.c3
+        statement: No tooling marks on the finished wraps.
+        observable: photo
+    error_modes:
+      - id: tb.s3.e1
+        statement: Wrap count other than 4 per wire.
+        severity: major
+      - id: tb.s3.e2
+        statement: Loose or gapped coils.
+        severity: major
+      - id: tb.s3.e3
+        statement: Plier tooling marks scarring the wrap.
+        severity: minor
+
+  - id: tb.s4
+    variant: turnbuckle_hand
+    text: Inspect the safety.
+    note_refs: [4]
+    checks:
+      - id: tb.s4.c1
+        statement: The completed safety presents a streamlined silhouette against the turnbuckle.
+        observable: photo
+      - id: tb.s4.c2
+        statement: 4 wraps per wire, tightly coiled with no gaps.
+        observable: photo
+      - id: tb.s4.c3
+        statement: Wire ends are curled so no sharp hazard remains.
+        observable: photo
+    error_modes:
+      - id: tb.s4.e1
+        statement: Sharp uncurled wire ends left exposed.
+        severity: critical
+
+evidence:
+  required:
+    - id: ev1
+      description: >-
+        Overall view of the completed safety showing every fastener or the full
+        turnbuckle barrel in one frame, so wire routing and direction are traceable.
+      medium: photo
+      framing: >-
+        Perpendicular to the safetied surface, whole run in frame, wire in focus.
+    - id: ev2
+      description: >-
+        Close view of the twisted span with a scale reference in frame, so wraps
+        per inch can be counted.
+      medium: photo
+      framing: >-
+        Close enough to resolve individual twists, with a rule or known-size
+        reference laid alongside the wire.
+    - id: ev3
+      description: Close view of the pigtail / wire ends showing the curl.
+      medium: photo
+      framing: Oblique angle that reveals whether the cut end is curled flat.
+    - id: ev4
+      description: >-
+        Result of the physical tightness test (probe wire under the wrap; lift
+        test over the bolt head). Not determinable from a still photograph.
+      medium: measurement
+      assumed: true
+      framing: Instructor-recorded pass/fail, or short video of the test being performed.
+
+references:
+  handbook:
+    - handbook: FAA-H-8083-30B
+      chapter: 7
+      pages: ["7-77", "7-78", "7-79", "7-80"]
+      pdf_page_indices: [320, 321, 322, 323]
+      cited_by_source: false
+      assumed: true
+      id: ref.handbook.30b
+      file: references/handbook/faa_h_8083_30b_7_77_7_80.md
+  videos:
+    - path: data/videos/AM.I.E.S1/safety_wire_by_hand.mp4
+      variant: bolts_hand
+    - path: data/videos/AM.I.E.S1/safety_wire_pliers_1.mp4
+      variant: bolts_pliers
+    - path: data/videos/AM.I.E.S1/safety_wire_pliers_2.mp4
+      variant: bolts_pliers
+    - path: data/videos/AM.I.E.S1/safety_wire_pliers_3.mp4
+      variant: bolts_pliers
+    - path: data/videos/AM.I.E.S1/safety_wire_pliers_4.mp4
+      variant: bolts_pliers
+    - path: data/videos/AM.I.E.S1/insert_wire_for_double_wrap_turnbuckle_safety.mp4
+      variant: turnbuckle_hand
+  trainwithaim_video: https://www.youtube.com/watch?v=iNEMByyeeWQ
+
+assumptions:
+  - id: ref.handbook.30b
+    statement: >-
+      FAA-H-8083-30B pages 7-77 to 7-80 are the governing handbook section for
+      this task.
+    reason: >-
+      Unlike the other procedure sheets, the three safety-wire variants cite no
+      handbook pages at all. This range was located during compilation by
+      searching the General handbook for the safetying section and confirmed
+      against the page-label index. AC 43.13-1B, the reference the other sheets
+      lean on for safetying practice, is not present in data/.
+    resolve_by: Confirm the page range with AIM before marking this pack reviewed.
+  - id: ev4
+    statement: >-
+      The tightness and lift tests are required evidence even though a single
+      photograph cannot show them.
+    reason: >-
+      The source sheet makes both tests explicit acceptance criteria, but they
+      are tactile. Treating them as photo-checkable would let a loose safety pass
+      the model. Flagged so the pilot can decide whether the instructor records
+      the result or the student submits a short video.
+    resolve_by: Decide the capture method with Alcor during pilot scoping.
+
+open_questions:
+  - >-
+    Which variant a photo belongs to must be supplied at capture time; acceptance
+    criteria differ between the bolt and turnbuckle variants.
+  - >-
+    Wraps-per-inch is only measurable from a photo if a scale reference is in
+    frame. Confirm whether students will be asked to include one.

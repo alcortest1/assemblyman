@@ -1,0 +1,65 @@
+{
+  "acs_code": "AM.I.C.S3",
+  "task": "Calculate ballast weight shift and required weight location.",
+  "variants": [
+    {
+      "source": "data/drive-download-aim-procedures-confidential/AM.I.C.S3 - Calculate Ballast Weight Shift and Required Weight Location_.docx",
+      "title": "AM.I.C.S3 - Calculate Ballast Weight Shift and Required Weight Location.",
+      "variant": "AM.I.C.S3 - Calculate Ballast Weight Shift and Required Weight Location.",
+      "sections": [
+        {
+          "section": "Procedure",
+          "steps": [
+            {
+              "text": "Identify the aircraft total weight1.",
+              "text_clean": "Identify the aircraft total weight.",
+              "note_refs": [
+                1
+              ]
+            },
+            {
+              "text": "Identify how far CG is out of range2.",
+              "text_clean": "Identify how far CG is out of range.",
+              "note_refs": [
+                2
+              ]
+            },
+            {
+              "text": "Identify ballast location3.",
+              "text_clean": "Identify ballast location.",
+              "note_refs": [
+                3
+              ]
+            },
+            {
+              "text": "Determine temporary ballast weight4.",
+              "text_clean": "Determine temporary ballast weight.",
+              "note_refs": [
+                4
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "text": "This is often a given value to use (e.g., ACFT weight 2,500 LBS)."
+            },
+            {
+              "text": "A range will be given for CG and the current CG location (e.g., 64\"-70\"; CG @ 71.2\"). Subtract the desired location from the current location (e.g., 71.2\" - 70\" = 1.2\"), this is how far out of range the CG is. When shifting CG, shift it to the closest limit it currently is out of."
+            },
+            {
+              "text": "This location is usually a baggage compartment or a given fuselage station (e.g., ballast location +45\")."
+            },
+            {
+              "text": "Plug the values into the formula for the needed ballast weight. Using the previous example calculations: (2,500 x 1.2) / (70-45) = 3,000 / 25 = 120 LBS."
+            }
+          ],
+          "safety": [],
+          "equipment": [],
+          "you_need_to": []
+        }
+      ],
+      "step_count": 4,
+      "note_count": 4
+    }
+  ]
+}

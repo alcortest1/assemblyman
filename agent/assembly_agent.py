@@ -19,8 +19,12 @@ import os
 
 from dotenv import load_dotenv
 from google.genai import types as genai
+from livekit import rtc
 from livekit.agents import Agent, AgentServer, AgentSession, JobContext, cli, room_io
+from livekit.agents.utils import images
 from livekit.plugins import google
+
+import dataset_recorder
 
 load_dotenv(".env.local")
 
@@ -66,6 +70,11 @@ THINKING_BUDGET = _int("ASSEMBLYMAN_THINKING_BUDGET", 0)
 # The operator's POV at full resolution is a lot of tokens per second for a model that mostly
 # needs to recognise a part. Low resolution cuts both latency and cost.
 MEDIA_RESOLUTION = os.getenv("ASSEMBLYMAN_MEDIA_RESOLUTION", "LOW").upper()
+MEDIA_SIZE = {
+    "LOW": 512,
+    "MEDIUM": 768,
+    "HIGH": 1024,
+}.get(MEDIA_RESOLUTION, 512)
 
 # Affective dialog makes replies warmer at some cost in responsiveness.
 AFFECTIVE = os.getenv("ASSEMBLYMAN_AFFECTIVE", "0") == "1"
@@ -129,10 +138,23 @@ async def entrypoint(ctx: JobContext) -> None:
                 )
             ),
             thinking_config=genai.ThinkingConfig(thinking_budget=THINKING_BUDGET),
-            media_resolution=getattr(
-                genai.MediaResolution,
-                f"MEDIA_RESOLUTION_{MEDIA_RESOLUTION}",
-                genai.MediaResolution.MEDIA_RESOLUTION_LOW,
+            # Transcribe both directions. Without input transcription a session where the
+            # microphone is silent and one where Gemini hears but declines to answer look
+            # identical in the log — both are simply an absence. This makes the difference
+            # visible, and gives the dataset recorder the operator's words to label with.
+            input_audio_transcription=genai.AudioTranscriptionConfig(),
+            output_audio_transcription=genai.AudioTranscriptionConfig(),
+            # The LiveKit Google wrapper does not expose Gemini's `media_resolution`
+            # setup field. Resize frames before they are sent instead, using the
+            # wrapper's supported image encoding option.
+            image_encode_options=images.EncodeOptions(
+                format="JPEG",
+                quality=75,
+                resize_options=images.ResizeOptions(
+                    width=MEDIA_SIZE,
+                    height=MEDIA_SIZE,
+                    strategy="scale_aspect_fit",
+                ),
             ),
         ),
     )
@@ -144,6 +166,53 @@ async def entrypoint(ctx: JobContext) -> None:
         # track — without it Gemini gets audio only and cannot see the work.
         room_options=room_io.RoomOptions(video_input=True),
     )
+
+    # The app publishes simulcast, and by default this subscriber is handed a low layer —
+    # frames arrived at 180x320. That is enough to say "a view of a city" and nowhere near
+    # enough to read a port label, which is the thing the assistant most needs to do. Ask
+    # for the top layer explicitly on the operator's camera.
+    def _request_full_resolution(publication, participant) -> None:
+        if (
+            publication.kind == rtc.TrackKind.KIND_VIDEO
+            and participant.identity.startswith("phone-")
+        ):
+            try:
+                publication.set_video_quality(rtc.VideoQuality.VIDEO_QUALITY_HIGH)
+                logger.info("requested high-quality video from %s", participant.identity)
+            except Exception as error:  # noqa: BLE001 - never break the session over this
+                logger.warning("could not raise video quality: %s", error)
+
+    ctx.room.on(
+        "track_subscribed",
+        lambda track, publication, participant: _request_full_resolution(
+            publication, participant
+        ),
+    )
+    for participant in ctx.room.remote_participants.values():
+        for publication in participant.track_publications.values():
+            if publication.subscribed:
+                _request_full_resolution(publication, participant)
+    # Dataset capture, when asked for. Rides on the session rather than a second worker: two
+    # unnamed workers would be load-balanced across rooms by LiveKit, so only one of them
+    # would see any given session — recording has to live where the video already is.
+    if dataset_recorder.ENABLED:
+        recorder = dataset_recorder.SessionRecorder(ctx.room.name)
+
+        def _attach(track: rtc.Track, publication, participant) -> None:
+            if track.kind == rtc.TrackKind.KIND_VIDEO and participant.identity.startswith("phone-"):
+                recorder.attach(track)
+
+        ctx.room.on("track_subscribed", _attach)
+
+        @session.on("user_input_transcribed")
+        def _on_speech(event) -> None:
+            # Interim results fire continuously while someone talks; one still per finished
+            # utterance is the sample worth labelling.
+            if getattr(event, "is_final", True):
+                recorder.capture(trigger="speech", transcript=getattr(event, "transcript", None))
+
+        ctx.add_shutdown_callback(recorder.aclose)
+
     await ctx.connect()
 
     logger.info(

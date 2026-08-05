@@ -1,0 +1,1675 @@
+# Compiled by packs/compile_pack.py from the AIM procedure sheet and the FAA handbook.
+# DRAFTED, NOT REVIEWED — every check, error mode and evidence item below was
+# proposed by anthropic/claude-opus-5 and has not been seen by a subject-matter expert.
+# Regenerate with: python3 packs/compile_pack.py AM.I.D.S1
+
+schema_version: 1
+status: draft
+acs_code: AM.I.D.S1
+task_no: 5
+title: Fabricate a rigid line with a flare and a bend
+subject: General
+block: 3
+campus: AIM Fremont
+week: 2
+day: 3
+provenance:
+  generator: packs/compile_pack.py
+  model: anthropic/claude-opus-5
+  drafted_at: '2026-08-04T03:22:20Z'
+  reviewed_by: null
+  sources:
+  - procedure.md
+  - steps.json
+  - tasks.csv
+  - references/handbook/faa_h_8083_30b_9_1_9_7.md
+  note: >-
+    Checks, error modes and evidence were drafted from the procedure sheet and handbook. Nothing
+    here has been through subject-matter review; `status` stays `draft` until it has.
+photo_assessment:
+  fit: High
+  rationale: >-
+    The campus rates this High because the graded product is a finished, hand-held artifact:
+    bend count and placement, bend smoothness, sleeve/B-nut orientation, and the thin blue
+    sleeve ring at the flare are all legible in close, well-lit stills next to the safety-wire
+    template that generated them. What a still cannot settle is anything dimensional or behavioural
+    — the flare's included angle, the residual diameter at a flattened bend, wall thinning
+    from deburring, the final one-third-turn past torque rise, and whether the assembly actually
+    holds test pressure without decay. So the fabrication is photo-gradeable but the acceptance
+    of the flare and the pressure test must ride on instrumented or witnessed evidence submitted
+    alongside the photos.
+safety:
+- Hydraulic fluid can cause irritation and burns if left on skin.
+- High pressure fluids can cause severe injuries if sprayed at body.
+- Handling sharp tools may present a cutting hazard.
+- >-
+  Filed or sanded metal turns to fine metallic dust and if ingested can cause internal injuries.
+- Keep all fluid out of eyes and mouth.
+equipment:
+- Eye protection
+- Ear protection
+- Gloves
+- Standard toolbox set
+- Parts bags
+- Pen & paper
+- FOD box
+- Rigid tubing
+- Fittings (B-Nut and Sleeves)
+- Hand bender
+- Flaring tool
+- 220 to 80 grit sandpaper
+- System hydraulic fluid
+- Tubing cutter
+- 0.041” Safety wire
+- Tape measure and scale
+- Hydraulic Pressure test cart
+- Shop rags
+- Felt tip marker
+- AC 43.13 - 1B
+steps:
+- id: dl.s1
+  section: Determine the Line Route
+  text: Use the safety wire method to map tubing length and bends.
+  note_refs:
+  - 1
+  checks:
+  - id: dl.s1.c1
+    statement: >-
+      Both ends of the safety wire are seated into their respective fittings, with the wire
+      spanning the complete route.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: insert one end into the first fitting, route to the second, cut excess 'to allow
+      it to feed into the other fitting'.
+  - id: dl.s1.c2
+    statement: >-
+      Felt-tip marks are present on the wire at each bend location and at both fitting ends.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: 'Sheet: ''Use a marker to mark the location of each bend and ends.'''
+  - id: dl.s1.c3
+    statement: >-
+      The wire path clears surrounding structure and components rather than cutting through
+      an obstruction.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: route 'taking the most appropriate route'; routing done 'to avoid obstructions
+      and excessive material waste'.
+  - id: dl.s1.c4
+    statement: >-
+      No bend in the mapped wire route is tighter than the standard bend radius for the tube
+      size selected.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: 'Figure 9-4 shows preferred methods and standard bend radii for bending tubing
+      by tube size.' Radius requires measurement against the table.
+  error_modes:
+  - id: dl.s1.e1
+    statement: >-
+      Wire ends are not fed fully into the fittings, so the mapped length is short and the
+      finished line will not reach.
+    severity: critical
+    origin: drafted
+  - id: dl.s1.e2
+    statement: >-
+      Bend locations are not marked before the wire is removed, leaving bend positions unrecoverable.
+    severity: major
+    origin: drafted
+  - id: dl.s1.e3
+    statement: >-
+      Wire is routed by the shortest path through structure instead of a clear, installable
+      route.
+    severity: major
+    origin: drafted
+- id: dl.s2
+  section: Determine the Line Route
+  text: Carefully remove the wire, keeping its shape.
+  note_refs:
+  - 2
+  checks:
+  - id: dl.s2.c1
+    statement: >-
+      The removed wire still holds the routed contour, with every bend at the same angle and
+      location as when installed.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Carefully remove the wire, keeping its shape" — shape is the template
+      for bend locations.
+  - id: dl.s2.c2
+    statement: >-
+      All felt-tip marks for the bend locations and both wire ends remain present and legible
+      after removal.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Routing note requires marking "the location of each bend and ends"; marks must survive
+      to transfer to tubing.
+  - id: dl.s2.c3
+    statement: >-
+      A drawing or photograph of the wire's shape exists as a record before the wire is further
+      handled.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: 'Senior Mechanic Note 2: "Draw or photograph the shape to make."'
+  - id: dl.s2.c4
+    statement: >-
+      The removed wire's shape still corresponds to a clear route between the two fittings
+      without obstruction contact.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Only verifiable by observing removal against the actual routing; a still of the wire
+      alone cannot confirm the route.
+  error_modes:
+  - id: dl.s2.e1
+    statement: >-
+      Wire is pulled straight or its bends are opened during removal, so bend locations and
+      added length are wrong while the wire still looks usable.
+    severity: critical
+    origin: drafted
+  - id: dl.s2.e2
+    statement: >-
+      Bend and end marks are smeared or rubbed off during removal, leaving no transferable
+      dimensions.
+    severity: major
+    origin: drafted
+  - id: dl.s2.e3
+    statement: >-
+      No sketch or photograph of the shape is made before the wire is straightened for measuring.
+    severity: major
+    origin: drafted
+- id: dl.s3
+  section: Determine the Line Route
+  text: Straighten the wire and measure the total length.
+  note_refs:
+  - 3
+  checks:
+  - id: dl.s3.c1
+    statement: >-
+      The safety wire is fully straightened, with no residual bows, kinks or curls remaining
+      along its length.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step 3 requires the wire be straightened before measuring; residual curvature understates
+      the routed length.
+  - id: dl.s3.c2
+    statement: >-
+      The measured straightened-wire length matches the tape/scale reading recorded on the
+      worksheet.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior note: 'Use a tape measure for length'; the reading itself must be taken, not
+      seen.
+  - id: dl.s3.c3
+    statement: >-
+      The recorded tubing length equals the wire length plus 1/2 inch for each marked bend.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior note: 'add 1/2" per bend. This is the length of tubing you will need.' Handbook
+      states no per-bend figure.
+  - id: dl.s3.c4
+    statement: >-
+      The recorded length includes extra material for bending variation rather than being
+      the bare routed dimension.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: 'cut approximately 10 percent longer than the tube to be replaced to provide
+      for minor variations in bending.'
+  error_modes:
+  - id: dl.s3.e1
+    statement: >-
+      Wire measured while still bowed or kinked, yielding a short length and a tube later
+      strained into position.
+    severity: critical
+    origin: drafted
+  - id: dl.s3.e2
+    statement: >-
+      Bend allowance omitted or applied once instead of per bend, so the tubing is cut too
+      short.
+    severity: major
+    origin: drafted
+  - id: dl.s3.e3
+    statement: >-
+      Length recorded without units, or transcribed from the tape incorrectly onto the worksheet.
+    severity: minor
+    origin: drafted
+- id: ct.s1
+  section: Cut the Tubing
+  text: Decide the size of tubing to use.
+  note_refs:
+  - 1
+  checks:
+  - id: ct.s1.c1
+    statement: >-
+      The tubing selected matches the size, wall thickness and material called out in the
+      applicable maintenance data.
+    observable: document
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "Replacement tubing should be of the same size and material as the original
+      tubing"; procedure sheet: "Use the tubing referred to in the manual".
+  - id: ct.s1.c2
+    statement: >-
+      Measured outside diameter of the selected stock equals the specified OD (e.g., 0.25").
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "Metal tubing is sized by outside diameter (OD)"; the 0.25" example figure
+      is the procedure sheet's.
+  - id: ct.s1.c3
+    statement: >-
+      The tube's printed diameter/wall-thickness markings or alloy color band are present
+      and legible on the selected stock.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      "The tube diameter is printed on all rigid tubing" and wall thickness "is printed on
+      the tubing in thousandths of an inch".
+  - id: ct.s1.c4
+    statement: >-
+      Selected alloy is appropriate to the system pressure the line will serve.
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-1
+    origin: drafted
+    note: >-
+      Handbook assigns 2024-T3/5052-O/6061-T6 to "1,000 to 1,500 psi systems" and CRES to
+      "high-pressure hydraulic systems (3,000 psi or more)".
+  error_modes:
+  - id: ct.s1.e1
+    statement: >-
+      Tubing of correct OD but wrong alloy or thinner wall is selected, producing a line that
+      looks correct but bursts under test pressure.
+    severity: critical
+    origin: drafted
+  - id: ct.s1.e2
+    statement: >-
+      Unmarked or unidentifiable stock is used with no comparison to the original tubing's
+      code markings.
+    severity: major
+    origin: drafted
+  - id: ct.s1.e3
+    statement: >-
+      Wrong OD stock selected, so fittings, bender channel and flare die will not match.
+    severity: major
+    origin: drafted
+- id: ct.s2
+  section: Cut the Tubing
+  text: Transfer length onto the tubing.
+  note_refs:
+  - 2
+  checks:
+  - id: ct.s2.c1
+    statement: >-
+      Distance from the reference tube end to the mark equals the routed wire length plus
+      ½" per bend.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Use a tape measure for length and add ½" per bend. This is the length
+      of tubing you will need." Handbook gives no such figure.
+  - id: ct.s2.c2
+    statement: >-
+      The mark is a single crisp line encircling or squarely crossing the tube, unambiguous
+      for wheel alignment.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires the cutting wheel be aligned "precisely" with the marked line; handbook
+      only speaks qualitatively of producing a square end.
+  - id: ct.s2.c3
+    statement: >-
+      Cut length recorded on paper matches the routing measurement and bend allowance used
+      for the mark.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet directs measuring the straightened wire and adding bend allowance; the written
+      figure is the traceable record.
+  - id: ct.s2.c4
+    statement: >-
+      Marked length includes surplus for bending variation, roughly 10 percent over the finished
+      run.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "cut approximately 10 percent longer than the tube to be replaced to provide
+      for minor variations in bending."
+  error_modes:
+  - id: ct.s2.e1
+    statement: >-
+      Wire length transferred with no bend allowance, so the finished line is short after
+      bending.
+    severity: critical
+    origin: drafted
+  - id: ct.s2.e2
+    statement: >-
+      Mark made as a wide, angled or smeared band, so the cut wheel is misaligned and the
+      flare comes out crooked.
+    severity: major
+    origin: drafted
+  - id: ct.s2.e3
+    statement: >-
+      Multiple or stale marks left on the tube, leaving the cut location ambiguous.
+    severity: minor
+    origin: drafted
+- id: ct.s3
+  section: Cut the Tubing
+  text: Cut the tubing with a cutter tool.
+  note_refs:
+  - 3
+  checks:
+  - id: ct.s3.c1
+    statement: The cut end is square to the tube axis, with no angled or crooked face.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "it is important to produce a square end, free of burrs"; "A crooked flare
+      is the result of the tubing not being cut squarely." Verified against a square.
+  - id: ct.s3.c2
+    statement: >-
+      The tube at the cut is round and undeformed, with no flattening, ridging or wheel-track
+      collapse.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "Too much pressure on the cutting wheel at one time could deform the tubing
+      or cause excessive burring."
+  - id: ct.s3.c3
+    statement: >-
+      Finished cut length equals the routed wire length plus 1/2" per bend, measured end to
+      end.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Use a tape measure for length and add 1/2" per bend. This is the length
+      of tubing you will need." Handbook gives no such figure.
+  - id: ct.s3.c4
+    statement: >-
+      The cutter type used suits the tubing material (rolling cutter only for soft aluminum/copper
+      alloy).
+    observable: document
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "The cutter can be used with any soft metal tubing"; "Special chipless cutters
+      are available for cutting aluminum 6061-T6, corrosion-resistant steel, and titanium
+      tubing."
+  error_modes:
+  - id: ct.s3.e1
+    statement: >-
+      Tube cut off-square because the wheel wandered off the mark, yielding a crooked flare
+      that leaks under pressure.
+    severity: critical
+    origin: drafted
+  - id: ct.s3.e2
+    statement: >-
+      Cutter knob over-tightened, flattening or ovalizing the tube end and thinning the wall
+      for flaring.
+    severity: major
+    origin: drafted
+  - id: ct.s3.e3
+    statement: >-
+      Cut made at the wrong mark, leaving the line too short to reach both fittings after
+      bending.
+    severity: major
+    origin: drafted
+- id: dr.s1
+  section: Deburr and Resize Tubing Ends
+  text: Use a single-edge deburr tool for inside diameter resizing the tubing.
+  note_refs:
+  - 1
+  checks:
+  - id: dr.s1.c1
+    statement: >-
+      The inside edge of the tube end is smooth and free of any burr, raised lip or curl of
+      metal.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Procedure: "check the inside diameter is smooth"; handbook p.9-2: "carefully remove
+      any burrs from inside and outside the tube."
+  - id: dr.s1.c2
+    statement: >-
+      The bore at the deburred end measures the tubing's original inside diameter, not belled
+      or enlarged.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet requires "the original size returned"; handbook gives only ID calculation,
+      no deburring tolerance.
+  - id: dr.s1.c3
+    statement: >-
+      Wall thickness at the deburred end is not reduced or fractured relative to the printed
+      wall thickness.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "use extreme care that the wall thickness of the end of the tubing is not
+      reduced or fractured."
+  - id: dr.s1.c4
+    statement: No metal chips, shavings or cuttings remain inside the tube bore.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: 'Handbook: "Be sure all filings and cuttings are removed from the tube."'
+  error_modes:
+  - id: dr.s1.e1
+    statement: >-
+      Over-twisting the deburr tool thins or chamfers the wall, leaving a tube end that looks
+      clean but cracks or blows off the flare under pressure.
+    severity: critical
+    origin: drafted
+  - id: dr.s1.e2
+    statement: >-
+      A burr or raised lip is left inside the ID, restricting flow and able to break loose
+      as system contamination.
+    severity: major
+    origin: drafted
+  - id: dr.s1.e3
+    statement: >-
+      Tool inserted at an angle, producing an off-center or uneven chamfer around the bore.
+    severity: minor
+    origin: drafted
+- id: dr.s2
+  section: Deburr and Resize Tubing Ends
+  text: Deburr the outside edge of the tubing end.
+  note_refs:
+  - 2
+  checks:
+  - id: dr.s2.c1
+    statement: >-
+      The outside edge of the tube end is smoothly chamfered with no ragged lip, burr or sharp
+      feathered edge.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "carefully remove any burrs from inside and outside the tube"; procedure sheet
+      requires sanding "until the end is smooth".
+  - id: dr.s2.c2
+    statement: >-
+      Wall thickness at the tube end is not reduced or fractured relative to the tube's marked
+      wall thickness.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "use extreme care that the wall thickness of the end of the tubing is not
+      reduced or fractured" — leads to defective flares.
+  - id: dr.s2.c3
+    statement: >-
+      The tube end face is square to the tube axis, not sanded to an angle or oval.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "file the end square and smooth"; p.9-4 "A crooked flare is the result of
+      the tubing not being cut squarely."
+  - id: dr.s2.c4
+    statement: >-
+      The tube end and outer surface are free of visible metallic dust, grit and fluid smears
+      before flaring.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "Be sure all filings and cuttings are removed from the tube." Sheet uses hydraulic
+      fluid as lubricant, which traps dust.
+  error_modes:
+  - id: dr.s2.e1
+    statement: >-
+      Excessive sanding thins or knife-edges the tube end wall, which still looks clean but
+      cracks or blows the flare.
+    severity: critical
+    origin: drafted
+  - id: dr.s2.e2
+    statement: >-
+      Tube held off-perpendicular so the end is sanded out of square, producing a crooked
+      flare.
+    severity: major
+    origin: drafted
+  - id: dr.s2.e3
+    statement: >-
+      Metallic dust and abrasive grit left on or in the tube end, contaminating the finished
+      line.
+    severity: major
+    origin: drafted
+- id: dr.s3
+  section: Deburr and Resize Tubing Ends
+  text: Check ends for burrs.
+  checks:
+  - id: dr.s3.c1
+    statement: >-
+      Both tube ends are free of burrs on the inside bore and the outside edge.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "carefully remove any burrs from inside and outside the tube"; procedure sheet
+      step 3 "Check ends for burrs."
+  - id: dr.s3.c2
+    statement: >-
+      The inside diameter is smooth and back to its original nominal size, not belled or enlarged.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Procedure: "check the inside diameter is smooth and the original size returned"; handbook
+      sizing by OD minus twice wall thickness.
+  - id: dr.s3.c3
+    statement: >-
+      Wall thickness at the end is not reduced or fractured by deburring or sanding.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "use extreme care that the wall thickness of the end of the tubing is not
+      reduced or fractured."
+  - id: dr.s3.c4
+    statement: >-
+      The end face is square to the tube axis and smooth, with no nicks, scratches or gouges.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "produce a square end, free of burrs" and "file the end square and smooth";
+      squareness needs a square/gauge.
+  - id: dr.s3.c5
+    statement: >-
+      No filings, sanding grit or metallic dust remain inside the tube after deburring.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-2
+    origin: drafted
+    note: >-
+      Handbook: "Be sure all filings and cuttings are removed from the tube"; verified by
+      watching the tube blown/wiped clean.
+  error_modes:
+  - id: dr.s3.e1
+    statement: >-
+      Excessive deburring thins or chamfers the end wall, leaving a plausible-looking end
+      that will crack when flared.
+    severity: critical
+    origin: drafted
+  - id: dr.s3.e2
+    statement: >-
+      Interior burr or raised lip left in the bore, becoming FOD and restricting flow while
+      the outside looks finished.
+    severity: critical
+    origin: drafted
+  - id: dr.s3.e3
+    statement: >-
+      End left out of square or with an obvious outside burr, producing a crooked flare and
+      requiring recut.
+    severity: major
+    origin: drafted
+  - id: dr.s3.e4
+    statement: >-
+      Sanding scratches or scoring on the tube OD near the end from careless figure-8 work.
+    severity: minor
+    origin: drafted
+- id: bt.s1
+  section: Bending the Tubing
+  text: Measure and mark where the middle of each bend will be on the tubing.
+  note_refs:
+  - 1
+  checks:
+  - id: bt.s1.c1
+    statement: >-
+      A distinct mark is present on the tube for every bend mapped on the safety-wire template.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step requires a mark at each bend location; count must equal bends recorded during routing.
+  - id: bt.s1.c2
+    statement: >-
+      Each mark's distance from the reference tube end matches the corresponding wire-template
+      dimension.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior note: 'Measure from the ends of the wire to the bend marks. Use that dimension
+      to mark on the tubing.'
+  - id: bt.s1.c3
+    statement: >-
+      Marks are felt-tip only, with no scribe lines, scratches or dents in the tube wall.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Sheet lists felt tip marker; handbook: tubing 'must be free from cracks, dents, nicks,
+      scratches, or any other defects.'
+  - id: bt.s1.c4
+    statement: >-
+      Mark count and spacing agree with the routing sketch/photo of the bent wire.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Routing note 2: 'Draw or photograph the shape to make' — the sketch is the reference
+      for verification.
+  error_modes:
+  - id: bt.s1.e1
+    statement: >-
+      Dimensions transferred from the wrong wire end, mirroring bend locations on the tube.
+    severity: critical
+    origin: drafted
+  - id: bt.s1.e2
+    statement: >-
+      Mark scribed or scratched into the tube instead of marked, creating a stress riser.
+    severity: critical
+    origin: drafted
+  - id: bt.s1.e3
+    statement: >-
+      Mark placed at the start of the bend rather than its middle, offsetting every bend.
+    severity: major
+    origin: drafted
+  - id: bt.s1.e4
+    statement: Mark too wide or smeared to align precisely with the bender L/R line.
+    severity: minor
+    origin: drafted
+- id: bt.s2
+  section: Bending the Tubing
+  text: Use a hand bender to bend the tubing.
+  note_refs:
+  - 2
+  checks:
+  - id: bt.s2.c1
+    statement: >-
+      The finished bend is smooth and free of kinks, wrinkles, or visible flat spots.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-3
+    origin: drafted
+    note: >-
+      Handbook: "Bend the tubing carefully to avoid excessive flattening, kinking, or wrinkling";
+      "Tubing with flattened, wrinkled, or irregular bends should not be installed."
+  - id: bt.s2.c2
+    statement: >-
+      The small diameter of any flattened portion of the bend is at least 75 percent of the
+      original tube OD.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-3
+    origin: drafted
+    note: >-
+      Handbook: "the small diameter of the flattened portion must not be less than 75 percent
+      of the original outside diameter."
+  - id: bt.s2.c3
+    statement: >-
+      The completed bend angle matches the angle called for by the routing template.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "pull the form handle until the zero mark on the form handle lines up with
+      the desired angle of bend"; sheet: "until the upper handle 0 points to the desired degrees."
+  - id: bt.s2.c4
+    statement: >-
+      The bend center falls at the marked location, measured from the correct (L or R) reference
+      end.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "align the mark on the tubing with the L on the form handle... If the measured
+      end is on the right side, then align... with the R."
+  error_modes:
+  - id: bt.s2.e1
+    statement: >-
+      Bend is flattened close to or below the 75 percent OD limit while still appearing acceptable
+      to a novice.
+    severity: critical
+    origin: drafted
+  - id: bt.s2.e2
+    statement: >-
+      Bend is kinked or wrinkled from wrong-size bender channel or jerky handle motion, requiring
+      the tube be scrapped.
+    severity: major
+    origin: drafted
+  - id: bt.s2.e3
+    statement: >-
+      L/R reference reversed or zeros not aligned, placing the bend at the wrong distance
+      or angle from the measured end.
+    severity: major
+    origin: drafted
+- id: bt.s3
+  section: Bending the Tubing
+  text: Repeat at each marked bend location.
+  checks:
+  - id: bt.s3.c1
+    statement: >-
+      Every marked bend location on the tube has a corresponding formed bend, matching the
+      count and sequence of the wire template.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step directs repeating the bend at each marked location; template shape recorded per
+      note 2 ('Draw or photograph the shape to make').
+  - id: bt.s3.c2
+    statement: Each bend is smooth and free of wrinkles, kinks, or visible flattening.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: 'Tubing with flattened, wrinkled, or irregular bends should not be installed';
+      procedure sheet requires smooth bender-formed bends.
+  - id: bt.s3.c3
+    statement: >-
+      At each bend the small diameter of any flattened portion is not less than 75 percent
+      of the original outside diameter.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-3
+    origin: drafted
+    note: >-
+      Handbook: 'the small diameter of the flattened portion must not be less than 75 percent
+      of the original outside diameter'.
+  - id: bt.s3.c4
+    statement: >-
+      Bend angles and the distances between bends reproduce the wire-template dimensions within
+      fit-up of both fittings.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: 'Measure from the ends of the wire to the bend marks. Use that dimension to mark
+      on the tubing.'
+  error_modes:
+  - id: bt.s3.e1
+    statement: >-
+      A subsequent bend is formed off the L/R reference or in the wrong plane, so the line
+      will not seat in both fittings.
+    severity: major
+    origin: drafted
+  - id: bt.s3.e2
+    statement: >-
+      Bend flattened below 75 percent of original OD — looks acceptable to a novice but invites
+      fatigue failure.
+    severity: critical
+    origin: drafted
+  - id: bt.s3.e3
+    statement: >-
+      Over-bent joint is bent back or re-worked, work-hardening the tube and producing a kink
+      or wrinkle.
+    severity: major
+    origin: drafted
+- id: ft.s1
+  section: Flare the Tube
+  text: Install the hardware.
+  note_refs:
+  - 1
+  checks:
+  - id: ft.s1.c1
+    statement: >-
+      The B-nut is on the tube with its threaded end facing the tube end to be flared.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Slide the B-nut on the tube with the threads pointing towards the
+      end being flared." Handbook only says slip nut on tube.
+  - id: ft.s1.c2
+    statement: >-
+      The sleeve sits between the B-nut and the tube end with its larger opening facing that
+      end.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: "Slide the sleeve on with the larger opening pointing towards the end
+      of the tube being flared." Handbook is silent on orientation.
+  - id: ft.s1.c3
+    statement: >-
+      Both nut and sleeve are on the tube while the end is still square and unflared.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook p.9-4: "Cut the tube squarely and remove all burrs. Slip the fitting nut and
+      sleeve on the tube." Sequence precedes flaring in both sources.
+  - id: ft.s1.c4
+    statement: >-
+      Nut and sleeve size matches the tube outside diameter and both slide freely on the tube.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet specifies tubing per manual (e.g. 0.25" OD) with matching B-nut and
+      sleeve; fit verified by measuring OD against hardware.
+  error_modes:
+  - id: ft.s1.e1
+    statement: >-
+      Sleeve installed reversed, small opening toward the flare, so it cannot support the
+      flare face.
+    severity: critical
+    origin: drafted
+  - id: ft.s1.e2
+    statement: >-
+      Flare formed before hardware installed, requiring the flare to be cut off and remade.
+    severity: major
+    origin: drafted
+  - id: ft.s1.e3
+    statement: B-nut installed with threads facing away from the end being flared.
+    severity: major
+    origin: drafted
+- id: ft.s2
+  section: Flare the Tube
+  text: Use the flaring tool.
+  note_refs:
+  - 2
+  checks:
+  - id: ft.s2.c1
+    statement: >-
+      The finished flare is concentric and square to the tube axis, not lopsided or crooked.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "A crooked flare is the result of the tubing not being cut squarely"; procedure
+      sheet: "holder is square to the tube."
+  - id: ft.s2.c2
+    statement: >-
+      Flare face and adjacent tube surface are free of cracks, splits, nicks, scratches or
+      die scoring.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "The flare and tubing must be free from cracks, dents, nicks, scratches, or
+      any other defects"; sheet warns of scoring.
+  - id: ft.s2.c3
+    statement: >-
+      Flare outside diameter is neither undersized nor oversized for the sleeve and B-nut
+      thread engagement.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-4
+    origin: drafted
+    note: >-
+      "A flare made too small produces a weak joint... if made too large, it interferes with
+      the proper engagement of the screw thread"; handbook gives no figure.
+  - id: ft.s2.c4
+    statement: >-
+      Flare angle matches the taught 47° die form, not an automotive 45° flare.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet states "a good 47° flare"; the angle figure comes from the sheet only
+      and needs gauge or comparator reading.
+  - id: ft.s2.c5
+    statement: >-
+      Tube protruded about a dime's thickness through the tapered die and the anvil was run
+      in until torque rose and the die seated.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: extend "about the thickness of a dime" and rotate "until a noticeable rise in
+      torque is felt." Setup and feel are not visible afterward.
+  error_modes:
+  - id: ft.s2.e1
+    statement: >-
+      Tube under-flared (anvil not seated), leaving a thick sleeve ring that can blow off
+      under pressure while looking finished.
+    severity: critical
+    origin: drafted
+  - id: ft.s2.e2
+    statement: >-
+      Over-flared end thinned or cracked at the rim, which will leak or fail when pressurized.
+    severity: critical
+    origin: drafted
+  - id: ft.s2.e3
+    statement: >-
+      Tube clamped at an angle, producing a crooked, one-sided flare that will not seat in
+      the fitting.
+    severity: major
+    origin: drafted
+  - id: ft.s2.e4
+    statement: >-
+      Die jaws score or mar the tube wall behind the flare from loose or angled clamping.
+    severity: minor
+    origin: drafted
+- id: ft.s3
+  section: Flare the Tube
+  text: Check for a good flare.
+  note_refs:
+  - 3
+  checks:
+  - id: ft.s3.c1
+    statement: >-
+      With the sleeve pulled up against the flare, a thin, continuous ring of the blue sleeve
+      is visible around the flared end.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet's go/no-go check: thin blue ring = correct flare size; thick ring =
+      under-flared, no ring = over-flared.
+  - id: ft.s3.c2
+    statement: >-
+      The flare and adjacent tubing are free of cracks, splits, dents, nicks, scratches or
+      scoring from the die.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "The flare and tubing must be free from cracks, dents, nicks, scratches, or
+      any other defects." Sheet warns scoring causes failure under pressure.
+  - id: ft.s3.c3
+    statement: >-
+      The flare is concentric and square to the tube axis, not crooked or lopsided in wall
+      thickness.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-4
+    origin: drafted
+    note: >-
+      Handbook: "A crooked flare is the result of the tubing not being cut squarely"; flare
+      must be "properly shaped or the connection leaks or fails."
+  - id: ft.s3.c4
+    statement: >-
+      The included flare angle measures 47° per the procedure sheet (handbook specifies 35°
+      to 37°).
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Angle figure 47° is the procedure sheet's alone; handbook states dies "ground to produce
+      a flare of 35° to 37°." Requires gauge, not a photo.
+  error_modes:
+  - id: ft.s3.e1
+    statement: >-
+      Under-flared end (thick blue sleeve ring showing) accepted as good; may blow off under
+      system pressure.
+    severity: critical
+    origin: drafted
+  - id: ft.s3.e2
+    statement: >-
+      Over-flared end (no sleeve ring visible) accepted; flare cracks under pressure and leaks.
+    severity: critical
+    origin: drafted
+  - id: ft.s3.e3
+    statement: >-
+      Flare scored, split or thinned from angled/over-tightened die insertion but passed on
+      visual glance.
+    severity: major
+    origin: drafted
+- id: ft.s4
+  section: Flare the Tube
+  text: Repeat hardware and flare process for the other end.
+  checks:
+  - id: ft.s4.c1
+    statement: >-
+      Both tube ends carry a completed flare, with a B-nut and sleeve captured on the tube
+      for each end.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet: slide B-nut with threads toward the end being flared and sleeve with larger opening
+      toward that end, then repeat for other end.
+  - id: ft.s4.c2
+    statement: >-
+      On each end the B-nut threads and the sleeve's larger opening face their own flare,
+      not each other.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Hardware orientation per Senior Mechanic Note 1; reversed hardware cannot seat on the
+      flare.
+  - id: ft.s4.c3
+    statement: >-
+      The second flare is concentric and square to the tube axis and free of cracks, nicks,
+      scratches or splits.
+    observable: photo
+    source: both
+    origin: drafted
+    note: >-
+      Handbook: "The flare and tubing must be free from cracks, dents, nicks, scratches, or
+      any other defects"; "A crooked flare is the result of the tubing not being cut squarely."
+  - id: ft.s4.c4
+    statement: >-
+      The second flare's included angle matches the specified flare angle for the fitting.
+    observable: measurement
+    source: both
+    origin: drafted
+    note: >-
+      Sheet specifies a 47° flare; handbook states dies "produce a flare of 35° to 37°" and
+      forbids 45° automotive flares.
+  error_modes:
+  - id: ft.s4.e1
+    statement: >-
+      Sleeve or B-nut installed backwards, or omitted, before flaring the second end.
+    severity: critical
+    origin: drafted
+  - id: ft.s4.e2
+    statement: >-
+      Second end over-flared (no blue sleeve ring visible) or under-flared (thick blue ring),
+      risking cracking or blow-off under pressure.
+    severity: critical
+    origin: drafted
+  - id: ft.s4.e3
+    statement: >-
+      Tube clamped at an angle in the die, producing a crooked or scored flare on the second
+      end.
+    severity: major
+    origin: drafted
+- id: pt.s1
+  section: Pressure Test the Tubing
+  text: Use an enclosed pressure test box.
+  checks:
+  - id: pt.s1.c1
+    statement: >-
+      The entire fabricated line, including both end fittings, sits inside the test box with
+      nothing protruding past the enclosure walls.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet: 'Use an enclosed pressure test box'; safety note warns high-pressure
+      fluid sprayed at the body causes severe injury.
+  - id: pt.s1.c2
+    statement: >-
+      The box lid or door is fully closed and latched before any pressure is applied to the
+      line.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Containment only exists while closed; a still of a closed box cannot show whether the
+      line was inside or when pressure began.
+  - id: pt.s1.c3
+    statement: >-
+      The enclosure and its viewing panel are intact, with no cracks, missing panels or open
+      gaps facing the operator.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Enclosure is the sole spray barrier implied by 'enclosed pressure test box' and the
+      high-pressure spray hazard note.
+  - id: pt.s1.c4
+    statement: >-
+      The box is rated for at least the intended test pressure of 1.5 times system pressure.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet sets test pressure at 1.5x system (e.g. 3000 psi); enclosure rating
+      must be confirmed from shop equipment data.
+    assumed: true
+  error_modes:
+  - id: pt.s1.e1
+    statement: >-
+      Line pressurized with the box open or with a fitting left outside the enclosure, so
+      a burst sprays the operator.
+    severity: critical
+    origin: drafted
+  - id: pt.s1.e2
+    statement: >-
+      Test hose routed over the lip so the lid cannot close, leaving a gap aimed at the work
+      area.
+    severity: critical
+    origin: drafted
+  - id: pt.s1.e3
+    statement: >-
+      Line laid in the box resting on a bend or fitting instead of supported, risking movement
+      during pressurization.
+    severity: minor
+    origin: drafted
+- id: pt.s2
+  section: Pressure Test the Tubing
+  text: Connect the completed rigid line to the pressure tester pump.
+  note_refs:
+  - 1
+  checks:
+  - id: pt.s2.c1
+    statement: >-
+      The B-nut is fully run down square on the tester port with no visible thread gap or
+      cross-threading.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Step requires the completed line connected to the pump; full square engagement is the
+      inspectable outcome of that connection.
+  - id: pt.s2.c2
+    statement: >-
+      Two wrenches are used simultaneously, one holding the tester fitting stationary so no
+      twist reaches the tube or flare.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Senior Mechanic Note: 'Use two wrenches when connecting the rigid line to the tester.'
+      Only observable while turning.
+  - id: pt.s2.c3
+    statement: >-
+      The two wrenches are set about 45° apart on the hardware and squeezed together like
+      plier handles.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet alone specifies 45°; handbook pp.9-1..9-7 give no wrench-positioning
+      figure.
+  - id: pt.s2.c4
+    statement: >-
+      Final tightness is reached at a firm torque rise, not by adding torque in an attempt
+      to seal a poor flare.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-4
+    origin: drafted
+    note: >-
+      Handbook: 'If a flare is not made properly, flaws cannot be corrected by applying additional
+      torque when tightening the fitting.'
+  error_modes:
+  - id: pt.s2.e1
+    statement: >-
+      Single wrench used, twisting the tube and distorting or cracking the flare while the
+      joint still looks correctly assembled.
+    severity: critical
+    origin: drafted
+  - id: pt.s2.e2
+    statement: >-
+      Over-tightening the B-nut to stop a weep instead of re-making a defective flare.
+    severity: critical
+    origin: drafted
+  - id: pt.s2.e3
+    statement: B-nut cross-threaded or only partially engaged on the tester port.
+    severity: major
+    origin: drafted
+- id: pt.s3
+  section: Pressure Test the Tubing
+  text: Place the rigid line into the enclosed box.
+  checks:
+  - id: pt.s3.c1
+    statement: >-
+      The entire tube assembly, including both B-nut/fitting connections, lies wholly inside
+      the enclosure with nothing protruding past the box opening.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet requires an enclosed pressure test box and the line placed into it;
+      cited handbook pages state no enclosure requirement.
+  - id: pt.s3.c2
+    statement: >-
+      The box cover/closure is fully seated and latched, with only the supply hose passing
+      through its intended port.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Containment of high-pressure fluid; sheet warns 'High pressure fluids can cause severe
+      injuries if sprayed at body.'
+  - id: pt.s3.c3
+    statement: >-
+      The line shows no new kink, flat spot or wrinkle from being forced or sprung into the
+      box.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-3
+    origin: drafted
+    note: >-
+      Handbook: 'Tubing with flattened, wrinkled, or irregular bends should not be installed';
+      flattening limit itself needs measurement.
+  - id: pt.s3.c4
+    statement: >-
+      The box is closed and all personnel are clear of the spray path before any pumping begins.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sequencing and personnel position; sheet lists high-pressure spray injury and eye/mouth
+      exposure hazards.
+  error_modes:
+  - id: pt.s3.e1
+    statement: >-
+      Line pressurized with the box lid open or with a fitting end hanging outside the enclosure.
+    severity: critical
+    origin: drafted
+  - id: pt.s3.e2
+    statement: >-
+      Assembly sprung or bent to fit the box, kinking or flattening a bend or straining a
+      flare.
+    severity: major
+    origin: drafted
+  - id: pt.s3.e3
+    statement: >-
+      Loose rags, tools or FOD left in the box with the line, or fluid drips not wiped up.
+    severity: minor
+    origin: drafted
+- id: pt.s4
+  section: Pressure Test the Tubing
+  text: Pressurize the rigid line.
+  note_refs:
+  - 2
+  checks:
+  - id: pt.s4.c1
+    statement: >-
+      The test gauge reaches 1.5 times the documented system operating pressure (e.g., 3,000
+      psi for a 2,000 psi system).
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet alone gives the 1.5x figure; handbook only says tubing is "designed
+      to withstand several times the normal operating pressure."
+  - id: pt.s4.c2
+    statement: >-
+      The system operating pressure used to compute test pressure is traceable to the aircraft
+      manual/TCDS for the installation.
+    observable: document
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires use of all relevant data (TCDS, maintenance/service manuals) to establish
+      system pressure.
+  - id: pt.s4.c3
+    statement: >-
+      Indicated pressure holds at test value without decay for the observation period.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Pressurization exists to reveal leaks; a falling gauge indicates leakage at b-nut, sleeve
+      or tube.
+  - id: pt.s4.c4
+    statement: >-
+      Pressure is applied only with the line inside the enclosed test box and personnel clear
+      of the line.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Sheet requires an enclosed pressure test box; safety note: "High pressure fluids can
+      cause severe injuries if sprayed at body."
+  error_modes:
+  - id: pt.s4.e1
+    statement: >-
+      Line pressurized to system pressure only, not 1.5x, so a weak flare passes an inadequate
+      test.
+    severity: critical
+    origin: drafted
+  - id: pt.s4.e2
+    statement: >-
+      Pressure applied with the enclosure open or body/hands near the line, exposing personnel
+      to high-pressure spray.
+    severity: critical
+    origin: drafted
+  - id: pt.s4.e3
+    statement: >-
+      Pump run well past the calculated test pressure, yielding or bulging the tube and requiring
+      refabrication.
+    severity: major
+    origin: drafted
+- id: pt.s5
+  section: Pressure Test the Tubing
+  text: Check tubing for leaks.
+  note_refs:
+  - 3
+  checks:
+  - id: pt.s5.c1
+    statement: >-
+      The line holds the specified test pressure with no gauge decay during the leak check.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure sheet alone gives 1.5× system pressure (e.g. 3,000 psi for a 2,000 psi system);
+      handbook only says tubing is pressure tested and withstands several times normal pressure.
+  - id: pt.s5.c2
+    statement: >-
+      No fluid seepage appears at either B-nut or at the base of either sleeve while the line
+      is pressurized.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet ties leak location to fault; handbook p.9-4: "the flare on the tubing
+      must be properly shaped or the connection leaks or fails."
+  - id: pt.s5.c3
+    statement: >-
+      No weeping, misting or wetness appears along the tube body or through the bend under
+      pressure.
+    observable: video
+    source: both
+    origin: drafted
+    note: >-
+      Procedure sheet: "Leak on tubing = possible damage from fabrication"; handbook p.9-1
+      requires tubing be pressure tested prior to installation.
+  - id: pt.s5.c4
+    statement: >-
+      Joints and tube are wiped dry and free of residual fluid before the pressure check begins.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Leak-location diagnosis in the senior mechanic notes is only valid if pre-existing fluid
+      is removed first.
+  error_modes:
+  - id: pt.s5.e1
+    statement: >-
+      A leak at the sleeve base is 'fixed' by further tightening the B-nut instead of re-flaring
+      the tube.
+    severity: critical
+    origin: drafted
+  - id: pt.s5.e2
+    statement: >-
+      Line inspected only after depressurizing or after wiping, so a slow weep is never observed
+      and the line is passed.
+    severity: critical
+    origin: drafted
+  - id: pt.s5.e3
+    statement: >-
+      Leak check performed below the 1.5× test pressure, so a marginal flare or joint is not
+      challenged.
+    severity: major
+    origin: drafted
+- id: ir.s1
+  section: Install Rigid Line on Aircraft
+  text: Fit rigid line into position.
+  checks:
+  - id: ir.s1.c1
+    statement: >-
+      Both tube ends align concentrically with their fitting seats, with no visible offset
+      or gap when set in place.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Procedure step 'Fit rigid line into position' before tightening; misalignment forces
+      the flare off its seat.
+  - id: ir.s1.c2
+    statement: >-
+      The line shows no flattened, wrinkled, kinked or irregular bends anywhere along its
+      length.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-3
+    origin: drafted
+    note: >-
+      Handbook: "Tubing with flattened, wrinkled, or irregular bends should not be installed."
+  - id: ir.s1.c3
+    statement: >-
+      Any flattening at a bend measures not less than 75 percent of the original tube outside
+      diameter.
+    observable: measurement
+    source: handbook FAA-H-8083-30B p.9-3
+    origin: drafted
+    note: >-
+      Handbook: "the small diameter of the flattened portion must not be less than 75 percent
+      of the original outside diameter."
+  - id: ir.s1.c4
+    statement: >-
+      Flares and tube surfaces are free of cracks, dents, nicks and scratches where fitted.
+    observable: photo
+    source: handbook FAA-H-8083-30B p.9-4
+    origin: drafted
+    note: >-
+      Handbook: "The flare and tubing must be free from cracks, dents, nicks, scratches, or
+      any other defects."
+  - id: ir.s1.c5
+    statement: >-
+      The fitted line clears adjacent structure and components with no contact or chafing
+      point.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Routing was mapped to avoid obstructions; fit must reproduce that clearance.
+  error_modes:
+  - id: ir.s1.e1
+    statement: >-
+      Line is sprung or pulled into the fittings, pre-loading the flare and risking cross-threaded
+      b-nuts.
+    severity: critical
+    origin: drafted
+  - id: ir.s1.e2
+    statement: >-
+      A line with a flattened or kinked bend is fitted anyway, inviting fatigue failure in
+      service.
+    severity: major
+    origin: drafted
+  - id: ir.s1.e3
+    statement: >-
+      Line rests against or bears on adjacent structure, creating a chafe point.
+    severity: major
+    origin: drafted
+- id: ir.s2
+  section: Install Rigid Line on Aircraft
+  text: Tighten rigid line on fittings.
+  note_refs:
+  - 1
+  checks:
+  - id: ir.s2.c1
+    statement: >-
+      Each b-nut is run up square and fully engaged on its fitting, with no cocked nut, cross-threading,
+      or unengaged exposed threads.
+    observable: photo
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      Handbook speaks only qualitatively of "proper engagement of the screw thread on the
+      fitting"; squareness/engagement judgement is the sheet's.
+  - id: ir.s2.c2
+    statement: >-
+      Final tightening on each b-nut is the point of high torque rise plus one-third turn,
+      no more and no less.
+    observable: measurement
+    source: procedure sheet
+    origin: drafted
+    note: >-
+      The ⅓-turn figure appears only on the procedure sheet; the handbook gives no turn value
+      for flared b-nut installation.
+  - id: ir.s2.c3
+    statement: >-
+      A backup wrench holds the fitting while the b-nut is turned, so no torque reaches the
+      tube or the airframe fitting.
+    observable: video
+    source: procedure sheet
+    origin: drafted
+    note: 'Senior Mechanic Note: two wrenches, one on b-nut and one on fitting.'
+  - id: ir.s2.c4
+    statement: >-
+      No extra torque beyond the specified tightening is used to stop a weep or to seat an
+      imperfect flare.
+    observable: video
+    source: handbook FAA-H-8083-30B p.9-4
+    origin: drafted
+    note: >-
+      Handbook: "If a flare is not made properly, flaws cannot be corrected by applying additional
+      torque when tightening the fitting."
+  error_modes:
+  - id: ir.s2.e1
+    statement: >-
+      B-nut over-torqued well past the ⅓ turn, shearing or cracking the flare while the joint
+      still looks correctly assembled.
+    severity: critical
+    origin: drafted
+  - id: ir.s2.e2
+    statement: >-
+      Tightened with a single wrench, rotating the fitting or twisting the tube and preloading
+      the installed line.
+    severity: critical
+    origin: drafted
+  - id: ir.s2.e3
+    statement: >-
+      B-nut cross-threaded or left cocked on the fitting, with visible thread gap.
+    severity: major
+    origin: drafted
+  - id: ir.s2.e4
+    statement: Wrench marks, rounded flats, or galling on the b-nut and fitting hex.
+    severity: minor
+    origin: drafted
+evidence:
+  required:
+  - id: ev1
+    description: >-
+      The completed rigid line laid flat beside the bent safety-wire template used to route
+      it, both ends and every bend visible, with the felt-tip bend marks on the wire still
+      legible.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Plan view from directly overhead on a plain contrasting bench mat, whole assembly plus
+      whole wire in frame, steel scale or tape laid parallel as scale reference, even diffuse
+      shop light with no hot spots on the tube.
+  - id: ev2
+    description: >-
+      Axial close-up looking straight down into one flared end with the sleeve pulled up against
+      the flare, showing a thin continuous ring of the sleeve around the flared tube end and
+      the B-nut captive behind it.
+    medium: photo
+    origin: drafted
+    framing: >-
+      Macro, lens on the tube axis, tube end filling most of the frame, ring light or on-axis
+      light so the flare face and the sleeve ring are both exposed; include the second end
+      in a matching separate shot.
+  - id: ev3
+    description: >-
+      Oblique close-up of one formed bend showing the outer and inner radius surfaces, taken
+      so wrinkles, kinks or flat spots would cast visible shadow.
+    medium: photo
+    origin: drafted
+    framing: >-
+      45° oblique, 150–250 mm from the bend, raking side light across the bend to reveal surface
+      irregularity, scale reference (rule or caliper jaws) in frame beside the bend.
+    assumed: true
+  - id: ev4
+    description: >-
+      Measured record of flare geometry and bend deformation: the included flare angle at
+      each end, the original tube OD, and the smallest diameter measured across each flattened
+      bend expressed as a percentage of original OD.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Caliper or flare gauge readings transcribed on the worksheet with the instrument and
+      reading photographed at each measurement point; angle gauge seated on the flare face.
+    assumed: true
+  - id: ev5
+    description: >-
+      Record of the pressure test: computed test pressure with the source of the system operating
+      pressure, the peak gauge reading, and the observed hold with no decay and no seepage
+      at either B-nut, either sleeve base, or the tube body.
+    medium: measurement
+    origin: drafted
+    framing: >-
+      Gauge face photographed at peak with the value legible, plus a signed worksheet entry
+      giving system pressure, test pressure, hold duration and leak-check result; line inside
+      the closed enclosure throughout.
+    assumed: true
+references:
+  handbook:
+  - handbook: FAA-H-8083-30B
+    chapter: 9
+    pages:
+    - 9-1
+    - 9-2
+    - 9-3
+    - 9-4
+    - 9-5
+    - 9-6
+    - 9-7
+    pdf_page_indices:
+    - 353
+    - 354
+    - 355
+    - 356
+    - 357
+    - 358
+    - 359
+    located_by: label
+    cited_by_source: true
+    file: references/handbook/faa_h_8083_30b_9_1_9_7.md
+  videos:
+  - path: data/videos/AM.I.D.S1/bend_the_line.mp4
+  - path: data/videos/AM.I.D.S1/cut_the_line.mp4
+  - path: data/videos/AM.I.D.S1/deburr_the_line.mp4
+  - path: data/videos/AM.I.D.S1/flare_the_line.mp4
+  - path: data/videos/AM.I.D.S1/install_fluid_line.mp4
+  - path: data/videos/AM.I.D.S1/route_the_line.mp4
+  - path: data/videos/AM.I.D.S1/test_fluid_line.mp4
+  trainwithaim_video: https://www.youtube.com/watch?v=ioMHYkOHu3E
+assumptions:
+- id: pt.s1.c4
+  statement: >-
+    The box is rated for at least the intended test pressure of 1.5 times system pressure.
+  reason: >-
+    Procedure sheet sets test pressure at 1.5x system (e.g. 3000 psi); enclosure rating must
+    be confirmed from shop equipment data.
+  resolve_by: Confirm with AIM before marking this pack reviewed.
+- id: ev3
+  statement: >-
+    Oblique close-up of one formed bend showing the outer and inner radius surfaces, taken
+    so wrinkles, kinks or flat spots would cast visible shadow.
+  reason: Required as photo, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev4
+  statement: >-
+    Measured record of flare geometry and bend deformation: the included flare angle at each
+    end, the original tube OD, and the smallest diameter measured across each flattened bend
+    expressed as a percentage of original OD.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+- id: ev5
+  statement: >-
+    Record of the pressure test: computed test pressure with the source of the system operating
+    pressure, the peak gauge reading, and the observed hold with no decay and no seepage at
+    either B-nut, either sleeve base, or the tube body.
+  reason: Required as measurement, which a single photograph cannot evidence.
+  resolve_by: Decide the capture method with Alcor during pilot scoping.
+open_questions:
+- >-
+  Every check, error mode and evidence item in this pack was drafted by packs/compile_pack.py
+  from the procedure sheet and handbook, and has not been reviewed by a subject-matter expert.
+- >-
+  The procedure sheet specifies a 47° flare and a 47° die; the cited handbook page 9-4 says
+  the aircraft flaring tool produces "a flare of 35° to 37°" and that an automotive tool producing
+  45° is impermissible. An SME must resolve which angle the assessment accepts before this
+  pack is used.
+- >-
+  Does the blue-sleeve-ring check depend on a specific sleeve finish? It fails as a criterion
+  if the shop stocks unpainted or differently coloured sleeves.
+- >-
+  The pressure test has no specified hold duration or allowable gauge decay; a number is needed
+  for 'holds without decay' to be checkable.
+- >-
+  Is a double flare required? Handbook p. 9-5 states a double flare is used on soft aluminium
+  alloy tubing 3/8" OD and under, which would cover the 0.25" example stock; the procedure
+  sheet teaches a single flare only.
+- >-
+  Which document supplies the system operating pressure used to compute test pressure for
+  this training article, and is it recorded on the worksheet?

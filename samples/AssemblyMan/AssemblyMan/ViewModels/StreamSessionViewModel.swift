@@ -74,6 +74,24 @@ final class StreamSessionViewModel {
     }
   }
   var isReticleOverlayEnabled: Bool = true
+
+  /// Seconds since the last frame arrived from the glasses, while streaming. Zero while the
+  /// feed is healthy. Anything above a couple of seconds means the picture on screen is a
+  /// still of the past.
+  private(set) var secondsSinceLastFrame: Int = 0
+  /// True once the gap is long enough that this is a stall rather than a slow frame.
+  var isFeedStalled: Bool { secondsSinceLastFrame >= 3 }
+  /// Rebuilding the stream underneath a session that is still, from the operator's point of
+  /// view, running. Drives an indicator rather than an alert: they have their hands full, and
+  /// a modal per hiccup costs more attention than the hiccup.
+  private(set) var isReconnecting = false
+  @ObservationIgnored private var lastFrameAt: Date?
+  /// Coalesces preview frames so the main actor never accumulates a backlog.
+  @ObservationIgnored private let previewGate = PreviewFrameGate()
+  /// Reset by a frame arriving, so a session that recovers gets its full budget back.
+  @ObservationIgnored private var feedRecoveryAttempts = 0
+  @ObservationIgnored private var lastRecoveryAt: Date?
+  @ObservationIgnored private var restartHandshakeTask: Task<Void, Never>?
   /// The vision overlay drawn over the feed.
   ///
   /// Also handed to the relay, so a remote viewer sees the same overlay rather than the bare
@@ -188,6 +206,13 @@ final class StreamSessionViewModel {
     streamingStatus = .stopped
     currentVideoFrame = nil
     hasReceivedFirstFrame = false
+    lastFrameAt = nil
+    secondsSinceLastFrame = 0
+    feedRecoveryAttempts = 0
+    lastRecoveryAt = nil
+    restartHandshakeTask?.cancel()
+    restartHandshakeTask = nil
+    previewGate.reset()
     resetSegmentation()
     sessionManager.cleanup()
   }
@@ -240,11 +265,7 @@ final class StreamSessionViewModel {
       return
     }
 
-    let config = StreamConfiguration(
-      videoCodec: VideoCodec.raw,
-      resolution: settings.quality.streamingResolution,
-      frameRate: UInt(settings.frameRate.rawValue)
-    )
+    let config = activeStreamConfiguration()
 
     do {
       guard let newStream = try deviceSession.addStream(config: config) else {
@@ -267,6 +288,51 @@ final class StreamSessionViewModel {
     }
   }
 
+  /// The configuration to open the next stream with: the operator's settings, stepped down by
+  /// however many recovery attempts have already failed.
+  ///
+  /// Degradation lives here rather than in `AppSettings` so it stays temporary. Writing a
+  /// reduced frame rate back into settings would make a bad link permanently lower the
+  /// operator's chosen quality, and they would have no idea why.
+  ///
+  /// The values are hints: the SDK runs its own adaptive-bitrate ladder and will lower
+  /// resolution and then frame rate on its own. Handing it a lower starting point gives that
+  /// ladder headroom instead of competing with it.
+  private func activeStreamConfiguration() -> StreamConfiguration {
+    var resolution = settings.quality.streamingResolution
+    var frameRate = UInt(settings.frameRate.rawValue)
+
+    switch feedRecoveryAttempts {
+    case 0:
+      break
+    case 1:
+      // 15 is the lowest rate the SDK will hold; AGENTS.md lists 2, 7, 15, 24, 30 as valid.
+      // Fewer frames is a cheaper concession than fewer pixels when the operator is reading
+      // a label.
+      frameRate = 15
+    default:
+      frameRate = 15
+      resolution = Self.steppedDown(resolution)
+    }
+
+    return StreamConfiguration(
+      // Compressed HEVC rather than raw. Raw video is the worst case for a bandwidth-limited
+      // link, and per the 0.5.0 changelog it also pauses streaming whenever the app is
+      // backgrounded, which `.hvc1` does not.
+      videoCodec: .hvc1,
+      resolution: resolution,
+      frameRate: frameRate
+    )
+  }
+
+  private static func steppedDown(_ resolution: StreamingResolution) -> StreamingResolution {
+    switch resolution {
+    case .high: return .medium
+    case .medium, .low: return .low
+    @unknown default: return .low
+    }
+  }
+
   private func setupListeners(for stream: MWDATCamera.Stream) {
     stateListenerToken = stream.statePublisher.listen { [weak self] state in
       Task { @MainActor in self?.handleStateChange(state) }
@@ -277,14 +343,25 @@ final class StreamSessionViewModel {
     // delivery thread.
     let sink = relay.frameSink
 
+    let gate = previewGate
+
     videoFrameListenerToken = stream.videoFramePublisher.listen { [weak self] frame in
       // The relay is fed on the delivery thread, before the hop: handing the buffer to
       // WebRTC is a non-blocking enqueue, and going by way of the main actor would put a
       // 30-per-second workload behind SwiftUI layout with no ordering guarantee.
       sink.capture(frame.sampleBuffer)
 
-      // The on-device preview still needs the main actor.
-      Task { @MainActor in self?.handleVideoFrame(frame) }
+      // Decode here rather than on the main actor. `makeUIImage` is a full image conversion,
+      // and running it per frame on the actor that also draws the UI is work the preview
+      // does not need to own.
+      guard let image = frame.makeUIImage() else { return }
+
+      // One frame in flight at a time. Scheduling a hop per frame queued work without limit
+      // whenever the main actor fell behind, holding every frame's buffer alive until it
+      // caught up — which over Bluetooth means a burst after a hiccup freezes the screen.
+      if gate.offer(image) {
+        Task { @MainActor in self?.drainPreviewGate() }
+      }
     }
 
     errorListenerToken = stream.errorPublisher.listen { [weak self] error in
@@ -306,29 +383,44 @@ final class StreamSessionViewModel {
   private func handleStateChange(_ state: StreamState) {
     switch state {
     case .stopped:
-      currentVideoFrame = nil
-      streamingStatus = .stopped
       stream = nil
       clearListeners()
-      hasReceivedFirstFrame = false
-      stopElapsedClock()
-      resetSegmentation()
       sessionManager.stopCurrentSession()
 
       if wantsRestart {
-        // A configuration change rebuilds the DAT session but deliberately leaves the room
-        // alone: the code stays valid and anyone watching keeps their connection, seeing
-        // only a brief freeze. Tearing the relay down here would mint a new code and drop
-        // every viewer on each settings change.
+        // A rebuild is not the end of the session, so almost none of the teardown below
+        // applies. Holding the status at `.waiting` keeps `isStreaming` true, which keeps
+        // `StreamSessionView` on the live screen — dropping to `.stopped` swapped in the
+        // Ready screen mid-session. The last frame stays up and the clock keeps running for
+        // the same reason: the stream restarted, the session did not.
+        //
+        // The relay is deliberately left alone: the room code stays valid and anyone watching
+        // keeps their connection, seeing only a brief freeze. Tearing it down here would mint
+        // a new code and drop every viewer on each rebuild.
         wantsRestart = false
+        restartHandshakeTask?.cancel()
+        restartHandshakeTask = nil
+        streamingStatus = .waiting
+        isReconnecting = true
         Task { await handleStartStreaming() }
       } else {
+        currentVideoFrame = nil
+        streamingStatus = .stopped
+        hasReceivedFirstFrame = false
+        isReconnecting = false
+        stopElapsedClock()
+        resetSegmentation()
         relay.stop()
       }
     case .waitingForDevice, .starting, .stopping, .paused:
       streamingStatus = .waiting
     case .streaming:
       streamingStatus = .streaming
+      isReconnecting = false
+      // Seeded here rather than on the first frame. `checkFeedLiveness` bails on a nil
+      // `lastFrameAt`, so a stream that reached `.streaming` and then delivered nothing at all
+      // was invisible to the watchdog — the one case where an operator waits longest.
+      if lastFrameAt == nil { lastFrameAt = Date() }
       startElapsedClock()
     }
   }
@@ -342,6 +434,7 @@ final class StreamSessionViewModel {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         guard !Task.isCancelled else { return }
         self?.elapsedSeconds += 1
+        self?.checkFeedLiveness()
       }
     }
   }
@@ -351,15 +444,89 @@ final class StreamSessionViewModel {
     elapsedTask = nil
   }
 
-  private func handleVideoFrame(_ frame: VideoFrame) {
-    if let image = frame.makeUIImage() {
-      currentVideoFrame = image
-      if !hasReceivedFirstFrame {
-        hasReceivedFirstFrame = true
-      }
-      scheduleSegmentation(for: image)
+  private func drainPreviewGate() {
+    guard let image = previewGate.take() else { return }
+    lastFrameAt = Date()
+    if secondsSinceLastFrame != 0 { secondsSinceLastFrame = 0 }
+
+    // The budget resets only after the feed has been healthy for a while, not on the first
+    // frame back. Resetting immediately meant a feed that recovered for a second and stalled
+    // again got a fresh set of attempts every time, so the cap never bound and the stream
+    // rebuilt itself in a loop — worse than the stall it was meant to fix.
+    if feedRecoveryAttempts != 0,
+      let lastRecoveryAt,
+      Date().timeIntervalSince(lastRecoveryAt) >= Self.healthyStreakSeconds {
+      feedRecoveryAttempts = 0
+      self.lastRecoveryAt = nil
+    }
+
+    currentVideoFrame = image
+    if !hasReceivedFirstFrame {
+      hasReceivedFirstFrame = true
+    }
+    scheduleSegmentation(for: image)
+  }
+
+  /// Notices when the glasses stop sending, and rebuilds the stream when they do.
+  ///
+  /// A stalled feed is silent: the SDK reports no error and no state change, the last frame
+  /// stays on screen, and the session looks live. Over Bluetooth this happens for ordinary
+  /// reasons — the link saturates, the frames warm up and throttle — and it does not recover
+  /// on its own, because nothing downstream knows anything is wrong.
+  ///
+  /// Rebuilding is the only lever available: a stopped DAT session is terminal, so there is
+  /// nothing to nudge, and `restartStream()` already knows how to tear one down and stand a
+  /// fresh one up. The relay deliberately survives it, so viewers keep their room code and
+  /// the assistant keeps its context across the gap.
+  private func checkFeedLiveness() {
+    guard streamingStatus == .streaming, let lastFrameAt else { return }
+    secondsSinceLastFrame = Int(Date().timeIntervalSince(lastFrameAt))
+
+    guard secondsSinceLastFrame >= Self.stallRecoverySeconds else { return }
+    guard feedRecoveryAttempts < Self.maxFeedRecoveryAttempts else { return }
+
+    // Capped rather than endless. If three rebuilds do not bring frames back, the problem is
+    // the glasses or the link, and retrying forever would hide that behind a loop while
+    // burning battery on both devices.
+    feedRecoveryAttempts += 1
+    lastRecoveryAt = Date()
+    self.lastFrameAt = Date()
+    // Reported once the budget is spent rather than on every attempt. An alert per restart
+    // interrupts the operator more than the stall does, and the badge already shows the gap.
+    if feedRecoveryAttempts >= Self.maxFeedRecoveryAttempts {
+      showError(
+        "The glasses keep dropping the video feed. Stopping the automatic restarts — "
+          + "check that the glasses are charged and in range, then start a new session."
+      )
+    }
+    restartStream()
+
+    // `restartStream` only asks: it sets `wantsRestart` and calls `stop()`, then waits for the
+    // SDK to deliver `.stopped`. A wedged link is exactly the case where that may never
+    // arrive, which would leave the flag set and every later attempt asking a dead stream to
+    // stop. Give the handshake a deadline and drive the rebuild directly if it lapses.
+    let attempt = feedRecoveryAttempts
+    restartHandshakeTask?.cancel()
+    restartHandshakeTask = Task { [weak self] in
+      try? await Task.sleep(nanoseconds: UInt64(Self.restartHandshakeSeconds) * 1_000_000_000)
+      guard !Task.isCancelled, let self, self.wantsRestart, self.feedRecoveryAttempts == attempt
+      else { return }
+      self.wantsRestart = false
+      self.stream = nil
+      self.clearListeners()
+      self.sessionManager.stopCurrentSession()
+      await self.handleStartStreaming()
     }
   }
+
+  /// How long a gap has to be before it counts as a stall rather than a slow frame. Wide
+  /// enough to sit out a Bluetooth hiccup, short enough that nobody stares at a dead picture.
+  private static let stallRecoverySeconds = 8
+  private static let maxFeedRecoveryAttempts = 3
+  /// How long the feed must run cleanly before a fresh set of restarts is allowed.
+  private static let healthyStreakSeconds: TimeInterval = 60
+  /// How long to wait for the SDK to acknowledge a stop before rebuilding regardless.
+  private static let restartHandshakeSeconds = 5
 
   private func scheduleSegmentation(for image: UIImage) {
     guard
@@ -475,4 +642,58 @@ final class StreamSessionViewModel {
 private enum VisionInferenceResult {
   case success(image: UIImage, inferenceMilliseconds: Int, coloredRegions: Int?)
   case failure(message: String)
+}
+
+/// Keeps the on-device preview from flooding the main actor.
+///
+/// Frames arrive on the SDK's delivery thread and the preview has to be drawn on the main
+/// actor, so each one needs a hop. Scheduling that hop per frame queues work without limit:
+/// when the main actor falls behind — and it does, because it also runs SwiftUI layout and
+/// the segmentation the preview triggers — the backlog grows and every queued frame holds its
+/// pixel buffer alive. Over Bluetooth that is not hypothetical, since a link hiccup delivers a
+/// burst the moment it recovers.
+///
+/// Only the newest frame is worth drawing, so this holds exactly one and schedules exactly one
+/// hop. A preview that skips frames is correct; one that freezes is not.
+final class PreviewFrameGate: @unchecked Sendable {
+
+  private struct State {
+    var pending: UIImage?
+    var isHopScheduled = false
+    var dropped: UInt64 = 0
+  }
+
+  private let lock = NSLock()
+  private var state = State()
+
+  /// Frames replaced before they could be drawn — the queue that never formed.
+  var dropped: UInt64 {
+    lock.lock(); defer { lock.unlock() }
+    return state.dropped
+  }
+
+  /// Offers a frame. True means the caller should schedule a main-actor hop, because this is
+  /// the only one in flight.
+  func offer(_ image: UIImage) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    if state.pending != nil { state.dropped &+= 1 }
+    state.pending = image
+    guard !state.isHopScheduled else { return false }
+    state.isHopScheduled = true
+    return true
+  }
+
+  /// Takes the newest frame and clears the scheduled flag.
+  func take() -> UIImage? {
+    lock.lock(); defer { lock.unlock() }
+    state.isHopScheduled = false
+    let image = state.pending
+    state.pending = nil
+    return image
+  }
+
+  func reset() {
+    lock.lock(); defer { lock.unlock() }
+    state = State()
+  }
 }
