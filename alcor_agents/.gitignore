@@ -20,5 +20,10 @@ build/
 # source and these are their output.
 criteria/
 
+# Synthetic negative examples and their artifacts, written by
+# erroneous_video_pipeline. Derived from the confidential AIM footage and
+# regenerable from it, so the pipeline is the source and these are its output.
+generated_errors/
+
 # macOS
 .DS_Store
