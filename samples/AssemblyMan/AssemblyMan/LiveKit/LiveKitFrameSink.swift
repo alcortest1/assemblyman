@@ -41,18 +41,43 @@ final class LiveKitFrameSink: Sendable {
     var framesSkippedComposite: UInt64 = 0
     var firstPixelFormat: OSType?
     var isPixelFormatSupported: Bool?
+    /// Frames that carried no CVImageBuffer at all — encoded samples rather than pixels.
+    ///
+    /// Distinct from an unsupported pixel format, and the distinction is the whole
+    /// diagnosis: an unsupported format means the glasses sent pixels WebRTC will not take,
+    /// while this means they sent no pixels at all, which is what asking the DAT SDK for
+    /// `.hvc1` instead of `.raw` does. Both end as a silent black relay; only this counter
+    /// tells them apart.
+    var framesWithoutPixelBuffer: UInt64 = 0
+    /// Media subtype of the first frame's format description, e.g. "hvc1", "420v".
+    var firstMediaSubType: OSType?
 
     static let empty = Diagnostics()
 
     /// The four-character code Core Video uses, e.g. "420v", "420f", "BGRA".
     var pixelFormatDescription: String {
-      guard let format = firstPixelFormat else { return "—" }
+      Self.fourCC(firstPixelFormat)
+    }
+
+    var mediaSubTypeDescription: String {
+      Self.fourCC(firstMediaSubType)
+    }
+
+    /// Reads a FourCC as text, falling back to hex when it is not printable.
+    private static func fourCC(_ code: OSType?) -> String {
+      guard let code else { return "—" }
       let bytes = [
-        UInt8((format >> 24) & 0xFF), UInt8((format >> 16) & 0xFF),
-        UInt8((format >> 8) & 0xFF), UInt8(format & 0xFF),
+        UInt8((code >> 24) & 0xFF), UInt8((code >> 16) & 0xFF),
+        UInt8((code >> 8) & 0xFF), UInt8(code & 0xFF),
       ]
       let text = String(bytes: bytes, encoding: .ascii) ?? ""
-      return text.allSatisfy { $0.isASCII && !$0.isNewline } ? text : "0x\(String(format, radix: 16))"
+      return text.allSatisfy { $0.isASCII && !$0.isNewline } ? text : "0x\(String(code, radix: 16))"
+    }
+
+    /// Set when frames are arriving but none of them carry pixels — the one failure that
+    /// looks identical to a healthy session from the outside.
+    var isDeliveringEncodedFrames: Bool {
+      framesWithoutPixelBuffer > 0 && firstPixelFormat == nil
     }
   }
 
@@ -113,14 +138,24 @@ final class LiveKitFrameSink: Sendable {
       state.diagnostics.framesOffered &+= 1
       guard state.isArmed, let capturer = state.capturer else { return (nil, false) }
 
-      if state.diagnostics.firstPixelFormat == nil,
-        let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
-        let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
-        state.diagnostics.firstPixelFormat = format
-        // WebRTC silently drops anything outside this set, logging only at warning level.
-        // Recording it here is what turns that into a diagnosable failure.
-        state.diagnostics.isPixelFormatSupported =
-          VideoCapturer.supportedPixelFormats.contains { $0.uint32Value == format }
+      if let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
+        if state.diagnostics.firstPixelFormat == nil {
+          let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
+          state.diagnostics.firstPixelFormat = format
+          // WebRTC silently drops anything outside this set, logging only at warning level.
+          // Recording it here is what turns that into a diagnosable failure.
+          state.diagnostics.isPixelFormatSupported =
+            VideoCapturer.supportedPixelFormats.contains { $0.uint32Value == format }
+        }
+      } else {
+        // No pixels in this frame — an encoded sample. Counted rather than ignored: the
+        // relay's symptom is a black feed either way, and without this the log shows frames
+        // being forwarded quite happily to a capturer that is discarding all of them.
+        state.diagnostics.framesWithoutPixelBuffer &+= 1
+        if state.diagnostics.firstMediaSubType == nil,
+          let description = CMSampleBufferGetFormatDescription(sampleBuffer) {
+          state.diagnostics.firstMediaSubType = CMFormatDescriptionGetMediaSubType(description)
+        }
       }
 
       state.diagnostics.framesForwarded &+= 1
