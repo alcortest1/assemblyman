@@ -161,6 +161,13 @@ code { font-family: ui-monospace, monospace; }
   background: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.85);
 }
 .plate-note { font-size: 10px; color: var(--color-neutral-500); line-height: 1.5; }
+/* A real frame covers the plate; the crosshair stays underneath for the frames
+   that were never extracted, and for an image that fails to load. */
+.plate-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.frame .plate-img { object-fit: cover; }
 
 .block { display: flex; flex-direction: column; gap: 6px; }
 .block-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }

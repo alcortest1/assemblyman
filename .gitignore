@@ -19,3 +19,7 @@ LiveKit.local.xcconfig
 # Local worktrees and captured session data — not source.
 .claude/
 dataset/
+
+# Derived from the untracked alcor_agents/build/ by scripts/build_portal_data.py.
+portal/data/frames/
+portal/data/thumbs/
