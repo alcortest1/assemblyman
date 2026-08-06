@@ -237,8 +237,11 @@ code { font-family: ui-monospace, monospace; }
 
 /* subtask rail — shared by every tab but Documentation */
 .rail { display: flex; border-bottom: 1px solid var(--color-divider); flex: none; }
+/* A task with one subtask would otherwise stretch its single cell across the
+   whole rail, turning the 46px plate into an unreadable slice of the frame.
+   Capping the cell keeps it the width it has when a task has seven. */
 .rail-cell {
-  flex: 1; min-width: 0; padding: 9px 11px; cursor: pointer;
+  flex: 1 1 0; min-width: 0; max-width: 200px; padding: 9px 11px; cursor: pointer;
   border: 0; border-right: 1px solid var(--color-divider); background: none;
   display: flex; flex-direction: column; gap: 5px; font: inherit;
   color: inherit; text-align: left;
