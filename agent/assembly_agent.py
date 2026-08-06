@@ -38,6 +38,7 @@ from livekit.plugins import google
 import criteria_prompt
 import dataset_recorder
 import grading
+import identify
 from frame_grabber import FrameGrabber
 from photo_capture import PhotoCapture
 
@@ -161,6 +162,8 @@ DATA_TOPIC = "assemblyman.grade"
 # capture topic, which carries photos the agent itself requested — the two arrive
 # by different routes and only one of them has a waiting future.
 GRADE_REQUEST_TOPIC = "assemblyman.grade-request"
+# A photograph sent to be named rather than graded.
+IDENTIFY_REQUEST_TOPIC = "assemblyman.identify-request"
 
 
 class Grader:
@@ -288,12 +291,12 @@ class Grader:
         )
         await self._publish(result)
 
-    async def publish_catalogue(self) -> None:
-        """Tell the phone what it can ask to be graded against.
+    def catalogue(self) -> list[dict]:
+        """Everything this room can grade, as codes and names.
 
-        The rubrics live here, not on the phone, so the picker behind the capture
-        button would otherwise have nothing to list. Codes and names only — a few
-        kilobytes, not the 15k-token prompt.
+        Built from the rubrics rather than stored, so it cannot fall out of step
+        with them. Used twice: sent to the phone to fill its picker, and given to
+        the identifier as the closed set of answers it may choose from.
         """
         tasks: dict[str, dict] = {}
         for item in CRITERIA.items:
@@ -306,7 +309,53 @@ class Grader:
                 "subject": item.subject,
                 "criteria_count": len(item.criteria),
             })
-        await self._publish({"type": "catalogue", "tasks": list(tasks.values())})
+        return list(tasks.values())
+
+    async def publish_catalogue(self) -> None:
+        """Tell the phone what it can ask to be graded against.
+
+        The rubrics live here, not on the phone, so the picker behind the capture
+        button would otherwise have nothing to list. Codes and names only — a few
+        kilobytes, not the 15k-token prompt.
+        """
+        await self._publish({"type": "catalogue", "tasks": self.catalogue()})
+
+    # ------------------------------------------------------------- identification
+    #
+    # The operator knows what they just built. Making them find it in a picker
+    # forty-one subtasks deep, holding a phone, is asking them to do the model's
+    # job — so the photograph is identified first and the picker opens on the
+    # answer.
+    #
+    # A suggestion only. It never grades on its own: acting on a wrong guess
+    # silently would mark a student's work against the wrong rubric, which is
+    # worse than any amount of scrolling.
+
+    def listen_for_identification(self) -> None:
+        try:
+            self._room.register_byte_stream_handler(
+                IDENTIFY_REQUEST_TOPIC,
+                lambda reader, identity: asyncio.create_task(
+                    self._on_identify(reader, identity)
+                ),
+            )
+        except Exception as error:  # noqa: BLE001
+            logger.warning("could not listen for identification requests: %s", error)
+
+    async def _on_identify(self, reader, identity: str) -> None:
+        attributes = dict(getattr(getattr(reader, "info", None), "attributes", None) or {})
+        request_id = attributes.get("request_id", "")
+        try:
+            jpeg = b"".join([chunk async for chunk in reader])
+        except Exception as error:  # noqa: BLE001
+            logger.warning("identification photo from %s failed: %s", identity, error)
+            return
+
+        result = await identify.identify(jpeg, self.catalogue())
+        # Always answered, matched or not. The phone opens its picker on this
+        # message, so a silent failure would leave it waiting on a spinner with
+        # nothing coming.
+        await self._publish({"type": "identification", "request_id": request_id, **result})
 
 
 class AssemblyAssistant(Agent):
@@ -436,6 +485,7 @@ async def entrypoint(ctx: JobContext) -> None:
 
         grader.photos.register()
         grader.listen_for_phone_grades()
+        grader.listen_for_identification()
 
         # The phone builds its subtask picker from this, so it has to arrive after
         # the phone is listening. Published once now for whoever is already here,
