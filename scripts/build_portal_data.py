@@ -91,11 +91,19 @@ def run_files(code: str) -> list:
 
 
 def latest_run(code: str):
-    runs = run_files(code)
-    if not runs:
-        return None
-    with open(runs[-1]) as fh:
-        return json.load(fh)
+    """The newest run that actually graded something.
+
+    A run whose every call failed is still written to disk — a sweep that runs
+    the account out of credit saves one all-HTTP-402 run per remaining task. It
+    is the newest file, so choosing on date alone would replace a good grid with
+    an empty one and report the task as having no evidence at all.
+    """
+    for path in reversed(run_files(code)):
+        with open(path) as fh:
+            run = json.load(fh)
+        if any(not r.get("error") for r in (run.get("results") or [])):
+            return run
+    return None
 
 
 def segmented_clips(code: str) -> set:
@@ -290,9 +298,19 @@ def build_task(code: str) -> dict | None:
 
     crit_path = AGENTS / "build" / "criteria" / f"{code}.json"
     criteria = json.load(open(crit_path)) if crit_path.is_file() else {"entries": {}}
-    targets = len(criteria.get("entries") or {})
 
     run = latest_run(code)
+
+    # Photo targets: the criterion entries a photo is graded against. A hand-compiled
+    # pack has no build/criteria/ file — its sheets were built straight from the pack
+    # and only the run records them — so counting the file alone reported 0 targets
+    # for AM.II.K.S3 and AM.I.E.S1 while the portal rendered their graded points.
+    targets = len(criteria.get("entries") or {})
+    targets_prov = "build/criteria/"
+    if not targets and run:
+        targets = len({r.get("rolls_up_to") for r in (run.get("results") or [])
+                       if (r.get("polarity") or "original") == "original" and r.get("rolls_up_to")})
+        targets_prov = "saved run" if targets else "none compiled"
 
     # Sections are the design's subtasks; steps keep their order inside one.
     sections: "OrderedDict[str, list]" = OrderedDict()
@@ -347,6 +365,7 @@ def build_task(code: str) -> dict | None:
         "def": defect,
         "atoms": corr + defect,
         "targets": targets,
+        "targetsProv": targets_prov,
         "handbook": hb_label,
         "hbProv": ("hand-compiled · " if hand else "") + hb_prov,
         "handbookFile": hb_file,
@@ -737,8 +756,8 @@ def main() -> int:
         },
         "tasks": [{k: t[k] for k in (
             "code", "short", "title", "subject", "steps", "corr", "def", "atoms",
-            "targets", "handbook", "hbProv", "clips", "clipNames", "segmented",
-            "hand", "runCost", "runCalls")} for t in tasks],
+            "targets", "targetsProv", "handbook", "hbProv", "clips", "clipNames",
+            "segmented", "hand", "runCost", "runCalls")} for t in tasks],
     }
     with open(OUT / "index.json", "w") as fh:
         json.dump(index, fh, ensure_ascii=False, indent=1)
