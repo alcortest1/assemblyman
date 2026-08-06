@@ -108,12 +108,33 @@ final class AppSettings {
 
   // MARK: - Options
 
+  /// A tier the operator can pick, named for what the glasses actually send.
+  ///
+  /// The raw values are identifiers, not labels. They used to be the labels — "480p", "720p",
+  /// "1080p" — and every one of them was wrong: the SDK's three tiers are 720x1280, 504x896 and
+  /// 360x640, so the app advertised a 1080p stream the glasses cannot produce and called the
+  /// real 720p tier "720p" while sending 504x896. That is worth more than pedantry when a feed
+  /// is misbehaving, because the first question is always what was asked for versus what
+  /// arrived, and the chip on screen was answering it wrongly.
+  ///
+  /// `label` is now derived from `videoFrameSize`, so it comes from the SDK and cannot drift
+  /// from it again.
   enum Quality: String, CaseIterable, Hashable {
-    case low = "480p"
-    case medium = "720p"
-    case high = "1080p"
+    case low
+    case medium
+    case high
 
-    var label: String { rawValue }
+    /// Short edge of the frame, the way video tiers are normally named: "720p".
+    var label: String { "\(min(frameSize.width, frameSize.height))p" }
+
+    /// What the glasses send on this tier, as the SDK reports it.
+    var frameSize: (width: UInt, height: UInt) {
+      let size = streamingResolution.videoFrameSize
+      return (size.width, size.height)
+    }
+
+    /// "720 x 1280", for the diagnostics line.
+    var dimensionsLabel: String { "\(frameSize.width)x\(frameSize.height)" }
 
     var streamingResolution: StreamingResolution {
       switch self {

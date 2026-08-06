@@ -393,7 +393,7 @@ final class AssemblyManUITests: XCTestCase {
     )
   }
 
-  /// Turning on the Wi-Fi tier offers 1080p and carries it into the session spec.
+  /// Turning on the Wi-Fi tier offers 720p and carries it into the session spec.
   @MainActor
   func testWiFiTierOffersHigherQuality() {
     pairDeviceWithCameraResources()
@@ -406,7 +406,7 @@ final class AssemblyManUITests: XCTestCase {
     )
     XCTAssertEqual(
       element("session_spec").label,
-      "720p · 30 fps · Bluetooth",
+      "504p · 30 fps · Bluetooth",
       "Should start on the default Bluetooth tier"
     )
 
@@ -416,13 +416,13 @@ final class AssemblyManUITests: XCTestCase {
       "Settings screen should open"
     )
 
-    // 1080p is gated behind the Wi-Fi tier.
-    XCTAssertFalse(app.buttons["1080p"].exists, "1080p should not be offered on Bluetooth")
+    // 720p is gated behind the Wi-Fi tier.
+    XCTAssertFalse(app.buttons["720p"].exists, "720p should not be offered on Bluetooth")
 
     tapWithRetry(app.buttons["Stream over Wi-Fi"].firstMatch)
 
-    let highQuality = app.buttons["1080p"]
-    XCTAssertTrue(highQuality.waitForExistence(timeout: 5), "1080p should be offered once Wi-Fi is on")
+    let highQuality = app.buttons["720p"]
+    XCTAssertTrue(highQuality.waitForExistence(timeout: 5), "720p should be offered once Wi-Fi is on")
     tapWithRetry(highQuality)
 
     tapWithRetry(app.buttons["settings_back_button"])
@@ -430,7 +430,7 @@ final class AssemblyManUITests: XCTestCase {
     XCTAssertTrue(element("session_spec").waitForExistence(timeout: 10), "Spec row should be visible")
     XCTAssertEqual(
       element("session_spec").label,
-      "1080p · 30 fps · Wi-Fi",
+      "720p · 30 fps · Wi-Fi",
       "Ready screen should reflect the selected quality and transport"
     )
   }
@@ -448,7 +448,7 @@ final class AssemblyManUITests: XCTestCase {
     )
 
     // Drop to the lower tier; the stream should rebuild rather than die.
-    let lowQuality = app.buttons["480p"]
+    let lowQuality = app.buttons["360p"]
     if lowQuality.waitForExistence(timeout: 5) {
       tapWithRetry(lowQuality)
     }
