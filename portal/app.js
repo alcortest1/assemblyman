@@ -6,9 +6,10 @@
  * `url` value drives the real address bar instead, so a screen is linkable.
  *
  * No build step and no dependencies: index.html holds the shell, this file owns
- * state and builds the screens. The task data below is the design's seeded pilot
- * set — swap `DATA` for the live `alcor_agents/inspector/server.py` API to put it
- * on the working tree.
+ * state and builds the screens. Everything rendered comes from the extract under
+ * data/, which scripts/build_portal_data.py writes out of the alcor_agents working
+ * tree — compiled packs, drafted criteria, and the saved photo-eval runs with both
+ * polarities. Nothing here is seeded; when a figure is missing it is missing.
  */
 (function () {
   'use strict';
@@ -71,289 +72,53 @@
     return el('span', { class: cls + ' ' + (extra || 'tag-xs'), text: text });
   }
 
-  /* ── seeded data ───────────────────────────────────────────────────────── */
+  /* ── data ──────────────────────────────────────────────────────────────── */
 
-  var RAIL_TS = ['t000041_50', 't000027_25', 't000018_00', 't000033_75', 't000029_50',
-                 't000024_25', 't000031_00', 't000022_50', 't000019_75'];
+  /* The extract under data/ is built from the alcor_agents working tree by
+     scripts/build_portal_data.py — packs, drafted criteria and the saved
+     photo-eval runs. index.json and evals.json load at boot; a task's steps,
+     criteria and run load the first time that task is opened. */
 
-  function mk(code, short, title, subject, steps, corr, def, targets, handbook, hbProv,
-              clipNames, segmented, hand, subs) {
-    return {
-      code: code, short: short, title: title, subject: subject, steps: steps,
-      corr: corr, def: def, targets: targets, handbook: handbook, hbProv: hbProv,
-      clipNames: clipNames, clips: clipNames.length, segmented: segmented, hand: hand,
-      atoms: corr + def,
-      subtasks: subs.map(function (s, i) {
-        return Object.assign({ ts: RAIL_TS[i % RAIL_TS.length] }, s);
-      })
-    };
+  var DATA = { index: null, evals: null, tasks: {}, pending: {}, error: null };
+
+  function getJSON(path) {
+    return fetch(path, { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(path + ' \u2192 ' + r.status);
+      return r.json();
+    });
   }
 
-  function sub(label, sheet, n, atoms) {
-    return { label: label, sheet: sheet, stepsCount: n, atomsCount: atoms, steps: null };
+  function taskList() { return (DATA.index && DATA.index.tasks) || []; }
+  function modelNames() { return (DATA.index && DATA.index.models) || []; }
+
+  function ensureTask(code) {
+    if (!code || DATA.tasks[code] || DATA.pending[code]) return;
+    DATA.pending[code] = true;
+    getJSON('data/tasks/' + encodeURIComponent(code) + '.json')
+      .then(function (t) { DATA.tasks[code] = t; })
+      .catch(function (e) { DATA.error = String((e && e.message) || e); })
+      .then(function () { delete DATA.pending[code]; render(); });
   }
-  function C(id, text, obs, src) { return { id: id, text: text, obs: obs, src: src }; }
-  function E(id, text, sev) { return { id: id, text: text, sev: sev }; }
 
-  var ds1Clips = ['route_the_line', 'cut_the_line', 'deburr_the_line', 'bend_the_line',
-                  'flare_the_line', 'test_fluid_line', 'install_fluid_line'];
+  // Graded frames are copied at full size; the Videos strip is downscaled. Try the
+  // sharp one first and fall back, so a frame we did not copy just shows the plate.
+  function plateImage(sources, alt) {
+    var i = 0;
+    var img = el('img', { class: 'plate-img', alt: alt || '', loading: 'lazy', src: sources[0] });
+    img.addEventListener('error', function () {
+      i += 1;
+      if (i < sources.length) img.src = sources[i];
+      else if (img.parentNode) img.parentNode.removeChild(img);
+    });
+    return img;
+  }
 
-  var ds1 = mk('AM.I.D.S1', 'Rigid line', 'Fabricate a rigid line with a flare and a bend',
-    'General', 23, 95, 73, 27, '30B 9-1..9-7', 'cited', ds1Clips, false, false, [
-      Object.assign(sub('Route the line', 'route_the_line', 3, 16), {
-        steps: [
-          { id: 'dl.s1', text: 'Use the safety wire method to map tubing length and bends.',
-            checks: [
-              C('c1', 'Both ends of the safety wire are seated into their respective fittings, with the wire spanning the complete route.', 'photo', 'Sheet: cut excess "to allow it to feed into the other fitting"'),
-              C('c2', 'Felt-tip marks are present on the wire at each bend location and at both fitting ends.', 'photo', 'Sheet: "Use a marker to mark the location of each bend and ends."'),
-              C('c3', 'The wire path clears surrounding structure and components rather than cutting through an obstruction.', 'photo', 'Sheet: route "taking the most appropriate route"'),
-              C('c4', 'No bend in the mapped wire route is tighter than the standard bend radius for the tube size selected.', 'measurement', 'Handbook FAA-H-8083-30B p.9-2: standard bend radii by tube size — excluded from photo criterion')],
-            errors: [
-              E('e1', 'Wire ends not fed fully into the fittings — mapped length short, finished line will not reach.', 'critical'),
-              E('e2', 'Bend locations unmarked or marked after the wire moved.', 'major'),
-              E('e3', 'Route cuts through an obstruction the tube cannot share.', 'critical')] },
-          { id: 'dl.s2', text: 'Carefully remove the wire, keeping its shape.',
-            checks: [
-              C('c1', 'Wire is free of the fittings/airframe and held clear as a separate shaped piece.', 'photo', 'Source: procedure sheet'),
-              C('c2', 'Removed wire retains its bent contour, not straightened or flattened.', 'photo', 'Source: procedure sheet'),
-              C('c3', 'A drawing or photograph of the wire’s shape exists as a record before further handling.', 'document', 'Source: procedure sheet, note 2 — excluded from photo criterion')],
-            errors: [
-              E('e1', 'Wire shown pulled straight or bends visibly opened out.', 'critical'),
-              E('e2', 'Marks on wire smeared or absent.', 'major')] },
-          { id: 'dl.s3', text: 'Straighten the wire and measure the total length.',
-            checks: [
-              C('c1', 'The safety wire lies straight along its full length, no bows, kinks or curls.', 'photo', 'Source: procedure sheet'),
-              C('c2', 'The wire is laid alongside a tape measure or scale for reading.', 'photo', 'Source: procedure sheet'),
-              C('c3', 'The recorded tubing length equals the wire length plus 1/2 inch for each marked bend.', 'document', 'Sheet note 3: bend allowance — excluded from photo criterion')],
-            errors: [
-              E('e1', 'Wire still visibly bowed or kinked while being measured.', 'major')] }
-        ],
-        sheetPoints: [
-          { n: '1.', text: 'Safety wire spans the full route with both ends inserted into their fittings.' },
-          { n: '2.', text: 'Felt-tip marks visible on the wire at bend points and both ends.' },
-          { n: '3.', text: 'Wire path runs clear of surrounding structure, not through an obstruction.' },
-          { n: 'D1.', text: 'graded as absence: wire end loose or not seated in a fitting.' }],
-        excluded: '[measurement] bend radius vs. standard table — shown here, never sent to a grader.',
-        run: {
-          rows: [
-            { label: '1 · wire spans route, ends seated',
-              cells: [['pass', '0.82'], ['pass', '0.78'], ['pass', '0.74'], ['pass', '0.66']],
-              neg: { label: 'P1 · safety wire spans the route with at least 3 in of slack beyond each fitting',
-                src: 'spans the route → spans it with 3 in of slack',
-                cells: [['fail', '✓'], ['fail', '✓'], ['fail', '✓'], ['accepted', 'pass ✗ accepted']] } },
-            { label: '2 · felt-tip marks at bends + ends',
-              cells: [['unsure', 'occluded'], ['pass', '0.71'], ['unsure', 'hand covers'], ['pass', '0.69']],
-              skip: 'P2 dropped — perturbing "marks at each bend" to "marks every 2 in along the wire" needs a scale reference in frame, so it can only return unsure' },
-            { label: '3 · path clears structure',
-              cells: [['pass', '0.88'], ['pass', '0.90'], ['pass', '0.85'], ['pass', '0.81']],
-              neg: { label: 'P3 · wire path crosses through structure at one point, as the route requires',
-                src: 'runs clear of structure → crosses through it',
-                cells: [['fail', '✓'], ['fail', '✓'], ['unsure', 'not_pass ✓'], ['fail', '✓']] } },
-            { label: 'D1 · no loose / unseated wire end',
-              cells: [['pass', '0.79'], ['pass', '0.76'], ['pass', '0.72'], ['pass', '0.70']],
-              neg: { label: 'P4 · a wire end protruding more than 1/16 in from its fitting is the defect',
-                src: 'defect threshold: unseated → protruding >1/16 in',
-                cells: [['fail', '✓'], ['fail', '✓'], ['fail', '✓'], ['unsure', 'not_pass ✓']] } }],
-          rollup: [['review', 'review · 1 unsure'], ['pass', 'pass · 4/4'],
-                   ['review', 'review · 1 unsure'], ['pass', 'pass · 4/4']],
-          controlStats: '12 perturbed points · not passed 11 · accepted 1 (GPT-5.6 Sol)',
-          negLines: [
-            { mark: 'P1', from: '1. Safety wire spans the full route with both ends inserted into their fittings.', text: 'Safety wire spans the full route with at least 3 in of slack beyond each fitting.', status: 'perturbed' },
-            { mark: 'P2', from: '2. Felt-tip marks visible on the wire at bend points and both ends.', text: 'Felt-tip marks appear every 2 in along the wire, as well as at bends and ends.', status: 'skipped · needs a scale' },
-            { mark: 'P3', from: '3. Wire path runs clear of surrounding structure, not through an obstruction.', text: 'Wire path crosses through structure at one point, as the route requires.', status: 'perturbed' },
-            { mark: 'P4', from: 'D1. wire end loose or not seated in a fitting.', text: 'A wire end protruding more than 1/16 in from its fitting is the defect.', status: 'perturbed' }],
-          replies: {
-            'r0m0': 'The safety wire runs continuously from the upper fitting to the lower manifold fitting; both ends disappear into the fitting bores, consistent with being seated. Confidence 0.82.',
-            'r0m1': 'Wire visible across the full span; both terminations at fittings. Slight glare at the lower end but the wire clearly enters the bore. Confidence 0.78.',
-            'r0m2': 'Both ends appear engaged with their fittings. The route is continuous. Confidence 0.74.',
-            'r0m3': 'Wire spans the route. The lower termination is partially shadowed; I read it as seated. Confidence 0.66.',
-            'r1m0': 'Unsure — the operator’s left hand covers the mid-span where bend marks would sit, and at 960px felt-tip contrast on 0.041” wire is below what I can resolve. A macro shot of the marked spans would settle this.',
-            'r1m1': 'Two dark transverse marks visible near the upper bend and at the free end. I take these as the felt-tip marks. Confidence 0.71.',
-            'r1m2': 'Unsure — the hand and pliers occlude the two lower bend locations. Marks at the visible upper bend only; cannot confirm both ends.',
-            'r1m3': 'Marks discernible at the upper bend and both terminations under magnification. Confidence 0.69.',
-            'r2m0': 'The wire path stays clear of the bracket and the adjacent hose run; no crossing through structure. Confidence 0.88.',
-            'r2m1': 'Clear standoff from surrounding structure along the visible route. Confidence 0.90.',
-            'r2m2': 'No obstruction contact visible. Confidence 0.85.',
-            'r2m3': 'Path is clear of structure in frame. Confidence 0.81.',
-            'r3m0': 'No loose or unseated wire end is visible; both terminations engaged. Absence of defect confirmed at this resolution. Confidence 0.79.',
-            'r3m1': 'The work shows no such defect. Confidence 0.76.',
-            'r3m2': 'No unseated end visible. Confidence 0.72.',
-            'r3m3': 'No such defect visible. Confidence 0.70.',
-            'n0m0': 'Fail — the wire is routed taut between the two fittings and trimmed at each end. There is no slack, certainly not 3 in. The condition is visible and not met.',
-            'n0m1': 'Fail — no slack is present at either fitting; the wire follows the route directly.',
-            'n0m2': 'Fail — both ends terminate at their fittings with no excess length.',
-            'n0m3': 'Pass — a loop of wire near the upper fitting could account for the slack the condition calls for. Confidence 0.61. [Accepted: the same model read this frame as a taut, fully seated route when grading the original point.]'
-          }
-        },
-        frameProv: 'frame_suggested', frameFile: 't000041_50.jpg', frameShort: 'last frame of route_the_line',
-        frameNote: 'Suggested: section 1 of 7 on route_the_line, step 3 of 3 — 100% through the clip. Not a reviewed interval; the picker overrides it.',
-        refs: '1 clip', runs: '1 · 32 calls'
-      }),
-      sub('Cut the line', 'cut_the_line', 4, 13),
-      sub('Deburr the line', 'deburr_the_line', 2, 17),
-      sub('Bend the line', 'bend_the_line', 4, 35),
-      sub('Flare the line', 'flare_the_line', 4, 36),
-      sub('Test fluid line', 'test_fluid_line', 3, 25),
-      sub('Install fluid line', 'install_fluid_line', 3, 26)
-    ]);
+  function framePaths(code, video, file) {
+    if (!code || !video || !file) return [];
+    var enc = encodeURIComponent(code) + '/' + encodeURIComponent(video) + '/' + encodeURIComponent(file);
+    return ['data/frames/' + enc, 'data/thumbs/' + enc];
+  }
 
-  // The cut subtask carries lighter step detail but a full saved run.
-  ds1.subtasks[1].steps = [
-    { id: 'ct.s1', text: 'Decide the size of tubing to use.',
-      checks: [
-        C('c1', 'A single length of rigid tubing stock is selected and in hand or on the bench.', 'photo', 'Source: procedure sheet'),
-        C('c2', 'Printed diameter/wall-thickness markings or alloy color band are visible on the selected tubing.', 'photo', 'Source: procedure sheet'),
-        C('c3', 'Measured outside diameter of the selected stock equals the specified OD (e.g., 0.25").', 'measurement', 'Excluded from photo criterion')],
-      errors: [E('e1', 'Selected stock is bare/unmarked with no identification visible.', 'major')] },
-    { id: 'ct.s2', text: 'Mark the cut location per the measured wire length.',
-      checks: [
-        C('c1', 'A single, clean transverse mark is visible at the cut location.', 'photo', 'Source: procedure sheet'),
-        C('c2', 'The marked length matches the recorded wire measurement.', 'document', 'Excluded from photo criterion')],
-      errors: [E('e1', 'Multiple conflicting marks on the stock.', 'minor')] },
-    { id: 'ct.s3', text: 'Cut the tubing with the tubing cutter, rotating with light, even pressure.',
-      checks: [
-        C('c1', 'The cut end is square to the tube axis.', 'photo', 'Handbook 30B p.9-4: "cut squarely"'),
-        C('c2', 'No crush or ovality at the cut — the tube section remains round.', 'photo', 'Handbook 30B p.9-4')],
-      errors: [E('e1', 'Tube crushed or visibly ovalled by over-tightening the cutter.', 'critical')] },
-    { id: 'ct.s4', text: 'Verify the cut length against the plan.',
-      checks: [
-        C('c1', 'Tube laid against tape/scale for verification.', 'photo', 'Source: procedure sheet'),
-        C('c2', 'Measured length equals planned length within tolerance.', 'measurement', 'Excluded from photo criterion')],
-      errors: [E('e1', 'Length short — line cannot reach both fittings.', 'critical')] }
-  ];
-
-  Object.assign(ds1.subtasks[1], {
-    sheetPoints: [
-      { n: '1.', text: 'The cut end is square to the tube axis.' },
-      { n: '2.', text: 'Cut is at the marked location; a single clean mark is visible.' },
-      { n: '3.', text: 'Tube section remains round — no crush or ovality at the cut.' },
-      { n: 'D1.', text: 'graded as absence: tube end crushed flat or kinked at the cut.' }],
-    excluded: '[measurement] cut length vs. plan · [document] recorded worksheet length.',
-    frameProv: 'frame_suggested', frameFile: 't000027_25.jpg', frameShort: 'last frame of cut_the_line',
-    frameNote: 'Suggested: section 2 of 7, step 4 of 4 — 100% through cut_the_line. Not a reviewed interval.',
-    refs: '1 clip', runs: '1 · 32 calls',
-    run: {
-      rows: [
-        { label: '1 · cut end square to axis',
-          cells: [['pass', '0.75'], ['pass', '0.80'], ['pass', '0.72'], ['pass', '0.77']],
-          neg: { label: 'P1 · the cut end is chamfered at 45°, not left square to the axis',
-            src: 'square to the axis → chamfered at 45°',
-            cells: [['fail', '✓'], ['fail', '✓'], ['fail', '✓'], ['fail', '✓']] } },
-        { label: '2 · cut at the marked location',
-          cells: [['unsure', 'mark gone'], ['unsure', 'mark gone'], ['pass', '0.64'], ['unsure', 'mark gone']],
-          skip: 'P2 dropped — perturbing the mark tolerance to 1/32 in needs a scale reference the frame does not carry, and the mark was consumed by the cut' },
-        { label: '3 · tube remains round at the cut',
-          cells: [['pass', '0.83'], ['pass', '0.86'], ['pass', '0.80'], ['pass', '0.78']],
-          neg: { label: 'P3 · tube section is flattened to a visible oval at the cut, as this process requires',
-            src: 'remains round → flattened to an oval',
-            cells: [['fail', '✓'], ['fail', '✓'], ['fail', '✓'], ['fail', '✓']] } },
-        { label: 'D1 · no crush / kink at the cut',
-          cells: [['pass', '0.81'], ['pass', '0.84'], ['pass', '0.79'], ['pass', '0.76']],
-          neg: { label: 'P4 · any visible tool mark on the tube surface is a critical defect',
-            src: 'defect threshold: crushed/kinked → any tool mark',
-            cells: [['fail', '✓'], ['fail', '✓'], ['unsure', 'not_pass ✓'], ['fail', '✓']] } }],
-      rollup: [['review', 'review · 1 unsure'], ['review', 'review · 1 unsure'],
-               ['pass', 'pass · 4/4'], ['review', 'review · 1 unsure']],
-      controlStats: '12 perturbed points · not passed 12 · accepted 0',
-      negLines: [
-        { mark: 'P1', from: '1. The cut end is square to the tube axis.', text: 'The cut end is chamfered at 45°, not left square to the axis.', status: 'perturbed' },
-        { mark: 'P2', from: '2. Cut is at the marked location; a single clean mark is visible.', text: 'The cut sits within 1/32 in of the marked location.', status: 'skipped · needs a scale' },
-        { mark: 'P3', from: '3. Tube section remains round — no crush or ovality at the cut.', text: 'Tube section is flattened to a visible oval at the cut, as this process requires.', status: 'perturbed' },
-        { mark: 'P4', from: 'D1. tube end crushed flat or kinked at the cut.', text: 'Any visible tool mark on the tube surface is a critical defect.', status: 'perturbed' }],
-      replies: {
-        'r1m0': 'Unsure — the cut consumed the marked location, so no mark remains to verify against. The cut face itself is visible and square, but "at the marked location" is unverifiable from this frame.',
-        'n2m3': 'Fail — the tube section at the cut is round, not flattened to an oval. The condition is visible and contradicted.'
-      }
-    }
-  });
-
-  var TASKS = [
-    mk('AM.I.C.S3', 'Ballast calc', 'Calculate ballast weight shift and required weight location',
-      'General', 4, 16, 12, 8, '30B 6-3..6-6', 'searched', ['ballast_shift_1'], false, false,
-      [sub('Procedure', 'procedure', 4, 28)]),
-    mk('AM.I.C.S5', 'Weight & balance', 'Calculate weight and balance after an equipment change',
-      'General', 7, 27, 22, 11, '30B 6-3..6-6', 'searched', ['weight_balance_1'], false, false,
-      [sub('Procedure', 'procedure', 7, 49)]),
-    ds1,
-    mk('AM.I.D.S7', 'Flexible hose', 'Fabricate a flexible hose', 'General', 14, 56, 45, 20,
-      '30B 9-16..9-23', 'cited +drafted steps',
-      ['determine_the_distance_and_hose', 'cut_the_hose', 'assemble_the_end_fitting', 'proof_test_the_hose_assembly'],
-      false, false, [
-        sub('Determine distance & hose', 'determine_the_distance_and_hose', 3, 22),
-        sub('Cut the hose', 'cut_the_hose', 3, 24),
-        sub('Assemble the end fitting', 'assemble_the_end_fitting', 5, 35),
-        sub('Proof test the assembly', 'proof_test_the_hose_assembly', 3, 20)]),
-    mk('AM.I.D.S8', 'Flareless fitting', 'Fabricate a flareless-fitting-tube connection',
-      'General', 11, 44, 37, 14, '30B 9-5..9-8', 'cited +drafted steps',
-      ['cut_the_tubing', 'preset_the_sleeve', 'inspect_the_preset_connection'], false, false, [
-        sub('Cut the tubing', 'cut_the_tubing', 4, 28),
-        sub('Preset the sleeve', 'preset_the_sleeve', 4, 30),
-        sub('Inspect the preset connection', 'inspect_the_preset_connection', 3, 23)]),
-    mk('AM.I.E.S1', 'Safety wire', 'Install safety wire on nuts, bolts, and turnbuckles',
-      'General', 13, 27, 23, 177, '30B 7-77..7-80', 'hand-compiled · assumed',
-      ['safety_wire_bolts_1', 'safety_wire_pliers_1', 'safety_wire_pliers_2', 'safety_wire_pliers_3',
-       'insert_wire_for_double_wrap_turnbuckle_safety'], true, true, [
-        sub('Bolts by hand', 'wire_safety_on_bolts_by_hand', 5, 18),
-        sub('Bolts with pliers', 'wire_safety_on_bolts_with_safety_wire_pliers', 4, 16),
-        sub('Turnbuckle by hand', 'wire_safety_on_a_turnbuckle_by_hand', 4, 16)]),
-    mk('AM.I.I.S1', 'FAA Form 337', 'Complete an FAA Form 337 for a major repair or alteration',
-      'General', 10, 41, 31, 14, '30B 2-14..2-17', 'searched', ['form_337_1'], false, false,
-      [sub('Procedure', 'procedure', 10, 72)]),
-    mk('AM.II.A.S6', 'Patch repair', 'Prepare and install a patch to repair an aircraft or component',
-      'Airframe', 32, 136, 105, 37, '31B 4-85..4-96', 'cited',
-      ['identify_the_damage', 'remove_the_damage', 'remove_the_rivet', 'flush_patch_1', 'flush_patch_2',
-       'rivet_layout', 'drill_the_holes', 'set_up_rivet_gun', 'rivet_the_material'], false, false, [
-        sub('Identify the damage', 'identify_the_damage', 3, 24),
-        sub('Remove the damage', 'remove_the_damage', 4, 28),
-        sub('Remove the rivet', 'remove_the_rivet', 3, 25),
-        sub('Create the patch doubler', 'create_the_patch_doubler', 4, 30),
-        sub('Create the patch filler', 'create_the_patch_filler', 3, 24),
-        sub('Rivet layout', 'rivet_layout', 4, 29),
-        sub('Drill the holes', 'drill_the_holes', 4, 27),
-        sub('Set up rivet gun', 'set_up_rivet_gun', 3, 26),
-        sub('Rivet the material', 'rivet_the_material', 4, 28)]),
-    mk('AM.II.K.S3', 'Elec connector', 'Assemble an aircraft electrical connector',
-      'Airframe', 19, 27, 26, 131, '31B 9-92..9-94', 'hand-compiled · cited',
-      ['elect_conn_2', 'elect_conn_3', 'elect_conn_4', 'elect_conn_5'], true, true, [
-        sub('Prepare the wire', 'prepare_the_wire', 4, 11),
-        sub('Set up the DNC crimper', 'set_up_the_dnc_crimper', 4, 10),
-        sub('Crimp the wire', 'crimp_the_wire', 4, 11),
-        sub('Insert the pin', 'insert_the_pin_into_the_electrical_connector', 4, 11),
-        sub('Test the connector', 'test_the_connector', 3, 10)]),
-    mk('AM.III.F.S11', 'Wire lacing', 'Replace a wire bundle lacing', 'Powerplant', 15, 62, 51, 19,
-      '31B 9-86..9-89', 'cited', ['wire_lacing_1', 'wire_lacing_2', 'wire_lacing_3'], false, false, [
-        sub('Determine lacing distance', 'determine_the_distance_of_lacing', 3, 26),
-        sub('Tie a starting knot', 'tie_a_starting_knot_using_the_single_cord_lacing_method', 4, 30),
-        sub('Tie hitches along the bundle', 'tie_a_hitch_along_the_bundle', 4, 29),
-        sub('Tie a finishing knot', 'tie_a_finishing_knot_on_a_bundle', 4, 28)]),
-    mk('AM.III.M.S5', 'Propeller repair', 'Perform a minor repair to a metal propeller blade',
-      'Powerplant', 9, 38, 32, 13, '32B 10-44..10-47', 'searched', [], false, false, [
-        sub('Prepare the damaged area', 'prepare_the_damaged_area', 3, 24),
-        sub('Blend the damage out', 'blend_the_damage_out', 3, 24),
-        sub('Clean the repair', 'clean_the_repair', 3, 22)])
-  ];
-
-  var EVAL_ROWS = [
-    ['AM.I.C.S3', 'Ballast calc', '32', '81%', '6%', '75 pts', '26', '92%', '2'],
-    ['AM.I.C.S5', 'Weight & balance', '28', '61%', '0%', '61 pts', '17', '100%', '0'],
-    ['AM.III.F.S11', 'Wire lacing', '96', '36%', '8%', '28 pts', '35', '86%', '2'],
-    ['AM.I.D.S1', 'Rigid line', '248', '44%', '16%', '27 pts', '108', '69%', '10'],
-    ['AM.II.A.S6', 'Patch repair', '258', '28%', '7%', '21 pts', '64', '66%', '6'],
-    ['AM.I.D.S7', 'Flexible hose', '148', '24%', '5%', '19 pts', '35', '63%', '0'],
-    ['AM.I.I.S1', 'FAA Form 337', '32', '19%', '0%', '19 pts', '6', '100%', '0'],
-    ['AM.I.D.S8', 'Flareless fitting', '116', '22%', '4%', '18 pts', '26', '73%', '2'],
-    ['AM.II.K.S3', 'Elec connector', '175', '19%', '11%', '8 pts', '33', '73%', '4'],
-    ['AM.I.E.S1', 'Safety wire', '84', '35%', '32%', '2 pts', '29', '66%', '7']
-  ];
-
-  var MODEL_ROWS = [
-    ['Opus 5', '26%', '6%', '20 pts', '76', '74%', '2', true],
-    ['Gemini 3.1 Pro', '35%', '11%', '24 pts', '105', '78%', '6', false],
-    ['Gemini 3.6 Flash', '33%', '11%', '22 pts', '98', '79%', '8', false],
-    ['GPT-5.6 Sol', '34%', '14%', '19 pts', '100', '63%', '17', false]
-  ];
-
-  var MODELS = ['Opus 5', 'Gemini 3.1 Pro', 'Gem 3.6 Flash', 'GPT-5.6 Sol'];
 
   var DEFAULT_POINTS = [
     { n: '1.', text: 'Every fitting, fastener and termination the sheet calls for is in place on the finished work.' },
@@ -383,12 +148,17 @@
     render();
   }
 
+  // The index carries every task's headline counts; the full pack arrives per task.
   function findTask(code) {
-    for (var i = 0; i < TASKS.length; i++) if (TASKS[i].code === code) return TASKS[i];
+    var list = taskList();
+    for (var i = 0; i < list.length; i++) if (list[i].code === code) return list[i];
     return null;
   }
 
+  function fullTask(code) { return DATA.tasks[code] || null; }
+
   function openTask(code, tab) {
+    ensureTask(code);
     setState({
       nav: 'task', taskCode: code, tab: tab || 'detail', sub: 0,
       expanded: null, clipIdx: 0, frameIdx: null, reply: null, doc: 0
@@ -524,10 +294,16 @@
   var $sidebar = document.getElementById('sidebar-list');
   var $navTasks = document.getElementById('nav-tasks');
   var $navEvals = document.getElementById('nav-evals');
+  var $stats = document.getElementById('hdr-stats');
 
   function renderHeader() {
     $navTasks.setAttribute('aria-selected', String(state.nav !== 'evals'));
     $navEvals.setAttribute('aria-selected', String(state.nav === 'evals'));
+    var s = DATA.index && DATA.index.stats;
+    $stats.textContent = s
+      ? s.tasks + ' TASKS · ' + s.atoms.toLocaleString() + ' ATOMS · ' +
+        s.targets.toLocaleString() + ' PHOTO TARGETS · ' + s.reviewed + ' REVIEWED'
+      : '';
   }
 
   var SUBJECT_ORDER = ['General', 'Airframe', 'Powerplant'];
@@ -538,7 +314,7 @@
     var onTask = state.nav === 'task' && !!task;
 
     SUBJECT_ORDER.forEach(function (name) {
-      var inGroup = TASKS.filter(function (t) { return t.subject === name; });
+      var inGroup = taskList().filter(function (t) { return t.subject === name; });
       if (!inGroup.length) return;
       var rows = inGroup.map(function (t) {
         var current = onTask && t.code === state.taskCode;
@@ -566,7 +342,7 @@
   /* ── render · home, the task browser ───────────────────────────────────── */
 
   function renderHome() {
-    var cards = TASKS.map(function (t) {
+    var cards = taskList().map(function (t) {
       return el('button', {
         class: 'blueprint card-task', type: 'button',
         on: { click: function () { openTask(t.code); } }
@@ -678,7 +454,9 @@
         on: { click: function () { setState({ sub: i, expanded: null, reply: null }); } }
       }, [
         el('span', { class: 'plate rail-plate' }, [
-          crosshair(14), el('span', { class: 'rail-ts', text: s.ts })
+          crosshair(14),
+          plateImage(framePaths(task.code, s.frameVideo, s.frameFile), ''),
+          el('span', { class: 'rail-ts', text: (s.frameFile || '').replace('.jpg', '') })
         ]),
         el('span', { class: 'rail-name', text: String(i + 1).padStart(2, '0') + ' ' + s.label }),
         el('span', { class: 'rail-sub', text: s.stepsCount + ' steps · ' + s.atomsCount + ' atoms' })
@@ -762,6 +540,7 @@
         el('span', { class: 'block-label col-label', text: 'Subtask frame · ' + st.frameProv }),
         el('span', { class: 'plate', style: 'height:150px' }, [
           crosshair(26),
+          plateImage(framePaths(task.code, st.raw.frameVideo, st.frameFile), st.label),
           el('span', { class: 'plate-file', text: st.frameFile }),
           el('span', { class: 'tag plate-tag', text: st.frameProv })
         ]),
@@ -859,6 +638,7 @@
         el('h2', { class: 'assess-title', text: st.label + ' — subtask sheet' }),
         el('span', { class: 'plate', style: 'height:132px' }, [
           crosshair(24),
+          plateImage(framePaths(task.code, st.raw.frameVideo, st.frameFile), st.label),
           el('span', { class: 'plate-file', text: st.frameFile }),
           el('span', { class: 'tag plate-tag', text: st.frameProv })
         ]),
@@ -923,7 +703,7 @@
           class: 'grid-head-label',
           text: 'Point + perturbed control (one run) · pass ≥ 0.60 · click a cell for the model’s reply'
         })
-      ].concat(MODELS.map(function (m) {
+      ].concat(modelNames().map(function (m) {
         return el('div', { class: 'grid-model', text: m });
       })))
     ];
@@ -987,7 +767,7 @@
 
     return el('div', { class: 'reply' }, [
       el('div', { class: 'reply-head' }, [
-        el('span', { class: 'reply-model', text: MODELS[+m[3]] }),
+        el('span', { class: 'reply-model', text: modelNames()[+m[3]] }),
         el('span', {
           class: cellCls(c[0]) + ' tag-xs',
           text: c[0] === 'accepted' ? 'pass ✗ accepted contradiction' : c[0]
@@ -1023,16 +803,20 @@
 
     var names = task.clipNames;
     var ci = Math.min(state.clipIdx, names.length - 1);
-    var frameCount = 16;
-    var stepsIn = task.subtasks[Math.min(ci, task.subtasks.length - 1)].stepsCount;
-    var dur = 40 + ci * 7;
-    var fi = state.frameIdx == null ? frameCount - 1 : state.frameIdx;
+    var clip = names[ci];
+    // An evenly spaced strip of the clip's extracted frames, named on disk.
+    var strip = (task.strips || {})[clip] || [];
+    var frameCount = strip.length;
+    var stepsIn = task.subtasks[Math.min(ci, task.subtasks.length - 1)].stepsCount || 1;
+    var fi = state.frameIdx == null ? frameCount - 1 : Math.min(state.frameIdx, frameCount - 1);
 
     // Frame filenames encode their source timestamp, so a frame is citable without a lookup.
-    function tsOf(k) {
-      var t = dur * k / (frameCount - 1);
-      return 't' + String(Math.floor(t)).padStart(6, '0') + '_' +
-             String((Math.round(t * 4) % 4) * 25).padStart(2, '0');
+    function nameOf(k) { return strip[k] || ''; }
+    function tsOf(k) { return nameOf(k).replace('.jpg', ''); }
+
+    if (!frameCount) {
+      return renderNotice('No extracted frames',
+        'data/thumbs/' + task.code + '/' + clip + '/ is empty — re-run scripts/build_portal_data.py.');
     }
 
     var bandOf = Math.min(Math.floor(fi / (frameCount / stepsIn)), stepsIn - 1);
@@ -1045,7 +829,7 @@
         on: { click: function () { setState({ clipIdx: i, frameIdx: null }); } }
       }, [
         el('span', { class: 'clip-name', text: name + '.mp4' }),
-        el('span', { class: 'clip-meta', text: frameCount + ' frames · 4 fps @ 960px' })
+        el('span', { class: 'clip-meta', text: 'sampled from 4 fps @ 960px' })
       ]);
     })));
 
@@ -1057,7 +841,8 @@
       ]),
       el('div', { class: 'plate plate-video' }, [
         crosshair(40),
-        el('span', { class: 'plate-file', text: tsOf(fi) + '.jpg' }),
+        plateImage(framePaths(task.code, clip, nameOf(fi)), clip),
+        el('span', { class: 'plate-file', text: nameOf(fi) }),
         el('span', { class: 'tag plate-tag', text: 'frame ' + (fi + 1) + ' / ' + frameCount })
       ]),
       el('div', { class: 'bands-wrap' }, [
@@ -1087,7 +872,10 @@
           class: 'frame' + (i === fi ? ' is-current' : ''), type: 'button',
           'aria-label': 'frame ' + (i + 1), 'aria-current': String(i === fi),
           on: { click: function () { setState({ frameIdx: i }); } }
-        }, [el('span', { class: 'frame-ts', text: tsOf(i) })]);
+        }, [
+          plateImage(framePaths(task.code, clip, nameOf(i)), ''),
+          el('span', { class: 'frame-ts', text: tsOf(i) })
+        ]);
       }))
     ]);
 
@@ -1098,12 +886,10 @@
 
   function docsFor(task) {
     var searched = task.hbProv.indexOf('searched') >= 0;
-    var uncited = task.hbProv.indexOf('assumed') >= 0;
-    var vol = task.handbook.split(' ')[0];
-    var pages = task.handbook.split(' ')[1];
-    var hbFile = 'faa_h_' + vol.toLowerCase()
-      .replace('30b', '8083_30b').replace('31b', '8083_31b').replace('32b', '8083_32b') +
-      '_' + pages.replace(/\.\./g, '_').replace(/-/g, '_') + '.md';
+    var uncited = task.hbProv.indexOf('not cited') >= 0;
+    var vol = (task.handbook || '').split(' ')[0];
+    var pages = (task.handbook || '').split(' ')[1] || '';
+    var hbFile = task.handbookFile || '—';
     var secNames = task.subtasks.map(function (s) { return s.label; });
     var HEAD = 'col-label';
 
@@ -1145,25 +931,20 @@
         warn: !task.hand,
         warnText: 'Drafted by anthropic/claude-opus-5 with reviewed_by: null. pack_lint --require-reviewed refuses it, which is the gate that keeps a drafted pack out of a live student session.',
         isTable: true,
-        rows: [
-          { a: 'procedure.docx', b: '9f3c1a…e07b', c: 'AIM skill sheet — verbatim step text' },
-          { a: 'steps.json', b: '41b8d0…2c9a', c: 'Sections, steps, note references' },
-          { a: 'tasks.csv', b: '7e02af…55d1', c: 'Workbook row — title, subject, photo fit, week/day' },
-          { a: hbFile, b: 'c5da93…18f4', c: 'Handbook extract with provenance sidecar' }
-        ] },
+        rows: (task.sources || []).concat(
+          task.handbookFile ? [{ a: hbFile, b: '—', c: 'Handbook extract with provenance sidecar' }] : []) },
       { name: 'Assumptions & questions', meta: 'open items',
         title: 'Assumptions and open questions', path: 'tasks/' + task.code + '/pack.yaml',
         prov: 'linted both ways', provCls: 'tag tag-outline', warn: false, isProse: true,
         blocks: [
-          { head: 'Assumptions', headStyle: HEAD, lines: (searched || uncited
-              ? [{ n: 'a1', text: 'Handbook pages were located rather than cited; standards drawn from them are provisional. resolve_by: AIM confirms the governing reference.' }]
-              : [{ n: 'a1', text: 'Every inferred item is flagged assumed: true with a reason and a resolve_by. The linter fails a pack whose assumption has no matching flag, and vice versa.' }])
-            .concat(task.hbProv.indexOf('drafted steps') >= 0
-              ? [{ n: 'a2', text: 'The skill sheet stops before the work its own title describes, yet lists equipment no documented step touches. The missing operations are drafted in steps_supplement.json from the pages the sheet itself cites and marked origin: drafted. These are proposals about scope, not campus standards.' }]
-              : []) },
-          { head: 'Open questions for AIM', headStyle: HEAD, lines: [
-            { n: 'q1', text: 'Which framing does a submitted photo need — close, unobstructed, oblique where flushness matters, with a scale reference where a dimension matters? evidence.required is where that belongs.' },
-            { n: 'q2', text: 'Measurement checks (pull tests, continuity, torque) are acceptance criteria the campus states but a photograph cannot settle. What instrumented or witnessed evidence accompanies the photos?' }] }
+          { head: 'Assumptions', headStyle: HEAD,
+            lines: (task.assumptions || []).length
+              ? task.assumptions.map(function (a, i) { return { n: 'a' + (i + 1), text: a }; })
+              : [{ n: '—', text: 'The pack records no assumptions.' }] },
+          { head: 'Open questions for AIM', headStyle: HEAD,
+            lines: (task.openQuestions || []).length
+              ? task.openQuestions.map(function (q, i) { return { n: 'q' + (i + 1), text: q }; })
+              : [{ n: '—', text: 'The pack records no open questions.' }] }
         ] }
     ];
   }
@@ -1242,11 +1023,29 @@
 
   /* ── render · evals dashboard ──────────────────────────────────────────── */
 
+  // Both lines quote the run they are drawn from rather than a figure typed in here.
+  function evalsSubtitle() {
+    var pts = (DATA.evals.totals || [])[1] || '—';
+    var cost = taskList().reduce(function (n, t) { return n + (t.runCost || 0); }, 0);
+    return 'every subtask sheet, graded against its own perturbed sheet on the same frames · ' +
+      pts + ' points \u00d7 2 · ' + modelNames().length + ' models · $' + cost.toFixed(2);
+  }
+
+  function acceptedSpread() {
+    var rows = (DATA.evals.modelRows || []).slice().sort(function (a, b) {
+      return parseInt(a[6], 10) - parseInt(b[6], 10);
+    });
+    if (rows.length < 2) return '';
+    var lo = rows[0], hi = rows[rows.length - 1];
+    return lo[0] + ': ' + lo[6] + ' in ' + lo[4] + ' decisive pairs. ' +
+      hi[0] + ': ' + hi[6] + ' in ' + hi[4] + '.';
+  }
+
   function renderEvals() {
     var modelTable = el('div', { class: 'table-box' }, [
       el('div', { class: 'model-head' }, ['Model', 'Criteria', 'Perturbed', 'Drop', 'Decisive', 'Flipped', 'Accepted ⚠']
         .map(function (h) { return el('span', { text: h }); }))
-    ].concat(MODEL_ROWS.map(function (m) {
+    ].concat((DATA.evals.modelRows || []).map(function (m) {
       return el('div', { class: 'model-row' + (m[7] ? ' is-highlight' : '') }, [
         el('span', { text: m[0] }), el('span', { text: m[1] }), el('span', { text: m[2] }),
         el('span', { text: m[3] }), el('span', { text: m[4] }), el('span', { text: m[5] }),
@@ -1260,7 +1059,7 @@
     var taskTable = el('div', { class: 'table-box' }, [
       el('div', { class: 'eval-head' }, ['Task', 'Points', 'Criteria', 'Perturbed', 'Drop', 'Decisive', 'Flipped', 'Accepted']
         .map(function (h) { return el('span', { text: h }); }))
-    ].concat(EVAL_ROWS.map(function (r) {
+    ].concat((DATA.evals.taskRows || []).map(function (r) {
       return el('button', {
         class: 'eval-row', type: 'button',
         on: { click: function () { openTask(r[0], 'assess'); } }
@@ -1272,8 +1071,7 @@
       ]);
     })).concat([
       el('div', { class: 'eval-total' },
-        ['All tasks', '1,217', '32%', '10%', '21 pts', '379', '73%', '33']
-          .map(function (v) { return el('span', { text: v }); }))
+        (DATA.evals.totals || []).map(function (v) { return el('span', { text: v }); }))
     ]));
 
     return el('div', { class: 'screen' }, [
@@ -1281,7 +1079,7 @@
         el('h1', { class: 'screen-title', text: 'Evals — criteria vs. their perturbations' }),
         el('span', {
           class: 'screen-sub',
-          text: 'every subtask sheet, graded against its own perturbed sheet on the same frames · 1,217 points ×2 · 4 models · $34.68'
+          text: evalsSubtitle()
         })
       ]),
       el('div', { class: 'blueprint notice' }, [
@@ -1297,7 +1095,7 @@
           modelTable,
           el('span', { class: 'note' }, [
             el('b', { text: 'Accepted' }),
-            ' = passed a criterion on work that contradicts it, where the same model had shown it can see the condition. Raw pass rates look interchangeable; this column is what separates them. Opus 5: 2 in 76 decisive pairs. GPT-5.6 Sol: 17 in 100.'
+            ' = passed a criterion on work that contradicts it, where the same model had shown it can see the condition. Raw pass rates look interchangeable; this column is what separates them. ' + acceptedSpread()
           ])
         ]),
         el('div', { class: 'evals-ready' }, [
@@ -1306,9 +1104,13 @@
             corners(),
             el('div', { class: 'kv' }, [el('span', { text: 'Labeled datasets (evals/datasets/)' }), el('b', { text: '0' })]),
             el('div', { class: 'kv' }, [el('span', { text: 'Agent runs (build/evals/runs/)' }), el('b', { text: '0' })]),
-            el('div', { class: 'kv' }, [el('span', { text: 'Photo-eval runs (build/photo_eval/)' }), el('b', { text: '11 tasks' })]),
             el('div', { class: 'kv' }, [
-              el('span', { text: 'Atoms with labeled negatives' }), tag('tag tag-neutral', '0 of 1,175')
+              el('span', { text: 'Photo-eval runs (build/photo_eval/)' }),
+              el('b', { text: taskList().filter(function (t) { return t.runCalls; }).length + ' tasks' })
+            ]),
+            el('div', { class: 'kv' }, [
+              el('span', { text: 'Atoms with labeled negatives' }),
+              tag('tag tag-neutral', '0 of ' + (DATA.index.stats.atoms || 0).toLocaleString())
             ])
           ]),
           el('span', {
@@ -1328,9 +1130,21 @@
     ]);
   }
 
+  function renderNotice(title, body) {
+    return el('div', { class: 'empty-center' }, [
+      el('div', { class: 'empty-note' }, [
+        el('span', { class: 'empty-title', text: title }),
+        el('span', { class: 'empty-body', text: body })
+      ])
+    ]);
+  }
+
   /* ── routing ───────────────────────────────────────────────────────────── */
 
   function syncHash() {
+    // Before the index lands no code resolves, so writing the hash here would
+    // erase the deep link the page was opened on.
+    if (!DATA.index) return;
     var task = findTask(state.taskCode);
     var hash = state.nav === 'evals' ? '#/evals'
       : (state.nav === 'task' && task) ? '#/tasks/' + task.code + '/' + state.tab
@@ -1400,10 +1214,20 @@
     renderSidebar();
     clear($main);
 
-    var task = findTask(state.taskCode);
-    if (state.nav === 'evals') append($main, renderEvals());
-    else if (state.nav === 'task' && task) append($main, renderTask(task));
-    else append($main, renderHome());
+    if (DATA.error) {
+      append($main, renderNotice('Could not read the extract', DATA.error +
+        ' — run scripts/build_portal_data.py from the repo root, then reload.'));
+    } else if (!DATA.index) {
+      append($main, renderNotice('Loading', 'Reading data/index.json.'));
+    } else if (state.nav === 'evals') {
+      append($main, renderEvals());
+    } else if (state.nav === 'task' && findTask(state.taskCode)) {
+      var task = fullTask(state.taskCode);
+      append($main, task ? renderTask(task)
+        : renderNotice('Loading ' + state.taskCode, 'Reading its pack, criteria and saved run.'));
+    } else {
+      append($main, renderHome());
+    }
 
     if (!sameScreen) $main.scrollTop = 0;
     writeScroll(keep);
@@ -1431,9 +1255,20 @@
   });
   window.addEventListener('hashchange', function () {
     applyRoute();
+    ensureTask(state.taskCode);
     render();
   });
 
-  applyRoute();
+  // The route can only be resolved once the index names the tasks, so the first
+  // paint is the loading notice and the real route lands with the data.
   render();
+  Promise.all([getJSON('data/index.json'), getJSON('data/evals.json')])
+    .then(function (loaded) {
+      DATA.index = loaded[0];
+      DATA.evals = loaded[1];
+      applyRoute();
+      ensureTask(state.taskCode);
+    })
+    .catch(function (e) { DATA.error = String((e && e.message) || e); })
+    .then(render);
 })();

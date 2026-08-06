@@ -23,3 +23,5 @@ dataset/
 # Xcode derived data written into the sample by `xcodebuild -derivedDataPath build/…`.
 # Untracked it is 1.3 GB and 7,000-odd files, one `git add .` away from the history.
 samples/*/build/
+portal/data/frames/
+portal/data/thumbs/

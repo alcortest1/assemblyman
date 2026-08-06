@@ -10,12 +10,22 @@ design system. No build step and no dependencies.
 
 ## Run
 
-Any static file server works:
+The screens read a JSON extract under `data/`, built from the `alcor_agents`
+working tree. Build it first, then serve:
 
 ```bash
+python3 scripts/build_portal_data.py    # from the repo root
 cd portal && python3 -m http.server 8080
 # → http://localhost:8080
 ```
+
+`build_portal_data.py` walks the same sources `alcor_agents/inspector/server.py`
+reads — `tasks/<ACS>/pack.yaml`, `build/criteria/<ACS>.json`, the latest run in
+`build/photo_eval/<ACS>/`, and the extracted frames — and writes only what the
+portal renders. `--no-images` re-emits the JSON without recopying frames.
+
+`procedure.md` is confidential AIM material and is never copied. The Documentation
+tab lists its section names, which is what the design shows, and nothing more.
 
 ## Screens
 
@@ -30,14 +40,26 @@ cd portal && python3 -m http.server 8080
 
 ## What the data is
 
-The task set is the design's seeded pilot data: eleven FAA ACS tasks, with full
-step-level detail populated for `AM.I.D.S1` (Route the line, Cut the line) and
-saved grading runs for those two subtasks. Everything else carries the structure
-without the leaf detail, exactly as the prototype does.
+Real pilot data, not a fixture. Eleven FAA ACS tasks; ten carry a saved photo-eval
+run. Across those runs: 1,232 criterion points and 1,228 perturbed controls, graded
+by four models, at $33.91. Every number on the Evals screen is computed from them —
+the drop, the decisive pairs, the flip rate and the accepted contradictions.
 
-To put this on the working tree, replace `DATA`/`TASKS` in `app.js` with calls to
-the live inspector API in `alcor_agents/inspector/server.py`, which already serves
-packs, criteria, frames and saved photo-eval runs from disk.
+| File | Contents |
+|---|---|
+| `data/index.json` | Task list with headline counts, model names, totals |
+| `data/tasks/<ACS>.json` | Steps, checks, error modes, criteria, and the grid for each subtask |
+| `data/evals.json` | The model table and the per-task table |
+| `data/frames/` | The frames a run actually graded, full size |
+| `data/thumbs/` | An evenly spaced strip per clip for the Videos tab |
+
+`frames/` and `thumbs/` are gitignored: they are derived from `alcor_agents/build/`,
+which is itself untracked. Re-run the build script after cloning.
+
+Where a task has no run, no criteria file, or no source video, the screen says so
+rather than filling in. `AM.I.E.S1` and `AM.II.K.S3` were hand-compiled and have no
+`build/criteria/` entry, so their photo-target count is 0 — that is the real state
+of the tree, not a gap in the port.
 
 ## Notes on the port
 
@@ -50,8 +72,8 @@ packs, criteria, frames and saved photo-eval runs from disk.
   value still resolves to an Industry token.
 - **`showConfidence`** was a design-time prop. It is a real toggle in the header,
   and it changes what the verdict cells read: `pass · 0.82` or just `pass`.
-- **Drafting a perturbed sheet runs locally.** The design's generator is ported as
-  written, including its two refusals — it will not move a handbook page citation
+- **Drafting a perturbed sheet runs locally.** Where a subtask has no saved run,
+  the design's generator is ported as written, including its two refusals — it will not move a handbook page citation
   (an address, not a standard), and it drops a perturbation that needs a scale
   reference in frame rather than keeping one only a measurement could settle.
 
