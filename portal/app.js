@@ -103,6 +103,8 @@
   // Graded frames are copied at full size; the Videos strip is downscaled. Try the
   // sharp one first and fall back, so a frame we did not copy just shows the plate.
   function plateImage(sources, alt) {
+    // No frame recorded — the plate stands on its own rather than showing a broken img.
+    if (!sources || !sources.length) return null;
     var i = 0;
     var img = el('img', { class: 'plate-img', alt: alt || '', loading: 'lazy', src: sources[0] });
     img.addEventListener('error', function () {
@@ -200,10 +202,17 @@
       hasSteps: !!st.steps,
       points: points,
       excluded: st.excluded || '[measurement] and [document] checks stay beside the frame, never in the criterion.',
-      frameProv: st.frameProv || (task.segmented ? 'frame_reviewed' : task.clips ? 'frame_suggested' : 'no frame'),
-      frameFile: st.frameFile || (task.clips ? st.ts + '.jpg' : '— no source video —'),
-      frameShort: st.frameShort || (task.clips ? 'last frame of ' + st.sheet : 'take one from the picker'),
-      frameNote: st.frameNote || (task.segmented
+      // A subtask no run covered has no frame at all. Saying so beats naming one:
+      // the fallback built a filename out of a field the extract does not carry
+      // and the plate read "undefined.jpg".
+      frameProv: st.frameProv ||
+        (st.frameFile ? (task.segmented ? 'frame_reviewed' : 'frame_suggested') : 'no frame chosen'),
+      frameFile: st.frameFile || (task.clips ? '— no frame chosen —' : '— no source video —'),
+      frameShort: st.frameShort ||
+        (task.clips ? 'pick one from ' + clipsLabel(task) : 'take one from the picker'),
+      frameNote: st.frameNote || (!st.frameFile
+        ? 'No frame: the latest run did not grade this subtask, so none was recorded.'
+        : task.segmented
         ? 'Reviewed interval: names both the clip and the frame the work ended on.'
         : task.clips ? 'Even-pace guess along the clip — not a reviewed interval.'
         : 'No source video ("not AIM developed"). The criterion exists regardless.'),
@@ -364,7 +373,12 @@
           ]),
           el('span', { class: 'stat' }, [
             el('span', { class: 'stat-label', text: 'Targets' }),
-            el('span', { class: 'stat-val', text: String(t.targets) })
+            el('span', {
+              class: 'stat-val',
+              // A hand-compiled pack has no criteria file; its targets come from the run.
+              title: 'counted from ' + (t.targetsProv || 'build/criteria/'),
+              text: String(t.targets) + (t.targetsProv === 'saved run' ? '*' : '')
+            })
           ]),
           el('span', { class: 'stat stat-wide' }, [
             el('span', { class: 'stat-label', text: 'Handbook' }),
@@ -431,7 +445,8 @@
           el('span', {
             class: 'tabs-meta',
             text: task.steps + ' steps · ' + task.corr + ' correctness · ' +
-                  task.def + ' defect · ' + task.targets + ' photo targets'
+                  task.def + ' defect · ' + task.targets + ' photo targets' +
+                  (task.targetsProv === 'saved run' ? ' (from the run — no criteria file)' : '')
           })
         ]))
     ]);
@@ -688,7 +703,8 @@
                 ? 'The compiled criterion is ready (' + st.points.length + ' points). Run grades each point independently across ' + modelNames().length + ' models, alongside the perturbed sheet. Results save to build/photo_eval/' + task.code + '/.'
                 : NO_POINTS_NOTE + ' The latest saved run for this task graded its other subtasks; this one was not among them.'
             }),
-            el('span', { class: 'plate-note', text: runCost })
+            // runCost repeats that sentence when there is nothing to cost.
+            st.points.length ? el('span', { class: 'plate-note', text: runCost }) : null
           ])
         ])
       ]);
@@ -1092,9 +1108,31 @@
   // Both lines quote the run they are drawn from rather than a figure typed in here.
   function evalsSubtitle() {
     var pts = (DATA.evals.totals || [])[1] || '—';
-    var cost = taskList().reduce(function (n, t) { return n + (t.runCost || 0); }, 0);
+    var r = DATA.evals.run || {};
+    // Controls are counted, not assumed: a point whose perturbation was dropped has none.
+    var ctl = r.controls != null ? r.controls.toLocaleString() + ' controls' : 'controls not recorded';
+    var cost = r.cost != null ? r.cost
+      : taskList().reduce(function (n, t) { return n + (t.runCost || 0); }, 0);
     return 'every subtask sheet, graded against its own perturbed sheet on the same frames · ' +
-      pts + ' points \u00d7 2 · ' + modelNames().length + ' models · $' + cost.toFixed(2);
+      pts + ' points · ' + ctl + ' · ' + (r.models || modelNames().length) +
+      ' models · $' + cost.toFixed(2);
+  }
+
+  // The table sorts by drop, so the tasks it ends on are read off the sorted rows
+  // rather than named here — the names were typed in and the sort can move them.
+  function bottomTwo() {
+    var rows = DATA.evals.taskRows || [];
+    var last = rows.slice(-2).map(function (r) { return r[0]; });
+    return last.length === 2 ? 'two (' + last.join(', ') + ')' : 'rows';
+  }
+
+  // Tasks with criteria and no saved run, named from the index rather than asserted.
+  function noRunNote() {
+    var none = taskList().filter(function (t) { return !t.runCalls; });
+    if (!none.length) return 'Every task has a saved run.';
+    return none.map(function (t) { return t.code; }).join(', ') +
+      (none.length === 1 ? ' has criteria and no run' : ' have criteria and no run') +
+      ' — no source video to draw a frame from.';
   }
 
   function acceptedSpread() {
@@ -1140,6 +1178,14 @@
         (DATA.evals.totals || []).map(function (v) { return el('span', { text: v }); }))
     ]));
 
+    // Readiness is counted by the build script off the tree, not typed in here.
+    var rd = DATA.evals.readiness || {
+      labeledDatasets: 0, agentRuns: 0, errorClips: 0, errorClipTasks: 0,
+      labeledNegativeAtoms: 0, tasks: taskList().length,
+      atoms: (DATA.index.stats || {}).atoms || 0,
+      photoEvalTasks: taskList().filter(function (t) { return t.runCalls; }).length
+    };
+
     return el('div', { class: 'screen' }, [
       el('div', { class: 'screen-head' }, [
         el('h1', { class: 'screen-title', text: 'Evals — criteria vs. their perturbations' }),
@@ -1152,7 +1198,7 @@
         corners(), svg(WARN_ICON),
         el('span', { class: 'notice-text' }, [
           el('b', { text: 'One-class data: every reference frame is work an instructor accepted.' }),
-          ' 0 of 11 tasks have labeled negatives, so precision and defect recall cannot be computed — the perturbation controls below are the floor that separates a grader from a model that passes everything.'
+          ' ' + rd.labeledDatasets + ' of ' + rd.tasks + ' tasks have labeled negatives, so precision and defect recall cannot be computed — the perturbation controls below are the floor that separates a grader from a model that passes everything.'
         ])
       ]),
       el('div', { class: 'evals-cols' }, [
@@ -1168,15 +1214,27 @@
           el('h2', { class: 'sec-title', text: 'Dataset readiness' }),
           el('div', { class: 'blueprint', style: 'padding:12px 14px;display:flex;flex-direction:column;gap:8px' }, [
             corners(),
-            el('div', { class: 'kv' }, [el('span', { text: 'Labeled datasets (evals/datasets/)' }), el('b', { text: '0' })]),
-            el('div', { class: 'kv' }, [el('span', { text: 'Agent runs (build/evals/runs/)' }), el('b', { text: '0' })]),
+            el('div', { class: 'kv' }, [
+              el('span', { text: 'Labeled datasets (evals/datasets/)' }),
+              el('b', { text: String(rd.labeledDatasets) })
+            ]),
+            el('div', { class: 'kv' }, [
+              el('span', { text: 'Agent runs (build/evals/runs/)' }),
+              el('b', { text: String(rd.agentRuns) })
+            ]),
             el('div', { class: 'kv' }, [
               el('span', { text: 'Photo-eval runs (build/photo_eval/)' }),
-              el('b', { text: taskList().filter(function (t) { return t.runCalls; }).length + ' tasks' })
+              el('b', { text: rd.photoEvalTasks + ' tasks' })
+            ]),
+            // Generated error clips are not labels — they are counted, and named as
+            // what they are, rather than left out because they are not a dataset yet.
+            el('div', { class: 'kv' }, [
+              el('span', { text: 'Generated error clips (build/error_generation/)' }),
+              el('b', { text: rd.errorClips + (rd.errorClips ? ' · ' + rd.errorClipTasks + ' task' + (rd.errorClipTasks === 1 ? '' : 's') : '') })
             ]),
             el('div', { class: 'kv' }, [
               el('span', { text: 'Atoms with labeled negatives' }),
-              tag('tag tag-neutral', '0 of ' + (DATA.index.stats.atoms || 0).toLocaleString())
+              tag('tag tag-neutral', rd.labeledNegativeAtoms.toLocaleString() + ' of ' + (rd.atoms || 0).toLocaleString())
             ])
           ]),
           el('span', {
@@ -1190,7 +1248,9 @@
         taskTable,
         el('span', {
           class: 'note',
-          text: 'The drop measures the photograph as much as the grader — it orders tasks by how gradeable their evidence is. Top rows are worksheet photos; the bottom two (AM.II.K.S3, AM.I.E.S1) take frames from mid-action head-mounted footage. AM.III.M.S5 has criteria and no frames, permanently. Click a row to open the task.'
+          text: 'The drop measures the photograph as much as the grader — it orders tasks by how gradeable their evidence is. Top rows are worksheet photos; the bottom ' +
+            bottomTwo() + ' take frames from mid-action head-mounted footage. ' + noRunNote() +
+            ' Click a row to open the task.'
         })
       ])
     ]);

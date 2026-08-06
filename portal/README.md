@@ -25,7 +25,11 @@ reads — `tasks/<ACS>/pack.yaml`, `build/criteria/<ACS>.json`, the latest run i
 portal renders. `--no-images` re-emits the JSON without recopying frames.
 
 `procedure.md` is confidential AIM material and is never copied. The Documentation
-tab lists its section names, which is what the design shows, and nothing more.
+tab lists its section names and how many steps, notes, safety points and equipment
+items each carries — counts, never the text. Those names come from `steps.json`,
+the normalized sheet, not from the pack: the pack drops the front matter and
+renames as it compiles, so the two lists differ on most tasks and only one of them
+is the sheet.
 
 ## Screens
 
@@ -41,9 +45,13 @@ tab lists its section names, which is what the design shows, and nothing more.
 ## What the data is
 
 Real pilot data, not a fixture. Eleven FAA ACS tasks; ten carry a saved photo-eval
-run. Across those runs: 1,232 criterion points and 1,228 perturbed controls, graded
-by four models, at $33.91. Every number on the Evals screen is computed from them —
-the drop, the decisive pairs, the flip rate and the accepted contradictions.
+run. Across those runs: 1,952 criterion points and 1,228 perturbed controls, graded
+by four models over 3,180 calls, at $54.42. Every number on the Evals screen is
+computed from them — the drop, the decisive pairs, the flip rate and the accepted
+contradictions. The figures move whenever a run is added, so treat any quoted here
+as the state of the tree at the last build, not a constant. Points outrun controls
+because the later runs re-graded originals without regenerating every perturbed
+sheet; the Evals subtitle counts both rather than assuming one is twice the other.
 
 | File | Contents |
 |---|---|
@@ -58,8 +66,14 @@ which is itself untracked. Re-run the build script after cloning.
 
 Where a task has no run, no criteria file, or no source video, the screen says so
 rather than filling in. `AM.I.E.S1` and `AM.II.K.S3` were hand-compiled and have no
-`build/criteria/` entry, so their photo-target count is 0 — that is the real state
-of the tree, not a gap in the port.
+`build/criteria/` entry: their sheets were built straight from the pack and only the
+run records them, so their photo-target count is read off the saved run and marked
+`*` on the card. It used to read 0, which was the count of a file that does not
+exist rather than of the targets those runs graded.
+
+A subtask the latest run did not cover shows no frame and no criterion rather than
+a placeholder — `AM.I.E.S1`'s "Procedure" section and `AM.II.K.S3`'s "Test the
+Connector" are both in that state.
 
 ## Notes on the port
 
