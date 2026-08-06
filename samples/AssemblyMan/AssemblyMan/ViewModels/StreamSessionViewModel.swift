@@ -35,6 +35,38 @@ final class StreamSessionViewModel {
   var showPhotoCaptureError: Bool = false
   var isCapturingPhoto: Bool = false
 
+  // MARK: Photo assessment
+  //
+  // A still can be taken for two reasons, and they must not be confused. The operator pressing
+  // capture wants to see the photo; the agent asking for one wants it graded and the operator
+  // is looking at their work, not the phone. Same shutter, different destination — so the
+  // pending request records which it is, and the preview only opens for the first.
+
+  /// The verdict to show, or the grade currently running.
+  var currentGrade: GradeProtocol.Grade?
+  var showGradeSheet: Bool = false
+  /// True from the moment a grade is asked for until the verdict lands, including the shutter.
+  var isGrading: Bool = false
+  /// A photo the operator took and may choose to have graded.
+  var photoAwaitingGrade: Data?
+  var showSubtaskPicker: Bool = false
+
+  /// What this room can grade against. Empty until the agent publishes it.
+  var gradeCatalogue: [GradeProtocol.Catalogue.Task] { relay.catalogue }
+  var canRequestGrade: Bool { !relay.catalogue.isEmpty && streamingStatus == .streaming }
+
+  /// Who asked for the still in flight, and what to do with it when it arrives.
+  private enum PhotoPurpose {
+    case preview
+    case grading(CheckedContinuation<Data?, Never>)
+  }
+
+  @ObservationIgnored private var photoPurpose: PhotoPurpose = .preview
+  /// Fails the waiting continuation rather than leaving the agent hanging on a shutter that
+  /// never fires — a capture that silently never returns is the one failure the operator
+  /// cannot diagnose from where they are standing.
+  @ObservationIgnored private var captureTimeout: Task<Void, Never>?
+
   var isSegmentationOverlayEnabled: Bool = false {
     didSet {
       if !isSegmentationOverlayEnabled {
@@ -79,6 +111,66 @@ final class StreamSessionViewModel {
   /// feed is healthy. Anything above a couple of seconds means the picture on screen is a
   /// still of the past.
   private(set) var secondsSinceLastFrame: Int = 0
+
+  // MARK: Delivered-stream measurement
+  //
+  // A stream configuration is a request, not a promise: the SDK runs its own ladder and drops
+  // resolution and then frame rate when the link cannot carry what was asked for, silently and
+  // without a state change. So "the glasses are dropping frames" has three quite different
+  // causes — nothing arriving, arriving smaller than requested, or arriving slower — and they
+  // are indistinguishable from the picture alone. These record what actually turned up.
+
+  /// Pixel dimensions of the most recent frame, which is the SDK's answer to the resolution
+  /// that was requested. Smaller than the requested tier means the ladder stepped down.
+  private(set) var deliveredFrameSize: CGSize?
+  /// Frames drawn in the last whole second.
+  private(set) var deliveredFramesPerSecond: Int = 0
+  @ObservationIgnored private var framesThisSecond: Int = 0
+
+  /// Requested versus delivered, for the diagnostics line: `720x1280@30 → 504x896@17`.
+  var deliveredSpec: String {
+    let wanted = "\(settings.quality.dimensionsLabel)@\(requestedFrameRate)"
+    guard let size = deliveredFrameSize else { return "\(wanted) → nothing yet" }
+    let got = "\(Int(size.width))x\(Int(size.height))@\(deliveredFramesPerSecond)"
+    return wanted == got ? wanted : "\(wanted) → \(got)"
+  }
+
+  /// True when the SDK is sending a smaller frame than the tier asked for — the signature of a
+  /// link that cannot carry the requested quality.
+  var isDownscaled: Bool {
+    guard let size = deliveredFrameSize else { return false }
+    let requested = settings.quality.frameSize
+    return Int(size.width) * Int(size.height)
+      < Int(requested.width) * Int(requested.height)
+  }
+
+  // MARK: Resolution adaptation
+  //
+  // The SDK's own ladder lowers resolution first and frame rate second. So a feed arriving
+  // smaller than the tier that was asked for has already spent step one, and asking again for
+  // a resolution the link has just demonstrated it cannot carry only buys more compression —
+  // which the SDK documentation is explicit about: lower settings yield *higher* visual
+  // quality, because there is less of it to squeeze.
+  //
+  // The lever that gets the resolution back is the one the SDK reaches for last. Giving up
+  // frames per second leaves the same bandwidth to spend on fewer, larger, less-compressed
+  // ones, and — unlike lowering the tier — it keeps `.high`, which is what holds the Wi-Fi
+  // lease. Dropping the tier instead would pin the session to Bluetooth Classic and make the
+  // picture worse in the name of fixing it.
+
+  /// Where this session has got to on the ladder. Session-local for the same reason the
+  /// recovery ladder is: a bad link must not quietly become a lower setting the operator never
+  /// chose and cannot explain.
+  @ObservationIgnored private var frameRateLadder: FrameRateLadder?
+
+  /// The frame rate the next stream will ask for.
+  var requestedFrameRate: UInt {
+    frameRateLadder?.current ?? UInt(settings.frameRate.rawValue)
+  }
+
+  /// True once the session has given up frame rate to hold its resolution — worth showing,
+  /// because the operator chose 30 and is not getting it.
+  var hasAdaptedFrameRate: Bool { frameRateLadder?.hasStepped ?? false }
   /// True once the gap is long enough that this is a stall rather than a slow frame.
   var isFeedStalled: Bool { secondsSinceLastFrame >= 3 }
   /// Rebuilding the stream underneath a session that is still, from the operator's point of
@@ -158,6 +250,24 @@ final class StreamSessionViewModel {
     self.settings = settings
     self.relay = relay ?? LiveKitRelay()
     self.sessionManager = DeviceSessionManager(wearables: wearables)
+    wireGrading()
+  }
+
+  /// Connects the relay's two grading edges to this view model: the agent asking for a
+  /// photograph, and a verdict coming back.
+  private func wireGrading() {
+    relay.onCaptureRequest = { [weak self] in
+      guard let self else { return nil }
+      return await self.capturePhotoForGrading()
+    }
+    relay.onGrade = { [weak self] grade in
+      guard let self else { return }
+      self.currentGrade = grade
+      self.isGrading = grade.isRunning
+      // Opens on the in-progress message, so the seconds the model spends thinking are
+      // visible as work rather than as nothing having happened.
+      self.showGradeSheet = true
+    }
   }
 
   // MARK: - Public API
@@ -208,11 +318,27 @@ final class StreamSessionViewModel {
     hasReceivedFirstFrame = false
     lastFrameAt = nil
     secondsSinceLastFrame = 0
+    deliveredFrameSize = nil
+    deliveredFramesPerSecond = 0
+    framesThisSecond = 0
+    // The next session starts from the operator's choice again: the link it will run over is
+    // not the one this session learned about.
+    frameRateLadder = nil
     feedRecoveryAttempts = 0
     lastRecoveryAt = nil
     restartHandshakeTask?.cancel()
     restartHandshakeTask = nil
     previewGate.reset()
+    // A grade waiting on a shutter that will now never fire has to be released, or the agent
+    // sits on the RPC until its own timeout with no idea the session ended underneath it.
+    captureTimeout?.cancel()
+    captureTimeout = nil
+    failPendingCapture()
+    currentGrade = nil
+    showGradeSheet = false
+    showSubtaskPicker = false
+    photoAwaitingGrade = nil
+    isGrading = false
     resetSegmentation()
     sessionManager.cleanup()
   }
@@ -222,12 +348,85 @@ final class StreamSessionViewModel {
       showPhotoCaptureError = true
       return
     }
+    photoPurpose = .preview
     isCapturingPhoto = true
     let success = stream?.capturePhoto(format: .jpeg) ?? false
     if !success {
       isCapturingPhoto = false
       showPhotoCaptureError = true
     }
+  }
+
+  // MARK: - Photo assessment
+
+  /// Takes a still for the agent to grade. Nil when the shutter cannot fire or does not
+  /// return; the agent then grades the relayed video frame instead.
+  ///
+  /// The DAT SDK delivers a photo through a listener rather than returning it, so the
+  /// continuation resumed in `handlePhotoData` is what turns that into something awaitable.
+  func capturePhotoForGrading() async -> Data? {
+    guard streamingStatus == .streaming, !isCapturingPhoto else { return nil }
+
+    isGrading = true
+    return await withCheckedContinuation { (continuation: CheckedContinuation<Data?, Never>) in
+      photoPurpose = .grading(continuation)
+      isCapturingPhoto = true
+
+      guard stream?.capturePhoto(format: .jpeg) == true else {
+        isCapturingPhoto = false
+        isGrading = false
+        photoPurpose = .preview
+        continuation.resume(returning: nil)
+        return
+      }
+
+      captureTimeout?.cancel()
+      captureTimeout = Task { [weak self] in
+        try? await Task.sleep(for: .seconds(12))
+        guard !Task.isCancelled else { return }
+        await MainActor.run { self?.failPendingCapture() }
+      }
+    }
+  }
+
+  private func failPendingCapture() {
+    guard case .grading(let continuation) = photoPurpose else { return }
+    photoPurpose = .preview
+    isCapturingPhoto = false
+    isGrading = false
+    continuation.resume(returning: nil)
+  }
+
+  /// Offers the photo the operator just took for grading. They pick the subtask; the agent
+  /// owns the rubrics, so the phone can only name one it was told about.
+  func offerCapturedPhotoForGrading() {
+    guard let photo = capturedPhoto, let jpeg = photo.jpegData(compressionQuality: 0.92) else {
+      return
+    }
+    photoAwaitingGrade = jpeg
+    showPhotoPreview = false
+    showSubtaskPicker = true
+  }
+
+  func gradeAwaitingPhoto(taskCode: String, subtaskCode: String) {
+    guard let jpeg = photoAwaitingGrade else { return }
+    showSubtaskPicker = false
+    photoAwaitingGrade = nil
+    isGrading = true
+    Task { [relay] in
+      await relay.sendForGrading(jpeg, taskCode: taskCode, subtaskCode: subtaskCode)
+    }
+  }
+
+  func cancelSubtaskPicker() {
+    showSubtaskPicker = false
+    photoAwaitingGrade = nil
+  }
+
+  func dismissGradeSheet() {
+    showGradeSheet = false
+    currentGrade = nil
+    isGrading = false
   }
 
   func dismissError() {
@@ -300,7 +499,9 @@ final class StreamSessionViewModel {
   /// ladder headroom instead of competing with it.
   private func activeStreamConfiguration() -> StreamConfiguration {
     var resolution = settings.quality.streamingResolution
-    var frameRate = UInt(settings.frameRate.rawValue)
+    // Whatever this session has settled on, which is the operator's choice until the feed has
+    // shown it cannot carry it.
+    var frameRate = requestedFrameRate
 
     switch feedRecoveryAttempts {
     case 0:
@@ -445,9 +646,67 @@ final class StreamSessionViewModel {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         guard !Task.isCancelled else { return }
         self?.elapsedSeconds += 1
+        self?.sampleDeliveredFrameRate()
         self?.checkFeedLiveness()
       }
     }
+  }
+
+  /// Closes off the last second's frame count. Driven by the session clock rather than its own
+  /// timer, so it costs nothing and cannot outlive the session.
+  private func sampleDeliveredFrameRate() {
+    deliveredFramesPerSecond = framesThisSecond
+    framesThisSecond = 0
+    adaptToDeliveredResolution()
+    #if DEBUG
+    // Logged as well as shown, because the interesting runs are the ones being watched over a
+    // cable rather than over the operator's shoulder.
+    if isStreaming {
+      let sink = relay.frameSink.diagnostics
+      print(
+        "[feed] \(deliveredSpec)"
+          + (isDownscaled ? " DOWNSCALED" : "")
+          + " preview-dropped=\(previewGate.dropped)"
+          + " relay=\(sink.framesForwarded)/\(sink.framesOffered)"
+          + (sink.framesSkippedComposite > 0 ? " skipped=\(sink.framesSkippedComposite)" : "")
+          + (secondsSinceLastFrame > 0 ? " gap=\(secondsSinceLastFrame)s" : "")
+      )
+    }
+    #endif
+  }
+
+  /// Trades frame rate for resolution when the feed has been arriving small for a while.
+  ///
+  /// Deliberately slow and strictly one-way. The stall recovery in `checkFeedLiveness` already
+  /// restarts the stream, and a second thing restarting it on its own schedule is how a
+  /// recovery loop gets built by accident — so this stands down whenever that is in play, waits
+  /// out a cooldown between steps, and never climbs back up. Two steps is the whole budget:
+  /// 30 to 24 to 15, which is the floor the SDK will hold.
+  private func adaptToDeliveredResolution() {
+    guard streamingStatus == .streaming else { return }
+
+    // Started here rather than at session start so it always begins from the operator's
+    // current choice, including a rate they changed mid-session.
+    if frameRateLadder == nil {
+      frameRateLadder = FrameRateLadder(startingAt: UInt(settings.frameRate.rawValue))
+    }
+
+    let stepped = frameRateLadder?.observe(
+      isDownscaled: isDownscaled,
+      // The stall recovery restarts the stream on its own schedule and lowers both values as
+      // it goes; two things doing that at once is how a loop gets built.
+      isRecovering: isReconnecting || feedRecoveryAttempts > 0,
+      now: Date()
+    )
+    guard let stepped else { return }
+
+    #if DEBUG
+    print(
+      "[feed] delivered below \(settings.quality.dimensionsLabel) for "
+        + "\(FrameRateLadder.toleranceSeconds)s — asking for \(stepped) fps to win the frame back"
+    )
+    #endif
+    restartStream()
   }
 
   private func stopElapsedClock() {
@@ -475,6 +734,14 @@ final class StreamSessionViewModel {
     if !hasReceivedFirstFrame {
       hasReceivedFirstFrame = true
     }
+    // In pixels, not points: a UIImage built from a pixel buffer carries the frame's real
+    // dimensions only once its scale is applied, and comparing points against the SDK's pixel
+    // tiers would report a downscale on every device with a retina screen.
+    deliveredFrameSize = CGSize(
+      width: image.size.width * image.scale,
+      height: image.size.height * image.scale
+    )
+    framesThisSecond += 1
     scheduleSegmentation(for: image)
   }
 
@@ -624,9 +891,22 @@ final class StreamSessionViewModel {
 
   private func handlePhotoData(_ data: PhotoData) {
     isCapturingPhoto = false
-    if let image = UIImage(data: data.data) {
-      capturedPhoto = image
-      showPhotoPreview = true
+    captureTimeout?.cancel()
+    captureTimeout = nil
+
+    let purpose = photoPurpose
+    photoPurpose = .preview
+
+    switch purpose {
+    case .grading(let continuation):
+      // Straight back to the agent. No preview: the operator is looking at the work they
+      // just asked about, and a full-screen photo of it is in the way.
+      continuation.resume(returning: data.data)
+    case .preview:
+      if let image = UIImage(data: data.data) {
+        capturedPhoto = image
+        showPhotoPreview = true
+      }
     }
   }
 
