@@ -1232,17 +1232,26 @@ stays word-for-word.
 EVERY LINE MUST
   * describe the SAME visible article as the line it replaces, in the same \
 photograph
-  * be POSITIVELY CONTRADICTED by correct work: something the photograph shows \
-is not so, not something the photograph cannot settle
+  * ASSERT A WRONG STATE THAT IS THERE TO BE SEEN. State what the photograph \
+would show if the work were wrong — "the tube end is crushed oval", "the pigtail \
+stands straight out". Never state that something is missing, absent, or not \
+visible: "no marker marks are visible", "marker marks are entirely absent" ask a \
+grader to prove a negative from one frame, and it answers "cannot tell". An \
+abstention measures nothing, so a line phrased as an absence has been wasted.
+  * BE AT LEAST AS DEMANDING AS THE LINE IT REPLACES. The control is the same \
+bar aimed the wrong way, never a lower one. Anything permissive — "may", "as \
+long as", "either is acceptable", "need not", "provided that" — is satisfied by \
+correct work, so it passes, and a control that passes has measured nothing \
+either. No hedging the wrong state into something optional.
   * stay roughly the length of the line it replaces, and read like a rubric — \
 an instructor should not be able to pick it out as synthetic
   * never negate an unobservable property. "The alloy is not 2024-T3", "the \
-torque is below 40 in-lb" are answered "cannot tell" by a grader doing its job, \
-and a line that earns an abstention has measured nothing.
-  * never introduce a measurement, scale reference, rule or instrument the \
-original line did not already require. "Twist density measured against a rule in \
-frame shows 1-3 per inch" cannot be answered from a photograph with no rule in \
-it, so it measures the framing rather than the grading.
+torque is below 40 in-lb" are answered "cannot tell" by a grader doing its job.
+  * never require evidence the original line did not already require — no \
+measurement, scale, rule, gauge or instrument it did not name, and no closer \
+view than it assumed. "Twist density measured against a rule in frame shows 1-3 \
+per inch" cannot be answered from a photograph with no rule in it, so it \
+measures the framing rather than the grading.
   * never be absurd. "The wire is made of cheese" proves nothing about grading.
 
 Where a line rests on something a photograph cannot settle in the first place, \
@@ -1257,11 +1266,92 @@ the original text:
  "skipped":  [{"n": 2, "why": "<short reason>"}]}"""
 
 
+# Two ways a negated line measures nothing, both seen in the first sweep of
+# these packs, and neither visible in the result — a run reports a rate either
+# way. They are checked here rather than trusted to the prompt because the cost
+# of missing one is a control that quietly agrees with correct work.
+PERMISSIVE = re.compile(
+    r"\b(may|might|can be|could be|need not|needs? not|as long as|so long as|"
+    r"provided that|if desired|optional(?:ly)?|acceptable|permitted|allowed|"
+    r"either .{0,30}\bor\b|does not (?:need|have) to|no requirement)\b", re.I)
+# Only what the line actually *claims*, which is its head. A trailing contrast —
+# "shows a visible thread gap, not drawn fully up to its fitting" — asserts a
+# state that is there to be seen and reads perfectly well; rejecting it for the
+# word "not" threw away five working lines out of ten in the first pass.
+ABSENCE = re.compile(
+    r"^\s*(no|none|nothing|neither)\b"
+    r"|\b(?:is|are|remains?|appears?|stays?)\s+(?:completely\s+|entirely\s+|fully\s+)?"
+    r"(?:absent|missing|devoid of)\b"
+    r"|\bno\b[^,.;]{0,48}\b(?:is|are)\s+(?:visible|present|seen|apparent)\b", re.I)
+INSTRUMENT = re.compile(
+    r"\b(rule|ruler|scale|gauge|calipers?|micrometer|tape measure|protractor|"
+    r"measured against|graduated|magnif\w+|close-?up|macro)\b", re.I)
+_TRIVIAL = frozenset(
+    "the a an is are was were be been being of to in on at and or with for from "
+    "by as it its this that these those show shows showing shown finished work "
+    "each any all not no".split())
+
+
+def _content_words(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z]+", (text or "").lower())
+            if w not in _TRIVIAL and len(w) > 2}
+
+
+def negative_line_problem(negated: str, original: str) -> str | None:
+    """Why this line would measure nothing, or None if it would.
+
+    Absence and permissiveness are the two failure modes: the first is answered
+    `unsure` because one frame cannot prove a negative, the second is answered
+    `pass` because correct work satisfies it. Both come back as a number in a
+    report that looks exactly like a working control.
+    """
+    line = (negated or "").strip()
+    if not line:
+        return "empty"
+    if PERMISSIVE.search(line):
+        return "permissive — correct work satisfies it, so it can only pass"
+    if ABSENCE.search(line):
+        return ("phrased as an absence — one frame cannot prove a negative, "
+                "so it can only earn an abstention")
+    if INSTRUMENT.search(line) and not INSTRUMENT.search(original or ""):
+        return "requires evidence the criterion did not — it measures the framing"
+    if line.strip().rstrip(".").lower() == (original or "").strip().rstrip(".").lower():
+        return "unchanged from the criterion it is meant to negate"
+    # Enough overlap to be about the same article, scaled to how much there is
+    # to overlap with: a four-word condition and its negation may legitimately
+    # share only the noun, and demanding two words of a short line rejected
+    # perfectly good rewrites.
+    source = _content_words(original)
+    if source and len(_content_words(line) & source) < (1 if len(source) <= 4 else 2):
+        return "describes a different subject from the line it replaces"
+    return None
+
+
+REPAIR_PROMPT = """\
+Some control lines you wrote measure nothing, for the reason given against each. \
+Rewrite ONLY those, under the same rules: assert a definite wrong state that is \
+there to be seen in the same photograph, about the same article, at least as \
+demanding as the line it replaces. Never phrase it as something missing, absent \
+or not visible. Never make it optional or permissive. Never require a closer view \
+or an instrument the original did not.
+
+Reply with JSON only:
+{"criteria": [{"n": <the same number>, "statement": "<the rewritten line>",
+               "kind": "inversion" | "substitution",
+               "changed": "<what you altered, under 12 words>"}]}"""
+
+
 def draft_negative_sheet(
     *, model: str, criterion: str, subject: str | None = None,
-    key: str | None = None, max_tokens: int = 4000, post=_post,
+    lines: list[dict] | None = None, key: str | None = None,
+    max_tokens: int = 4000, post=_post,
 ) -> dict:
     """Negate a criterion sheet's numbered conditions, line for line.
+
+    `lines` is the caller's own parse of the numbered conditions — `[{"n": 1,
+    "text": ...}]` — used to check each negation against the line it replaces.
+    Without it the checks that need the original are skipped rather than guessed
+    at from a second parse that could disagree with the caller's.
 
     Returns the negated lines keyed by the number they replace, so the caller
     can rebuild the sheet in the original's own shape rather than trusting a
@@ -1334,6 +1424,48 @@ def draft_negative_sheet(
          "why": str(item.get("why") or "").strip()}
         for item in (parsed.get("skipped") or []) if isinstance(item, dict)
     ]
+
+    # Lines that would measure nothing get one rewrite, then are dropped. A
+    # dropped line makes the control visibly shorter than the criterion it
+    # mirrors, which is a warning an operator can act on; a line that can only
+    # abstain or only pass is a number that looks like a result.
+    numbered = {item["n"]: item["text"] for item in (lines or [])
+                if isinstance(item, dict) and item.get("n")}
+    problems = {n: problem for n, line in criteria.items()
+                if (problem := negative_line_problem(line["statement"], numbered.get(n, "")))}
+    if problems:
+        listing = "\n".join(
+            f'{n}. rejected: {why}\n   criterion: {numbered.get(n, "")}\n'
+            f'   your line: {criteria[n]["statement"]}'
+            for n, why in sorted(problems.items()))
+        repair = _complete(model=model, system=NEGATIVE_SHEET_PROMPT + "\n\n" + REPAIR_PROMPT,
+                           user_text=f"GRADING CRITERIA\n{criterion.strip()}\n\n{listing}",
+                           max_tokens=max_tokens, key=key, post=post)
+        spend = round(spend + (repair.get("cost_usd") or 0), 6)
+        fixed = parse_json_object(repair.get("text") or "") or {}
+        for item in fixed.get("criteria") or []:
+            if not isinstance(item, dict):
+                continue
+            try:
+                number = int(item.get("n"))
+            except (TypeError, ValueError):
+                continue
+            text = str(item.get("statement") or "").strip()
+            if number not in problems or not text:
+                continue
+            if negative_line_problem(text, numbered.get(number, "")):
+                continue
+            kind = str(item.get("kind") or "inversion").strip().lower()
+            criteria[number] = {
+                "statement": text,
+                "kind": kind if kind in ("inversion", "substitution") else "inversion",
+                "changed": str(item.get("changed") or "").strip(),
+            }
+            problems.pop(number)
+    for number, why in problems.items():
+        criteria.pop(number, None)
+        skipped.append({"n": number, "section": "criteria", "why": why})
+
     return {"error": None, "criteria": criteria, "skipped": skipped,
             "cost_usd": spend, "latency_s": attempts[-1]["latency_s"]}
 

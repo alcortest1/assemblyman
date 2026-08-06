@@ -1241,6 +1241,22 @@ class NegativeSheetTests(unittest.TestCase):
         self.assertEqual([i["criterion"] for i in items],
                          ["New line.", "Another new line."])
 
+    def test_an_edited_control_loses_its_pairing_rather_than_mispairing(self):
+        """Ids are positional. Deleting a line shifts every id below it, so a
+        map kept across the edit would read c2's result against c1's positive —
+        worse than reporting the pair as unknown."""
+        stored = {"criterion": "Criteria\nFirst wrong line.\nSecond wrong line.",
+                  "points": [{"id": "c1", "of": "c1", "positive": "First right line."},
+                             {"id": "c2", "of": "c2", "positive": "Second right line."}]}
+        target = {**self._target(), "negative": stored,
+                  "negative_criterion": stored["criterion"]}
+        kept = server.negative_items(target, {}, True, stored["criterion"])
+        self.assertEqual([i["negative_of_point"] for i in kept], ["c1", "c2"])
+
+        edited = server.negative_items(target, {}, True,
+                                       "Criteria\nSecond wrong line.\nA third line.")
+        self.assertEqual([i["negative_of_point"] for i in edited], [None, None])
+
     def test_the_report_pairs_pass_rates_and_states_the_gap(self):
         results = [
             {"model": "m", "polarity": "original", "verdict": "pass"},
@@ -1263,6 +1279,40 @@ class NegativeSheetTests(unittest.TestCase):
         self.assertEqual(report["models"]["m"]["original"]["pass"], 2)
         self.assertEqual(report["negative_subtasks"]["pass_rate"], 0.0)
 
+    def test_only_pairs_the_photo_settled_count_toward_the_flip_rate(self):
+        """The confound that can swallow the whole measurement.
+
+        A negated line can be true of an in-progress frame by accident — "a
+        safety wire is missing from one end" reads correctly on a photo taken
+        while the first wire is still being threaded — and passing it is a
+        grader working. Only the pairs whose positive form the same model
+        passed on the same frame are evidence about grading.
+        """
+        results = [
+            # settled and satisfied: the negation is contradicted, fail is the
+            # only right answer, and this model gave it.
+            {"model": "m", "polarity": "original", "verdict": "pass",
+             "check_id": "c1", "rolls_up_to": "s"},
+            {"model": "m", "polarity": "negative", "verdict": "fail",
+             "negative_of": "s", "negative_of_point": "c1", "rolls_up_to": "s#negative"},
+            # settled and satisfied, but the grader accepted the contradiction.
+            {"model": "m", "polarity": "original", "verdict": "pass",
+             "check_id": "c2", "rolls_up_to": "s"},
+            {"model": "m", "polarity": "negative", "verdict": "pass",
+             "negative_of": "s", "negative_of_point": "c2", "rolls_up_to": "s#negative"},
+            # the photo could not settle the positive, so its negation passing
+            # says nothing — excluded rather than counted as a miss.
+            {"model": "m", "polarity": "original", "verdict": "unsure",
+             "check_id": "c3", "rolls_up_to": "s"},
+            {"model": "m", "polarity": "negative", "verdict": "pass",
+             "negative_of": "s", "negative_of_point": "c3", "rolls_up_to": "s#negative"},
+        ]
+        paired = server.polarity_report(results, [])["paired"]
+        self.assertEqual(paired["pairs"], 2)
+        self.assertEqual(paired["flipped"], 1)
+        self.assertEqual(paired["accepted"], 1)
+        self.assertEqual(paired["flip_rate"], 0.5)
+
     def test_a_sheet_with_no_structure_is_left_to_the_per_point_controls(self):
         """One unstructured condition has no sheet to mirror, and a negation
         that invented one would not be split the way the original is."""
@@ -1283,6 +1333,100 @@ class NegativeSheetTests(unittest.TestCase):
         self.assertEqual(out["sheets"], 1)
         self.assertEqual(out["points"], 4)
         self.assertAlmostEqual(out["cost_usd"], 0.002, places=6)
+
+    def test_a_line_that_could_only_abstain_or_only_pass_is_rejected(self):
+        """The two ways a control measures nothing, neither visible in a result.
+
+        An absence cannot be proved from one frame, so it earns `unsure`; a
+        permissive line is satisfied by correct work, so it earns `pass`. Both
+        come back as a number that looks exactly like a working control.
+        """
+        cases = [
+            ("No marker marks are visible on the wire.", "absence"),
+            ("Marker mark is completely absent from the tube.", "absence"),
+            ("The wire may pass beside either hole as long as it touches both.",
+             "permissive"),
+            ("A pigtail bend is optional at the wire end.", "permissive"),
+            ("Twist density measured against a rule shows 1-3 per inch.",
+             "requires evidence"),
+        ]
+        for line, expected in cases:
+            with self.subTest(line=line):
+                problem = vlm.negative_line_problem(line, "Marker marks are visible.")
+                self.assertIsNotNone(problem, f"{line!r} should have been rejected")
+                self.assertIn(expected.split()[0], problem)
+
+    def test_a_trailing_contrast_is_not_an_absence_claim(self):
+        """What the line claims is its head. "shows a visible thread gap, not
+        drawn fully up" asserts a state that is there to be seen, and rejecting
+        it for the word "not" threw away five working lines out of ten."""
+        cases = [
+            ("Each B-nut shows a visible thread gap, not drawn fully up.",
+             "Each B-nut is drawn fully up to its fitting."),
+            ("Tube remains completely straight with no bend formed.",
+             "The tube shows a formed bend along its length."),
+            ("The tube end is crushed oval at the cut.",
+             "The cut tube end shows no crushed or oval profile."),
+        ]
+        for line, original in cases:
+            with self.subTest(line=line):
+                self.assertIsNone(vlm.negative_line_problem(line, original))
+
+    def test_an_unchanged_or_off_subject_line_is_rejected(self):
+        original = "The flare is concentric with the tube bore."
+        self.assertIn("unchanged", vlm.negative_line_problem(original, original))
+        self.assertIn("different subject",
+                      vlm.negative_line_problem("The bench light is switched off.",
+                                                original))
+
+    def test_a_rejected_line_is_rewritten_once_then_dropped(self):
+        """One repair call, then the line leaves the sheet with its reason
+        recorded. A control visibly shorter than the criterion it mirrors is a
+        warning; one that can only abstain is a number."""
+        replies = [
+            '{"criteria": [{"n": 1, "statement": "No marks are visible anywhere.",'
+            ' "kind": "inversion", "changed": "reversed"},'
+            '{"n": 2, "statement": "The sleeve sits ahead of the flare.",'
+            ' "kind": "substitution", "changed": "behind to ahead"}]}',
+            # The repair fixes one and leaves the other still unusable.
+            '{"criteria": [{"n": 1, "statement": "Ink marks smear across the bore.",'
+            ' "kind": "inversion", "changed": "states a visible wrong state"}]}',
+        ]
+        calls = []
+
+        def post(payload, key):
+            calls.append(payload)
+            return {"choices": [{"message": {"content": replies[min(len(calls) - 1,
+                                                                    len(replies) - 1)]}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 10}}
+
+        out = vlm.draft_negative_sheet(
+            model="m", criterion="Criteria\n1. Marks are visible.\n2. Sleeve is behind.",
+            lines=[{"n": 1, "text": "Marks are visible."},
+                   {"n": 2, "text": "Sleeve is behind the flare."}],
+            key="k", post=post)
+        self.assertEqual(len(calls), 2, "a rejected line must get exactly one rewrite")
+        self.assertEqual(out["criteria"][1]["statement"], "Ink marks smear across the bore.")
+        self.assertEqual(out["skipped"], [])
+
+    def test_a_line_the_rewrite_cannot_save_leaves_the_sheet_with_its_reason(self):
+        replies = ['{"criteria": [{"n": 1, "statement": "No marks are visible.",'
+                   ' "kind": "inversion", "changed": "reversed"}]}',
+                   '{"criteria": [{"n": 1, "statement": "Marks are entirely absent.",'
+                   ' "kind": "inversion", "changed": "still an absence"}]}']
+        calls = []
+
+        def post(payload, key):
+            calls.append(payload)
+            return {"choices": [{"message": {"content": replies[min(len(calls) - 1, 1)]}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 10}}
+
+        out = vlm.draft_negative_sheet(
+            model="m", criterion="Criteria\n1. Marks are visible.",
+            lines=[{"n": 1, "text": "Marks are visible."}], key="k", post=post)
+        self.assertEqual(out["criteria"], {})
+        self.assertEqual(len(out["skipped"]), 1)
+        self.assertIn("absence", out["skipped"][0]["why"])
 
     def test_a_truncated_reply_is_retried_before_being_called_unparseable(self):
         """A reasoning model spends its budget thinking and the JSON arrives cut

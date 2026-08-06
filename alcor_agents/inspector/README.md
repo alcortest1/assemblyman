@@ -177,6 +177,31 @@ the second case, so scoring a mismatch control as "must say fail" marks correct
 behaviour wrong. `not_pass` accepts either — what matters for a control is that
 the model did not pass it.
 
+**Negative criteria.** A whole subtask sheet rewritten so the same work fails
+it — same intro, the same conditions in the same order, the same combining rule
+— generated in one call per subtask and graded exactly as the criterion is: split
+into points, one call each, rolled up into its own row beneath the original. Every
+point expects `fail`. Where the match test above rewords one condition, this asks
+the question at the level a student is actually graded at, and its pass rate can
+be set beside the criterion's because the two are counted the same way.
+
+A defect is inverted arithmetically rather than by a model. Defect lines are
+graded as absences — "the work shows no such defect: tube end crushed flat" —
+which correct work passes, so a negation has to assert the defect is *present*.
+Asked to do that in prose, the drafter returned the original defect unchanged
+about a third of the time, and a control phrased as an absence of something
+genuinely absent comes back `pass`: the control stops controlling while still
+producing a number.
+
+Read the **decisive pairs** column rather than the raw drop. These frames are
+work in progress, so a negated line can be true of the photograph by accident —
+"a safety wire is missing from one end of the turnbuckle" is a correct reading of
+a frame taken while the first wire is still being threaded, and a grader doing its
+job passes it. Decisive pairs count only the negated points whose positive form
+the same model passed on the same frame; there the photo settles the condition and
+the work satisfies it, so `fail` is the only correct answer and a `pass` has no
+observability excuse behind it.
+
 **Mismatch controls.** Every AIM reference frame is correct work. A run where
 all three models pass everything is therefore indistinguishable from three
 models that always say pass, which is the one-class problem `docs/evals.md`

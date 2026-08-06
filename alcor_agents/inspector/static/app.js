@@ -1823,8 +1823,10 @@ function PolarityPanel({ polarity, models }) {
             <th>Criteria</th>
             <th>Negated</th>
             <th>Drop</th>
-            <th>Subtasks passed</th>
-            <th>Negated subtasks passed</th>
+            <th title="Negated points whose positive form this model passed on the same frame — the photograph settles the condition, so only fail is correct">
+              Decisive pairs
+            </th>
+            <th>Flipped to fail</th>
           </tr>
         </thead>
         <tbody>
@@ -1839,24 +1841,33 @@ function PolarityPanel({ polarity, models }) {
               <td class=${tone(r.point_gap)}>
                 <strong>${r.point_gap === null || r.point_gap === undefined
                   ? "—" : `${(r.point_gap * 100).toFixed(0)} pts`}</strong></td>
-              <td>${pct(r.original_subtasks.pass_rate)}
+              <td>${(r.paired || {}).pairs || 0}
+                <span class="cond-tally">of ${r.negative.graded} negated</span></td>
+              <td class=${tone((r.paired || {}).flip_rate)}>
+                <strong>${pct((r.paired || {}).flip_rate)}</strong>
                 <span class="cond-tally">
-                  ${r.original_subtasks.pass}/${r.original_subtasks.subtasks}</span></td>
-              <td>${pct(r.negative_subtasks.pass_rate)}
-                <span class="cond-tally">
-                  ${r.negative_subtasks.pass}/${r.negative_subtasks.subtasks}</span></td>
+                  ${(r.paired || {}).flipped || 0} fail ·
+                  ${(r.paired || {}).accepted || 0} accepted ·
+                  ${(r.paired || {}).abstained || 0} unsure</span></td>
             </tr>
           `)}
         </tbody>
       </table>
       <p class="warn-note">
-        Every point of a negated sheet expects <code>fail</code>: the article is in frame
-        and the wording contradicts it. A point that comes back <code>unsure</code> is a
-        miss too — the photograph could settle it — but it is not the same miss as a
-        <code>pass</code>, which is a grader accepting a description of work that is not
-        in front of it. A drop close to the criteria's own pass rate is the result this
-        run is looking for; a negated rate near the original means the verdicts are not
-        tracking the text.
+        Every point of a negated sheet expects <code>fail</code>, and a drop close to the
+        criteria's own pass rate is the result this run looks for. But the raw drop has a
+        confound big enough to swallow it: these are frames of work in progress, so a
+        negated line can be <em>true</em> of the photograph by accident — "a safety wire
+        is missing from one end" reads correctly on a frame taken while the first wire is
+        still being threaded, and a grader doing its job passes it.
+      </p>
+      <p class="warn-note">
+        <strong>Decisive pairs</strong> is the column to read. It counts only the negated
+        points whose positive form the same model passed on the same frame: there the
+        photograph settles the condition and the work satisfies it, so the negation is
+        contradicted and <code>fail</code> is the only correct answer. A point
+        <em>accepted</em> there is a grader agreeing with a description of work that is
+        not in front of it, with no observability excuse available.
       </p>
     </div>
   `;
