@@ -30,8 +30,8 @@
    ],
    "segmented": false,
    "hand": false,
-   "runCost": 0.85,
-   "runCalls": 64
+   "runCost": 2.25,
+   "runCalls": 108
   },
   {
    "code": "AM.I.C.S5",
@@ -51,8 +51,8 @@
    ],
    "segmented": false,
    "hand": false,
-   "runCost": 0.76,
-   "runCalls": 56
+   "runCost": 3.61,
+   "runCalls": 156
   },
   {
    "code": "AM.I.D.S1",
