@@ -325,6 +325,138 @@ Thresholds live in `apply_thresholds` rather than in the prompt precisely so the
 can be retuned against a saved run without spending another call, which is how
 the figure above was chosen.
 
+### The criteria against their own negations
+
+Every reference frame in this pilot is work an instructor accepted, so the
+criteria's own pass rate is a number a model that passes everything would also
+produce. What separates the two is the same subtask graded against a criterion
+the work does *not* satisfy, and the distance between the two rates.
+
+The control is a **whole sheet**, not a reworded line. `packs`-style one-liners
+already existed — one per criteria point, inversion and substitution — and they
+could say a control was missed but never that the subtask, graded against a
+criterion describing work that is not in the photograph, still passed. A negated
+sheet keeps the original's intro, its conditions in order and its combining rule,
+so `sheet_checks` splits it into the same number of points, `handle_photo_run`
+rolls it up the same way, and the two pass rates can be subtracted. It costs one
+drafting call per subtask rather than one per point.
+
+`vlm.draft_negative_sheet` is asked only for the numbered conditions. **The
+defects are inverted arithmetically**, and that asymmetry is the difference
+between measuring something and measuring nothing. A defect is graded as an
+absence — "the work shows no such defect: tube end crushed flat" — which correct
+work passes; its negation must assert the defect is *present*. Asked for that in
+prose, the drafter returned the original defect unchanged in roughly a third of
+cases, and such a line is an absence of something genuinely absent: it comes back
+`pass`, the control quietly stops controlling, and the run still reports a rate.
+Stating it as present is a mechanical transform of the line, so it is done in
+`assemble_negative_sheet`, where the polarity cannot be got wrong. It also has to
+leave the `Critical defects` section to do it, since a line under that heading is
+restated as an absence by the splitter and would land back where it started.
+
+Nothing in the assembled text says what it is. Statements reach a grader
+verbatim, and a sheet announcing itself as the one the work should fail would be
+answered by reading the label rather than the photograph.
+
+#### Two ways a negated line measures nothing
+
+Neither is visible in a result — a run reports a rate either way — so both are
+checked in code rather than trusted to the prompt, by
+`vlm.negative_line_problem()`:
+
+- **An absence.** "No felt-tip marker marks are visible", "marker marks are
+  entirely absent". One frame cannot prove a negative, so a grader doing its job
+  answers `unsure`. On the first AM.I.D.S1 sweep, thirteen of sixty-two negated
+  points came back `unsure` on **all four models**, asking for macro shots.
+- **A weakening.** "The wire *may* pass beside either bolt hole *as long as* it
+  touches both bolt heads." Correct work satisfies it, so it can only pass. A
+  control is the same bar aimed the wrong way, never a lower one.
+
+Also rejected: a line requiring evidence the criterion never did — a rule, a
+gauge, a closer view — which measures the framing rather than the grading; a
+line returned unchanged; and one whose subject has drifted off the article.
+
+A rejected line gets **one rewrite** against the reason it failed. What the
+rewrite cannot save leaves the sheet, with its reason recorded in `skipped`, so
+the control is visibly shorter than the criterion it mirrors. That is a warning
+an operator can act on. A line that can only abstain is a number that looks
+exactly like a working control.
+
+What the checks deliberately do **not** reject is a trailing contrast — "shows a
+visible thread gap, not drawn fully up to its fitting" asserts a state that is
+there to be seen. An earlier version keyed on the bare word "not" and threw away
+five working lines out of ten.
+
+The effect is not on the raw drop, which is set by the footage, but on how much
+of the sheet produces evidence at all. Re-drafting AM.I.E.S1 under these rules
+took its decisive pairs from 14 of 96 to **29 of 84**, and the share of those
+that flipped to `fail` from 50% to 66%.
+
+#### The pass rate does fall — by how much depends on the photograph
+
+Every subtask sheet in the pilot, graded against its own negation on the same
+frames by four models: 1,217 criteria points and as many again negated, $34.68.
+
+| Task | Points | Criteria | Negated | Drop | Decisive | Flipped | Accepted |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| AM.I.C.S3 | 32 | 81% | 6% | 75 pts | 26 | 92% | 2 |
+| AM.I.C.S5 | 28 | 61% | 0% | 61 pts | 17 | 100% | 0 |
+| AM.III.F.S11 | 96 | 36% | 8% | 28 pts | 35 | 86% | 2 |
+| AM.I.D.S1 | 248 | 44% | 16% | 27 pts | 108 | 69% | 10 |
+| AM.II.A.S6 | 258 | 28% | 7% | 21 pts | 64 | 66% | 6 |
+| AM.I.D.S7 | 148 | 24% | 5% | 19 pts | 35 | 63% | 0 |
+| AM.I.I.S1 | 32 | 19% | 0% | 19 pts | 6 | 100% | 0 |
+| AM.I.D.S8 | 116 | 22% | 4% | 18 pts | 26 | 73% | 2 |
+| AM.II.K.S3 | 175 | 19% | 11% | 8 pts | 33 | 73% | 4 |
+| AM.I.E.S1 | 84 | 35% | 32% | 2 pts | 29 | 66% | 7 |
+| **All** | **1,217** | **32%** | **10%** | **21 pts** | **379** | **73%** | **33** |
+
+The two tasks at the bottom are the two that were segmented: AM.I.E.S1 and
+AM.II.K.S3 take their frames from reviewed sub-subtask ends, which are moments
+inside the work. The two at the top are calculation tasks, photographed as a
+finished worksheet. **The drop is a measurement of the photograph as much as of
+the grader**, and it orders the pilot's tasks by how gradeable their evidence is.
+
+#### The graders are not interchangeable
+
+| Model | Criteria | Negated | Drop | Decisive | Flipped | Accepted | Unsure |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| Opus 5 | 26% | 6% | 20 pts | 76 | 74% | **2** | 18 |
+| Gemini 3.1 Pro | 35% | 11% | 24 pts | 105 | 78% | 6 | 17 |
+| Gemini 3.6 Flash | 33% | 11% | 22 pts | 98 | 79% | 8 | 13 |
+| GPT-5.6 Sol | 34% | 14% | 19 pts | 100 | 63% | **17** | 20 |
+
+The drop is similar across all four, and on the raw rates they look
+interchangeable. The column that separates them is **accepted** — a criterion
+passed on work that contradicts it, where the same model has already shown it
+can see the condition. GPT-5.6 Sol did that 17 times in 100 decisive pairs;
+Opus 5 twice in 76. Between two graders whose pass rates agree, that is the
+difference that matters, and it is invisible without the negations.
+
+#### The raw drop is confounded, and by how much
+
+On **AM.I.E.S1** the same procedure gives criteria 33% and negations 35% — no
+drop at all. The reason is not that the graders stop reading. These frames are
+moments *inside* the work, so a negated line can be true of the photograph by
+accident: the turnbuckle frame comes from
+`insert_wire_for_double_wrap_turnbuckle_safety`, and against `t000086_75.jpg` —
+taken while the first wire is still being threaded — the control "a safety wire
+is broken, or missing from one end of the turnbuckle" is simply a correct
+reading. All four models passed it, correctly.
+
+So the number to read is the **decisive pairs**: negated points whose positive
+form the same model passed on the same frame. There the photograph settles the
+condition and the work satisfies it, so the negation is contradicted and `fail`
+is the only correct answer — no observability excuse is available.
+
+That count is itself the measurement of the footage. AM.I.D.S1, whose subtask
+frames are section-final, produced 108 decisive pairs from 124 negated points.
+AM.I.E.S1, filmed head-mounted mid-action, produced **14 from 96** — and on those
+fourteen the models flipped only half the time. The first task can be graded
+against these criteria; the second is telling us what
+`inspector/README.md` already says, that a frame of a reviewed sub-subtask is not
+an assessment photo.
+
 ### An interval with no pack step has no criterion
 
 Where a reviewed interval resolves to no pack step, there is no acceptance

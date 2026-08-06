@@ -123,7 +123,8 @@ def generate_variant(record: VideoRecord, plan: dict, client: Client,
     # Retry feedback goes through the same length budget rather than being
     # concatenated afterwards; appending it is what pushed the first real
     # submission past aleph-2's 1000-character ceiling.
-    prompt = prompts.generation_prompt(analysis, error, info_note=retry_feedback or "")
+    prompt = prompts.generation_prompt(analysis, error, info_note=retry_feedback or "",
+                                       mode=selection.mode)
 
     # The segment the model is asked to replace, normalised to SDR H.264 so both
     # the reference clip and the eventual splice share one colour pipeline.

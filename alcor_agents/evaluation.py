@@ -517,11 +517,18 @@ def main() -> int:
             np_, nn, nr = rate([r for r in mine if r.get("polarity") == "negative"])
             if not un or not nn:
                 continue
-            print(f"   {model.split('/')[-1]:<22} criteria {ur:.0%} ({up}/{un})   "
-                  f"negated {nr:.0%} ({np_}/{nn})   drop {(ur - nr) * 100:.0f} pts")
-        print("   a negated point expects `fail`; `unsure` is a miss too, but a "
-              "`pass`\n   is a grader accepting a description of work that is not "
-              "in the photograph.")
+            pair = server.polarity_report(mine, [])["paired"]
+            line = (f"   {model.split('/')[-1]:<22} criteria {ur:.0%} ({up}/{un})   "
+                    f"negated {nr:.0%} ({np_}/{nn})   drop {(ur - nr) * 100:.0f} pts")
+            if pair["pairs"]:
+                line += (f"   |  {pair['flipped']}/{pair['pairs']} "
+                         f"({pair['flip_rate']:.0%}) flipped where its positive passed")
+            print(line)
+        print("   the raw drop is diluted by frames of work in progress, where a "
+              "negated\n   line can be true of the photograph by accident. The paired "
+              "figure counts\n   only points whose positive form the same model passed "
+              "on the same frame —\n   there the negation is contradicted and `fail` is "
+              "the only correct answer.")
 
     if controls:
         # The positive verdict for the same condition, so a control can be read

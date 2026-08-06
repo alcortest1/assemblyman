@@ -140,7 +140,8 @@ def _clip(text: str, limit: int) -> str:
 
 
 def generation_prompt(analysis: dict, error: dict, info_note: str = "",
-                      max_chars: int = MAX_PROMPT_CHARS) -> str:
+                      max_chars: int = MAX_PROMPT_CHARS,
+                      mode: str = "first_last_frame") -> str:
     """The positive-preservation prompt for one specific defect, within budget.
 
     Built from the analysis rather than a template so the preserved details are
@@ -161,6 +162,9 @@ def generation_prompt(analysis: dict, error: dict, info_note: str = "",
     scene = analysis.get("scene_description", "the same workshop")
     preserve = analysis.get("constraints_to_preserve") or []
 
+    if mode == "video_reference":
+        return _edit_prompt(error, preserve, info_note, max_chars)
+
     # 1. The one change. Always present, and given the largest single share.
     change = (f"Change only this: {_clip(error['description'], 200)}, so that "
               f"{_clip(error['visible_change'], 260)}.")
@@ -180,13 +184,47 @@ def generation_prompt(analysis: dict, error: dict, info_note: str = "",
     if info_note:
         parts.append(_clip(info_note, 200) + ".")
 
+    return _assemble(parts, change, max_chars)
+
+
+def _assemble(parts: list[str], required: str, max_chars: int) -> str:
     prompt = ""
     for part in parts:
         candidate = f"{prompt} {part}".strip() if prompt else part
         if len(candidate) > max_chars:
             break
         prompt = candidate
-    return prompt or _clip(change, max_chars)
+    return prompt or _clip(required, max_chars)
+
+
+def _edit_prompt(error: dict, preserve: list[str], info_note: str,
+                 max_chars: int) -> str:
+    """Edit-forward prompt for an in-context video editor.
+
+    A video-to-video model already has the footage and preserves it by default —
+    that is the whole premise of `runway/aleph-2`. Restating the bench, the
+    lighting and the technician back to it spends most of the 1000-character
+    budget describing what it was going to do anyway, and dilutes the one
+    instruction that matters.
+
+    That dilution is not hypothetical: the first paid attempt at
+    `wrong_bend_angle` came back scoring 1.00/1.00/1.00 on scene, equipment and
+    camera preservation with the edit simply not applied — a perfect
+    reproduction of the source. So for this mode the prompt leads with an
+    imperative edit, keeps only the constraints that stop the edit spilling into
+    neighbouring work, and drops the scene description entirely.
+    """
+    change = (f"Edit the tube so that {_clip(error['visible_change'], 300)}. "
+              f"Achieve it by showing that {_clip(error['description'], 180)}.")
+    hold = ("Keep the same camera, hands, tools, bench and lighting, and change "
+            "nothing else in the frame.")
+    rest = (f"Leave the rest of the work correct: {_clip('; '.join(preserve), 140)}."
+            if preserve else "")
+    forbid = "No warping, no extra or detached hands, no vanishing objects."
+    parts = [p for p in (hold, forbid, rest) if p]
+    if info_note:
+        parts.append(_clip(info_note, 180) + ".")
+    return _assemble([change] + parts, change, max_chars)
 
 
 def qa_messages(original_uri: str, generated_uri: str, error_plan: dict,
