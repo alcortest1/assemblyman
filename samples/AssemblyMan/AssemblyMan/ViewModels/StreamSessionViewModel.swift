@@ -50,6 +50,11 @@ final class StreamSessionViewModel {
   /// A photo the operator took and may choose to have graded.
   var photoAwaitingGrade: Data?
   var showSubtaskPicker: Bool = false
+  /// The agent's guess at what the waiting photograph shows, or nil when it declined to
+  /// guess. Only ever pre-selects the picker.
+  var suggestion: GradeProtocol.Identification?
+  /// True while the photograph is with the agent to be named.
+  var isIdentifying: Bool = false
 
   /// What this room can grade against. Empty until the agent publishes it.
   var gradeCatalogue: [GradeProtocol.Catalogue.Task] { relay.catalogue }
@@ -234,6 +239,14 @@ final class StreamSessionViewModel {
       guard let self else { return nil }
       return await self.capturePhotoForGrading()
     }
+    relay.onIdentification = { [weak self] identification in
+      guard let self, self.showSubtaskPicker else { return }
+      self.isIdentifying = false
+      // Recorded, never acted on. A wrong guess grading a student's work against the wrong
+      // rubric is a worse outcome than any amount of scrolling, so this only moves the
+      // picker's starting point.
+      self.suggestion = identification.matched ? identification : nil
+    }
     relay.onGrade = { [weak self] grade in
       guard let self else { return }
       self.currentGrade = grade
@@ -307,6 +320,8 @@ final class StreamSessionViewModel {
     showGradeSheet = false
     showSubtaskPicker = false
     photoAwaitingGrade = nil
+    suggestion = nil
+    isIdentifying = false
     isGrading = false
     resetSegmentation()
     sessionManager.cleanup()
@@ -374,13 +389,22 @@ final class StreamSessionViewModel {
     }
     photoAwaitingGrade = jpeg
     showPhotoPreview = false
+    suggestion = nil
+    isIdentifying = true
     showSubtaskPicker = true
+
+    // The picker opens now and the suggestion lands in it a moment later, rather than the
+    // operator waiting on a spinner for permission to start scrolling. Someone who already
+    // knows their subtask never notices this happened.
+    Task { [relay] in await relay.sendForIdentification(jpeg) }
   }
 
   func gradeAwaitingPhoto(taskCode: String, subtaskCode: String) {
     guard let jpeg = photoAwaitingGrade else { return }
     showSubtaskPicker = false
     photoAwaitingGrade = nil
+    suggestion = nil
+    isIdentifying = false
     isGrading = true
     Task { [relay] in
       await relay.sendForGrading(jpeg, taskCode: taskCode, subtaskCode: subtaskCode)
@@ -390,6 +414,8 @@ final class StreamSessionViewModel {
   func cancelSubtaskPicker() {
     showSubtaskPicker = false
     photoAwaitingGrade = nil
+    suggestion = nil
+    isIdentifying = false
   }
 
   func dismissGradeSheet() {

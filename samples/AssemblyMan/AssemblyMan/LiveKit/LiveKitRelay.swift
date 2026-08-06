@@ -71,6 +71,11 @@ final class LiveKitRelay {
   /// result sheet the moment a grade starts.
   @ObservationIgnored var onGrade: (@MainActor (GradeProtocol.Grade) -> Void)?
 
+  /// Fires when the agent has named the work in a photograph. The view model uses it to
+  /// pre-select the picker, which is already open and waiting by then.
+  @ObservationIgnored var onIdentification:
+    (@MainActor (GradeProtocol.Identification) -> Void)?
+
   var isConfigured: Bool { configuration.isConfigured }
 
   /// What the ready screen's RELAY row shows.
@@ -257,6 +262,15 @@ final class LiveKitRelay {
       topic: GradeProtocol.gradeRequestTopic,
       attributes: ["task_code": taskCode, "subtask_code": subtaskCode]
     )
+  }
+
+  /// Sends a photograph to be named rather than graded.
+  ///
+  /// Separate from `sendForGrading` because it carries no codes — naming them is the whole
+  /// point — and because the answer is a suggestion the operator may ignore. Nothing is graded
+  /// as a result of this call.
+  func sendForIdentification(_ jpeg: Data) async {
+    await send(jpeg, topic: GradeProtocol.identifyRequestTopic, attributes: [:])
   }
 
   private func send(_ jpeg: Data, topic: String, attributes: [String: String]) async {
@@ -503,6 +517,11 @@ final class LiveKitRelay {
     case let .grade(grade):
       latestGrade = grade
       onGrade?(grade)
+    case let .identification(identification):
+      note("identification: " + (identification.matched
+        ? "\(identification.taskCode ?? "?") / \(identification.subtaskCode ?? "?")"
+        : "none (\(identification.reason ?? "unknown"))"))
+      onIdentification?(identification)
     case let .catalogue(catalogue):
       // Replaces rather than merges. The agent republishes the whole list on every join, and
       // a stale subtask left behind from an earlier build would sit in the picker offering a
@@ -592,6 +611,7 @@ enum RelayRoomEvent: Sendable {
   case grade(GradeProtocol.Grade)
   /// What this room can grade against, published by the agent when it joins.
   case catalogue(GradeProtocol.Catalogue)
+  case identification(GradeProtocol.Identification)
 }
 
 /// Bridges room callbacks — which arrive on the SDK's own threads — onto the main actor.
@@ -645,6 +665,7 @@ final class RoomDelegateProxy: NSObject, RoomDelegate, Sendable {
     switch GradeProtocol.decode(data) {
     case .grade(let grade): onEvent(.grade(grade))
     case .catalogue(let catalogue): onEvent(.catalogue(catalogue))
+    case .identification(let identification): onEvent(.identification(identification))
     case nil: break
     }
   }

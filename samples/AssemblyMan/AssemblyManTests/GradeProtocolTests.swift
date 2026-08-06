@@ -162,6 +162,40 @@ final class GradeProtocolTests: XCTestCase {
     XCTAssertEqual(task.subtasks[1].label, "cut_the_line")
   }
 
+  // MARK: - Identification
+
+  func testIdentificationCarriesTheSuggestedSubtask() {
+    guard case let .identification(suggestion)? = decode("""
+      {"type": "identification", "request_id": "id-1", "matched": true,
+       "task_code": "AM.I.D.S1", "task_title": "Rigid line with flare and bend",
+       "subtask_code": "flare_the_line", "subtask": "Flare the line",
+       "confidence": "high", "observed": "A flared aluminium tube end."}
+      """) else {
+      return XCTFail("an identification payload should decode as one")
+    }
+
+    XCTAssertTrue(suggestion.matched)
+    XCTAssertEqual(suggestion.taskCode, "AM.I.D.S1")
+    XCTAssertEqual(suggestion.subtaskCode, "flare_the_line")
+    XCTAssertEqual(suggestion.subtask, "Flare the line")
+    XCTAssertEqual(suggestion.confidence, "high")
+  }
+
+  /// The agent answers even when it will not guess, because the phone opens its picker on this
+  /// message. A silent decline would leave the sheet waiting on a spinner with nothing coming.
+  func testDecliningToGuessStillArrivesAsAnIdentification() {
+    for reason in ["no_match", "not_in_catalogue", "timeout", "failed", "no_catalogue"] {
+      guard case let .identification(suggestion)? = decode("""
+        {"type": "identification", "matched": false, "reason": "\(reason)"}
+        """) else {
+        return XCTFail("a declined identification must still decode")
+      }
+      XCTAssertFalse(suggestion.matched)
+      XCTAssertEqual(suggestion.reason, reason)
+      XCTAssertNil(suggestion.subtaskCode, "there is no suggestion to pre-select")
+    }
+  }
+
   // MARK: - Everything else on the topic
 
   /// The topic is shared, and the agent will grow message kinds this build has never seen. An
@@ -197,6 +231,7 @@ final class GradeProtocolTests: XCTestCase {
     XCTAssertEqual(GradeProtocol.captureMethod, "assemblyman.capture")
     XCTAssertEqual(GradeProtocol.captureTopic, "assemblyman.capture")
     XCTAssertEqual(GradeProtocol.gradeRequestTopic, "assemblyman.grade-request")
+    XCTAssertEqual(GradeProtocol.identifyRequestTopic, "assemblyman.identify-request")
     XCTAssertEqual(GradeProtocol.gradeTopic, "assemblyman.grade")
   }
 

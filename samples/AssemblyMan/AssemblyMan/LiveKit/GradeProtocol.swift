@@ -40,6 +40,9 @@ enum GradeProtocol {
   /// Byte-stream topic for a photograph the operator chose to have graded.
   static let gradeRequestTopic = "assemblyman.grade-request"
 
+  /// Byte-stream topic for a photograph sent to be named rather than graded.
+  static let identifyRequestTopic = "assemblyman.identify-request"
+
   /// Data topic carrying verdicts and the catalogue.
   static let gradeTopic = "assemblyman.grade"
 
@@ -158,6 +161,37 @@ enum GradeProtocol {
     }
   }
 
+  /// The agent's guess at which subtask a photograph shows, sent back before the operator
+  /// picks so the picker can open on it.
+  ///
+  /// A suggestion and nothing more — it never starts a grade on its own. Acting on a wrong
+  /// guess silently would mark a student's work against the wrong rubric, which is worse than
+  /// any amount of scrolling. `matched` is false whenever the agent declined to guess: an
+  /// empty bench, a photograph of none of the listed work, a model that invented a code, or a
+  /// call that timed out. The picker opens either way.
+  struct Identification: Decodable {
+    let matched: Bool
+    let taskCode: String?
+    let taskTitle: String?
+    let subtaskCode: String?
+    let subtask: String?
+    /// "high", "medium" or "low". Shown rather than acted on — the operator decides what a
+    /// low-confidence guess is worth.
+    let confidence: String?
+    /// What the photograph shows, in the model's words.
+    let observed: String?
+    /// Why there is no suggestion: "no_match", "not_in_catalogue", "timeout", "failed",
+    /// "no_catalogue".
+    let reason: String?
+
+    enum CodingKeys: String, CodingKey {
+      case matched, subtask, confidence, observed, reason
+      case taskCode = "task_code"
+      case taskTitle = "task_title"
+      case subtaskCode = "subtask_code"
+    }
+  }
+
   // MARK: - Decoding
 
   /// Reads a message off the grade topic, or nil if it is not one this build understands.
@@ -170,6 +204,10 @@ enum GradeProtocol {
     case "catalogue":
       guard let catalogue = try? JSONDecoder().decode(Catalogue.self, from: data) else { return nil }
       return .catalogue(catalogue)
+    case "identification":
+      guard let identification = try? JSONDecoder().decode(Identification.self, from: data)
+      else { return nil }
+      return .identification(identification)
     default:
       return nil
     }
@@ -178,5 +216,6 @@ enum GradeProtocol {
   enum Message {
     case grade(Grade)
     case catalogue(Catalogue)
+    case identification(Identification)
   }
 }

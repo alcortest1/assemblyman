@@ -166,6 +166,8 @@ struct StreamView: View {
     .sheet(isPresented: $viewModel.showSubtaskPicker) {
       SubtaskPickerView(
         tasks: viewModel.gradeCatalogue,
+        suggestion: viewModel.suggestion,
+        isIdentifying: viewModel.isIdentifying,
         onPick: { taskCode, subtaskCode in
           viewModel.gradeAwaitingPhoto(taskCode: taskCode, subtaskCode: subtaskCode)
         },

@@ -23,12 +23,29 @@ import SwiftUI
 
 struct SubtaskPickerView: View {
   let tasks: [GradeProtocol.Catalogue.Task]
+  /// The agent's guess at what the photograph shows, if it made one. Opens that task and marks
+  /// the subtask; it never picks for the operator, who still has to press it.
+  var suggestion: GradeProtocol.Identification?
+  /// True while the guess is still being made, so the header can say so rather than implying
+  /// the list is all there is.
+  var isIdentifying: Bool = false
   let onPick: (String, String) -> Void
   let onCancel: () -> Void
 
   @State private var expanded: String?
+  /// Set once from the suggestion, so re-opening a section the operator collapsed does not
+  /// spring back open under them.
+  @State private var didApplySuggestion = false
 
   var body: some View {
+    content
+      // The guess arrives after the sheet is already up, so this reacts to it rather than
+      // reading it once at presentation time.
+      .onAppear { applySuggestionIfNeeded() }
+      .onChange(of: suggestion?.subtaskCode) { _, _ in applySuggestionIfNeeded() }
+  }
+
+  private var content: some View {
     VStack(spacing: 0) {
       header
       Divider().overlay(Theme.divider)
@@ -54,7 +71,7 @@ struct SubtaskPickerView: View {
       VStack(alignment: .leading, spacing: 2) {
         Text("Grade against")
           .headingStyle(20)
-        Text("Pick the subtask this photo shows")
+        Text(subtitle)
           .font(Theme.body(12))
           .foregroundStyle(Theme.neutral600)
       }
@@ -65,6 +82,35 @@ struct SubtaskPickerView: View {
     }
     .padding(.horizontal, Theme.screenPadding)
     .padding(.vertical, 16)
+  }
+
+  /// Says what the agent made of the photograph, because a subtask sitting pre-marked with no
+  /// explanation reads as the app having decided rather than guessed.
+  private var subtitle: String {
+    if isIdentifying { return "Working out what this photo shows…" }
+    guard let suggestion, suggestion.matched, let subtask = suggestion.subtask else {
+      return "Pick the subtask this photo shows"
+    }
+    let confidence = suggestion.confidence ?? "low"
+    return confidence == "high"
+      ? "This looks like \(subtask) — confirm or pick another"
+      : "This might be \(subtask) — check before grading"
+  }
+
+  /// Whether the agent named this subtask.
+  private func isSuggested(_ subtask: GradeProtocol.Catalogue.Subtask) -> Bool {
+    guard let suggestion, suggestion.matched else { return false }
+    return suggestion.subtaskCode == subtask.subtaskCode
+  }
+
+  /// Opens the suggested task once the guess arrives. The operator lands on the right section
+  /// instead of scrolling to it, and can still go anywhere else in the list.
+  private func applySuggestionIfNeeded() {
+    guard !didApplySuggestion, let suggestion, suggestion.matched,
+      let taskCode = suggestion.taskCode
+    else { return }
+    didApplySuggestion = true
+    expanded = taskCode
   }
 
   private var empty: some View {
@@ -117,12 +163,22 @@ struct SubtaskPickerView: View {
             onPick(task.taskCode, subtask.subtaskCode)
           } label: {
             HStack(alignment: .top, spacing: 10) {
-              Rectangle().fill(Theme.accent400).frame(width: 3)
+              Rectangle()
+                .fill(isSuggested(subtask) ? Theme.accent : Theme.accent400)
+                .frame(width: 3)
               VStack(alignment: .leading, spacing: 2) {
-                Text(subtask.label)
-                  .font(Theme.body(14))
-                  .foregroundStyle(Theme.text)
-                  .multilineTextAlignment(.leading)
+                HStack(spacing: 6) {
+                  Text(subtask.label)
+                    .font(Theme.body(14, weight: isSuggested(subtask) ? .semibold : .regular))
+                    .foregroundStyle(Theme.text)
+                    .multilineTextAlignment(.leading)
+                  if isSuggested(subtask) {
+                    // Marked, not selected. The operator still presses it, because a guess
+                    // that grades on its own would mark a student against the wrong rubric.
+                    Tag(text: "Suggested")
+                      .accessibilityLabel("Suggested by the assistant")
+                  }
+                }
                 if let subject = subtask.subject, !subject.isEmpty {
                   Text(subject)
                     .font(Theme.body(12))
