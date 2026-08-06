@@ -46,9 +46,12 @@ try {
 const TOKEN_ENDPOINT = '/api/token';
 const ROOM_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const ROOM_CODE_LENGTH = 6;
+/** Must match DATA_TOPIC in agent/assembly_agent.py. */
+const AGENT_DATA_TOPIC = 'assemblyman.grade';
 
 let room = null;
 let onUpdate = () => {};
+let onData = () => {};
 let audioSink = null;
 /** Identities this viewer has silenced. Local only — muting someone here does not mute them
  *  for anyone else in the room, which is what a call UI leads people to expect. */
@@ -270,6 +273,21 @@ function wire() {
     }
   });
 
+  // The agent publishes grading results on its own topic. Everything else on the wire is
+  // ignored, so an unrelated data message from some future participant cannot reach the
+  // overlay renderer.
+  room.on(RoomEvent.DataReceived, (payload, participant, _kind, topic) => {
+    if (topic !== AGENT_DATA_TOPIC) return;
+    let message;
+    try {
+      message = JSON.parse(new TextDecoder().decode(payload));
+    } catch (error) {
+      report('error', `unreadable data message on ${topic}: ${error && error.message}`);
+      return;
+    }
+    onData(message, participant ? participant.identity : null);
+  });
+
   room.on(RoomEvent.Disconnected, () => {
     onUpdate({ ...snapshot(), connected: false });
   });
@@ -292,6 +310,7 @@ function snapshot() {
 
 async function connect(code, handlers = {}) {
   onUpdate = handlers.onUpdate || (() => {});
+  onData = handlers.onData || (() => {});
   const roomName = canonical(code);
   if (roomName.length !== ROOM_CODE_LENGTH) {
     return { ok: false, error: 'Enter the full six-character room code.' };
