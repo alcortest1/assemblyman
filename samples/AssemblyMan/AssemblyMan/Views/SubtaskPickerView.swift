@@ -55,6 +55,15 @@ struct SubtaskPickerView: View {
       } else {
         ScrollView {
           VStack(spacing: 0) {
+            // The match comes first and states itself in full, because "suggested" as a tag on
+            // one row of forty-one is something an operator scrolls past. Confirming is one
+            // press; the list underneath is the disagreement.
+            if isIdentifying {
+              identifyingBanner
+            } else if let suggestion, suggestion.matched {
+              matchBanner(suggestion)
+            }
+
             ForEach(tasks) { task in
               taskSection(task)
               Divider().overlay(Theme.divider)
@@ -64,6 +73,114 @@ struct SubtaskPickerView: View {
       }
     }
     .background(Theme.bg)
+  }
+
+  private var identifyingBanner: some View {
+    HStack(spacing: 10) {
+      Spinner(size: 14, color: Theme.accent700)
+      Text("Working out which subtask this photo shows…")
+        .font(Theme.body(13))
+        .foregroundStyle(Theme.neutral700)
+      Spacer(minLength: 0)
+    }
+    .padding(.horizontal, Theme.screenPadding)
+    .padding(.vertical, 16)
+    .background(Theme.accent100)
+    .overlay(alignment: .bottom) {
+      Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+    }
+    .accessibilityIdentifier("identifying_banner")
+  }
+
+  /// What the agent thinks the photograph shows, and the one press that accepts it.
+  ///
+  /// Nothing is graded until that press. The model is right often enough to be worth putting
+  /// first and wrong often enough that grading on its say-so would eventually mark a student
+  /// against a rubric for work they did not do — so it proposes and the operator disposes.
+  private func matchBanner(_ suggestion: GradeProtocol.Identification) -> some View {
+    VStack(alignment: .leading, spacing: 10) {
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        Text("Looks like")
+          .overlineStyle(size: 10, color: Theme.accent700)
+        Spacer(minLength: 0)
+        Text(confidenceLabel(suggestion))
+          .overlineStyle(size: 9, color: Theme.neutral500)
+      }
+
+      VStack(alignment: .leading, spacing: 3) {
+        Text(suggestion.subtask ?? suggestion.subtaskCode ?? "—")
+          .font(Theme.body(17, weight: .semibold))
+          .foregroundStyle(Theme.text)
+          .multilineTextAlignment(.leading)
+
+        Text([suggestion.taskCode, suggestion.taskTitle].compactMap { $0 }.joined(separator: " · "))
+          .font(Theme.body(12))
+          .foregroundStyle(Theme.neutral600)
+          .multilineTextAlignment(.leading)
+
+        // The model's own words. An operator deciding whether to trust the match is better
+        // served by what it saw than by a number.
+        if let observed = suggestion.observed, !observed.isEmpty {
+          Text("Saw: \(observed)")
+            .font(Theme.body(12))
+            .foregroundStyle(Theme.neutral500)
+            .multilineTextAlignment(.leading)
+            .padding(.top, 2)
+        }
+      }
+
+      HStack(spacing: 10) {
+        Button {
+          guard let taskCode = suggestion.taskCode,
+            let subtaskCode = suggestion.subtaskCode
+          else { return }
+          onPick(taskCode, subtaskCode)
+        } label: {
+          Text("Grade this")
+            .font(Theme.body(13, weight: .semibold))
+            .tracking(13 * 0.06)
+            .textCase(.uppercase)
+            .foregroundStyle(Theme.bg)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(Theme.accent)
+        }
+        .buttonStyle(PressableStyle(pressedOverlay: Theme.accent700))
+        .accessibilityIdentifier("accept_suggestion_button")
+
+        Button {
+          // Only collapses the pre-opened section. The whole list is already below, so
+          // "something else" is a scroll rather than another screen.
+          expanded = nil
+        } label: {
+          Text("Not this")
+            .font(Theme.body(13, weight: .semibold))
+            .tracking(13 * 0.06)
+            .textCase(.uppercase)
+            .foregroundStyle(Theme.text)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .overlay { Rectangle().strokeBorder(Theme.neutral400, lineWidth: Theme.hairline) }
+        }
+        .buttonStyle(PressableStyle(pressedOverlay: Theme.text.opacity(0.07)))
+        .accessibilityIdentifier("reject_suggestion_button")
+      }
+    }
+    .padding(.horizontal, Theme.screenPadding)
+    .padding(.vertical, 16)
+    .background(Theme.accent100)
+    .overlay(alignment: .bottom) {
+      Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+    }
+    .accessibilityIdentifier("suggestion_banner")
+  }
+
+  private func confidenceLabel(_ suggestion: GradeProtocol.Identification) -> String {
+    switch suggestion.confidence {
+    case "high": return "Confident"
+    case "medium": return "Fairly sure — check it"
+    default: return "Unsure — check it"
+    }
   }
 
   private var header: some View {
@@ -84,17 +201,11 @@ struct SubtaskPickerView: View {
     .padding(.vertical, 16)
   }
 
-  /// Says what the agent made of the photograph, because a subtask sitting pre-marked with no
-  /// explanation reads as the app having decided rather than guessed.
+  /// The banner below carries the match, so this stays the same sentence throughout: the
+  /// operator is picking a subtask whether or not anything was suggested, and a heading that
+  /// changed under them as the guess arrived would read as the screen having moved on.
   private var subtitle: String {
-    if isIdentifying { return "Working out what this photo shows…" }
-    guard let suggestion, suggestion.matched, let subtask = suggestion.subtask else {
-      return "Pick the subtask this photo shows"
-    }
-    let confidence = suggestion.confidence ?? "low"
-    return confidence == "high"
-      ? "This looks like \(subtask) — confirm or pick another"
-      : "This might be \(subtask) — check before grading"
+    "Pick the subtask this photo shows"
   }
 
   /// Whether the agent named this subtask.

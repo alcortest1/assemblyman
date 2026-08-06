@@ -943,6 +943,14 @@
 				version = 8.9.11;
 			};
 		};
+		AA0130000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Liquid4All/leap-ios.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.9.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -975,6 +983,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */;
 			productName = UltralyticsYOLO;
+		};
+		AA0130000000000000000002 /* LeapSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0130000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */;
+			productName = LeapSDK;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
