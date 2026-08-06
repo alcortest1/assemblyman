@@ -85,13 +85,25 @@ def as_text(item) -> str:
     return str(item)
 
 
-def latest_run(code: str):
+def run_files(code: str) -> list:
     d = AGENTS / "build" / "photo_eval" / code
-    runs = sorted(d.glob("run_*.json")) if d.is_dir() else []
+    return sorted(d.glob("run_*.json")) if d.is_dir() else []
+
+
+def latest_run(code: str):
+    runs = run_files(code)
     if not runs:
         return None
     with open(runs[-1]) as fh:
         return json.load(fh)
+
+
+def segmented_clips(code: str) -> set:
+    """Clips with a reviewed segmentation, so a frame drawn from one is reviewed."""
+    d = AGENTS / "build" / "analysis" / code
+    if not d.is_dir():
+        return set()
+    return {p.name[: -len(".segments.json")] for p in d.glob("*.segments.json")}
 
 
 def handbook_ref(pack: dict) -> tuple[str, str, str]:
@@ -143,6 +155,95 @@ def read_sources(code: str, prov: dict) -> list:
         if not any(r["a"] == name for r in rows):
             rows.append({"a": name, "b": "—", "c": "compilation input"})
     return rows
+
+
+def sheet_sections(code: str) -> tuple[list, int]:
+    """The normalized sheet's own sections, as `steps.json` parsed them.
+
+    Names and counts only — the sheet is confidential AIM material, so nothing
+    it says is copied. The pack's compiled sections are a subset of these: the
+    front matter ("Before You Begin", "Safety and Equipment") carries no steps
+    to grade, so `compile_pack.py` drops it and the Documentation tab must not
+    pretend the sheet is shaped like the pack.
+    """
+    path = AGENTS / "tasks" / code / "steps.json"
+    if not path.is_file():
+        return ([], 0)
+    with open(path) as fh:
+        doc = json.load(fh)
+    variants = doc.get("variants") or []
+    out = []
+    for v in variants:
+        for s in (v.get("sections") or []):
+            out.append({
+                "name": s.get("section") or "Procedure",
+                "variant": (v.get("variant") or "") if len(variants) > 1 else "",
+                "steps": len(s.get("steps") or []),
+                "notes": len(s.get("notes") or []),
+                "safety": len(s.get("safety") or []),
+                "equipment": len(s.get("equipment") or []),
+                "prereqs": len(s.get("you_need_to") or []),
+            })
+    return (out, len(variants))
+
+
+def criteria_points(criteria: dict, section: str) -> list:
+    """Compiled points for a section the latest run did not grade.
+
+    Without this a subtask with a drafted criterion and no run fell through to a
+    generic placeholder set in the UI, which reads exactly like compiled text.
+    """
+    pts = []
+    for e in (criteria.get("entries") or {}).values():
+        if (e.get("section") or "") != section:
+            continue
+        for line in (e.get("criterion") or "").splitlines():
+            line = line.strip().lstrip("-•").strip()
+            if line:
+                pts.append({"n": f"{len(pts) + 1}.", "text": line})
+    return pts
+
+
+def excluded_note(sec_steps: list) -> str:
+    """What this subtask's criterion leaves out, counted from the pack."""
+    kinds: "OrderedDict[str, int]" = OrderedDict()
+    for s in sec_steps:
+        for c in (s.get("checks") or []):
+            obs = c.get("observable") or "photo"
+            if obs != "photo":
+                kinds[obs] = kinds.get(obs, 0) + 1
+    if not kinds:
+        return "None — every check in this subtask is photo-observable."
+    parts = ", ".join(f"{n} [{k}]" for k, n in kinds.items())
+    return f"{parts} — held beside the frame, never folded into the criterion."
+
+
+def rollup_cells(run: dict, target_id: str, polarity: str) -> list:
+    """The run's own per-model roll-up for one subtask, as it recorded it.
+
+    `rollups` is written by the eval pipeline and carries both polarities, so the
+    controls roll up on the same rule as the criteria instead of going unreported.
+    """
+    by_model = {}
+    for r in (run.get("rollups") or []):
+        if (r.get("polarity") or "original") != polarity:
+            continue
+        owner = r.get("negative_of") if polarity == "negative" else r.get("target_id")
+        if owner == target_id:
+            by_model[r.get("model")] = r
+
+    cells = []
+    for mid in MODEL_IDS:
+        r = by_model.get(mid)
+        if not r:
+            cells.append(["none", "not graded", ""])
+            continue
+        p = r.get("passed") or 0
+        f = len(r.get("failed") or [])
+        u = len(r.get("unsettled") or [])
+        cells.append([r.get("verdict") or "review", f"{p}P {f}F {u}U",
+                      f"{p} pass · {f} fail · {u} unsure of {r.get('checks', p + f + u)}"])
+    return cells
 
 
 def verdict_detail(res: dict) -> str:
@@ -206,6 +307,7 @@ def build_task(code: str) -> dict | None:
             "sheet": slug(name),
             "stepsCount": len(sec_steps),
             "atomsCount": atoms,
+            "excluded": excluded_note(sec_steps),
             "steps": [{
                 "id": s["id"],
                 "text": s.get("text") or "",
@@ -223,7 +325,17 @@ def build_task(code: str) -> dict | None:
             } for s in sec_steps],
         })
 
-    attach_runs(subtasks, run)
+    attach_runs(subtasks, run, len(run_files(code)), segmented_clips(code))
+
+    # A subtask the latest run did not grade still has its compiled criterion; show
+    # that rather than letting the UI fall back to a generic placeholder set.
+    for st in subtasks:
+        if not st.get("sheetPoints"):
+            pts = criteria_points(criteria, st["label"])
+            if pts:
+                st["sheetPoints"] = pts
+
+    sheet_secs, sheet_variants = sheet_sections(code)
 
     return {
         "code": code,
@@ -241,7 +353,12 @@ def build_task(code: str) -> dict | None:
         "clipNames": clip_names,
         "clips": len(clip_names),
         "segmented": segmented,
+        "segClips": sorted(segmented_clips(code)),
         "hand": hand,
+        "sheetSections": sheet_secs,
+        "sheetVariants": sheet_variants,
+        "thresholds": (run or {}).get("thresholds") or {},
+        "runCount": len(run_files(code)),
         "assumptions": [as_text(a) for a in (pack.get("assumptions") or [])][:6],
         "openQuestions": [as_text(q) for q in (pack.get("open_questions") or [])][:6],
         "sources": read_sources(code, prov),
@@ -252,10 +369,12 @@ def build_task(code: str) -> dict | None:
     }
 
 
-def attach_runs(subtasks: list, run: dict | None) -> None:
+def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
+                seg_clips: set | None = None) -> None:
     """Map a saved run's results onto the subtask that owns them."""
     if not run:
         return
+    seg_clips = seg_clips or set()
 
     # results are flat: one row per (target, model).
     by_target: "OrderedDict[str, dict]" = OrderedDict()
@@ -293,12 +412,31 @@ def attach_runs(subtasks: list, run: dict | None) -> None:
         if gid is None:
             continue
         entries = groups.pop(gid)
-        st.update(build_grid(entries, negatives, run))
+        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips))
+
+    # A run can grade targets no pack section matches: AM.I.E.S1 compiles to a single
+    # "Procedure" section while the run grades its three sheet variants separately.
+    # Carrying them keeps a graded result on the screen that reports it — without
+    # this the task's own page said "no saved run" while the Evals table scored it.
+    for gid, entries in groups.items():
+        raw = entries[0][1]["meta"].get("parent_label") or gid
+        part = raw.split("—")[1] if "—" in raw else raw
+        label = re.sub(r"\(.*?\)", "", part).strip().replace("_", " ").title() or gid
+        st = {
+            "label": label, "sheet": slug(label), "stepsCount": 0, "atomsCount": 0,
+            "steps": [], "fromRun": True,
+            "excluded": "Not compiled into a pack section — this target exists only in the run.",
+        }
+        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips))
+        subtasks.append(st)
 
 
-def build_grid(entries: list, negatives: dict, run: dict) -> dict:
+def build_grid(gid: str, entries: list, negatives: dict, run: dict,
+               run_count: int = 0, seg_clips: set | None = None) -> dict:
+    seg_clips = seg_clips or set()
     rows, neg_lines, replies, points = [], [], {}, []
     frame_file = frame_video = None
+    calls = 0
 
     for ri, (tid, blob) in enumerate(entries):
         meta = blob["meta"]
@@ -311,8 +449,11 @@ def build_grid(entries: list, negatives: dict, run: dict) -> dict:
         for mi, mid in enumerate(MODEL_IDS):
             res = blob["models"].get(mid)
             if not res:
-                cells.append(["unsure", "no result"])
+                # Not graded is not the same as unsure: an ungraded cell must not
+                # read as a model declining to call it.
+                cells.append(["none", "not graded"])
                 continue
+            calls += 1
             cells.append([res.get("verdict") or "unsure", verdict_detail(res)])
             if res.get("raw_text"):
                 replies[f"r{ri}m{mi}"] = res["raw_text"].strip()
@@ -326,8 +467,9 @@ def build_grid(entries: list, negatives: dict, run: dict) -> dict:
             for mi, mid in enumerate(MODEL_IDS):
                 res = nblob["models"].get(mid)
                 if not res:
-                    ncells.append(["unsure", "no result"])
+                    ncells.append(["none", "not graded"])
                     continue
+                calls += 1
                 v = res.get("verdict") or "unsure"
                 # A control that passed where the same model passed the original is
                 # an accepted contradiction — the photo settled it and it said yes anyway.
@@ -354,36 +496,68 @@ def build_grid(entries: list, negatives: dict, run: dict) -> dict:
     if not rows:
         return {}
 
-    # Roll-up: one fail fails, any unsure sends it to review.
-    rollup = []
-    for mi in range(len(MODEL_IDS)):
-        vs = [r["cells"][mi][0] for r in rows]
-        if "fail" in vs:
-            rollup.append(["fail", f"fail · {vs.count('fail')}"])
-        elif "unsure" in vs:
-            rollup.append(["review", f"review · {vs.count('unsure')} unsure"])
-        else:
-            rollup.append(["pass", f"pass · {len(vs)}/{len(vs)}"])
+    # The roll-up is the pipeline's, not a second opinion computed here: the grid
+    # shows the points it displays, while the run rolled up every check it graded,
+    # and recomputing from the visible rows quietly disagreed with the run.
+    rollup = {
+        "criteria": rollup_cells(run, gid, "original"),
+        "controls": rollup_cells(run, gid, "negative"),
+    }
 
-    graded = sum(1 for r in rows if "neg" in r)
     flat = [c for r in rows if "neg" in r for c in r["neg"]["cells"]]
     accepted = sum(1 for c in flat if c[0] == "accepted")
+    graded_ctl = [c for c in flat if c[0] != "none"]
     return {
         "sheetPoints": points,
         "run": {
             "rows": rows, "rollup": rollup, "negLines": neg_lines, "replies": replies,
-            "controlStats": (f"{len(flat)} perturbed points · "
-                             f"not passed {sum(1 for c in flat if c[0] != 'accepted')} · "
+            "controlStats": (f"{len(graded_ctl)} perturbed points · "
+                             f"not passed {sum(1 for c in graded_ctl if c[0] != 'accepted')} · "
                              f"accepted {accepted}"),
         },
         "frameFile": frame_file or "",
         "frameVideo": frame_video or "",
-        "frameProv": "frame_suggested",
-        "runs": f"1 · {len(rows) * len(MODEL_IDS) * (2 if graded else 1)} calls",
+        "frameProv": "frame_reviewed" if frame_video in seg_clips else "frame_suggested",
+        "runs": (f"{run_count} saved · {calls} calls in the latest"
+                 if run_count else f"{calls} calls"),
     }
 
 
 # ── evals tables ───────────────────────────────────────────────────────────
+
+def readiness(tasks: list) -> dict:
+    """Counted off the tree, not typed into the screen.
+
+    The three zeros the dashboard used to state as fact are still zeros today —
+    but they are now measured, so the day one of these directories appears the
+    screen stops claiming there is nothing in it.
+    """
+    ds = AGENTS / "evals" / "datasets"
+    ag = AGENTS / "build" / "evals" / "runs"
+    eg = AGENTS / "build" / "error_generation"
+    clips = [p for p in eg.glob("*/*") if p.is_dir()] if eg.is_dir() else []
+    labeled = [p for p in ds.glob("*.json")] if ds.is_dir() else []
+    labeled_atoms = 0
+    for p in labeled:
+        try:
+            with open(p) as fh:
+                doc = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        labeled_atoms += len(doc.get("negatives") or doc.get("items") or [])
+    return {
+        "labeledDatasets": len(labeled),
+        "agentRuns": len([p for p in ag.glob("*") if p.is_dir()]) if ag.is_dir() else 0,
+        "photoEvalTasks": sum(1 for t in tasks if t["runId"]),
+        "tasks": len(tasks),
+        "atoms": sum(t["atoms"] for t in tasks),
+        # Counted from the datasets themselves. Generated error clips are not
+        # labels, so they are reported separately rather than folded in here.
+        "labeledNegativeAtoms": labeled_atoms,
+        "errorClips": len(clips),
+        "errorClipTasks": len({p.parent.name for p in clips}),
+    }
+
 
 def build_evals(tasks: list) -> dict:
     per_model = {m: {"orig": [0, 0], "neg": [0, 0], "pairs": 0, "flipped": 0, "accepted": 0}
@@ -422,6 +596,10 @@ def build_evals(tasks: list) -> dict:
             f"{(fl / pr):.0%}" if pr else "—", str(ac),
         ])
         totals["points"] += pts; totals["pairs"] += pr; totals["accepted"] += ac
+        totals["controls"] = totals.get("controls", 0) + sum(
+            b.get("negative", {}).get("points", 0) for b in pm.values())
+        totals["cost"] = totals.get("cost", 0.0) + (run.get("summary", {}).get("cost_usd") or 0.0)
+        totals["calls"] = totals.get("calls", 0) + (run.get("summary", {}).get("calls") or 0)
 
     task_rows.sort(key=lambda r: -int(r[5].split()[0]))
 
@@ -445,10 +623,40 @@ def build_evals(tasks: list) -> dict:
                    f"{round((tot_o - tot_n) * 100)} pts", str(totals["pairs"]),
                    f"{(tot_f / totals['pairs']):.0%}" if totals["pairs"] else "—",
                    str(totals["accepted"])],
+        "readiness": readiness(tasks),
+        "run": {
+            "points": totals["points"],
+            "controls": totals.get("controls", 0),
+            "calls": totals.get("calls", 0),
+            "cost": round(totals.get("cost", 0.0), 2),
+            "models": len(MODEL_IDS),
+        },
     }
 
 
 # ── images ─────────────────────────────────────────────────────────────────
+
+def strip_picks(code: str, clip: str) -> list:
+    """An evenly spaced strip of a clip's extracted frames."""
+    allf = sorted((AGENTS / "build" / "frames" / code / clip).glob("t*.jpg"))
+    if not allf:
+        return []
+    return [allf[round(i * (len(allf) - 1) / (STRIP - 1))] for i in range(STRIP)]
+
+
+def record_strips(tasks: list) -> None:
+    """Name the strip frames in the JSON, whether or not images are copied.
+
+    This ran inside copy_images, so `--no-images` — documented as re-emitting the
+    JSON without recopying frames — emitted it with no strip at all, and every
+    Videos tab reported "no extracted frames" over a full thumbs/ directory.
+    """
+    for t in tasks:
+        for clip in t["clipNames"]:
+            picks = strip_picks(t["code"], clip)
+            if picks:
+                t.setdefault("strips", {})[clip] = [p.name for p in picks]
+
 
 def copy_images(tasks: list) -> tuple[int, int]:
     graded = thumbs = 0
@@ -469,10 +677,9 @@ def copy_images(tasks: list) -> tuple[int, int]:
 
         # An evenly spaced strip per clip, downscaled for the Videos tab grid.
         for clip in t["clipNames"]:
-            allf = sorted((AGENTS / "build" / "frames" / code / clip).glob("t*.jpg"))
-            if not allf:
+            picks = strip_picks(code, clip)
+            if not picks:
                 continue
-            picks = [allf[round(i * (len(allf) - 1) / (STRIP - 1))] for i in range(STRIP)]
             outdir = OUT / "thumbs" / code / clip
             outdir.mkdir(parents=True, exist_ok=True)
             for src in picks:
@@ -485,7 +692,6 @@ def copy_images(tasks: list) -> tuple[int, int]:
                 except (OSError, subprocess.CalledProcessError):
                     shutil.copy2(src, dst)
                 thumbs += 1
-            t.setdefault("strips", {})[clip] = [p.name for p in picks]
     return graded, thumbs
 
 
@@ -507,6 +713,8 @@ def main() -> int:
         if (OUT / sub).exists():
             shutil.rmtree(OUT / sub)
     (OUT / "tasks").mkdir(parents=True, exist_ok=True)
+
+    record_strips(tasks)
 
     graded = thumbs = 0
     if not args.no_images:

@@ -120,12 +120,10 @@
   }
 
 
-  var DEFAULT_POINTS = [
-    { n: '1.', text: 'Every fitting, fastener and termination the sheet calls for is in place on the finished work.' },
-    { n: '2.', text: 'Surfaces worked in this subtask are clean and free of burrs, swarf and tool damage.' },
-    { n: '3.', text: 'Identification markings on the installed parts face outward, readable without disturbing the work.' },
-    { n: 'D1.', text: 'graded as absence: work left deformed, damaged or incorrectly seated at this stage.' }
-  ];
+  // No placeholder criterion set: a subtask with nothing compiled says so. The four
+  // generic points that used to stand in here read exactly like compiled text.
+  var NO_POINTS_NOTE = 'No compiled criterion for this subtask — no entry in ' +
+    'build/criteria/ and no saved run to draw points from.';
 
   /* ── state ─────────────────────────────────────────────────────────────── */
 
@@ -182,13 +180,14 @@
 
   function cellTxt(v, x) {
     if (v === 'accepted') return x;
+    if (v === 'none') return x;            // ungraded — never dressed up as a verdict
     if (x === '✓') return v + ' ✓';
     if (v === 'unsure') return x.indexOf('not_pass') === 0 ? 'unsure ' + x : 'unsure · ' + x;
     return state.showConfidence ? v + ' · ' + x : v;
   }
 
-  // Points a subtask's sheet is graded on — its own where compiled, else the generic set.
-  function pointsOf(st) { return st.sheetPoints || DEFAULT_POINTS; }
+  // Points a subtask's sheet is graded on. Empty where nothing is compiled.
+  function pointsOf(st) { return st.sheetPoints || []; }
 
   function subtaskView(task, i) {
     var st = task.subtasks[i];
@@ -216,6 +215,7 @@
   }
 
   function runCostText(points, keptCount, haveSheet) {
+    if (!points.length) return NO_POINTS_NOTE;
     if (!haveSheet) {
       var total = points.length * 4;
       return points.length + ' points, × 4 models = ' + total + ' calls · ~$' +
@@ -554,9 +554,11 @@
             on: { click: function () { setState({ tab: 'assess', reply: null }); } }
           })
         ]),
-        el('div', { class: 'sheet' }, st.points.map(function (p) {
-          return el('span', {}, [el('b', { text: p.n }), ' ' + p.text]);
-        }))
+        el('div', { class: 'sheet' }, st.points.length
+          ? st.points.map(function (p) {
+            return el('span', {}, [el('b', { text: p.n }), ' ' + p.text]);
+          })
+          : [el('span', { class: 'sheet-hint', text: NO_POINTS_NOTE })])
       ]),
       el('div', { class: 'blueprint', style: 'padding:10px 14px;display:flex;flex-direction:column;gap:5px' }, [
         corners(),
@@ -651,7 +653,12 @@
           el('span', { style: 'font-size:10px;color:var(--color-accent-700);cursor:pointer', text: 'Reset to compiled text' })
         ]),
         el('div', { class: 'sheet' }, [
-          el('span', { class: 'sheet-hint', text: 'Each numbered point becomes its own model call. Defects graded as absences.' })
+          el('span', {
+            class: 'sheet-hint',
+            text: st.points.length
+              ? 'Each numbered point becomes its own model call. Defects graded as absences.'
+              : NO_POINTS_NOTE
+          })
         ].concat(st.points.map(function (p) {
           return el('span', {}, [el('b', { text: p.n }), ' ' + p.text]);
         }))),
@@ -671,10 +678,15 @@
       st.hasRun ? renderGrid(task, st) : [
         el('div', { class: 'empty-center' }, [
           el('div', { class: 'empty-note' }, [
-            el('span', { class: 'empty-title', text: 'No saved run for this target' }),
+            el('span', {
+              class: 'empty-title',
+              text: st.points.length ? 'No saved run for this target' : 'Nothing compiled for this target'
+            }),
             el('span', {
               class: 'empty-body',
-              text: 'The compiled criterion is ready (' + st.points.length + ' points). Run grades each point independently across 4 models, alongside the perturbed sheet. Results save to build/photo_eval/' + task.code + '/.'
+              text: st.points.length
+                ? 'The compiled criterion is ready (' + st.points.length + ' points). Run grades each point independently across ' + modelNames().length + ' models, alongside the perturbed sheet. Results save to build/photo_eval/' + task.code + '/.'
+                : NO_POINTS_NOTE + ' The latest saved run for this task graded its other subtasks; this one was not among them.'
             }),
             el('span', { class: 'plate-note', text: runCost })
           ])
@@ -729,13 +741,32 @@
       }
     });
 
-    out.push(el('div', { class: 'rollup' }, [
-      el('div', { class: 'rollup-label', text: 'Subtask roll-up — one fail fails · unsure → review' })
-    ].concat(run.rollup.map(function (c) {
-      return el('div', { class: 'rollup-cell' }, [
-        el('span', { class: cellCls(c[0]), style: 'font-size:9px;font-weight:600', text: c[1] })
-      ]);
-    }))));
+    // The criteria roll-up and the controls roll-up are the pair worth reading
+    // together: the same subtask, graded on its own sheet and on the perturbed one.
+    var rolls = Array.isArray(run.rollup)
+      ? [{ label: 'Subtask roll-up — one fail fails · unsure → review', cells: run.rollup }]
+      : [
+          { label: 'Criteria roll-up — one fail fails · unsure → review',
+            cells: run.rollup.criteria || [] },
+          { label: 'Controls roll-up — every control expects fail',
+            cells: run.rollup.controls || [], controls: true }
+        ];
+
+    rolls.forEach(function (r) {
+      if (!r.cells.length) return;
+      out.push(el('div', { class: 'rollup' + (r.controls ? ' is-controls' : '') }, [
+        el('div', { class: 'rollup-label', text: r.label })
+      ].concat(r.cells.map(function (c) {
+        // Verdict and the split it was decided from, so "review" shows what is unsettled.
+        return el('div', { class: 'rollup-cell', title: c[2] || '' }, [
+          el('span', {
+            class: cellCls(c[0]), style: 'font-size:9px;font-weight:600',
+            text: c[0] === 'none' ? c[1] : c[0]
+          }),
+          c[0] === 'none' ? null : el('span', { class: 'rollup-split', text: c[1] })
+        ]);
+      }))));
+    });
 
     out.push(el('div', { class: 'control-note' }, [
       el('span', {
@@ -890,8 +921,28 @@
     var vol = (task.handbook || '').split(' ')[0];
     var pages = (task.handbook || '').split(' ')[1] || '';
     var hbFile = task.handbookFile || '—';
-    var secNames = task.subtasks.map(function (s) { return s.label; });
     var HEAD = 'col-label';
+
+    // The sheet's own sections, as steps.json parsed them — not the pack's compiled
+    // subtasks. The pack drops the front matter and renames as it compiles, so the
+    // two lists differ on most tasks and only one of them is the sheet.
+    var sheetSecs = task.sheetSections || [];
+    var packSecs = task.subtasks.filter(function (s) { return !s.fromRun; })
+      .map(function (s) { return s.label; });
+
+    function carries(s) {
+      var parts = [];
+      if (s.steps) parts.push(s.steps + (s.steps === 1 ? ' step' : ' steps'));
+      if (s.notes) parts.push(s.notes + ' senior mechanic ' + (s.notes === 1 ? 'note' : 'notes'));
+      if (s.prereqs) parts.push(s.prereqs + ' prerequisites');
+      if (s.safety) parts.push(s.safety + ' safety points');
+      if (s.equipment) parts.push(s.equipment + ' equipment items');
+      return parts.length ? parts.join(' · ') : 'heading only — nothing parsed under it';
+    }
+
+    var uncompiled = sheetSecs.filter(function (s) {
+      return packSecs.indexOf(s.name) < 0;
+    }).length;
 
     return [
       { name: 'Handbook extract',
@@ -913,13 +964,28 @@
           { head: 'Conflicts recorded, not resolved', headStyle: HEAD, lines: [
             { n: '—', text: 'Where the two sources disagree the conflict is recorded and the procedure sheet is treated as operative: the student is graded against what the instructor taught.' }] }
         ] },
-      { name: 'Procedure sheet', meta: 'normalized · ' + secNames.length + ' sections',
+      { name: 'Procedure sheet',
+        meta: 'normalized · ' + sheetSecs.length + ' sections' +
+          (task.sheetVariants > 1 ? ' · ' + task.sheetVariants + ' variants' : ''),
         title: 'AIM skill sheet — ' + task.title, path: 'tasks/' + task.code + '/procedure.md',
         prov: 'confidential · AIM Fremont', provCls: 'tag tag-outline', warn: false, isProse: true,
         blocks: [
-          { head: 'Sections', headStyle: HEAD, lines: secNames.map(function (n, i) {
-            return { n: String(i + 1).padStart(2, '0'), text: n + ' — Step Instructions and a matching Senior Mechanic Notes list' };
-          }) },
+          { head: 'Sections · names and counts only', headStyle: HEAD,
+            lines: sheetSecs.length
+              ? sheetSecs.map(function (s, i) {
+                return {
+                  n: String(i + 1).padStart(2, '0'),
+                  text: (s.variant ? s.variant + ' · ' : '') + s.name + ' — ' + carries(s) +
+                    (packSecs.indexOf(s.name) < 0 ? ' · not compiled into the pack' : '')
+                };
+              })
+              : [{ n: '—', text: 'No steps.json for this task: the sheet was never normalized, so the pack was hand-compiled from the source document.' }] },
+          { head: 'Sheet vs. pack', headStyle: HEAD, lines: [
+            { n: '—', text: sheetSecs.length
+              ? 'The sheet carries ' + sheetSecs.length + ' sections; the pack compiles ' + packSecs.length +
+                (uncompiled ? '. The ' + uncompiled + ' left out carry no gradeable step — front matter, safety and equipment — and a criterion is never drafted from them.'
+                            : '. Every section with steps was compiled.')
+              : 'Nothing to compare: this pack has no normalized sheet.' }] },
           { head: 'Parsing', headStyle: HEAD, lines: [
             { n: '—', text: 'Steps carry note references as bare trailing digits: "Deburr the tubing ends2-3." means see notes 2 and 3. A reference is only accepted when it starts at the next unconsumed note number, so "Fill out block 13." reads as block 1, note 3.' },
             { n: '—', text: 'Most acceptance detail lives in the Senior Mechanic Notes, so drafting is sent the whole normalized sheet rather than the step list alone.' }] }
