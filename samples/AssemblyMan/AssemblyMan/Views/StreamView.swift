@@ -263,14 +263,7 @@ struct StreamView: View {
             .fill(.white)
             .frame(width: 7, height: 7)
             .blinking()
-          // The session's actual rate, not the one that was asked for. When the feed has
-          // traded frames for resolution the chip has to say so, or the operator reads a
-          // steady "30FPS" over a picture that plainly is not.
-          Text(
-            viewModel.hasAdaptedFrameRate
-              ? "Live · \(settings.quality.label.uppercased()) \(viewModel.requestedFrameRate)FPS"
-              : settings.liveLabel
-          )
+          Text(settings.liveLabel)
             .font(Theme.overline(10))
             .tracking(1.2)
             .textCase(.uppercase)

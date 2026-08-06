@@ -129,7 +129,7 @@ final class StreamSessionViewModel {
 
   /// Requested versus delivered, for the diagnostics line: `720x1280@30 → 504x896@17`.
   var deliveredSpec: String {
-    let wanted = "\(settings.quality.dimensionsLabel)@\(requestedFrameRate)"
+    let wanted = "\(settings.quality.dimensionsLabel)@\(settings.frameRate.rawValue)"
     guard let size = deliveredFrameSize else { return "\(wanted) → nothing yet" }
     let got = "\(Int(size.width))x\(Int(size.height))@\(deliveredFramesPerSecond)"
     return wanted == got ? wanted : "\(wanted) → \(got)"
@@ -144,46 +144,20 @@ final class StreamSessionViewModel {
       < Int(requested.width) * Int(requested.height)
   }
 
-  // MARK: Resolution adaptation
-  //
-  // The SDK's own ladder lowers resolution first and frame rate second. So a feed arriving
-  // smaller than the tier that was asked for has already spent step one, and asking again for
-  // a resolution the link has just demonstrated it cannot carry only buys more compression —
-  // which the SDK documentation is explicit about: lower settings yield *higher* visual
-  // quality, because there is less of it to squeeze.
-  //
-  // The lever that gets the resolution back is the one the SDK reaches for last. Giving up
-  // frames per second leaves the same bandwidth to spend on fewer, larger, less-compressed
-  // ones, and — unlike lowering the tier — it keeps `.high`, which is what holds the Wi-Fi
-  // lease. Dropping the tier instead would pin the session to Bluetooth Classic and make the
-  // picture worse in the name of fixing it.
-
-  /// Where this session has got to on the ladder. Session-local for the same reason the
-  /// recovery ladder is: a bad link must not quietly become a lower setting the operator never
-  /// chose and cannot explain.
-  @ObservationIgnored private var frameRateLadder: FrameRateLadder?
-
-  /// The frame rate the next stream will ask for.
-  var requestedFrameRate: UInt {
-    frameRateLadder?.current ?? UInt(settings.frameRate.rawValue)
-  }
-
-  /// True once the session has given up frame rate to hold its resolution — worth showing,
-  /// because the operator chose 30 and is not getting it.
-  var hasAdaptedFrameRate: Bool { frameRateLadder?.hasStepped ?? false }
   /// True once the gap is long enough that this is a stall rather than a slow frame.
+  ///
+  /// Reported and nothing more. Nothing here rebuilds the stream on the operator's behalf: a
+  /// restart costs seconds of black picture, and three of them in a row cost more than the
+  /// stall they were answering. A session that stops delivering stays stopped and says so, and
+  /// the operator decides whether to start another.
   var isFeedStalled: Bool { secondsSinceLastFrame >= 3 }
   /// Rebuilding the stream underneath a session that is still, from the operator's point of
-  /// view, running. Drives an indicator rather than an alert: they have their hands full, and
-  /// a modal per hiccup costs more attention than the hiccup.
+  /// view, running — which now happens only when they change a setting that is baked into the
+  /// stream at creation. Drives an indicator rather than an alert.
   private(set) var isReconnecting = false
   @ObservationIgnored private var lastFrameAt: Date?
   /// Coalesces preview frames so the main actor never accumulates a backlog.
   @ObservationIgnored private let previewGate = PreviewFrameGate()
-  /// Reset by a frame arriving, so a session that recovers gets its full budget back.
-  @ObservationIgnored private var feedRecoveryAttempts = 0
-  @ObservationIgnored private var lastRecoveryAt: Date?
-  @ObservationIgnored private var restartHandshakeTask: Task<Void, Never>?
   /// The vision overlay drawn over the feed.
   ///
   /// Also handed to the relay, so a remote viewer sees the same overlay rather than the bare
@@ -323,11 +297,6 @@ final class StreamSessionViewModel {
     framesThisSecond = 0
     // The next session starts from the operator's choice again: the link it will run over is
     // not the one this session learned about.
-    frameRateLadder = nil
-    feedRecoveryAttempts = 0
-    lastRecoveryAt = nil
-    restartHandshakeTask?.cancel()
-    restartHandshakeTask = nil
     previewGate.reset()
     // A grade waiting on a shutter that will now never fire has to be released, or the agent
     // sits on the RPC until its own timeout with no idea the session ended underneath it.
@@ -487,36 +456,18 @@ final class StreamSessionViewModel {
     }
   }
 
-  /// The configuration to open the next stream with: the operator's settings, stepped down by
-  /// however many recovery attempts have already failed.
+  /// The configuration to open the next stream with: exactly what the operator asked for.
   ///
-  /// Degradation lives here rather than in `AppSettings` so it stays temporary. Writing a
-  /// reduced frame rate back into settings would make a bad link permanently lower the
-  /// operator's chosen quality, and they would have no idea why.
+  /// Nothing steps it down any more. The SDK runs its own adaptive ladder — lowering resolution
+  /// first and frame rate second — and a second ladder here was competing with it rather than
+  /// helping: the app would ask for less, the SDK would adapt to that, and the two would settle
+  /// somewhere neither had chosen. One place decides, and it is the one holding the link.
   ///
-  /// The values are hints: the SDK runs its own adaptive-bitrate ladder and will lower
-  /// resolution and then frame rate on its own. Handing it a lower starting point gives that
-  /// ladder headroom instead of competing with it.
+  /// If the delivered frame is persistently smaller than the tier, that is worth knowing and
+  /// the diagnostics line says so — but the answer is for the operator to pick a lower tier in
+  /// Settings, where it will stick and be visible, not for the app to quietly do it.
   private func activeStreamConfiguration() -> StreamConfiguration {
-    var resolution = settings.quality.streamingResolution
-    // Whatever this session has settled on, which is the operator's choice until the feed has
-    // shown it cannot carry it.
-    var frameRate = requestedFrameRate
-
-    switch feedRecoveryAttempts {
-    case 0:
-      break
-    case 1:
-      // 15 is the lowest rate the SDK will hold; AGENTS.md lists 2, 7, 15, 24, 30 as valid.
-      // Fewer frames is a cheaper concession than fewer pixels when the operator is reading
-      // a label.
-      frameRate = 15
-    default:
-      frameRate = 15
-      resolution = Self.steppedDown(resolution)
-    }
-
-    return StreamConfiguration(
+    StreamConfiguration(
       // Raw, not `.hvc1`, and this is not a bandwidth preference — it is what the pipeline
       // can actually consume. An HEVC sample buffer carries a CMBlockBuffer of encoded
       // bytes and no CVImageBuffer, and both consumers of a frame need pixels:
@@ -532,17 +483,9 @@ final class StreamSessionViewModel {
       // ourselves — a VTDecompressionSession between the DAT publisher and both consumers —
       // not simply asking for the codec again.
       videoCodec: VideoCodec.raw,
-      resolution: resolution,
-      frameRate: frameRate
+      resolution: settings.quality.streamingResolution,
+      frameRate: UInt(settings.frameRate.rawValue)
     )
-  }
-
-  private static func steppedDown(_ resolution: StreamingResolution) -> StreamingResolution {
-    switch resolution {
-    case .high: return .medium
-    case .medium, .low: return .low
-    @unknown default: return .low
-    }
   }
 
   private func setupListeners(for stream: MWDATCamera.Stream) {
@@ -610,8 +553,6 @@ final class StreamSessionViewModel {
         // keeps their connection, seeing only a brief freeze. Tearing it down here would mint
         // a new code and drop every viewer on each rebuild.
         wantsRestart = false
-        restartHandshakeTask?.cancel()
-        restartHandshakeTask = nil
         streamingStatus = .waiting
         isReconnecting = true
         Task { await handleStartStreaming() }
@@ -657,7 +598,6 @@ final class StreamSessionViewModel {
   private func sampleDeliveredFrameRate() {
     deliveredFramesPerSecond = framesThisSecond
     framesThisSecond = 0
-    adaptToDeliveredResolution()
     #if DEBUG
     // Logged as well as shown, because the interesting runs are the ones being watched over a
     // cable rather than over the operator's shoulder.
@@ -675,40 +615,6 @@ final class StreamSessionViewModel {
     #endif
   }
 
-  /// Trades frame rate for resolution when the feed has been arriving small for a while.
-  ///
-  /// Deliberately slow and strictly one-way. The stall recovery in `checkFeedLiveness` already
-  /// restarts the stream, and a second thing restarting it on its own schedule is how a
-  /// recovery loop gets built by accident — so this stands down whenever that is in play, waits
-  /// out a cooldown between steps, and never climbs back up. Two steps is the whole budget:
-  /// 30 to 24 to 15, which is the floor the SDK will hold.
-  private func adaptToDeliveredResolution() {
-    guard streamingStatus == .streaming else { return }
-
-    // Started here rather than at session start so it always begins from the operator's
-    // current choice, including a rate they changed mid-session.
-    if frameRateLadder == nil {
-      frameRateLadder = FrameRateLadder(startingAt: UInt(settings.frameRate.rawValue))
-    }
-
-    let stepped = frameRateLadder?.observe(
-      isDownscaled: isDownscaled,
-      // The stall recovery restarts the stream on its own schedule and lowers both values as
-      // it goes; two things doing that at once is how a loop gets built.
-      isRecovering: isReconnecting || feedRecoveryAttempts > 0,
-      now: Date()
-    )
-    guard let stepped else { return }
-
-    #if DEBUG
-    print(
-      "[feed] delivered below \(settings.quality.dimensionsLabel) for "
-        + "\(FrameRateLadder.toleranceSeconds)s — asking for \(stepped) fps to win the frame back"
-    )
-    #endif
-    restartStream()
-  }
-
   private func stopElapsedClock() {
     elapsedTask?.cancel()
     elapsedTask = nil
@@ -718,17 +624,6 @@ final class StreamSessionViewModel {
     guard let image = previewGate.take() else { return }
     lastFrameAt = Date()
     if secondsSinceLastFrame != 0 { secondsSinceLastFrame = 0 }
-
-    // The budget resets only after the feed has been healthy for a while, not on the first
-    // frame back. Resetting immediately meant a feed that recovered for a second and stalled
-    // again got a fresh set of attempts every time, so the cap never bound and the stream
-    // rebuilt itself in a loop — worse than the stall it was meant to fix.
-    if feedRecoveryAttempts != 0,
-      let lastRecoveryAt,
-      Date().timeIntervalSince(lastRecoveryAt) >= Self.healthyStreakSeconds {
-      feedRecoveryAttempts = 0
-      self.lastRecoveryAt = nil
-    }
 
     currentVideoFrame = image
     if !hasReceivedFirstFrame {
@@ -745,66 +640,23 @@ final class StreamSessionViewModel {
     scheduleSegmentation(for: image)
   }
 
-  /// Notices when the glasses stop sending, and rebuilds the stream when they do.
+  /// Measures how long the glasses have been silent, and reports it.
   ///
-  /// A stalled feed is silent: the SDK reports no error and no state change, the last frame
-  /// stays on screen, and the session looks live. Over Bluetooth this happens for ordinary
-  /// reasons — the link saturates, the frames warm up and throttle — and it does not recover
-  /// on its own, because nothing downstream knows anything is wrong.
+  /// A stalled feed is otherwise invisible: the SDK reports no error and no state change, the
+  /// last frame stays on screen, and the session looks live. Over Bluetooth it happens for
+  /// ordinary reasons — the link saturates, the frames warm up and throttle.
   ///
-  /// Rebuilding is the only lever available: a stopped DAT session is terminal, so there is
-  /// nothing to nudge, and `restartStream()` already knows how to tear one down and stand a
-  /// fresh one up. The relay deliberately survives it, so viewers keep their room code and
-  /// the assistant keeps its context across the gap.
+  /// It used to answer that by rebuilding the stream, up to three times. That is gone. Every
+  /// rebuild costs seconds of black picture and a fresh negotiation with the glasses, so a
+  /// link that is struggling got a burst of restarts on top of whatever was already wrong; the
+  /// cure was reliably worse than the stall, and the loop it could fall into needed two further
+  /// mechanisms — a healthy-streak timer and a handshake deadline — to contain it. All three
+  /// are now unnecessary rather than tuned. The gap is shown, and starting another session is
+  /// the operator's call.
   private func checkFeedLiveness() {
     guard streamingStatus == .streaming, let lastFrameAt else { return }
     secondsSinceLastFrame = Int(Date().timeIntervalSince(lastFrameAt))
-
-    guard secondsSinceLastFrame >= Self.stallRecoverySeconds else { return }
-    guard feedRecoveryAttempts < Self.maxFeedRecoveryAttempts else { return }
-
-    // Capped rather than endless. If three rebuilds do not bring frames back, the problem is
-    // the glasses or the link, and retrying forever would hide that behind a loop while
-    // burning battery on both devices.
-    feedRecoveryAttempts += 1
-    lastRecoveryAt = Date()
-    self.lastFrameAt = Date()
-    // Reported once the budget is spent rather than on every attempt. An alert per restart
-    // interrupts the operator more than the stall does, and the badge already shows the gap.
-    if feedRecoveryAttempts >= Self.maxFeedRecoveryAttempts {
-      showError(
-        "The glasses keep dropping the video feed. Stopping the automatic restarts — "
-          + "check that the glasses are charged and in range, then start a new session."
-      )
-    }
-    restartStream()
-
-    // `restartStream` only asks: it sets `wantsRestart` and calls `stop()`, then waits for the
-    // SDK to deliver `.stopped`. A wedged link is exactly the case where that may never
-    // arrive, which would leave the flag set and every later attempt asking a dead stream to
-    // stop. Give the handshake a deadline and drive the rebuild directly if it lapses.
-    let attempt = feedRecoveryAttempts
-    restartHandshakeTask?.cancel()
-    restartHandshakeTask = Task { [weak self] in
-      try? await Task.sleep(nanoseconds: UInt64(Self.restartHandshakeSeconds) * 1_000_000_000)
-      guard !Task.isCancelled, let self, self.wantsRestart, self.feedRecoveryAttempts == attempt
-      else { return }
-      self.wantsRestart = false
-      self.stream = nil
-      self.clearListeners()
-      self.sessionManager.stopCurrentSession()
-      await self.handleStartStreaming()
-    }
   }
-
-  /// How long a gap has to be before it counts as a stall rather than a slow frame. Wide
-  /// enough to sit out a Bluetooth hiccup, short enough that nobody stares at a dead picture.
-  private static let stallRecoverySeconds = 8
-  private static let maxFeedRecoveryAttempts = 3
-  /// How long the feed must run cleanly before a fresh set of restarts is allowed.
-  private static let healthyStreakSeconds: TimeInterval = 60
-  /// How long to wait for the SDK to acknowledge a stop before rebuilding regardless.
-  private static let restartHandshakeSeconds = 5
 
   private func scheduleSegmentation(for image: UIImage) {
     guard

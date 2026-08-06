@@ -59,7 +59,6 @@
 		DE000000000000000000000B /* IndustryControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000A /* IndustryControls.swift */; };
 		DE000000000000000000000D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000C /* SettingsView.swift */; };
 		DE000000000000000000000F /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE000000000000000000000E /* AppSettings.swift */; };
-		DE0000000000000000000015 /* FrameRateLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0000000000000000000014 /* FrameRateLadder.swift */; };
 		DF0000000000000000000001 /* SegmentMaskOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0000000000000000000000 /* SegmentMaskOverlay.swift */; };
 		DF0000000000000000000003 /* DeveloperSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0000000000000000000002 /* DeveloperSection.swift */; };
 /* End PBXBuildFile section */
@@ -146,7 +145,6 @@
 		DE000000000000000000000A /* IndustryControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndustryControls.swift; sourceTree = "<group>"; };
 		DE000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DE000000000000000000000E /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-		DE0000000000000000000014 /* FrameRateLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRateLadder.swift; sourceTree = "<group>"; };
 		DF0000000000000000000000 /* SegmentMaskOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentMaskOverlay.swift; sourceTree = "<group>"; };
 		DF0000000000000000000002 /* DeveloperSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSection.swift; sourceTree = "<group>"; };
 		AA0130000000000000000001 /* LiveKit.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = LiveKit.xcconfig; sourceTree = "<group>"; };
@@ -268,7 +266,6 @@
 				8FD96B6F2E6F0A9800F56AB1 /* StreamSessionViewModel.swift */,
 				8F8F00772E8ACB4500A4BDAF /* WearablesViewModel.swift */,
 				DE000000000000000000000E /* AppSettings.swift */,
-				DE0000000000000000000014 /* FrameRateLadder.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -564,7 +561,6 @@
 				DE000000000000000000000B /* IndustryControls.swift in Sources */,
 				DE000000000000000000000D /* SettingsView.swift in Sources */,
 				DE000000000000000000000F /* AppSettings.swift in Sources */,
-				DE0000000000000000000015 /* FrameRateLadder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
