@@ -316,10 +316,21 @@ final class StreamSessionViewModel {
     }
 
     return StreamConfiguration(
-      // Compressed HEVC rather than raw. Raw video is the worst case for a bandwidth-limited
-      // link, and per the 0.5.0 changelog it also pauses streaming whenever the app is
-      // backgrounded, which `.hvc1` does not.
-      videoCodec: .hvc1,
+      // Raw, not `.hvc1`, and this is not a bandwidth preference — it is what the pipeline
+      // can actually consume. An HEVC sample buffer carries a CMBlockBuffer of encoded
+      // bytes and no CVImageBuffer, and both consumers of a frame need pixels:
+      // `makeUIImage()` returns nil, so the on-screen preview never updates and the stall
+      // banner reads "no frames"; and WebRTC's BufferCapturer drops every buffer, so the
+      // track's dimensions never resolve and `publish()` times out. The symptom is a
+      // session that looks connected and shows nothing, with frames visibly being offered —
+      // 225 offered, 225 forwarded, pixel format never determined.
+      //
+      // The reasons `.hvc1` was chosen are real: raw is the worst case for a
+      // bandwidth-limited link, and per the 0.5.0 changelog raw also pauses streaming when
+      // the app is backgrounded. Getting them back means decoding HEVC to pixel buffers
+      // ourselves — a VTDecompressionSession between the DAT publisher and both consumers —
+      // not simply asking for the codec again.
+      videoCodec: VideoCodec.raw,
       resolution: resolution,
       frameRate: frameRate
     )
