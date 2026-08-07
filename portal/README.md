@@ -38,6 +38,7 @@ is the sheet.
 | Task browser | The eleven pilot tasks as cards — steps, atoms, photo targets, governing handbook pages, and how each pack was compiled. Every pack is machine-drafted and unreviewed; the banner says so, because a passing grade against these criteria tests the pipeline, not a student. |
 | Hierarchy | A subtask's steps expanded into checks and error modes, each carrying the source it rests on and whether it is observable from a photograph, a video, a measurement or a document. Beside it: the frame the subtask would be graded on, its sheet, and eval readiness. |
 | Photo assessment | The subtask sheet, its excluded non-photo-observable checks, and the perturbed sheet drafted from it. The grid grades each point across four models, with the control row beneath its original. Click any verdict cell for the model's reply. |
+| Video assessment | The same criterion, moved onto the clip: a sequence sampled at 0.5 fps over the subtask's span, each frame labelled with its own timestamp. The grid sets the saved photo verdict against an empty clip verdict, because no video-eval run exists yet. |
 | Videos & frames | Clips with a band timeline per step and the sampled frames beneath. Frame filenames encode their source timestamp (`t000041_50.jpg` = 41.50 s), so a frame is citable back to the video without a lookup table. |
 | Documentation | Handbook extract, normalized procedure sheet, compilation inputs with their hashes, and the pack's assumptions and open questions. |
 | Evals | Which grader to trust and which tasks produce gradeable evidence. The **Accepted** column is the one that matters — a model passing a criterion on work that contradicts it, where the same model had already shown it can see the condition. |
@@ -59,7 +60,7 @@ sheet; the Evals subtitle counts both rather than assuming one is twice the othe
 | `data/tasks/<ACS>.json` | Steps, checks, error modes, criteria, and the grid for each subtask |
 | `data/evals.json` | The model table and the per-task table |
 | `data/frames/` | The frames a run actually graded, full size |
-| `data/thumbs/` | An evenly spaced strip per clip for the Videos tab |
+| `data/thumbs/` | Two picks per clip: the Videos tab's 16-frame strip, and the 0.5 fps sequence Video assessment grades on |
 
 `frames/` and `thumbs/` are gitignored: they are derived from `alcor_agents/build/`,
 which is itself untracked. Re-run the build script after cloning.
@@ -74,6 +75,44 @@ exist rather than of the targets those runs graded.
 A subtask the latest run did not cover shows no frame and no criterion rather than
 a placeholder — `AM.I.E.S1`'s "Procedure" section and `AM.II.K.S3`'s "Test the
 Connector" are both in that state.
+
+## Video assessment
+
+The screen grades the *same* compiled criterion Photo assessment grades — the points
+are passed through unchanged. Only the evidence moves: instead of one still, the
+model is handed a sequence sampled from the clip at `SAMPLE_FPS` (0.5 fps), each
+frame labelled with its own timestamp. Moving the evidence and the standard at once
+would leave nothing to read a verdict against.
+
+That rate is a rate, not a count. The Videos tab's strip is a fixed 16 frames per
+clip, which means a different thing on every clip — the 105 s `flareless_fitting_1_rf`
+came out at 0.14 fps and the 28 s `flex_hose_1` at 0.57 fps, four times denser for no
+reason but length. `sample_picks()` picks by timestamp off the 4 fps extraction, so
+the interval between two graded frames is 2.00 s everywhere and cost scales with clip
+length, which is the honest behaviour.
+
+A subtask's span is the interval of its clip it is graded over. Where a clip carries
+several subtasks, each span ends on that subtask's own graded frame and starts on the
+previous one's — `route_the_line` partitions into 0–13.75 s, 13.75–27.50 s and
+27.50–41.50 s, seven sampled frames each, no overlap. Only three tasks carry those
+sub-subtask rows; everywhere else a subtask is its clip's only occupant and the span
+is the whole clip, which the screen states rather than dressing up as an interval.
+
+Two things this screen does not do, and says so on its face:
+
+- **The clip column is empty.** No video-eval run exists anywhere in the tree —
+  `build/photo_eval/` has no counterpart and `alcor_agents` has no runner. The photo
+  column beside it is real, off the saved run, and it is what a video run would have
+  to beat: the unsures are the points where a still could not settle the condition.
+  The Run button is inert, and nothing on this screen writes.
+- **The `[video]` checks stay excluded.** 83 checks across the eleven tasks are marked
+  observable only in motion, and this is the evidence they were held back for.
+  Admitting them would change the criterion, and then a clip verdict could no longer
+  be read against the photo one. The sheet names the count per subtask instead.
+
+The costing is an order of magnitude, not a quote: it prices every frame at the photo
+run's per-call rate, which overstates a sequence that shares one criterion across its
+frames. No video run has been costed for real.
 
 ## Notes on the port
 

@@ -127,12 +127,17 @@
   var NO_POINTS_NOTE = 'No compiled criterion for this subtask — no entry in ' +
     'build/criteria/ and no saved run to draw points from.';
 
+  // Mirrors SAMPLE_FPS in scripts/build_portal_data.py, which picks the frames this
+  // reads. A rate, not a count: the Videos tab's 16-frame strip means a different
+  // thing on a 28 s clip than on a 105 s one, and a sampled sequence must not.
+  var SAMPLE_FPS_LABEL = '0.5 fps';
+
   /* ── state ─────────────────────────────────────────────────────────────── */
 
   var state = {
     nav: 'home',        // 'home' | 'task' | 'evals'
     taskCode: null,
-    tab: 'detail',      // 'detail' | 'assess' | 'videos' | 'docs'
+    tab: 'detail',      // 'detail' | 'assess' | 'vassess' | 'videos' | 'docs'
     sub: 0,
     expanded: null,     // step id whose checks/errors are open
     clipIdx: 0,
@@ -414,6 +419,7 @@
   var TABS = [
     { id: 'detail', label: 'Hierarchy' },
     { id: 'assess', label: 'Photo assessment' },
+    { id: 'vassess', label: 'Video assessment' },
     { id: 'videos', label: 'Videos & frames' },
     { id: 'docs', label: 'Documentation' }
   ];
@@ -456,6 +462,7 @@
 
     if (state.tab === 'detail') parts.push(renderHierarchy(task, st));
     else if (state.tab === 'assess') parts.push(renderAssess(task, st));
+    else if (state.tab === 'vassess') parts.push(renderVideoAssess(task, st));
     else if (state.tab === 'videos') parts.push(renderVideos(task));
     else parts.push(renderDocs(task));
 
@@ -828,6 +835,420 @@
       ]),
       el('div', { class: 'reply-body', text: text })
     ]);
+  }
+
+  /* tab · video assessment
+   *
+   * The same compiled criterion Photo assessment grades on one still, graded instead
+   * on a sequence sampled from the clip at SAMPLE_FPS, each frame carrying its own
+   * timestamp. The points are passed unchanged — this screen moves the evidence, not
+   * the standard, so a verdict that differs differs because of what motion shows.
+   *
+   * No video-eval run exists in the tree, so the clip column is empty everywhere. The
+   * photo column beside it is real, off the saved run, and it is the thing a video run
+   * would have to beat: the unsures are where a still could not settle the condition.
+   */
+
+  // Seconds off a frame's own name — t000041_50.jpg is 41.50 s. Same encoding the
+  // extractor writes and build_portal_data.py reads.
+  function frameSeconds(name) {
+    var m = /^t(\d+)_(\d+)/.exec(name || '');
+    return m ? +m[1] + +m[2] / 100 : null;
+  }
+
+  function fmtTime(t) { return t.toFixed(2) + 's'; }
+
+  /* The span of its clip a subtask is graded over. A pack section is graded on the
+     whole clip. A sub-subtask — the stepsCount-0 rows the compiler emits one per
+     step — ends at its own graded frame and starts at the one before it on that clip,
+     which is the interval that step's work actually occupies. Only three tasks carry
+     those rows; everywhere else a subtask is its clip's only occupant and the span is
+     the clip, which is stated rather than dressed up as an interval. */
+  function spanFor(task, i) {
+    var st = task.subtasks[i];
+    var clip = st.frameVideo;
+    if (!clip) return null;
+    var frames = (task.samples || {})[clip] || [];
+    if (!frames.length) return null;
+
+    var clipEnd = frameSeconds(frames[frames.length - 1]);
+    var own = frameSeconds(st.frameFile);
+    if (st.stepsCount || own === null) {
+      return { clip: clip, t0: 0, t1: clipEnd, whole: true, frames: frames };
+    }
+
+    var marks = task.subtasks.filter(function (s) {
+      return s.frameVideo === clip && !s.stepsCount && s.frameFile;
+    }).map(function (s) {
+      return frameSeconds(s.frameFile);
+    }).filter(function (t) {
+      return t !== null && t < own;
+    }).sort(function (a, b) { return a - b; });
+
+    var t0 = marks.length ? marks[marks.length - 1] : 0;
+    return {
+      clip: clip, t0: t0, t1: own, whole: false,
+      frames: frames.filter(function (f) {
+        var t = frameSeconds(f);
+        // Exclusive at the start so a frame landing on a boundary is not graded twice.
+        return t !== null && t <= own + 1e-9 && (t0 === 0 ? t >= 0 : t > t0 + 1e-9);
+      })
+    };
+  }
+
+  function videoChecks(st) {
+    var n = 0;
+    (st.raw.steps || []).forEach(function (s) {
+      s.checks.forEach(function (c) { if (c.obs === 'video') n += 1; });
+    });
+    return n;
+  }
+
+  function videoCostText(pointCount, frameCount, models) {
+    if (!pointCount) return NO_POINTS_NOTE;
+    var calls = pointCount * models;
+    var images = calls * frameCount;
+    return pointCount + ' points × ' + models + ' models = ' + calls + ' calls, ' +
+      frameCount + ' frames each = ' + images.toLocaleString() + ' images · ~$' +
+      (images * 0.028).toFixed(2) + ' priced at the photo run’s per-call rate per frame. ' +
+      'Treat it as an order of magnitude, not a quote: the sequence shares one criterion ' +
+      'across its frames, and no video run has been costed for real.';
+  }
+
+  function renderVideoAssess(task, st) {
+    if (!task.clips) {
+      var vcx = videoChecks(st);
+      return renderNotice('No source video',
+        'The workbook records this task as "N/A (not AIM developed)", so there is no clip ' +
+        'to sample and nothing to grade a sequence on. ' +
+        (vcx
+          ? 'This subtask carries ' + vcx + (vcx === 1 ? ' check' : ' checks') +
+            ' marked [video] — observable only in motion, on footage that was never shot. ' +
+            'The criterion does not stop existing because the recording does.'
+          : 'Its criterion exists regardless — a criterion cannot depend on a photograph existing.'));
+    }
+
+    var span = spanFor(task, subIndex(task));
+    if (!span) {
+      return renderNotice('No sampled sequence for this subtask',
+        st.raw.frameVideo
+          ? 'data/thumbs/' + task.code + '/' + st.raw.frameVideo + '/ carries no sample — ' +
+            're-run scripts/build_portal_data.py.'
+          : 'The latest run did not grade this subtask, so no clip is recorded against it ' +
+            'and there is no span to sample.');
+    }
+
+    var models = modelNames().length;
+    var vc = videoChecks(st);
+
+    /* left · what the model is handed */
+
+    var seq = el('div', { class: 'seq' }, span.frames.map(function (f) {
+      return el('span', { class: 'seq-frame' }, [
+        plateImage(framePaths(task.code, span.clip, f), ''),
+        el('span', { class: 'seq-ts', text: fmtTime(frameSeconds(f)) })
+      ]);
+    }));
+
+    var left = el('div', { class: 'assess-left' }, [
+      el('div', { class: 'assess-left-inner' }, [
+        el('h2', { class: 'assess-title', text: st.label + ' — criterion on clip' }),
+
+        el('div', { class: 'block' }, [
+          el('div', { class: 'block-head' }, [
+            el('span', { class: 'col-label', text: 'Evidence · sampled sequence' }),
+            tag('tag tag-accent', SAMPLE_FPS_LABEL)
+          ]),
+          el('div', { class: 'span-row' }, [
+            el('span', { class: 'span-clip', text: span.clip + '.mp4' }),
+            tag('tag tag-outline', span.whole
+              ? 'whole clip · ' + fmtTime(span.t1)
+              : fmtTime(span.t0) + ' – ' + fmtTime(span.t1)),
+            el('span', { class: 'span-count', text: span.frames.length + ' frames' })
+          ]),
+          seq,
+          el('span', { class: 'plate-note' }, [
+            'Each frame is passed with its own timestamp — ',
+            el('b', { text: 't=' + fmtTime(frameSeconds(span.frames[0])) }),
+            ' through ',
+            el('b', { text: 't=' + fmtTime(frameSeconds(span.frames[span.frames.length - 1])) }),
+            ' — so the model can order what it sees and cite a moment back to the video. ' +
+            'Sampled from the 4 fps extraction; the filenames are the timestamps.'
+          ]),
+          el('span', { class: 'plate-note', text: span.whole
+            ? 'This subtask is the only one recorded against this clip, so the span is the ' +
+              'whole clip rather than an interval inside it.'
+            : span.t0 === 0
+            ? 'The span ends on this subtask’s graded frame and starts at the clip’s start — ' +
+              'no earlier subtask is recorded against this clip to bound it.'
+            : (task.segmented
+              ? 'Reviewed interval: the span ends on this subtask’s own graded frame and ' +
+                'starts on the previous one’s.'
+              : 'The span ends on this subtask’s graded frame and starts on the previous ' +
+                'subtask’s on this clip. Those boundaries are compiled, not reviewed.') })
+        ]),
+
+        el('div', { class: 'block-head', style: 'padding-top:4px' }, [
+          el('span', { class: 'col-label', text: 'Criterion · unchanged from Photo assessment' }),
+          el('button', {
+            class: 'linkish', type: 'button', text: 'Open in Photo assessment →',
+            on: { click: function () { setState({ tab: 'assess', reply: null }); } }
+          })
+        ]),
+        el('div', { class: 'sheet' }, [
+          el('span', {
+            class: 'sheet-hint',
+            text: st.points.length
+              ? 'The same points, graded on the sequence instead of the still. Moving the ' +
+                'evidence and the standard at once would leave nothing to compare.'
+              : NO_POINTS_NOTE
+          })
+        ].concat(st.points.map(function (p) {
+          return el('span', {}, [el('b', { text: p.n }), ' ' + p.text]);
+        }))),
+
+        el('div', { class: 'block' }, [
+          el('span', { class: 'col-label', text: 'Excluded — carried over from the photo sheet' }),
+          el('span', { class: 'excluded', text: st.excluded }),
+          vc ? el('span', { class: 'plate-note vc-note' }, [
+            el('b', { text: vc + (vc === 1 ? ' check' : ' checks') + ' marked [video]' }),
+            vc === 1
+              ? ' in this subtask stays out of the sheet, though this is the evidence it was held back for. Admitting it would change the criterion, and then a clip verdict could not be read against the photo one.'
+              : ' in this subtask stay out of the sheet, though this is the evidence they were held back for. Admitting them would change the criterion, and then a clip verdict could not be read against the photo one.'
+          ]) : null
+        ]),
+
+        el('div', { class: 'run-row' }, [
+          el('button', { class: 'btn btn-primary blueprint', type: 'button', disabled: true },
+             [corners(), 'Run · ' + models + ' models']),
+          el('span', { class: 'plate-note',
+                       text: videoCostText(st.points.length, span.frames.length, models) })
+        ]),
+        el('span', { class: 'plate-note', text:
+          'Run is inert: no video-eval runner exists in alcor_agents, and nothing on this ' +
+          'screen writes. build/photo_eval/ has no counterpart yet.' })
+      ])
+    ]);
+
+    var right = el('div', { class: 'assess-right' },
+      st.hasRun ? renderCompare(task, st, span, models) : [
+        el('div', { class: 'empty-center' }, [
+          el('div', { class: 'empty-note' }, [
+            el('span', {
+              class: 'empty-title',
+              text: st.points.length ? 'No photo run to compare against' : 'Nothing compiled for this target'
+            }),
+            el('span', {
+              class: 'empty-body',
+              text: st.points.length
+                ? 'This screen reads a clip verdict against the photo verdict for the same ' +
+                  'point. The latest saved run did not grade this subtask, so there is no ' +
+                  'photo column — and no video run exists to fill the other one.'
+                : NO_POINTS_NOTE
+            })
+          ])
+        ])
+      ]);
+
+    return el('div', { class: 'assess' }, [left, right]);
+  }
+
+  /* The pair worth reading: what a still settled, and what it could not. Every clip
+     cell is empty — that is the state of the tree, not a loading placeholder. */
+  function renderCompare(task, st, span, models) {
+    var run = st.raw.run;
+
+    var unsettled = run.rows.filter(function (r) {
+      return r.cells.some(function (c) { return c[0] === 'unsure'; });
+    }).length;
+
+    /* Both columns tallied, and the clip column is tallied precisely because it is empty.
+       A verdict count that quietly reported only the photo side would read, on a screen
+       headed "Video assessment", as though the sequence had been graded — the one thing
+       this screen must never imply. The photo tally is the standing total; the clip tally
+       is a row of zeros against the same denominator, which is what shows the gap. */
+    function tallyOf(key) {
+      var t = { pass: 0, fail: 0, unsure: 0, graded: 0 };
+      run.rows.forEach(function (r) {
+        (r[key] || []).forEach(function (c) {
+          var v = (c && c[0]) || '';
+          // `none` is ungraded, and is deliberately not counted as a verdict:
+          // the denominator that matters is what was actually asked.
+          if (t[v] === undefined) return;
+          t[v] += 1;
+          t.graded += 1;
+        });
+      });
+      return t;
+    }
+
+    var tally = tallyOf('cells');
+    var clipTally = tallyOf('clipCells');
+    var cells = run.rows.length * modelNames().length;
+
+    /* The paired set: the (point, model) cells BOTH columns graded, and the list of
+       models the clip run actually reached. Every comparison below is counted over
+       this set and nothing else — see the Δ note for why that matters. */
+    var paired = { photoUnsure: 0, clipUnsure: 0, moved: 0, n: 0 };
+    var clipModels = [];
+    modelNames().forEach(function (_, mi) {
+      var reached = false;
+      run.rows.forEach(function (r) {
+        var c = (r.clipCells || [])[mi];
+        if (!c || c[0] === 'none') return;
+        reached = true;
+        paired.n += 1;
+        var photo = (r.cells[mi] || [])[0];
+        if (photo === 'unsure') paired.photoUnsure += 1;
+        if (c[0] === 'unsure') paired.clipUnsure += 1;
+        if (photo && photo !== c[0]) paired.moved += 1;
+      });
+      if (reached) clipModels.push(mi);
+    });
+    var partial = clipModels.length && clipModels.length < modelNames().length;
+
+    var out = [
+      el('div', { class: 'cmp-head' }, [
+        el('div', {
+          class: 'grid-head-label',
+          text: 'Photo verdict vs clip verdict · click a photo cell for its reply' +
+                (partial
+                  ? ' · clip reached ' + clipModels.length + ' of ' + modelNames().length + ' models'
+                  : '')
+        })
+      ].concat(modelNames().map(function (m) {
+        return el('div', { class: 'grid-model', text: m });
+      })))
+    ];
+
+    /* The clip verdict under its photo verdict. An ungraded cell stays the em dash
+       it always was — a model that was never asked must not be drawn as one that
+       looked and could not say. Where the two disagree the cell is marked, because
+       the disagreement is the finding: it is where the sequence changed the answer. */
+    function clipCell(row, mi) {
+      var c = (row.clipCells || [])[mi];
+      if (!c || c[0] === 'none') {
+        return el('span', { class: 'cmp-clip', title: 'not graded on the clip', text: '—' });
+      }
+      var photo = (row.cells[mi] || [])[0];
+      var moved = photo && photo !== c[0];
+      return el('span', {
+        class: 'cmp-clip is-graded' + (moved ? ' is-moved' : ''),
+        title: 'clip · ' + c[0] + (c[1] ? ' · ' + c[1] : '') +
+               (moved ? ' (still said ' + photo + ')' : '')
+      }, [
+        el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })
+      ]);
+    }
+
+    run.rows.forEach(function (r, ri) {
+      out.push(el('div', { class: 'cmp-row' }, [
+        el('div', { class: 'grid-row-label', text: r.label })
+      ].concat(r.cells.map(function (c, mi) {
+        var key = 'r' + ri + 'm' + mi;
+        return el('div', { class: 'cmp-cell' }, [
+          el('button', {
+            class: 'cell cmp-photo' + (state.reply === key ? ' is-open' : ''), type: 'button',
+            title: 'photo · ' + c[0],
+            on: { click: function () { setState({ reply: state.reply === key ? null : key }); } }
+          }, [el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })]),
+          clipCell(r, mi)
+        ]);
+      }))));
+    });
+
+    function tallyPart(kind, n, denom) {
+      return el('span', { class: 'vtally-part' }, [
+        el('span', { class: 'vtally-swatch is-' + kind }),
+        el('b', { class: 'vtally-n', text: String(n) }),
+        el('span', { class: 'vtally-kind', text: kind }),
+        el('span', { class: 'vtally-pct',
+                     text: denom ? '· ' + Math.round((100 * n) / denom) + '%' : '' })
+      ]);
+    }
+
+    function tallyLine(name, t, note) {
+      return el('div', { class: 'vtally-line' + (t.graded ? '' : ' is-empty') }, [
+        el('span', { class: 'vtally-col', text: name }),
+        tallyPart('pass', t.pass, t.graded),
+        tallyPart('fail', t.fail, t.graded),
+        tallyPart('unsure', t.unsure, t.graded),
+        el('span', { class: 'spacer' }),
+        el('span', { class: 'vtally-total', text: note })
+      ]);
+    }
+
+    /* The comparison the screen exists to make, stated as a number rather than
+       left for the reader to count across the grid. Percentages are of what each
+       column actually graded, not of the full grid: the clip column covers only
+       the models the run could reach, and dividing both by the same denominator
+       would read as the sequence having abstained on the rest. */
+    var lines = [
+      tallyLine('Photo', tally, cells + ' verdicts · ' + run.rows.length + ' points × ' +
+                                modelNames().length + ' models'),
+      tallyLine('Clip', clipTally, clipTally.graded
+        ? clipTally.graded + ' of ' + cells + ' graded'
+        : '0 of ' + cells + ' graded')
+    ];
+
+    /* Both sides counted over the SAME cells — the ones the clip actually graded.
+       Rating the photo column across all four models while the clip column covers
+       only the two the run reached is not a comparison, it is a denominator: on
+       "Identify the Damage" it reported 18% → 0% where the like-for-like figure is
+       9% → 0%, because five of that subtask's eight photo unsures belong to Opus 5,
+       a model the clip run never asked. An overclaim on the one screen whose entire
+       purpose is a fair comparison is the worst place to have one. */
+    if (paired.n) {
+      var pRate = paired.photoUnsure / paired.n;
+      var cRate = paired.clipUnsure / paired.n;
+      var deltaN = paired.photoUnsure - paired.clipUnsure;
+      var rates = Math.round(pRate * 100) + '% → ' + Math.round(cRate * 100) + '%';
+      lines.push(el('div', { class: 'vtally-line vtally-delta' }, [
+        el('span', { class: 'vtally-col', text: 'Δ' }),
+        el('span', { class: 'vtally-note' }, [
+          // A rise in unsure is the sequence declining to decide. That is a result,
+          // and it is stated as plainly as a fall — not folded into a "fewer" that
+          // happens to carry a minus sign.
+          el('b', {
+            text: deltaN === 0 ? 'No change in unsure'
+              : Math.abs(deltaN) + (deltaN > 0 ? ' fewer unsure' : ' more unsure')
+          }),
+          deltaN === 0
+            ? ' between the still and the clip — ' + rates + '.'
+            : ' on the clip than on the still — ' + rates + '.' +
+              (deltaN < 0 ? ' More frames did not help here.' : ''),
+          ' Counted over the ' + paired.n + ' verdicts both columns graded' +
+          (partial
+            ? ', which is ' + clipModels.length + ' of ' + modelNames().length +
+              ' models — the rest were never asked on the clip, so their photo unsures ' +
+              'are excluded from both sides rather than counted against the sequence.'
+            : '.'),
+          paired.moved
+            ? ' ' + paired.moved + ' of those ' + paired.n +
+              (paired.moved === 1 ? ' verdicts moved; the marked cell is which.'
+                                  : ' verdicts moved; the marked cells are which.')
+            : ' No verdict moved.'
+        ])
+      ]));
+    }
+
+    out.push(el('div', { class: 'vtally' }, lines));
+
+    out.push(el('div', { class: 'control-note' }, [
+      el('span', { class: 'control-note-text' }, [
+        el('b', { text: unsettled + ' of ' + run.rows.length + ' points' }),
+        ' carry at least one unsure on the still — a model saying the frame does not show ' +
+        'enough to decide. Those are what a sequence is for, and they are the only honest ' +
+        'measure of whether this screen earns its calls. The rest a photograph already settled.'
+      ]),
+      el('span', { class: 'spacer' }),
+      el('span', { class: 'control-stats',
+                   text: span.frames.length + ' frames · ' + SAMPLE_FPS_LABEL })
+    ]));
+
+    var reply = replyFor(run);
+    if (reply) out.push(reply);
+    return out;
   }
 
   /* tab · videos & frames */

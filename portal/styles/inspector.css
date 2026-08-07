@@ -429,6 +429,53 @@ code { font-family: ui-monospace, monospace; }
 .reply-close { font-size: 10px; color: var(--color-accent-700); }
 .reply-body { padding: 12px 14px; font-size: 11.5px; line-height: 1.6; color: var(--color-neutral-700); }
 
+/* ── tab · video assessment ─────────────────────────────────────────────── */
+
+/* Shares .assess/.assess-left/.assess-right with Photo assessment: same screen
+   shape, so the two read as one pair rather than two designs. */
+
+.span-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.span-clip { font-family: ui-monospace, monospace; font-size: 11px; }
+.span-count { font-size: 10px; color: var(--color-neutral-500); margin-left: auto; }
+
+/* The sequence the model is handed, in order, each frame under its own timestamp.
+   Scrolls rather than truncates — a 53-frame span should look like 53 frames. */
+.seq {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+  max-height: 208px; overflow-y: auto;
+  border: 1px solid var(--color-neutral-400); padding: 6px;
+}
+.seq-frame { display: flex; flex-direction: column; gap: 2px; min-width: 0; position: relative; }
+/* .plate-img is absolute so a frame can cover its plate. Here each frame is its own
+   tile with nothing behind it, so it goes back into flow — left absolute it escapes
+   to the nearest positioned ancestor and covers the screen. */
+.seq-frame .plate-img {
+  position: static; inset: auto;
+  width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  background: var(--color-neutral-300); display: block;
+}
+.seq-ts {
+  font-family: ui-monospace, monospace; font-size: 8px;
+  color: var(--color-neutral-500); text-align: center;
+}
+.vc-note { border-left: 2px solid var(--color-accent); padding-left: 8px; }
+
+/* Photo verdict over an empty clip slot. Same 116px column as the photo grid, so
+   switching tabs lands the models in the same place. */
+.cmp-head { display: flex; border-bottom: 1px solid var(--color-divider); }
+.cmp-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--color-divider); }
+.cmp-cell {
+  width: 116px; flex: none; border-left: 1px solid var(--color-divider);
+  display: flex; flex-direction: column;
+}
+.cmp-photo { width: 100%; border-left: 0; padding: 6px 10px 2px; }
+.cmp-clip {
+  padding: 0 10px 6px; font-family: ui-monospace, monospace; font-size: 10px;
+  color: var(--color-neutral-400);
+  border-top: 1px dashed var(--color-neutral-400); margin: 2px 10px 6px 10px;
+  padding-top: 4px;
+}
+
 /* ── tab · videos & frames ──────────────────────────────────────────────── */
 
 .videos { flex: 1; min-height: 0; display: flex; }
@@ -617,6 +664,8 @@ code { font-family: ui-monospace, monospace; }
     border-bottom: 1px solid var(--color-divider);
   }
   .frames { grid-template-columns: repeat(4, 1fr); }
+  /* Stacked, the sheet pane runs the full width — the sequence gets the room. */
+  .seq { grid-template-columns: repeat(10, 1fr); max-height: 260px; }
   .evals-models { min-width: 0; }
   .evals-ready { width: 100%; }
 }
@@ -625,3 +674,80 @@ code { font-family: ui-monospace, monospace; }
   .sidebar { display: none; }
   .cards { grid-template-columns: 1fr; }
 }
+
+/* ── video assessment · verdict tally ──────────────────────────────────────
+   Two lines, same denominator: what the still settled, and what the clip has
+   settled. The clip line is drawn even though every count on it is zero —
+   omitting an empty row would leave the screen showing a tally under the
+   heading "Video assessment" that was entirely photo verdicts, which is the
+   one reading this screen must not invite. */
+
+.vtally {
+  border-top: 1px solid var(--color-divider);
+  /* Matches .control-note's 16px gutter — the tally sits directly above it and a
+     different inset reads as a misalignment rather than a separate block. */
+  padding: 6px 16px 2px;
+}
+
+.vtally-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0;
+  font-size: 11px;
+  /* The grid is wide and this row sits under it; wrapping keeps the totals
+     readable at narrow widths instead of pushing them out of the container. */
+  flex-wrap: wrap;
+}
+.vtally-line .spacer { flex: 1; }
+
+/* The clip line is the absence, so it reads quieter than the photo line —
+   present and legible, but plainly not carrying results. */
+.vtally-line.is-empty { color: var(--color-neutral-500); }
+.vtally-line.is-empty .vtally-swatch { opacity: 0.3; }
+.vtally-line.is-empty .vtally-n { color: var(--color-neutral-500); }
+
+.vtally-col {
+  min-width: 42px;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+.vtally-part { display: inline-flex; align-items: baseline; gap: 5px; }
+
+.vtally-swatch {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  align-self: center;
+  border: 1px solid transparent;
+}
+.vtally-swatch.is-pass { background: var(--color-accent-100); border-color: var(--color-accent-800); }
+.vtally-swatch.is-fail { background: var(--color-neutral-100); border-color: var(--color-neutral-800); }
+.vtally-swatch.is-unsure { background: transparent; border-color: var(--color-accent); }
+
+.vtally-n {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+.vtally-kind { text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; }
+.vtally-pct { color: var(--color-neutral-500); font-variant-numeric: tabular-nums; }
+.vtally-total { color: var(--color-neutral-500); font-variant-numeric: tabular-nums; }
+
+/* A clip verdict that differs from the still's. The disagreement is the finding —
+   it is the only place the sequence changed an answer — so it is marked on the
+   cell rather than left for the reader to spot by comparing two rows. */
+.cmp-clip.is-graded { display: flex; align-items: center; justify-content: center; }
+.cmp-clip.is-moved {
+  box-shadow: inset 2px 0 0 var(--color-accent);
+  background: var(--color-accent-100);
+}
+
+.vtally-delta { border-top: 1px dashed var(--color-divider); margin-top: 2px; padding-top: 6px; }
+.vtally-note { font-size: 10px; color: var(--color-neutral-600); line-height: 1.4; }
+.vtally-note b { color: var(--color-text); }

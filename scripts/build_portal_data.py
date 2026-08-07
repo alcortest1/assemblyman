@@ -9,7 +9,7 @@ the same sources and writes the subset the portal actually renders:
     portal/data/tasks/<ACS>.json    steps, checks, error modes, criteria, runs
     portal/data/evals.json          model table and per-task table
     portal/data/frames/...          the frames a run actually graded
-    portal/data/thumbs/...          downscaled strip for the Videos tab
+    portal/data/thumbs/...          Videos tab strip + Video assessment sequence
 
 Only what the UI shows is emitted. `procedure.md` is confidential AIM material
 and is never copied — the Documentation tab lists its section names, which is
@@ -52,6 +52,13 @@ MODEL_IDS = list(MODELS)
 # Frames per clip kept for the Videos tab strip.
 STRIP = 16
 THUMB_PX = 320
+
+# The rate the Video assessment tab samples a span at. The extraction under
+# build/frames/ is 4 fps; a criterion is graded on a sequence drawn from it at
+# this rate, each frame labelled with its own timestamp. Unlike STRIP — a fixed
+# count, so a 105 s clip came out four times sparser than a 28 s one — this is a
+# rate, and it means the same thing on every clip.
+SAMPLE_FPS = 0.5
 
 
 # ── helpers ────────────────────────────────────────────────────────────────
@@ -104,6 +111,36 @@ def latest_run(code: str):
         if any(not r.get("error") for r in (run.get("results") or [])):
             return run
     return None
+
+
+def video_run_files(code: str) -> list:
+    d = AGENTS / "build" / "video_eval" / code
+    return sorted(d.glob("vrun_*.json")) if d.is_dir() else []
+
+
+def latest_video_run(code: str):
+    """The newest video run that graded something, on the same rule as the photo one.
+
+    A task with no video run is the normal case, not a fault: the runner is new
+    and only some tasks have been through it. Returning None leaves the clip
+    column empty, which is what it has always shown.
+    """
+    for path in reversed(video_run_files(code)):
+        with open(path) as fh:
+            run = json.load(fh)
+        if any(p.get("verdict") for r in (run.get("results") or []) for p in r.get("points", [])):
+            return run
+    return None
+
+
+def video_verdicts(run) -> dict:
+    """(target_id, model) -> the clip verdict and what settled it."""
+    out = {}
+    for row in run.get("results") or []:
+        for point in row.get("points") or []:
+            if point.get("verdict"):
+                out[(point["target_id"], row.get("model"))] = point
+    return out
 
 
 def segmented_clips(code: str) -> set:
@@ -343,7 +380,9 @@ def build_task(code: str) -> dict | None:
             } for s in sec_steps],
         })
 
-    attach_runs(subtasks, run, len(run_files(code)), segmented_clips(code))
+    vrun = latest_video_run(code)
+    attach_runs(subtasks, run, len(run_files(code)), segmented_clips(code),
+                video_verdicts(vrun) if vrun else {})
 
     # A subtask the latest run did not grade still has its compiled criterion; show
     # that rather than letting the UI fall back to a generic placeholder set.
@@ -389,7 +428,7 @@ def build_task(code: str) -> dict | None:
 
 
 def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
-                seg_clips: set | None = None) -> None:
+                seg_clips: set | None = None, vverdicts: dict | None = None) -> None:
     """Map a saved run's results onto the subtask that owns them."""
     if not run:
         return
@@ -431,7 +470,7 @@ def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
         if gid is None:
             continue
         entries = groups.pop(gid)
-        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips))
+        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips, vverdicts))
 
     # A run can grade targets no pack section matches: AM.I.E.S1 compiles to a single
     # "Procedure" section while the run grades its three sheet variants separately.
@@ -446,13 +485,15 @@ def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
             "steps": [], "fromRun": True,
             "excluded": "Not compiled into a pack section — this target exists only in the run.",
         }
-        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips))
+        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips, vverdicts))
         subtasks.append(st)
 
 
 def build_grid(gid: str, entries: list, negatives: dict, run: dict,
-               run_count: int = 0, seg_clips: set | None = None) -> dict:
+               run_count: int = 0, seg_clips: set | None = None,
+               vverdicts: dict | None = None) -> dict:
     seg_clips = seg_clips or set()
+    vverdicts = vverdicts or {}
     rows, neg_lines, replies, points = [], [], {}, []
     frame_file = frame_video = None
     calls = 0
@@ -477,7 +518,21 @@ def build_grid(gid: str, entries: list, negatives: dict, run: dict,
             if res.get("raw_text"):
                 replies[f"r{ri}m{mi}"] = res["raw_text"].strip()
 
-        row = {"label": f"{ri + 1} · {text[:76]}", "cells": cells}
+        # The clip column, point for point beside the photo one. `none` where the
+        # video run did not grade it — never `unsure`, which would read as a model
+        # having looked at the sequence and declined to call it.
+        clip_cells = []
+        for mid in MODEL_IDS:
+            v = vverdicts.get((tid, mid))
+            if not v:
+                clip_cells.append(["none", "not graded"])
+                continue
+            at = v.get("at")
+            detail = f"t={at}" if at not in (None, "", "null") else (v.get("note") or "")
+            clip_cells.append([v["verdict"], detail])
+
+        row = {"label": f"{ri + 1} · {text[:76]}", "cells": cells,
+               "clipCells": clip_cells}
 
         nblob = negatives.get(tid)
         if nblob:
@@ -655,12 +710,50 @@ def build_evals(tasks: list) -> dict:
 
 # ── images ─────────────────────────────────────────────────────────────────
 
+def frame_seconds(name: str) -> float:
+    """Seconds off an extracted frame's own name — t000041_50.jpg is 41.50 s.
+
+    The extractor encodes the source timestamp in the filename precisely so a
+    frame is citable back to the video without a lookup table. Everything that
+    needs a time reads it here rather than counting positions in a directory.
+    """
+    m = re.match(r"t(\d+)_(\d+)", name)
+    return int(m.group(1)) + int(m.group(2)) / 100 if m else 0.0
+
+
+def clip_frames(code: str, clip: str) -> list:
+    return sorted((AGENTS / "build" / "frames" / code / clip).glob("t*.jpg"))
+
+
 def strip_picks(code: str, clip: str) -> list:
     """An evenly spaced strip of a clip's extracted frames."""
-    allf = sorted((AGENTS / "build" / "frames" / code / clip).glob("t*.jpg"))
+    allf = clip_frames(code, clip)
     if not allf:
         return []
     return [allf[round(i * (len(allf) - 1) / (STRIP - 1))] for i in range(STRIP)]
+
+
+def sample_picks(code: str, clip: str) -> list:
+    """A clip's frames at SAMPLE_FPS — the sequence a video assessment grades on.
+
+    Picked by timestamp, not by position, so the interval between two kept frames
+    is the same on a 28 s clip and a 105 s one. The frame nearest each tick is
+    kept; a tick that lands past the last extracted frame is dropped rather than
+    repeating the final image.
+    """
+    allf = clip_frames(code, clip)
+    if not allf:
+        return []
+    times = [frame_seconds(p.name) for p in allf]
+    step, out, used = 1 / SAMPLE_FPS, [], set()
+    tick, end = 0.0, times[-1]
+    while tick <= end + 1e-9:
+        i = min(range(len(times)), key=lambda k: abs(times[k] - tick))
+        if i not in used:
+            used.add(i)
+            out.append(allf[i])
+        tick += step
+    return out
 
 
 def record_strips(tasks: list) -> None:
@@ -675,6 +768,10 @@ def record_strips(tasks: list) -> None:
             picks = strip_picks(t["code"], clip)
             if picks:
                 t.setdefault("strips", {})[clip] = [p.name for p in picks]
+            # The Video assessment sequence, at a rate rather than a count.
+            sample = sample_picks(t["code"], clip)
+            if sample:
+                t.setdefault("samples", {})[clip] = [p.name for p in sample]
 
 
 def copy_images(tasks: list) -> tuple[int, int]:
@@ -694,9 +791,11 @@ def copy_images(tasks: list) -> tuple[int, int]:
             shutil.copy2(src, dst)
             graded += 1
 
-        # An evenly spaced strip per clip, downscaled for the Videos tab grid.
+        # The Videos tab strip and the Video assessment sequence, both downscaled.
+        # They overlap on most clips; the copy below skips a file already written,
+        # so a frame in both is fetched once.
         for clip in t["clipNames"]:
-            picks = strip_picks(code, clip)
+            picks = strip_picks(code, clip) + sample_picks(code, clip)
             if not picks:
                 continue
             outdir = OUT / "thumbs" / code / clip
