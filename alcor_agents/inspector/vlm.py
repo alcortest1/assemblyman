@@ -24,8 +24,29 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+ENDPOINT = os.environ.get(
+    "ALCOR_VLM_ENDPOINT", "https://openrouter.ai/api/v1/chat/completions"
+).strip() or "https://openrouter.ai/api/v1/chat/completions"
 TIMEOUT_S = 120
+
+# An on-device candidate is served locally by `llama-server`, which speaks the
+# same chat-completions dialect this module already posts — same base64 data
+# URIs, same message shape. Carrying the endpoint on the model entry rather than
+# swapping the global is what lets one run put a local model and a hosted one to
+# identical points in a single grid; two separate runs cannot be lined up,
+# because the grid is what the comparison is.
+LOCAL_HOST = os.environ.get("ALCOR_LOCAL_VLM_HOST", "http://127.0.0.1").rstrip("/")
+
+# LEAP runs llama.cpp on device and publishes these sampling parameters in each
+# model's `leap/<quant>.json` manifest. A measurement taken at different
+# settings is not a measurement of what will ship, so they are sent verbatim and
+# override this module's usual temperature 0.
+LEAP_SAMPLING = {"temperature": 0.1, "min_p": 0.15, "repeat_penalty": 1.05}
+
+
+def _local(port: int) -> str:
+    return f"{LOCAL_HOST}:{port}/v1/chat/completions"
+
 
 # Vision-capable models, with the OpenRouter per-million prices current when
 # this registry was written. Prices are used only for the pre-run estimate that
@@ -42,12 +63,41 @@ MODELS = [
      "vendor": "Google", "in_per_m": 2.00, "out_per_m": 12.00},
     {"id": "openai/gpt-5.6-sol", "label": "GPT-5.6 Sol", "vendor": "OpenAI",
      "in_per_m": 5.00, "out_per_m": 30.00},
+
+    # On-device candidates. Each needs its own `llama-server` on the port below
+    # — see scripts/serve_local_vlm.sh — which is why they carry a port each
+    # rather than sharing one: the arms are meant to run against the same points
+    # in the same run, and a server hosts one checkpoint.
+    #
+    # Q8_0 is the configuration LEAP actually publishes a manifest for, so it is
+    # the shippable arm. Q4_K_M is here to price what the cheaper quant costs in
+    # accuracy, and the 1.6B to say whether a model a quarter the size is close
+    # enough to matter.
+    {"id": "local/lfm2-vl-3b-q8", "label": "LFM2-VL-3B Q8_0", "vendor": "LiquidAI (on-device)",
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True,
+     "endpoint": _local(8081), "sampling": LEAP_SAMPLING},
+    {"id": "local/lfm2-vl-3b-q4", "label": "LFM2-VL-3B Q4_K_M", "vendor": "LiquidAI (on-device)",
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True,
+     "endpoint": _local(8082), "sampling": LEAP_SAMPLING},
+    {"id": "local/lfm2.5-vl-1.6b-q4", "label": "LFM2.5-VL-1.6B Q4_0",
+     "vendor": "LiquidAI (on-device)",
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True,
+     "endpoint": _local(8083), "sampling": LEAP_SAMPLING},
 ]
 MODELS_BY_ID = {m["id"]: m for m in MODELS}
-# Every model, every run. A verdict from one model is an opinion; the useful
-# signal is where they disagree, and a run that silently left one out cannot
-# show that. Deselect in the picker for a deliberately cheap run.
-DEFAULT_MODELS = [m["id"] for m in MODELS]
+# Every hosted model, every run. A verdict from one model is an opinion; the
+# useful signal is where they disagree, and a run that silently left one out
+# cannot show that. Deselect in the picker for a deliberately cheap run.
+#
+# The local models are deliberately not defaults: they need a server running on
+# this machine, and a run that quietly included one would fail every call in
+# that column with a connection error that reads like a model fault.
+DEFAULT_MODELS = [m["id"] for m in MODELS if not m.get("local")]
+
+
+def is_local(model: str) -> bool:
+    """Whether this model is served from this machine, and so needs no API key."""
+    return bool(MODELS_BY_ID.get(model, {}).get("local"))
 
 VERDICTS = ("pass", "fail", "unsure")
 
@@ -183,16 +233,27 @@ Reply with JSON only, no prose around it:
  "missing_evidence": "<what a usable photo would need instead, or null>"}"""
 
 def _post(payload: dict, key: str) -> dict:
+    """Send one chat-completions request, to OpenRouter or to a local server.
+
+    Which of the two, and with what sampling, is decided by the model's registry
+    entry rather than by the caller. Every grading path in this module funnels
+    through here, so putting the choice in one place is what keeps a local arm
+    and a hosted arm identical in every respect except the model.
+    """
+    meta = MODELS_BY_ID.get(payload.get("model"), {})
+    endpoint = meta.get("endpoint") or ENDPOINT
+    if meta.get("sampling"):
+        payload = {**payload, **meta["sampling"]}
+
+    headers = {"Content-Type": "application/json"}
+    if not meta.get("local"):
+        headers["Authorization"] = f"Bearer {key}"
+        # OpenRouter attributes traffic with these; both are local-only.
+        headers["HTTP-Referer"] = "http://127.0.0.1:8765"
+        headers["X-Title"] = "Alcor Task Pack Inspector"
+
     request = urllib.request.Request(
-        ENDPOINT,
-        data=json.dumps(payload).encode(),
-        headers={
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json",
-            # OpenRouter attributes traffic with these; both are local-only.
-            "HTTP-Referer": "http://127.0.0.1:8765",
-            "X-Title": "Alcor Task Pack Inspector",
-        },
+        endpoint, data=json.dumps(payload).encode(), headers=headers,
     )
     with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:
         return json.load(response)
@@ -348,7 +409,7 @@ def pick_best_frame(
 ) -> dict:
     """Ask which of a sampled set of frames best shows the finished work."""
     key = load_api_key() if key is None else key
-    if not key:
+    if not key and not is_local(model):
         return {"error": "no_api_key", "message": "OPENROUTER_API_KEY is not set."}
     paths = [Path(p) for p in image_paths if Path(p).exists()]
     if not paths:
@@ -600,7 +661,7 @@ def _complete(
     sheet and handbook alone, with no photograph in existence to send.
     """
     key = load_api_key() if key is None else key
-    if not key:
+    if not key and not is_local(model):
         return {"error": "no_api_key", "message": "OPENROUTER_API_KEY is not set."}
 
     content: list[dict] = [{"type": "text", "text": user_text}]
@@ -1772,7 +1833,7 @@ def grade(
     # `None` means "use the ambient key"; an explicit "" means "no key", which
     # must not silently fall back to the one in the environment.
     key = load_api_key() if key is None else key
-    if not key:
+    if not key and not is_local(model):
         return {"model": model, "error": "no_api_key",
                 "message": "OPENROUTER_API_KEY is not set.", "verdict": None}
     if not paths:
@@ -1956,3 +2017,159 @@ def estimate_cost(model_ids: list[str], calls_per_model: int,
     return {"total_usd": round(total, 4), "per_model": per_model,
             "calls": calls_per_model * len(per_model),
             "images_per_call": images}
+
+
+# ------------------------------------------------------------ sequence grading
+#
+# The photo grader answers one criterion about one still, and it abstains a great
+# deal: across the saved runs 1,045 of 1,952 verdicts are `unsure`, most of them
+# a model saying the frame does not show the thing being asked about. A frame is
+# one instant of a process, and much of what a criterion asks about — whether a
+# cut was square, whether a line was scribed before it was drilled — is a state
+# that existed at some point during the work rather than at the moment filming
+# stopped.
+#
+# So this grades the sequence: every frame of a subtask's span, in order, each
+# labelled with its own timestamp, judged in ONE call per model.
+#
+# One call, not one per point. It is cheaper, but that is not the reason. A
+# criterion sheet is a set of conditions about the same article, and a grader
+# reading them together can use one to place another — "the sleeve is on at
+# t=12" settles a later point about assembly order. Splitting the sheet into
+# independent calls throws that away and re-sends the whole sequence each time,
+# which is how a 23-frame span becomes 23 frames × 11 points of upload.
+
+SEQUENCE_PROMPT = """\
+You are grading a student's aircraft-maintenance work for an FAA Part 147 \
+training pilot, from a SEQUENCE of video frames rather than a single photograph.
+
+The frames are in chronological order and each is labelled with its timestamp. \
+Together they cover one subtask from start to finish.
+
+You are given the numbered criteria for that subtask. Return a verdict for EVERY \
+numbered criterion, in the order given. Do not merge, skip, or add any.
+
+WHAT THE SEQUENCE CHANGES
+
+A criterion is satisfied if it is satisfied AT ANY POINT in the sequence, and you \
+should say when. A still can only show the last instant of the work; these frames \
+show the work being done. A condition that was plainly true at t=12.0 and is \
+obscured by a hand at t=44.0 is PASS, and the timestamp is your evidence.
+
+This is the whole reason for grading on a clip, so use it. Do not answer `unsure` \
+because the final frame is unclear if an earlier frame settles the point.
+
+VERDICTS
+- `pass`  — you can see, in at least one frame, that the criterion is satisfied.
+- `fail`  — you can see, in the frames, that it is NOT satisfied.
+- `unsure` — no frame in the sequence shows the feature well enough to decide. \
+Genuinely unsure, not "the last frame was blurry". If the whole sequence never \
+shows it, that is `unsure` and is a real and useful answer.
+
+Judge only what is visible. Never infer a torque, a pressure, an internal \
+condition, a material or an exact dimension from video. If a criterion needs a \
+measurement and no scale reference appears in any frame, it is `unsure`.
+
+Cite the timestamp you relied on whenever you answer pass or fail. Keep each \
+`note` under 20 words.
+
+Reply with JSON only, no prose around it:
+{"criteria": [
+   {"index": <1-based, matching the numbering given>,
+    "verdict": "pass" | "fail" | "unsure",
+    "at": "<timestamp you relied on, e.g. 12.00, or null>",
+    "note": "<what you saw that decided it>"}
+ ],
+ "observed": "<what the sequence shows overall, under 40 words>"}"""
+
+
+def frame_seconds(name: str) -> float | None:
+    """Read `t000012_50.jpg` as 12.5 seconds.
+
+    The filename is the timestamp — that is the convention the extraction writes
+    and the portal relies on, and it is what lets a verdict cite a moment back to
+    the video without a lookup table.
+    """
+    match = re.match(r"t(\d+)_(\d+)", Path(name).stem)
+    if not match:
+        return None
+    return int(match.group(1)) + int(match.group(2)) / 100.0
+
+
+def grade_sequence(
+    *, model: str, frame_paths: list[Path], criteria: list[str],
+    subject: str | None = None, key: str | None = None,
+    max_tokens: int = 4000, post=_post,
+) -> dict:
+    """Grade every criterion of one subtask against one sampled sequence.
+
+    Returns `criteria`, one entry per input criterion in input order, whether or
+    not the model returned one for it — a point that silently vanished would read
+    as a criterion that did not apply, when it is one nobody checked.
+    """
+    paths = [Path(p) for p in frame_paths]
+    missing = [p.name for p in paths if not p.exists()]
+    if missing:
+        return {"error": "missing_frames", "message": f"{len(missing)} frames absent: "
+                                                      f"{', '.join(missing[:3])}"}
+    if not paths:
+        return {"error": "no_frames", "message": "No frames in the span."}
+    if not criteria:
+        return {"error": "no_criteria", "message": "No criteria for this subtask."}
+
+    stamps = [frame_seconds(p.name) for p in paths]
+    labelled = ", ".join(
+        f"{i + 1}=t{s:.2f}" for i, s in enumerate(stamps) if s is not None
+    )
+    numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(criteria))
+
+    parts = []
+    if subject:
+        parts.append(f"THE WORK\n{subject.strip()}")
+    parts.append(
+        f"SEQUENCE\n{len(paths)} frames follow in chronological order. Their timestamps "
+        f"in seconds are {labelled}."
+    )
+    parts.append(f"NUMBERED CRITERIA\n{numbered}")
+    parts.append(
+        f"Return a verdict for all {len(criteria)} criteria, in order, using the whole "
+        "sequence."
+    )
+
+    result = _complete(model=model, system=SEQUENCE_PROMPT, user_text="\n\n".join(parts),
+                       image_paths=paths, max_tokens=max_tokens, key=key, post=post)
+    if result.get("error"):
+        return result
+
+    parsed = parse_json_object(result["text"]) or {}
+    by_index = {}
+    for item in parsed.get("criteria") or []:
+        try:
+            by_index[int(item.get("index"))] = item
+        except (TypeError, ValueError):
+            continue
+
+    graded = []
+    for i, text in enumerate(criteria, 1):
+        item = by_index.get(i) or {}
+        verdict = str(item.get("verdict") or "").strip().lower()
+        if verdict not in VERDICTS:
+            # A reply that ran out of tokens loses its later points. They are
+            # `none`, not `unsure`: no model declined to call them, none was asked.
+            graded.append({"index": i, "criterion": text, "verdict": None,
+                           "at": None, "note": "No verdict returned."})
+            continue
+        graded.append({
+            "index": i, "criterion": text, "verdict": verdict,
+            "at": item.get("at"), "note": str(item.get("note") or "").strip(),
+        })
+
+    return {
+        "error": None, "model": model, "criteria": graded,
+        "observed": str(parsed.get("observed") or "").strip(),
+        "frames": [p.name for p in paths],
+        "raw_text": result["text"],
+        "cost_usd": result["cost_usd"], "latency_s": result["latency_s"],
+        "prompt_tokens": result["prompt_tokens"],
+        "completion_tokens": result["completion_tokens"],
+    }

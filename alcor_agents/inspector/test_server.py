@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import json
 import re
 import tempfile
 import unittest
+import urllib.request
 from pathlib import Path
 
 from inspector import server, vlm
@@ -129,14 +131,31 @@ class ModelConfigTests(unittest.TestCase):
         for model_id in vlm.DEFAULT_MODELS:
             self.assertIn(model_id, vlm.MODELS_BY_ID)
 
-    def test_every_model_carries_the_pricing_the_estimate_needs(self):
+    def test_every_hosted_model_carries_the_pricing_the_estimate_needs(self):
         """A missing rate silently prices that model's share of a run at zero,
-        which reads as a cheap run rather than an unknown one."""
+        which reads as a cheap run rather than an unknown one. A locally-served
+        model is the one case where zero is the answer and not an omission."""
         for model in vlm.MODELS:
             with self.subTest(model=model["id"]):
                 self.assertTrue(model["label"] and model["vendor"])
+                if model.get("local"):
+                    self.assertEqual(model["in_per_m"], 0)
+                    self.assertEqual(model["out_per_m"], 0)
+                    continue
                 self.assertGreater(model["in_per_m"], 0)
                 self.assertGreater(model["out_per_m"], 0)
+
+    def test_local_models_are_offered_but_never_default(self):
+        """A local model needs a server on this machine. Pre-ticking one means
+        every call in its column fails with a connection error, which reads as
+        the model being broken rather than as nothing listening on the port."""
+        local = [m["id"] for m in vlm.MODELS if m.get("local")]
+        self.assertTrue(local, "the on-device arms should still be selectable")
+        for model_id in local:
+            with self.subTest(model=model_id):
+                self.assertNotIn(model_id, vlm.DEFAULT_MODELS)
+                self.assertTrue(vlm.is_local(model_id))
+                self.assertTrue(vlm.MODELS_BY_ID[model_id]["endpoint"])
 
 
 class VerdictParsingTests(unittest.TestCase):
@@ -1679,6 +1698,91 @@ class GradingTests(unittest.TestCase):
         if frame is None:
             self.skipTest("no extracted frames available")
         return frame
+
+    def test_a_local_model_is_graded_without_an_api_key(self):
+        """The key guard exists to stop calls that would 401. A local server has
+        no auth, so demanding a key there blocks the only run that can be made
+        offline — and it is the run the on-device decision rests on."""
+        sent = {}
+
+        def fake_post(payload, key):
+            sent["key"] = key
+            return {"choices": [{"message": {"content":
+                    '{"verdict":"pass","confidence":0.9,"observed":"o","rationale":"r"}'}}],
+                    "usage": {"prompt_tokens": 1000, "completion_tokens": 100}}
+
+        result = vlm.grade(model="local/lfm2-vl-3b-q8", image_path=self._frame(),
+                           criterion="The safety wire is taut.", key="", post=fake_post)
+        self.assertIsNone(result["error"])
+        self.assertEqual(result["verdict"], "pass")
+        # Zero rates, so a local run costs nothing rather than costing "unknown".
+        self.assertEqual(result["cost_usd"], 0.0)
+        self.assertEqual(sent["key"], "")
+
+    def test_local_models_carry_their_own_endpoint_and_leap_sampling(self):
+        """LEAP publishes the sampling it will use on device. A measurement taken
+        at this module's usual temperature 0 would be a measurement of something
+        else, so `_post` has to override the payload, not merely reroute it."""
+        seen = {}
+
+        class _Response(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_urlopen(request, timeout=None):
+            seen["url"] = request.full_url
+            seen["headers"] = {k.lower() for k in dict(request.header_items())}
+            seen["payload"] = json.loads(request.data)
+            return _Response(json.dumps(
+                {"choices": [{"message": {"content": "{}"}}]}).encode())
+
+        original = urllib.request.urlopen
+        urllib.request.urlopen = fake_urlopen
+        try:
+            vlm._post({"model": "local/lfm2-vl-3b-q8", "temperature": 0, "messages": []}, "")
+        finally:
+            urllib.request.urlopen = original
+
+        self.assertEqual(seen["url"], vlm.MODELS_BY_ID["local/lfm2-vl-3b-q8"]["endpoint"])
+        self.assertEqual(seen["payload"]["temperature"], vlm.LEAP_SAMPLING["temperature"])
+        self.assertEqual(seen["payload"]["min_p"], vlm.LEAP_SAMPLING["min_p"])
+        # No bearer token should reach a server that never asked for one.
+        self.assertNotIn("authorization", seen["headers"])
+
+    def test_a_hosted_model_still_goes_to_openrouter_with_its_key(self):
+        """The per-model endpoint must not have quietly rerouted the hosted arms;
+        they are the baseline the on-device candidate is measured against."""
+        seen = {}
+
+        class _Response(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_urlopen(request, timeout=None):
+            seen["url"] = request.full_url
+            seen["headers"] = {k.lower(): v for k, v in request.header_items()}
+            seen["payload"] = json.loads(request.data)
+            return _Response(json.dumps(
+                {"choices": [{"message": {"content": "{}"}}]}).encode())
+
+        original = urllib.request.urlopen
+        urllib.request.urlopen = fake_urlopen
+        try:
+            vlm._post({"model": "google/gemini-3.6-flash", "temperature": 0, "messages": []}, "k")
+        finally:
+            urllib.request.urlopen = original
+
+        self.assertEqual(seen["url"], vlm.ENDPOINT)
+        self.assertEqual(seen["headers"]["authorization"], "Bearer k")
+        # Hosted arms keep temperature 0; only the local ones take LEAP sampling.
+        self.assertEqual(seen["payload"]["temperature"], 0)
+        self.assertNotIn("min_p", seen["payload"])
 
     def test_grade_parses_reply_and_accounts_cost(self):
         def fake_post(payload, key):

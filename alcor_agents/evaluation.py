@@ -58,6 +58,12 @@ MODELS = {
     "pro": "google/gemini-3.1-pro-preview",
     "gpt": "openai/gpt-5.6-sol",
     "sol": "openai/gpt-5.6-sol",
+    # On-device candidates, each needing its own llama-server first — see
+    # scripts/serve_local_vlm.sh. `--models lfm-vl,gemini` is the comparison the
+    # on-device question turns on: same points, same run, one grid.
+    "lfm-vl": "local/lfm2-vl-3b-q8",
+    "lfm-vl-q4": "local/lfm2-vl-3b-q4",
+    "lfm-vl-small": "local/lfm2.5-vl-1.6b-q4",
 }
 DEFAULT_MODELS = "claude,gemini,sol"
 MARK = {"pass": "PASS", "fail": "FAIL", "unsure": "----"}
@@ -261,9 +267,17 @@ def main() -> int:
           f"criteria={'supplied' if criteria else 'compiled'}")
     print("models: " + ", ".join(m.split('/')[-1] for m in models))
 
-    online = bool(vlm.load_api_key())
-    if not online and not args.dry_run:
-        raise SystemExit("OPENROUTER_API_KEY is not set (env or alcor_agents/.env)")
+    # A run made entirely of locally-served models needs no key. The frame
+    # chooser counts too: it is a separate call to `--frame-model`, and it goes
+    # out before any grading, so a run that only listed local graders would
+    # still have failed here.
+    hosted = [m for m in models if not vlm.is_local(m)]
+    if not args.last_frame and not args.photo:
+        hosted += [m for m in resolve_models(args.frame_model) if not vlm.is_local(m)]
+    if hosted and not vlm.load_api_key() and not args.dry_run:
+        raise SystemExit(
+            "OPENROUTER_API_KEY is not set (env or alcor_agents/.env). "
+            f"Needed by: {', '.join(sorted(set(hosted)))}")
 
     frame_spend = 0.0
     if not args.last_frame and not args.photo and not args.dry_run:
