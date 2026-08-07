@@ -1,0 +1,31 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: create_the_patch_doubler
+SUBTASK:      Create the Patch Doubler
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+create_the_patch_doubler — VLM GRADING CRITERIA
+
+Assess the completed cut sheet metal patch doubler for a flush patch repair visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A single flat sheet metal doubler is cut free and separate from stock.
+2. Doubler is visibly larger than the prepared skin opening on all sides.
+3. Corners are rounded, not left as square points.
+4. Cut edges are continuous and straight, without shear steps or torn slivers.
+
+Critical defects
+- Doubler is smaller than the opening it must cover.
+- Doubler is buckled, cracked, or torn at a cut edge.
+- A corner is cut as a sharp square notch or overcut past the edge.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Create the Patch Doubler
+- Manual: FAA-H-8083-31B ch. 4 p. 4-96
+- Notes: Procedure specifies 1/8" corner radius; handbook p. 4-96 specifies 1/4" minimum for lap patches. Radius size is not gradeable from a photograph, so only rounding is graded.; Material gauge, alloy and exact dimensions are not visible; doubler being one gauge heavier than skin cannot be confirmed.; Rivet layout, drilling and the filler belong to later subtasks; their absence is correct here.

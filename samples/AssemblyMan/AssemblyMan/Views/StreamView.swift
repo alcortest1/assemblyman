@@ -176,7 +176,9 @@ struct StreamView: View {
     }
     .sheet(isPresented: $viewModel.showGradeSheet) {
       if let grade = viewModel.currentGrade {
-        GradeSheetView(grade: grade) { viewModel.dismissGradeSheet() }
+        GradeSheetView(grade: grade, fallbackNote: viewModel.offlineGradingReason) {
+          viewModel.dismissGradeSheet()
+        }
       }
     }
     .sheet(isPresented: $isSharingRoomCode) {

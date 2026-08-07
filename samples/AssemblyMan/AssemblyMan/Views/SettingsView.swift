@@ -18,6 +18,9 @@ import SwiftUI
 
 struct SettingsView: View {
   @Bindable var settings: AppSettings
+  /// Shown so the operator can fetch the weights deliberately, on a link they chose, rather
+  /// than discovering a 3.32 GB download the first time an agent fails to answer.
+  var localGrader: LocalGrader
   /// Hidden when settings was opened before the glasses were linked — there is nothing to
   /// disconnect from yet.
   var showsDisconnect: Bool = true
@@ -38,6 +41,7 @@ struct SettingsView: View {
         ScrollView {
           VStack(alignment: .leading, spacing: 20) {
             agentSection
+            gradingSection
             overlaySection
             sessionSection
             captureSection
@@ -128,6 +132,111 @@ struct SettingsView: View {
         }
       }
       .blueprintFrame()
+    }
+  }
+
+  private var gradingSection: some View {
+    Section(
+      title: "Photo assessment",
+      caption: "Which grader judges a photograph against its rubric."
+    ) {
+      VStack(spacing: 0) {
+        ForEach(
+          Array(AppSettings.GradingEngine.allCases.enumerated()), id: \.element.id
+        ) { index, engine in
+          Button {
+            settings.gradingEngine = engine
+            // Picking a mode that can run offline is the operator asking for the weights.
+            // Picking one that cannot is them saying the phone need not hold 3.32 GB.
+            if engine == .agent {
+              Task { await localGrader.unload() }
+            } else {
+              localGrader.prepare()
+            }
+          } label: {
+            HStack(alignment: .top, spacing: 10) {
+              SelectionBox(isOn: settings.gradingEngine == engine)
+                .padding(.top, 1)
+
+              VStack(alignment: .leading, spacing: 1) {
+                Text(engine.name)
+                  .font(Theme.body(13.5, weight: .semibold))
+                  .foregroundStyle(Theme.text)
+                Text(engine.detail)
+                  .font(Theme.body(11.5))
+                  .foregroundStyle(Theme.neutral600)
+                  .lineSpacing(2)
+                  .fixedSize(horizontal: false, vertical: true)
+              }
+
+              Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+          }
+          .buttonStyle(PressableStyle(pressedOverlay: Theme.text.opacity(0.05)))
+          .accessibilityAddTraits(settings.gradingEngine == engine ? [.isSelected] : [])
+
+          if index < AppSettings.GradingEngine.allCases.count - 1 {
+            Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+          }
+        }
+
+        if settings.gradingEngine != .agent {
+          Rectangle().fill(Theme.divider).frame(height: Theme.hairline)
+          modelStatusRow
+        }
+      }
+      .blueprintFrame()
+    }
+  }
+
+  /// Where the download stands. Load-bearing rather than decorative: until this says Ready the
+  /// automatic mode has nothing to fall back to, and the operator would otherwise find that
+  /// out at the moment the agent drops.
+  private var modelStatusRow: some View {
+    HStack(alignment: .top, spacing: 10) {
+      VStack(alignment: .leading, spacing: 2) {
+        Text(LocalGrader.modelName)
+          .font(Theme.body(13.5, weight: .semibold))
+          .foregroundStyle(Theme.text)
+        Text(modelStatusDetail)
+          .font(Theme.body(11.5))
+          .foregroundStyle(Theme.neutral600)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+
+      Spacer(minLength: 0)
+
+      switch localGrader.state {
+      case .notLoaded, .failed:
+        OutlineButton(title: "Download", action: { localGrader.prepare() })
+          .fixedSize()
+      case .downloading, .loading:
+        ProgressView().controlSize(.small)
+      case .ready:
+        Text("READY")
+          .overlineStyle(size: 9, color: Theme.neutral500)
+      }
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 10)
+  }
+
+  private var modelStatusDetail: String {
+    switch localGrader.state {
+    case .notLoaded:
+      return "3.3 GB, once. Grades stay on the phone afterwards."
+    case .downloading(let progress):
+      return "Downloading — \(Int(progress * 100))% of 3.3 GB"
+    case .loading:
+      return "Loading into memory…"
+    case .ready:
+      return "\(localGrader.catalogue.rubrics.count) bundled rubrics · "
+        + "provisional, machine-drafted and not SME-reviewed"
+    case .failed(let message):
+      return "Could not load: \(message)"
     }
   }
 

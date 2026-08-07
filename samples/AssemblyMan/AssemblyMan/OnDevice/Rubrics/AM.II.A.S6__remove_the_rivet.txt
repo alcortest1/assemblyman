@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: remove_the_rivet
+SUBTASK:      Remove the Rivet
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+remove_the_rivet — VLM GRADING CRITERIA
+
+Assess the completed riveted patch with one rivet drilled and punched out, leaving a vacated hole visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. One rivet location in the riveted patch is empty, with no rivet in it
+2. No sheared rivet head or shank fragment remains lodged in the vacated hole
+3. Sheet metal immediately around the vacated hole is free of drill gouges or scoring
+4. Skin and patch around the vacated hole lie flat, without dishing or bulging
+5. Remaining rivets in the pattern are still installed with heads intact
+6. Patch and base sheet stay in contact at the vacated hole, with no gap
+
+Critical defects
+- Crack or tear radiates from the edge of the vacated hole
+- Vacated hole is visibly elongated or irregular in shape
+- Rivet shank remains in the hole with its head sheared off
+- Sheet around the vacated hole is dented or deformed by hammer blows
+- Rivet heads adjacent to the vacated hole are gouged or sheared
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Remove the Rivet
+- Manual: FAA-H-8083-31B ch. 4 p. 4-85; FAA-H-8083-31B ch. 4 p. 4-92
+- Notes: Neither source gives dimensional limits for a vacated rivet hole; only visibly irregular, elongated or cracked conditions are gradeable from the photograph.; The photograph cannot establish the drill or punch diameters used, drilling depth, or that the hole remains at nominal size; those are excluded from the criteria.; Hole roundness is graded only as gross visible irregularity, not against original size, which would require measurement.

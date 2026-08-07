@@ -1,0 +1,31 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: remove_the_damage
+SUBTASK:      Remove the Damage
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+remove_the_damage — VLM GRADING CRITERIA
+
+Assess the completed damage removal — cutout or stop-drilled crack with smoothed, deburred edges visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Damage site shows a cut-out opening or drilled holes at the crack ends
+2. Cut edges appear smooth and rounded, free of burrs, jagged metal or tool marks
+3. Any rectangular cutout has rounded corners rather than sharp square corners
+4. No patch, doubler, filler or rivets installed at the opening
+
+Critical defects
+- Crack continues past the drilled hole into surrounding skin
+- Cutout edge shows tears, jagged burrs or torn metal
+- Fresh gouges or scratches from cutting extend into surrounding skin
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Remove the Damage
+- Manual: FAA-H-8083-31B ch. 4 p. 4-90; FAA-H-8083-31B ch. 4 p. 4-93; FAA-H-8083-31B ch. 4 p. 4-96
+- Notes: Handbook p. 4-96 gives corner radius no smaller than 1/4 inch; the task list cites 1/2 inch. Neither dimension is graded, as radius requires measurement.; Stop-hole diameter (3/32 inch), corner radius and grit progression are not settleable from a photograph and are not graded.; The photograph cannot establish structural integrity or that all damage was removed below the surface.

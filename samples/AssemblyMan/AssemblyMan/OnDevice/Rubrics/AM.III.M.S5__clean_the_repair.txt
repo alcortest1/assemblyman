@@ -1,0 +1,31 @@
+TASK CODE:    AM.III.M.S5
+TASK TITLE:   Perform a Minor Repair to a Metal Propeller Blade
+SUBTASK CODE: clean_the_repair
+SUBTASK:      Clean the Repair
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+clean_the_repair — VLM GRADING CRITERIA
+
+Assess the completed cleaned and measured blend repair area on a metal propeller blade visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Repair area is free of fine metallic dust and sanding debris
+2. Blended depression is visible on the blade, its surface smooth with no scratch pattern of coarse filing
+3. A steel scale or depth gauge is positioned on the repair area in frame
+4. Blade surface around the repair shows no solvent-smeared residue or loose rag fibers
+
+Critical defects
+- A visible crack runs through or beside the blended area
+- Blade edge is gouged or notched with a sharp, unblended step
+- Loose metal filings or rag left resting on the blade
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.M.S5/procedure.md § Clean the Repair
+- Manual: FAA-H-8083-32B ch. 10 p. 10-45
+- Notes: No numeric repair limits are cited for propeller blades; the photograph cannot settle measured length, width or depth, nor whether limits are met.; The photograph cannot establish that solvent was used or that dimensions were recorded.; FAA-H-8083-32B ch. 10 p. 10-45 — located by content search, not cited by the procedure sheet; standards taken from it are provisional.

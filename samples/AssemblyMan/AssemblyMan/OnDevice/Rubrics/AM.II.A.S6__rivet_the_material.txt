@@ -1,0 +1,31 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: rivet_the_material
+SUBTASK:      Rivet the Material
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+rivet_the_material — VLM GRADING CRITERIA
+
+Assess the completed driven rivet joining the patch to the skin, with its formed shop head visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A formed shop head is visible on the shank side of the joined sheets.
+2. The manufactured rivet head sits flush against the skin, not standing proud.
+3. A scale, dividers, or rule appears in frame against the shop head for measurement.
+4. Sheets are drawn tight together at the rivet with no visible gap.
+
+Critical defects
+- Shop head is bent or clinched sideways off the shank axis.
+- Skin around the rivet is dented or gouged by the rivet set.
+- Rivet shank is visibly bent or the shank buckled between sheets.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Rivet the Material
+- Manual: FAA-H-8083-31B ch. 4 p. 4-92
+- Notes: Procedure gives preferred shop head 0.5D height and 1.5D width; a photograph cannot establish these dimensions, so only the presence of a measuring reference is graded.; Rivet diameter, material, and hole fit are not determinable from the image.

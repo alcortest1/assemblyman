@@ -26,12 +26,28 @@ import SwiftUI
 
 struct GradeSheetView: View {
   let grade: GradeProtocol.Grade
+  /// Set when this grade was answered on the phone because the agent could not be reached.
+  ///
+  /// Automatic fallback is silent by design everywhere except here. The operator does not need
+  /// to be interrupted to be told the agent went away, but they do need to know which grader
+  /// judged the work in front of them — the on-device model is a great deal smaller than the
+  /// hosted one, and a verdict whose provenance is invisible is one nobody can weigh.
+  var fallbackNote: String?
   let onDismiss: () -> Void
 
   var body: some View {
     VStack(spacing: 0) {
       header
       Divider().overlay(Theme.divider)
+
+      if let fallbackNote {
+        Text(fallbackNote)
+          .font(Theme.body(11.5))
+          .foregroundStyle(Theme.neutral600)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding(.horizontal, Theme.screenPadding)
+          .padding(.top, 8)
+      }
 
       if let observed = grade.observed, !observed.isEmpty {
         Text(observed)

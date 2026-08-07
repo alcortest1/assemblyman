@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.K.S3
+TASK TITLE:   Assemble an Aircraft Electrical Connector
+SUBTASK CODE: set_up_the_dnc_crimper
+SUBTASK:      Set Up the DNC Crimper
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+set_up_the_dnc_crimper — VLM GRADING CRITERIA
+
+Assess the completed DNC crimper set up with its turret installed and wire-size selection made visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Turret is seated flat and fully down on the crimper tool face
+2. Turret set screws are present and seated in their holes, not backed out
+3. Cotter key is installed through the handle selector dial
+4. A numbered position on the selector dial is aligned with the handle index mark
+5. One turret crimp hole is centered over the tool opening, not between positions
+6. Crimper jaws are open and the crimp hole is empty, no contact inserted
+
+Critical defects
+- Turret sits cocked or raised off the tool face
+- A turret set screw hole is visibly empty
+- Dial cotter key hole is empty, dial unrestrained
+- Turret is unlatched, with no crimp hole over the opening
+- Turret keying tang or crimp hole is visibly broken or deformed
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.K.S3/procedure.md § Set Up the DNC Crimper
+- Manual: none cited
+- Notes: The procedure sheet supplies no numeric dial or turret settings; the photograph cannot establish that the selected dial number and turret hole match the wire gauge or contact size, only that a selection is made and latched.; FAA-H-8083-31B pp. 9-92 and 9-94 cover connector types, sealing and contacts, not crimper tool setup, so no handbook text is relied on here.; Whether the handles were squeezed to release before setup is an action and is not graded.

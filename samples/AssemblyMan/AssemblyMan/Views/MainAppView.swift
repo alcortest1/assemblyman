@@ -31,6 +31,10 @@ struct MainAppView: View {
   /// Session and overlay preferences, held above the routed screens so they survive
   /// navigation between connect, ready, live, and settings.
   @State private var settings = AppSettings()
+  /// Held at the same level as `settings` and for the same reason: its weights are a 3.32 GB
+  /// download, Settings is where that download is started and watched, and Settings is
+  /// reachable before there is a session to hang it off.
+  @State private var localGrader = LocalGrader()
   @State private var showingSettings = false
 
   private var isRegistered: Bool {
@@ -44,6 +48,7 @@ struct MainAppView: View {
           wearables: wearables,
           wearablesVM: viewModel,
           settings: settings,
+          localGrader: localGrader,
           openSettings: { showingSettings = true }
         )
       } else {
@@ -72,6 +77,7 @@ struct MainAppView: View {
     #if DEBUG
     SettingsView(
       settings: settings,
+      localGrader: localGrader,
       showsDisconnect: isRegistered,
       onBack: { showingSettings = false },
       onDisconnect: {
@@ -83,6 +89,7 @@ struct MainAppView: View {
     #else
     SettingsView(
       settings: settings,
+      localGrader: localGrader,
       showsDisconnect: isRegistered,
       onBack: { showingSettings = false },
       onDisconnect: {

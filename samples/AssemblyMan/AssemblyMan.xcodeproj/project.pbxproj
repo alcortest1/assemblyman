@@ -152,6 +152,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AA0110000000000000000001 /* LiveKit */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LiveKit; sourceTree = "<group>"; };
+		AA0110000000000000000002 /* OnDevice */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = OnDevice; sourceTree = "<group>"; };
 		E66CC00E2F3E05D900B07379 /* AssemblyManUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AssemblyManUITests; sourceTree = "<group>"; };
 		E699CC962E8150670052C240 /* AssemblyManTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AssemblyManTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -299,6 +300,7 @@
 				B20000212FB2000100000001 /* YOLO */,
 				E66CC01A2F3E1A9300B07379 /* TestResources */,
 				AA0110000000000000000001 /* LiveKit */,
+				AA0110000000000000000002 /* OnDevice */,
 				8FD96B702E6F0A9800F56AB1 /* ViewModels */,
 				8FD96B762E6F0A9800F56AB1 /* Views */,
 				8FD96B772E6F0A9800F56AB1 /* Assets.xcassets */,
@@ -381,11 +383,13 @@
 			);
 			fileSystemSynchronizedGroups = (
 				AA0110000000000000000001 /* LiveKit */,
+				AA0110000000000000000002 /* OnDevice */,
 			);
 			name = AssemblyMan;
 			packageProductDependencies = (
 				AA0120000000000000000002 /* LiveKit */,
 				B20000412FB2000100000001 /* UltralyticsYOLO */,
+				AA0140000000000000000002 /* LeapSDK */,
 			);
 			productName = AssemblyMan;
 			productReference = 3A3A3A3A3A3A3A3A3A3A3A3A /* AssemblyMan.app */;
@@ -472,6 +476,7 @@
 				95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
 				AA0120000000000000000001 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 				B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */,
+				AA0140000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */,
 			);
 			productRefGroup = 7A7A7A7A7A7A7A7A7A7A7A7A /* Products */;
 			projectDirPath = "";
@@ -943,7 +948,7 @@
 				version = 8.9.11;
 			};
 		};
-		AA0130000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */ = {
+		AA0140000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Liquid4All/leap-ios.git";
 			requirement = {
@@ -984,9 +989,9 @@
 			package = B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */;
 			productName = UltralyticsYOLO;
 		};
-		AA0130000000000000000002 /* LeapSDK */ = {
+		AA0140000000000000000002 /* LeapSDK */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AA0130000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */;
+			package = AA0140000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */;
 			productName = LeapSDK;
 		};
 /* End XCSwiftPackageProductDependency section */

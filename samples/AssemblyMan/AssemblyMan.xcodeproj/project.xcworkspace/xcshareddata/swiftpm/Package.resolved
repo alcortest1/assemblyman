@@ -1,5 +1,5 @@
 {
-  "originHash" : "d39b39e243acf9e4d116a625ac8c683f5426d373584aa2cf1195f40176a4d327",
+  "originHash" : "eed6d27f1cb230c967715b3bc95cb363ce0c55863ea35d4f1c2c2c2f15e41ebb",
   "pins" : [
     {
       "identity" : "client-sdk-swift",
@@ -7,6 +7,15 @@
       "location" : "https://github.com/livekit/client-sdk-swift.git",
       "state" : {
         "revision" : "1d711a811fd4e0e7bfd1600c5c1dbd71ad0cf564"
+      }
+    },
+    {
+      "identity" : "leap-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Liquid4All/leap-ios.git",
+      "state" : {
+        "revision" : "72afe9bf4c2fae086fbced3b05995edaad2c6bf2",
+        "version" : "0.9.4"
       }
     },
     {
@@ -34,6 +43,15 @@
       "state" : {
         "revision" : "55d7a1cc5666b85c13464aea1c4b4a90feccb4c8",
         "version" : "1.38.1"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     },
     {

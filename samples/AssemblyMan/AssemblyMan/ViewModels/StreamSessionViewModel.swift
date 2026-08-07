@@ -56,9 +56,48 @@ final class StreamSessionViewModel {
   /// True while the photograph is with the agent to be named.
   var isIdentifying: Bool = false
 
-  /// What this room can grade against. Empty until the agent publishes it.
-  var gradeCatalogue: [GradeProtocol.Catalogue.Task] { relay.catalogue }
-  var canRequestGrade: Bool { !relay.catalogue.isEmpty && streamingStatus == .streaming }
+  /// What can be graded against: the agent's catalogue online, the bundled rubrics on device.
+  var gradeCatalogue: [GradeProtocol.Catalogue.Task] {
+    gradesOnDevice ? localGrader.catalogue.catalogue : relay.catalogue
+  }
+
+  var canRequestGrade: Bool {
+    streamingStatus == .streaming && !gradeCatalogue.isEmpty
+  }
+
+  /// Whether the hosted grader can be reached right now.
+  ///
+  /// The catalogue is the operative test rather than mere presence: the picker cannot offer a
+  /// subtask the agent has not published, so an agent that has joined but not yet said what it
+  /// grades is not yet somewhere a photograph can be sent.
+  var isOnlineGradingAvailable: Bool { relay.isAgentPresent && !relay.catalogue.isEmpty }
+
+  /// Where the next grade will actually go.
+  ///
+  /// `.automatic` is the reason this is computed rather than stored: the agent can leave the
+  /// room between the shutter and the picker, and the operator should not have to notice. The
+  /// on-device engine only counts as available once its weights are on the phone — falling
+  /// back to a 3.32 GB download the operator did not ask for would be a worse failure than
+  /// saying grading is unavailable.
+  var gradesOnDevice: Bool {
+    switch settings.gradingEngine {
+    case .agent: return false
+    case .onDevice: return true
+    case .automatic: return !isOnlineGradingAvailable && localGrader.isReady
+    }
+  }
+
+  /// Why grading went to the phone, for the one line the sheet shows. Nil when it did not.
+  var offlineGradingReason: String? {
+    guard gradesOnDevice else { return nil }
+    return settings.gradingEngine == .automatic
+      ? "No agent in the room — graded on the phone."
+      : nil
+  }
+
+  /// Download and readiness of the on-device model, bound by Settings.
+  var localGraderState: LocalGrader.State { localGrader.state }
+  var hasLocalRubrics: Bool { localGrader.hasRubrics }
 
   /// Who asked for the still in flight, and what to do with it when it arrives.
   private enum PhotoPurpose {
@@ -214,19 +253,29 @@ final class StreamSessionViewModel {
   private var lastSegmentationTime: ContinuousClock.Instant?
   private let mobileSAMProcessor = MobileSAMProcessor()
   private let yoloProcessor = YOLOProcessor()
+  /// Grades without the network.
+  ///
+  /// Injected rather than owned, unlike the two CoreML processors it contends with for the
+  /// GPU: the weights are a 3.32 GB download whose progress Settings shows and whose readiness
+  /// outlives any one session, and Settings is reachable before a session exists.
+  let localGrader: LocalGrader
+  /// True while the model holds the GPU, so segmentation stands down for the duration.
+  private var isGradingOnDevice = false
 
   // MARK: - Init
 
-  /// `relay` is injectable for tests. It defaults to nil rather than to `LiveKitRelay()`
-  /// because a default argument is evaluated outside the actor, and the relay is
-  /// main-actor-isolated — building it in the body keeps that isolation intact.
+  /// `relay` and `localGrader` are injectable for tests. Both default to nil rather than to a
+  /// fresh instance because a default argument is evaluated outside the actor, and both are
+  /// main-actor-isolated — building them in the body keeps that isolation intact.
   init(
     wearables: WearablesInterface,
     settings: AppSettings,
+    localGrader: LocalGrader? = nil,
     relay: LiveKitRelay? = nil
   ) {
     self.wearables = wearables
     self.settings = settings
+    self.localGrader = localGrader ?? LocalGrader()
     self.relay = relay ?? LiveKitRelay()
     self.sessionManager = DeviceSessionManager(wearables: wearables)
     wireGrading()
@@ -381,8 +430,7 @@ final class StreamSessionViewModel {
     continuation.resume(returning: nil)
   }
 
-  /// Offers the photo the operator just took for grading. They pick the subtask; the agent
-  /// owns the rubrics, so the phone can only name one it was told about.
+  /// Offers the photo the operator just took for grading. They pick the subtask.
   func offerCapturedPhotoForGrading() {
     guard let photo = capturedPhoto, let jpeg = photo.jpegData(compressionQuality: 0.92) else {
       return
@@ -390,9 +438,16 @@ final class StreamSessionViewModel {
     photoAwaitingGrade = jpeg
     showPhotoPreview = false
     suggestion = nil
-    isIdentifying = true
     showSubtaskPicker = true
 
+    // Naming the work is the agent's job and there is no on-device equivalent — it would be a
+    // second full model pass for something that only pre-selects a row. Offline the operator
+    // picks unaided, which is what they do today whenever the agent declines to guess.
+    guard !gradesOnDevice else {
+      isIdentifying = false
+      return
+    }
+    isIdentifying = true
     // The picker opens now and the suggestion lands in it a moment later, rather than the
     // operator waiting on a spinner for permission to start scrolling. Someone who already
     // knows their subtask never notices this happened.
@@ -406,9 +461,48 @@ final class StreamSessionViewModel {
     suggestion = nil
     isIdentifying = false
     isGrading = true
-    Task { [relay] in
-      await relay.sendForGrading(jpeg, taskCode: taskCode, subtaskCode: subtaskCode)
+
+    // Resolved here rather than when the picker opened: the agent can leave the room while the
+    // operator is scrolling, and the grade should go wherever it can actually be answered.
+    if gradesOnDevice {
+      Task { await runLocalGrade(jpeg: jpeg, taskCode: taskCode, subtaskCode: subtaskCode) }
+    } else {
+      Task { [relay] in
+        await relay.sendForGrading(jpeg, taskCode: taskCode, subtaskCode: subtaskCode)
+      }
     }
+  }
+
+  /// Grades on the phone, mirroring what the agent does on the wire: the criteria go up first
+  /// so the sheet opens with the list drawn, then the verdict fills it in.
+  private func runLocalGrade(jpeg: Data, taskCode: String, subtaskCode: String) async {
+    guard let rubric = localGrader.catalogue.find(taskCode: taskCode, subtaskCode: subtaskCode)
+    else {
+      currentGrade = GradeAssembler.failure(
+        rubric: nil, taskCode: taskCode, subtaskCode: subtaskCode,
+        error: "no_rubric",
+        message: "This build ships no rubric for \(taskCode) / \(subtaskCode)."
+      )
+      isGrading = false
+      showGradeSheet = true
+      return
+    }
+
+    currentGrade = GradeAssembler.inProgress(rubric: rubric, model: LocalGrader.modelLabel)
+    isGrading = true
+    showGradeSheet = true
+
+    // The Metal compositor already contends with segmentation badly enough to have frozen the
+    // app once — see LiveKitFrameSink. A 3B model on the same GPU is not something to run
+    // alongside per-frame inference and hope.
+    isGradingOnDevice = true
+    segmentationTask?.cancel()
+    segmentationTask = nil
+    defer { isGradingOnDevice = false }
+
+    let grade = await localGrader.grade(jpeg: jpeg, rubric: rubric)
+    currentGrade = grade
+    isGrading = false
   }
 
   func cancelSubtaskPicker() {
@@ -688,6 +782,9 @@ final class StreamSessionViewModel {
     guard
       isSegmentationOverlayEnabled,
       segmentationTask == nil,
+      // The on-device grader is on the same GPU, and the operator is waiting on its verdict
+      // rather than on a mask over a frame they have already stopped looking at.
+      !isGradingOnDevice,
       let cgImage = image.cgImage
     else {
       return

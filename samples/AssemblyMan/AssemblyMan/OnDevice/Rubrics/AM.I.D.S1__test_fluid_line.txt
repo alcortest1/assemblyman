@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.D.S1
+TASK TITLE:   Fabricate a Rigid Line with a Flare and a Bend
+SUBTASK CODE: test_fluid_line
+SUBTASK:      Pressure Test the Tubing
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+test_fluid_line — VLM GRADING CRITERIA
+
+Assess the completed rigid line connected to the pressure tester inside the enclosed test box for leak check visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Fabricated rigid line is coupled to a pressure tester fitting by its B-nut.
+2. Rigid line lies inside the enclosed pressure test box, not outside it.
+3. B-nut is threaded onto the tester fitting with no visible thread gap.
+4. Tube surface, sleeve base, and B-nut are dry of pooled or running hydraulic fluid.
+
+Critical defects
+- Hydraulic fluid runs or beads at the sleeve base or B-nut joint.
+- Tube shows a split, crack, or bulge along its length.
+- Line is coupled to the tester but lies outside the enclosed box.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S1/procedure.md § Pressure Test the Tubing
+- Manual: FAA-H-8083-30B ch. 9 p. 9-1
+- Notes: Test pressure (1.5x system pressure) and gauge reading cannot be verified from the photograph; no gauge criterion written.; Leak location versus fault (B-nut tightness, flare failure, tube damage) is diagnostic guidance in the procedure; the photograph can show only presence of fluid, not internal cause.; Absence of installation on aircraft is the correct state at this subtask.

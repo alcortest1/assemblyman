@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.E.S1
+TASK TITLE:   Install safety wire on nuts, bolts, and turnbuckles
+SUBTASK CODE: wire_safety_on_bolts_by_hand
+SUBTASK:      Perform the Wire Safety on Bolts (By Hand)
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+wire_safety_on_bolts_by_hand — VLM GRADING CRITERIA
+
+Assess the completed hand-twisted safety wire installation joining two bolt heads, with pigtail visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A single wire connects two bolt holes, with twisted wire between the bolt heads.
+2. Twists between bolts are even, with 6-8 wraps per inch measured against a rule in frame.
+3. The wire loop lies down against the bolt head, not riding up over it.
+4. Pigtail at the end shows defined twists and is bent back toward the bolt head.
+
+Critical defects
+- Wire between bolts hangs slack or visibly loose.
+- Pigtail end sticks straight out unbent as a snag.
+- Wire is kinked, frayed, or broken along its run.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.E.S1/procedure.md § Perform the Wire Safety on Bolts (By Hand)
+- Manual: FAA-H-8083-30B ch. 7 p. 7-80
+- Notes: Procedure gives 6-8 wraps per inch and 6-8 pigtail wraps; handbook gives pigtail of 3-6 twists, 1/4 to 1/2 inch. Procedure followed as higher-priority source; disagreement unresolved.; A photograph cannot establish wire tension, wire newness, nut torque, or whether the wire pull tends to tighten the fastener.; FAA-H-8083-30B ch. 7 p. 7-80 — located by page label, not cited by the procedure sheet; standards taken from it are provisional.

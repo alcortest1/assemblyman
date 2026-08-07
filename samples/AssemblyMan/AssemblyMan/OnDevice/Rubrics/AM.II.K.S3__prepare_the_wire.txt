@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.K.S3
+TASK TITLE:   Assemble an Aircraft Electrical Connector
+SUBTASK CODE: prepare_the_wire
+SUBTASK:      Prepare the Wire
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+prepare_the_wire — VLM GRADING CRITERIA
+
+Assess the completed wire cut, stripped and inserted into the pin contact, before crimping visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Bare stranded conductor is visible at the prepared wire end, insulation removed cleanly.
+2. Bare conductor is inserted into the pin's wire barrel opening.
+3. Insulation ends at or just short of the barrel entry, with no long bare gap.
+4. All strands are gathered inside the barrel; none splayed or standing outside it.
+5. Only one wire enters the pin contact.
+6. Pin barrel is round and free of crimp indentations or tool marks.
+
+Critical defects
+- Pin barrel is empty; the stripped wire lies beside it, uninserted.
+- Insulation is pushed inside the barrel, no bare conductor entering the pin.
+- Strands are visibly cut, broken or fanned outside the barrel mouth.
+- The pin is bent, crushed or split along the barrel.
+- Two wires are inserted into the single pin contact.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.K.S3/procedure.md § Prepare the Wire
+- Manual: FAA-H-8083-31B ch. 9 p. 9-94
+- Notes: The 1/8 inch strip length in the procedure cannot be settled by photograph without a rule in frame; no criterion asks for it.; Wire gauge compatibility with the pin is not visible and is not graded.; Crimping and crimper setup belong to later subtasks; an uncrimped barrel is the correct state here.; The photograph cannot confirm the conductor is bottomed inside the barrel; only the external insulation-to-barrel gap is graded.; No conflict found between the procedure sheet and the handbook extract.

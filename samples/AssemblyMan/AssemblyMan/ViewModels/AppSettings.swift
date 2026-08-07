@@ -56,6 +56,7 @@ final class AppSettings {
   var frameRate: FrameRate = .thirty
 
   static let wiFiKey = "streamsOverWiFi"
+  static let gradingEngineKey = "gradingEngine"
   @ObservationIgnored private let defaults: UserDefaults
 
   /// `defaults` is injectable so tests are not steered by whatever the device last stored.
@@ -66,6 +67,10 @@ final class AppSettings {
     let prefersWiFi = defaults.object(forKey: Self.wiFiKey) as? Bool ?? true
     self.streamsOverWiFi = prefersWiFi
     self.quality = prefersWiFi ? .high : .medium
+    // Persisted, unlike the presentation toggles: which grader judged a student's work is not
+    // a preference to silently reset between launches.
+    self.gradingEngine = (defaults.string(forKey: Self.gradingEngineKey))
+      .flatMap(GradingEngine.init(rawValue:)) ?? .automatic
   }
 
   /// Whether to mirror the session into a LiveKit room for remote viewers and the assistant.
@@ -105,6 +110,21 @@ final class AppSettings {
   // MARK: - Agent
 
   var agent: Agent = .assistant
+
+  // MARK: - Grading
+
+  /// Which grader judges a photograph.
+  ///
+  /// Separate from `agent` on purpose. The agent is the voice riding along on the session and
+  /// it still needs a network; grading is one call on one still and is the half that can come
+  /// off the network on its own. Conflating them would mean losing the assistant to gain
+  /// offline grades, or the reverse.
+  var gradingEngine: GradingEngine = .automatic {
+    didSet {
+      guard gradingEngine != oldValue else { return }
+      defaults.set(gradingEngine.rawValue, forKey: Self.gradingEngineKey)
+    }
+  }
 
   // MARK: - Options
 
@@ -150,6 +170,36 @@ final class AppSettings {
     case thirty = 30
 
     var label: String { "\(rawValue) fps" }
+  }
+
+  /// Where a photograph gets graded.
+  enum GradingEngine: String, CaseIterable, Hashable, Identifiable {
+    /// The agent when it is in the room, the phone when it is not.
+    case automatic
+    case agent
+    case onDevice
+
+    var id: String { rawValue }
+
+    var name: String {
+      switch self {
+      case .automatic: return "Automatic"
+      case .agent: return "Agent — online"
+      case .onDevice: return "On device — offline"
+      }
+    }
+
+    var detail: String {
+      switch self {
+      case .automatic:
+        return "Grades with the agent, and falls back to the phone when it is not reachable."
+      case .agent:
+        return "Always the hosted grader. Grading is unavailable with no agent in the room."
+      case .onDevice:
+        return "Always \(LocalGrader.modelName) on the phone, network or not. Slower, and a "
+          + "much smaller model than the hosted grader."
+      }
+    }
   }
 
   /// Assistants that ride along on a session.

@@ -1,0 +1,31 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: create_the_patch_filler
+SUBTASK:      Create the Patch Filler
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+create_the_patch_filler — VLM GRADING CRITERIA
+
+Assess the completed cut and filed patch filler fitted into the skin opening visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A separate filler piece is present, cut to the shape of the skin opening.
+2. The filler sits in the opening with its face level with the surrounding skin.
+3. The gap between filler edge and opening edge is narrow and even all around.
+4. Filler edges show no burrs, ragged cut marks, or unsanded scratches.
+
+Critical defects
+- Filler is visibly smaller than the opening, leaving a wide open gap.
+- Filler edge is torn, cracked, or gouged from cutting.
+- Filler is buckled or bent, standing proud of the skin surface.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Create the Patch Filler
+- Manual: FAA-H-8083-31B ch. 4 p. 4-96; FAA-H-8083-31B ch. 4 p. 4-93
+- Notes: Filler gauge and alloy match to original skin cannot be judged from a photograph.; Rivet layout and holes belong to the next subtask; their absence is correct here.; Handbook corner radius and chamfer figures apply to lap patches, not this filler, so no numbers used.

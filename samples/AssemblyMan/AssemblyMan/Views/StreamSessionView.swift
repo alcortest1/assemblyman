@@ -33,6 +33,7 @@ struct StreamSessionView: View {
     wearables: WearablesInterface,
     wearablesVM: WearablesViewModel,
     settings: AppSettings,
+    localGrader: LocalGrader,
     openSettings: @escaping () -> Void
   ) {
     self.wearables = wearables
@@ -40,7 +41,9 @@ struct StreamSessionView: View {
     self.settings = settings
     self.openSettings = openSettings
     self._viewModel = State(
-      wrappedValue: StreamSessionViewModel(wearables: wearables, settings: settings)
+      wrappedValue: StreamSessionViewModel(
+        wearables: wearables, settings: settings, localGrader: localGrader
+      )
     )
   }
 

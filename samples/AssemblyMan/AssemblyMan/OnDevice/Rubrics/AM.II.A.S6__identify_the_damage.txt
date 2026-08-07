@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: identify_the_damage
+SUBTASK:      Identify the Damage
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+identify_the_damage — VLM GRADING CRITERIA
+
+Assess the completed marked-out damage area on the sheet metal part, measured and outlined prior to removal visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Damage such as a crack, hole, dent or tear is visible on the part
+2. A marker line forms a continuous closed boundary around the damage
+3. All visible damage lies inside the marked boundary, none touching the line
+4. A steel scale is in frame laid across the damage for height and length
+5. The part is still whole: no cut, sawn or drilled openings in the marked area
+6. Marker line contrasts with the surface and is legible along its full length
+
+Critical defects
+- Material is cut, sawn or drilled away inside the marked outline
+- The marker line runs across or through the visible damage
+- The marked outline is broken, leaving the damage not enclosed
+- Visible damage extends outside the marked outline
+- Marker outline is drawn on an area containing no visible damage
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Identify the Damage
+- Manual: FAA-H-8083-31B ch. 4 p. 4-90; FAA-H-8083-31B ch. 4 p. 4-91
+- Notes: Procedure requires a steel scale for height and length; the photograph shows the scale in place but cannot establish the recorded dimensions.; Handbook guidance on corner radii and permissible damage limits requires measurement or documentation and is not graded here.; Damage classification and repairability determination are written judgments, not visible in the frame.; Removal of the damaged material belongs to the next subtask; its absence is the correct finished state.

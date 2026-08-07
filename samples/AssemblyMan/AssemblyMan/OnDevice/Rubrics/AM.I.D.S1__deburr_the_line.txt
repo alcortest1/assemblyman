@@ -1,0 +1,34 @@
+TASK CODE:    AM.I.D.S1
+TASK TITLE:   Fabricate a Rigid Line with a Flare and a Bend
+SUBTASK CODE: deburr_the_line
+SUBTASK:      Deburr and Resize Tubing Ends
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+deburr_the_line — VLM GRADING CRITERIA
+
+Assess the completed deburred and resized tubing ends on the cut rigid tube visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Tube end opening is unobstructed and visible in frame for edge inspection
+2. Outer edge of the tube end shows a smooth, evenly broken edge with no raised burr ring
+3. Inner edge of the bore at the tube end shows no curled or protruding burr
+4. Tube ends remain plain and unflared, with no fitting installed
+5. Tube remains straight, with no bend formed at this stage
+6. Outer surface near the end is wiped free of fluid slurry so the edge can be seen
+
+Critical defects
+- Torn or curled metal lip protrudes from the tube end
+- Tube end is visibly crushed or flattened out of round
+- A split or crack runs from the tube end along the wall
+- Loose metal chips or sanding grit sit at the tube opening
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S1/procedure.md § Deburr and Resize Tubing Ends
+- Manual: FAA-H-8083-30B ch. 9 p. 9-2; FAA-H-8083-30B ch. 9 p. 9-6
+- Notes: Procedure and handbook agree: remove inside and outside burrs and leave a smooth end; no conflict.; The photograph cannot settle inside diameter restoration, squareness of the end face, wall thickness reduction, or that no filings remain inside the bore; these are excluded from the criteria.; Bending and flaring belong to later subtasks; their absence here is the correct finished state.

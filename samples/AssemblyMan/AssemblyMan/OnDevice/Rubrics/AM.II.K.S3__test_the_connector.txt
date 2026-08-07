@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.K.S3
+TASK TITLE:   Assemble an Aircraft Electrical Connector
+SUBTASK CODE: test_the_connector
+SUBTASK:      Test the Connector
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+test_the_connector — VLM GRADING CRITERIA
+
+Assess the completed mated electrical connector pair with its terminated wire, after the continuity and position check visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Both connector halves are joined together as one mated assembly.
+2. Mated shells are drawn fully together with no gap between their mating faces.
+3. Wire exits the rear of the connector with no bare conductor showing at the entry.
+4. Wire insulation is continuous and unbroken along the visible length to the connector.
+5. Wire remains seated in the connector and is not pulled back or hanging loose.
+6. Connector shell, coupling ring and rubber insert are intact, uncracked and undeformed.
+
+Critical defects
+- Connector halves rest cocked or half-engaged with an open gap between shells.
+- The wire has pulled free of the connector rear and hangs loose.
+- Exposed copper strands are visible outside the connector rear grommet.
+- A contact pin on a connector face is visibly bent, crushed or broken off.
+- The connector shell or rubber insert is split, gouged or torn.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.K.S3/procedure.md § Test the Connector
+- Manual: FAA-H-8083-31B ch. 9 p. 9-94
+- Notes: Continuity through the wire, termination and connector requires a meter reading and is not graded from the photograph.; Once the halves are mated, the contact position numbers on the connector faces are hidden, so correct pin-location matching cannot be confirmed in frame.; Plastic sealing plugs in unwired cavities (p. 9-94) are internal to the mated pair and are not graded here.

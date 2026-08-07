@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.E.S1
+TASK TITLE:   Install safety wire on nuts, bolts, and turnbuckles
+SUBTASK CODE: wire_safety_on_a_turnbuckle_by_hand
+SUBTASK:      Perform the Wire Safety on a Turnbuckle (By Hand)
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+wire_safety_on_a_turnbuckle_by_hand — VLM GRADING CRITERIA
+
+Assess the completed double-wrap safety wire installed by hand on a turnbuckle barrel and both end terminals visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Two separate safety wires pass through the turnbuckle barrel hole, lying on opposite sides.
+2. Wire strands lie flat along the barrel, streamlined, with no slack loops standing off.
+3. Each wrapped end shows at least four tight coils around the shank, no gaps.
+4. Cut wire ends are curled or bent back against the shank, not standing out.
+
+Critical defects
+- Wire ends are bare, straight and sharp, projecting away from the shank.
+- A safety wire is broken, or missing from one end of the turnbuckle.
+- Wraps are loose or spread with visible gaps, leaving the wire slack.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.E.S1/procedure.md § Perform the Wire Safety on a Turnbuckle (By Hand)
+- Manual: FAA-H-8083-30B ch. 7 p. 7-79; FAA-H-8083-30B ch. 7 p. 7-80
+- Notes: Procedure specifies exactly 4 wraps; handbook states at least four turns. Criterion follows the procedure's minimum without capping.; Handbook's three-thread exposure limit and wire diameter/material table are not gradeable here: thread count may be obscured and wire alloy is not visible.; The photograph cannot establish wire tension, wire diameter, or that the turnbuckle was correctly adjusted before safetying.; FAA-H-8083-30B ch. 7 p. 7-79; FAA-H-8083-30B ch. 7 p. 7-80 — located by page label, not cited by the procedure sheet; standards taken from them are provisional.
