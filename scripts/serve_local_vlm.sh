@@ -55,10 +55,32 @@ esac
 if ! command -v llama-server >/dev/null 2>&1; then
   echo "llama-server not found. Install llama.cpp first:" >&2
   echo "  brew install llama.cpp" >&2
+  echo "or, without Homebrew, take the upstream build — the Metal one, same" >&2
+  echo "engine LEAP runs on device — and put it on PATH:" >&2
+  echo "  https://github.com/ggml-org/llama.cpp/releases  (bin-macos-arm64)" >&2
   exit 1
 fi
 
 echo "$ARM -> $REPO/$MODEL on port $PORT"
+
+# The context has to hold the whole prompt, and what that is depends on which
+# eval is asking. A photo call sends one image; a video call sends the subtask's
+# whole sampled span, and AM.I.D.S8's shortest is 43 frames. At the few hundred
+# tokens the projector emits per frame that is tens of thousands of tokens, so
+# the 8192 this served at — sized when only photo grading existed — truncated a
+# sequence call before it had seen the work, and the model then graded whatever
+# survived the cut. Overridable, because context is the memory cost of serving
+# this arm and a photo-only run has no reason to pay for it.
+CTX_SIZE="${LLAMA_CTX_SIZE:-32768}"
+
+# One slot, and the context above is all of it. Left to itself llama-server opens
+# four and gives each the full --ctx-size, so raising the context for video
+# quadrupled into 131k tokens of KV cache, paged 25 GB of RAM out, and the server
+# was killed mid-sequence — the run recorded three `request_failed`s and no
+# reason. There is one GPU and one checkpoint here, so concurrent slots buy no
+# throughput; they only multiply what is resident. The runner sends these calls
+# one at a time to match.
+SLOTS="${LLAMA_SLOTS:-1}"
 
 # Sampling is verbatim from the model's leap/<quant>.json manifest. --jinja is
 # required for the LFM2 chat template; without it the model is prompted in a
@@ -74,5 +96,6 @@ exec llama-server \
   --temp 0.1 \
   --min-p 0.15 \
   --repeat-penalty 1.05 \
-  --ctx-size 8192 \
+  --ctx-size "$CTX_SIZE" \
+  --parallel "$SLOTS" \
   "${@:2}"

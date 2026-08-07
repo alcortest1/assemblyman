@@ -33,6 +33,7 @@ import json
 import re
 import sys
 import time
+import urllib.request
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -106,6 +107,22 @@ def span_frames(code: str, clip: str, t0: float | None, t1: float | None) -> lis
     return [p for p in picks if t0 - 1e-9 <= (frame_seconds(p.name) or 0) <= t1 + 1e-9]
 
 
+def frames_for(model: str, frames: list[Path]) -> list[Path]:
+    """The span's frames, thinned to what one call to this model may carry.
+
+    Even spacing, first and last kept: the span's endpoints are where a subtask
+    is entered and left, and a thinning that slid off either would grade a
+    different span than the screen states. The cap comes from the model's
+    registry entry — see the note on `max_frames` in vlm.py for why exceeding
+    it is not a longer call but no call at all.
+    """
+    cap = (vlm.MODELS_BY_ID.get(model) or {}).get("max_frames")
+    if not cap or len(frames) <= cap:
+        return frames
+    idx = {round(i * (len(frames) - 1) / (cap - 1)) for i in range(cap)}
+    return [frames[i] for i in sorted(idx)]
+
+
 # ── the points to grade ────────────────────────────────────────────────────
 
 def latest_photo_run(code: str) -> dict | None:
@@ -137,12 +154,23 @@ def subtasks_from(run: dict) -> "OrderedDict[str, dict]":
     Controls are skipped. A perturbed sheet is a probe of the grader's agreement
     on a still; running it again on video would double the spend to answer a
     question about the photo run, not this one.
+
+    So are the two other probe forms, on the same reasoning and for the same reason
+    the portal drops them: `step:dl.s1` is one step of a section this run already
+    grades whole, and `section:...#vmsghdgf5` is that section's criterion reworded
+    for a match test. Grading them here would put AM.I.D.S1 at thirty sequences
+    over seven clips — most of them a slice of a clip already being graded end to
+    end — where the runs that came out right graded one span per clip. It also has
+    to agree with `build_portal_data.py`: the screen shows one row per section, and
+    a verdict against a row the screen does not draw is a verdict nobody can read.
     """
     groups: OrderedDict[str, dict] = OrderedDict()
     for result in run.get("results", []):
         if result.get("is_control") or result.get("polarity") not in (None, "original"):
             continue
         gid = result.get("rolls_up_to") or result.get("target_id")
+        if gid.startswith("step:") or "#" in gid:
+            continue
         tid = result.get("target_id")
         group = groups.setdefault(gid, {
             "gid": gid,
@@ -221,10 +249,98 @@ def estimate(frames: int, points: int, model_id: str) -> float:
     return (prompt * meta["in_per_m"] + completion * meta["out_per_m"]) / 1e6
 
 
+# ── routes ─────────────────────────────────────────────────────────────────
+
+OPENROUTER_CREDITS = "https://openrouter.ai/api/v1/credits"
+
+
+def openrouter_balance() -> float | None:
+    """Credit left on the OpenRouter account, or None if it could not be asked.
+
+    A key outlives the credit that made it useful. The account is spent —
+    `/credits` reports usage past the balance and every call returns 402 — while
+    `OPENROUTER_API_KEY` sits in `.env` exactly as it did before. So the
+    pre-flight has to ask what is left rather than whether a key exists, or it
+    green-lights arms with no route: the run then spends on the arms that work
+    and writes ungraded points for the ones that never had a chance, with
+    nothing on the run distinguishing the two.
+
+    None means the question could not be put, which is not the same as an answer
+    of nothing. The caller proceeds on the key alone and says that it did.
+    """
+    key = vlm.load_api_key()
+    if not key:
+        return 0.0
+    request = urllib.request.Request(
+        OPENROUTER_CREDITS, headers={"Authorization": f"Bearer {key}"})
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            data = (json.load(response) or {}).get("data") or {}
+    except Exception:
+        return None
+    granted, used = data.get("total_credits"), data.get("total_usage")
+    if granted is None or used is None:
+        return None
+    return round(granted - used, 4)
+
+
+def local_up(model: str) -> bool:
+    """Whether this arm's `llama-server` is answering on its own port.
+
+    The third route fails a third way, and not over a credential: an on-device
+    arm needs no key and no project, only a server holding that checkpoint.
+    Asked here rather than per call for the same reason as the other two — a
+    port with nothing behind it fails every call in that column with a
+    connection error that reads like a model fault.
+
+    Asked of `/health`, which is the one endpoint that distinguishes serving from
+    listening: llama-server binds its port as it starts and answers `/v1/models`
+    while the weights are still loading, so that route calls a server ready some
+    minutes before it is.
+    """
+    endpoint = (vlm.MODELS_BY_ID.get(model) or {}).get("endpoint")
+    if not endpoint:
+        return False
+    try:
+        with urllib.request.urlopen(endpoint.split("/v1/")[0] + "/health", timeout=5) as r:
+            return (json.load(r) or {}).get("status") == "ok"
+    except Exception:
+        return False
+
+
+def resolve_routes(models: list[str]) -> tuple[dict[str, str], str]:
+    """The route each arm takes, decided once here and carried to every call.
+
+    One decision, in one place, because the alternative is what this runner did:
+    the pre-flight asked `reachable()` and printed a plan, and `one()` re-asked
+    `available()` per call and followed a different one. Those two disagree in
+    exactly the case that matters — a key file whose service account has been
+    deleted is configured but cannot mint a token — so the run announced
+    `openrouter` for the Gemini arms and then sent every one of them to Vertex,
+    where they failed identically. A plan that is not what runs is worse than no
+    plan: the saved file then records a route the call never took.
+
+    A local arm answers to neither question. Routing it by `supports()` alone put
+    it on the OpenRouter branch, where a spent balance aborted a run that was
+    never going to touch OpenRouter — and, had it started, stamped its rows
+    `openrouter` in the run file.
+    """
+    vertex, why = vertex_transport.reachable()
+    routes = {}
+    for model in models:
+        if vlm.is_local(model):
+            routes[model] = "local"
+        elif vertex and vertex_transport.supports(model):
+            routes[model] = "vertex"
+        else:
+            routes[model] = "openrouter"
+    return routes, why
+
+
 # ── the run ────────────────────────────────────────────────────────────────
 
 def grade_task(code: str, *, models: list[str], dry_run: bool = False,
-               workers: int = 4) -> dict | None:
+               workers: int = 4, routes: dict[str, str] | None = None) -> dict | None:
     run = latest_photo_run(code)
     if not run:
         print(f"  {code}: no photo run — nothing to grade against")
@@ -260,29 +376,40 @@ def grade_task(code: str, *, models: list[str], dry_run: bool = False,
     if dry_run:
         return None
 
+    # Route per model, not per run: the Gemini arms can go to Vertex while the
+    # others cannot, and a run that mixes routes is still one run — same prompt,
+    # same parsing, same schema — so the columns stay comparable. Resolved once
+    # for the whole run, never re-derived per call.
+    if routes is None:
+        routes, _ = resolve_routes(models)
+
     results = []
 
     def one(job: dict, model: str) -> dict:
         group = job["group"]
         started = time.monotonic()
-        # Route per model, not per run: the Gemini arms can go to Vertex while the
-        # others cannot, and a run that mixes routes is still one run — same
-        # prompt, same parsing, same schema — so the columns stay comparable.
-        use_vertex = vertex_transport.available() and vertex_transport.supports(model)
+        route = routes[model]
+        sent = frames_for(model, job["frames"])
         out = vlm.grade_sequence(
             model=model,
-            frame_paths=job["frames"],
+            frame_paths=sent,
             criteria=[p["criterion"] for p in job["points"]],
             subject=group["label"],
-            key="vertex" if use_vertex else None,
-            post=vertex_transport.post if use_vertex else vlm._post,
+            key="vertex" if route == "vertex" else None,
+            post=vertex_transport.post if route == "vertex" else vlm._post,
         )
         row = {
             "gid": group["gid"], "label": group["label"], "model": model,
             "video": group["video"], "t0": job["t0"], "t1": job["t1"],
-            "frames": [p.name for p in job["frames"]],
-            "frame_count": len(job["frames"]),
-            "route": "vertex" if use_vertex else "openrouter",
+            # What was SENT, which the cap can make thinner than the span. The
+            # drop is recorded on the row because a verdict must be readable
+            # against the evidence that produced it, not the evidence the
+            # screen happens to draw.
+            "frames": [p.name for p in sent],
+            "frame_count": len(sent),
+            "span_frames": len(job["frames"]),
+            "dropped": len(job["frames"]) - len(sent),
+            "route": route,
             "latency_s": out.get("latency_s") or round(time.monotonic() - started, 2),
             "cost_usd": out.get("cost_usd"),
             "prompt_tokens": out.get("prompt_tokens"),
@@ -308,6 +435,13 @@ def grade_task(code: str, *, models: list[str], dry_run: bool = False,
         return row
 
     pairs = [(j, m) for j in jobs for m in models]
+    # A hosted arm is rate-limited; an on-device one is a single process holding a
+    # single checkpoint on this machine's GPU. Sending it four sequences at once
+    # wins no throughput — they queue on the same device either way — and costs
+    # four slots' worth of KV cache, which for a video span is what takes the
+    # server out. So a run touching a local arm goes one call at a time.
+    if any(routes[m] == "local" for m in models):
+        workers = 1
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
         for row in pool.map(lambda pair: one(*pair), pairs):
             results.append(row)
@@ -378,25 +512,50 @@ def main() -> int:
 
     # Each arm needs a route it can actually reach. Checked up front rather than
     # per call, so a run does not spend on two models and then fail on the third.
+    routes = None
     if not args.estimate:
-        vertex = vertex_transport.available()
-        unreachable = [m for m in models
-                       if not (vertex and vertex_transport.supports(m))
-                       and not vlm.load_api_key()]
-        if unreachable:
-            print("No route for: " + ", ".join(unreachable))
-            print("  OpenRouter needs OPENROUTER_API_KEY with credit; Vertex needs "
-                  "GOOGLE_CLOUD_PROJECT and GOOGLE_APPLICATION_CREDENTIALS.")
-            print("  Vertex serves: " + ", ".join(sorted(vertex_transport.SUPPORTED)))
+        # Credentials being configured is not the same as their still working, and
+        # the difference is 60 identical failures with the run already underway.
+        # Each route is asked about the failure it actually has: Vertex about a
+        # token, OpenRouter about a balance, a local arm about its server.
+        routes, why = resolve_routes(models)
+        if why and any(vertex_transport.supports(m) and not vlm.is_local(m)
+                       for m in models):
+            print(f"Vertex not reachable: {why}")
+
+        down = [m for m, r in routes.items() if r == "local" and not local_up(m)]
+        if down:
+            print("No server for: " + ", ".join(down))
+            for model in down:
+                print(f"  {model} → {vlm.MODELS_BY_ID[model]['endpoint']} is not answering")
+            print("  Start one per arm, each on its own port: "
+                  "scripts/serve_local_vlm.sh {lfm-vl|lfm-vl-q4|lfm-vl-small}")
             return 1
+
+        needs_or = [m for m, r in routes.items() if r == "openrouter"]
+        balance = openrouter_balance() if needs_or else None
+        if needs_or and balance is not None and balance <= 0:
+            print("No route for: " + ", ".join(needs_or))
+            print(f"  OpenRouter has ${balance:.2f} left — a key is not a route."
+                  if vlm.load_api_key() else
+                  "  OPENROUTER_API_KEY is not set (environment or alcor_agents/.env).")
+            print("  Vertex needs GOOGLE_CLOUD_PROJECT and GOOGLE_APPLICATION_CREDENTIALS, "
+                  "in the environment or alcor_agents/.env.")
+            print("  Vertex serves: " + ", ".join(sorted(vertex_transport.SUPPORTED)))
+            print("  The on-device arms need neither, only a server: "
+                  + ", ".join(m["id"] for m in vlm.MODELS if m.get("local")))
+            print("  Re-run with --models naming only the arms that have a route.")
+            return 1
+        if needs_or and balance is None:
+            print("  could not read the OpenRouter balance — proceeding on the key alone")
         for model in models:
-            print(f"  {model} → "
-                  f"{'vertex' if vertex and vertex_transport.supports(model) else 'openrouter'}")
+            print(f"  {model} → {routes[model]}")
 
     print(f"{'estimating' if args.estimate else 'grading'} "
           f"{len(codes)} task(s) over {len(models)} model(s)")
     for code in codes:
-        grade_task(code, models=models, dry_run=args.estimate, workers=args.workers)
+        grade_task(code, models=models, dry_run=args.estimate,
+                   workers=args.workers, routes=routes)
     return 0
 
 

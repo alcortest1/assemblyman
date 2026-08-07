@@ -1,0 +1,7 @@
+# Everything in portal/ ships, including data/frames and data/thumbs — the repo
+# gitignores them as derived, and without this file the CLI would fall back to
+# .gitignore rules and deploy a portal with every image missing.
+.DS_Store
+serve.py
+.env
+.env.local

@@ -1,0 +1,210 @@
+{
+ "procedure": {
+  "live": true,
+  "models": [
+   "Opus 5",
+   "Gemini 3.1 Pro",
+   "Gem 3.6 Flash",
+   "GPT-5.6 Sol"
+  ],
+  "rows": [
+   {
+    "label": "1 \u00b7 Weight, arm, and moment entries are filled in for each weighed location.",
+    "cells": [
+     [
+      "pass",
+      "0.95"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "0.99"
+     ]
+    ]
+   },
+   {
+    "label": "2 \u00b7 Summed totals appear at the bottom of the weight and moment columns.",
+    "cells": [
+     [
+      "pass",
+      "0.55"
+     ],
+     [
+      "fail",
+      "1.00"
+     ],
+     [
+      "fail",
+      "0.95"
+     ],
+     [
+      "fail",
+      "0.87"
+     ]
+    ]
+   },
+   {
+    "label": "3 \u00b7 A CG value in inches is recorded on the worksheet.",
+    "cells": [
+     [
+      "pass",
+      "0.95"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "0.99"
+     ]
+    ]
+   },
+   {
+    "label": "4 \u00b7 A written CG range appears with a marked in-range or out-of-range conclusion",
+    "cells": [
+     [
+      "fail",
+      "0.90"
+     ],
+     [
+      "fail",
+      "1.00"
+     ],
+     [
+      "fail",
+      "1.00"
+     ],
+     [
+      "fail",
+      "0.99"
+     ]
+    ]
+   },
+   {
+    "label": "5 \u00b7 The finished work shows no such defect: The arm column carries a summed tota",
+    "cells": [
+     [
+      "pass",
+      "0.90"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "0.98"
+     ]
+    ]
+   },
+   {
+    "label": "6 \u00b7 The finished work shows no such defect: No moment column or moment values ap",
+    "cells": [
+     [
+      "pass",
+      "0.95"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "0.99"
+     ]
+    ]
+   },
+   {
+    "label": "7 \u00b7 The finished work shows no such defect: CG value lies outside the written ra",
+    "cells": [
+     [
+      "pass",
+      "0.50"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "1.00"
+     ],
+     [
+      "pass",
+      "0.96"
+     ]
+    ]
+   }
+  ],
+  "rollup": [
+   [
+    "fail",
+    "fail \u00b7 1 of 7"
+   ],
+   [
+    "fail",
+    "fail \u00b7 2 of 7"
+   ],
+   [
+    "fail",
+    "fail \u00b7 2 of 7"
+   ],
+   [
+    "fail",
+    "fail \u00b7 2 of 7"
+   ]
+  ],
+  "replies": {
+   "r0m0": "NG, RMG, LMG each list weight, arm, and computed moment",
+   "r0m1": "Weight, arm, and moment values are filled in for NG, RMG, and LMG.",
+   "r0m2": "Weight, arm, and moment values are filled in for NG, RMG, and LMG.",
+   "r0m3": "All three gear locations have weight, arm, and moment entries.",
+   "r1m0": "Totals 3,575 and 243,375 shown below table in CG fraction, not as column rows",
+   "r1m1": "Totals appear in the CG formula, not at the bottom of the columns.",
+   "r1m2": "No totals are written at the bottom of the weight or moment columns.",
+   "r1m3": "Totals are used below, but not placed at the bottoms of their columns.",
+   "r2m0": "CG = 68.07\" recorded at bottom",
+   "r2m1": "A CG value of 68.07\" is recorded.",
+   "r2m2": "CG value of 68.07 inches is clearly recorded.",
+   "r2m3": "CG is recorded as 68.07 inches.",
+   "r3m0": "No CG limits written and no in-range/out-of-range conclusion marked",
+   "r3m1": "No CG range or conclusion is visible on the worksheet.",
+   "r3m2": "No CG range or in/out-of-range conclusion is written.",
+   "r3m3": "No written CG range or range conclusion appears.",
+   "r4m0": "Arm column shows no summed total",
+   "r4m1": "The arm column does not contain a summed total.",
+   "r4m2": "The arm column does not carry a summed total.",
+   "r4m3": "No summed total appears in the arm column.",
+   "r5m0": "Moment column present with three values",
+   "r5m1": "A moment column with calculated values is present.",
+   "r5m2": "Moment column and values are present on the worksheet.",
+   "r5m3": "A moment column and three moment values are shown.",
+   "r6m0": "No range stated and no acceptability marking present",
+   "r6m1": "No range or acceptability mark is present, so this specific defect is absent.",
+   "r6m2": "No out-of-range CG was improperly marked acceptable.",
+   "r6m3": "No acceptable marking or written range appears."
+  },
+  "negLines": [],
+  "controlStats": "live run \u00b7 no perturbed sheet \u2014 the saved control grid returns if data/photo_runs/AM.I.C.S5.json is removed"
+ }
+}

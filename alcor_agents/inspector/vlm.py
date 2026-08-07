@@ -27,7 +27,10 @@ ROOT = Path(__file__).resolve().parent.parent
 ENDPOINT = os.environ.get(
     "ALCOR_VLM_ENDPOINT", "https://openrouter.ai/api/v1/chat/completions"
 ).strip() or "https://openrouter.ai/api/v1/chat/completions"
-TIMEOUT_S = 120
+# Sized for the largest call the harness makes: a 35-frame sequence graded in
+# one request routinely runs past two minutes on the slower arms, and at 120
+# this cut off seven of AM.II.K.S3's twenty-eight calls mid-reply.
+TIMEOUT_S = 300
 
 # An on-device candidate is served locally by `llama-server`, which speaks the
 # same chat-completions dialect this module already posts — same base64 data
@@ -51,9 +54,16 @@ def _local(port: int) -> str:
 # Vision-capable models, with the OpenRouter per-million prices current when
 # this registry was written. Prices are used only for the pre-run estimate that
 # the UI shows; actual spend comes back per call in the response usage block.
+# `max_frames` is the most images one call to the model may carry. Where a
+# sequence outruns it, the caller drops frames at even spacing BEFORE the call
+# and says so — the alternative observed on the on-device arms is worse than an
+# error: past ~2× this cap LFM2 stops returning the criteria JSON entirely and
+# answers with a fragment ("Answer: 1"), so every point of a 43-frame span came
+# back ungraded while a 12-frame call graded all eleven. A model that grades a
+# thinner sequence is a result; a model that silently grades nothing is not.
 MODELS = [
     {"id": "anthropic/claude-opus-5", "label": "Opus 5", "vendor": "Anthropic",
-     "in_per_m": 5.00, "out_per_m": 25.00},
+     "in_per_m": 5.00, "out_per_m": 25.00, "max_frames": 64},
     {"id": "google/gemini-3.6-flash", "label": "Gemini 3.6 Flash", "vendor": "Google",
      "in_per_m": 1.50, "out_per_m": 7.50},
     # `-preview` is the whole id, not a qualifier that can be trimmed: there is
@@ -74,14 +84,14 @@ MODELS = [
     # accuracy, and the 1.6B to say whether a model a quarter the size is close
     # enough to matter.
     {"id": "local/lfm2-vl-3b-q8", "label": "LFM2-VL-3B Q8_0", "vendor": "LiquidAI (on-device)",
-     "in_per_m": 0.0, "out_per_m": 0.0, "local": True,
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True, "max_frames": 12,
      "endpoint": _local(8081), "sampling": LEAP_SAMPLING},
     {"id": "local/lfm2-vl-3b-q4", "label": "LFM2-VL-3B Q4_K_M", "vendor": "LiquidAI (on-device)",
-     "in_per_m": 0.0, "out_per_m": 0.0, "local": True,
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True, "max_frames": 12,
      "endpoint": _local(8082), "sampling": LEAP_SAMPLING},
     {"id": "local/lfm2.5-vl-1.6b-q4", "label": "LFM2.5-VL-1.6B Q4_0",
      "vendor": "LiquidAI (on-device)",
-     "in_per_m": 0.0, "out_per_m": 0.0, "local": True,
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True, "max_frames": 12,
      "endpoint": _local(8083), "sampling": LEAP_SAMPLING},
 ]
 MODELS_BY_ID = {m["id"]: m for m in MODELS}
@@ -2041,30 +2051,32 @@ def estimate_cost(model_ids: list[str], calls_per_model: int,
 
 SEQUENCE_PROMPT = """\
 You are grading a student's aircraft-maintenance work for an FAA Part 147 \
-training pilot, from a SEQUENCE of video frames rather than a single photograph.
+training pilot.
 
-The frames are in chronological order and each is labelled with its timestamp. \
-Together they cover one subtask from start to finish.
+You are shown a VIDEO of the procedure being executed — a sequence of frames in \
+chronological order, each labelled with its timestamp. The final frames show the \
+work as the student left it.
 
-You are given the numbered criteria for that subtask. Return a verdict for EVERY \
-numbered criterion, in the order given. Do not merge, skip, or add any.
+GRADE THE FINISHED PRODUCT against the numbered criteria. Return a verdict for \
+EVERY numbered criterion, in the order given. Do not merge, skip, or add any.
 
-WHAT THE SEQUENCE CHANGES
+WHAT THE VIDEO CHANGES
 
-A criterion is satisfied if it is satisfied AT ANY POINT in the sequence, and you \
-should say when. A still can only show the last instant of the work; these frames \
-show the work being done. A condition that was plainly true at t=12.0 and is \
-obscured by a hand at t=44.0 is PASS, and the timestamp is your evidence.
+The product is graded as it ends, but the video is your evidence for how it got \
+there. A condition of the finished work that the last frame obscures — a hand, a \
+tool, the camera angle — may be plainly visible moments earlier: that is \
+evidence, and the timestamp is your citation. A criterion about how the work was \
+done (order, technique, handling) is graded on the frames that show it being done.
 
-This is the whole reason for grading on a clip, so use it. Do not answer `unsure` \
-because the final frame is unclear if an earlier frame settles the point.
+Do not answer `unsure` because the final frame is unclear if an earlier frame \
+settles the point.
 
 VERDICTS
-- `pass`  — you can see, in at least one frame, that the criterion is satisfied.
-- `fail`  — you can see, in the frames, that it is NOT satisfied.
-- `unsure` — no frame in the sequence shows the feature well enough to decide. \
-Genuinely unsure, not "the last frame was blurry". If the whole sequence never \
-shows it, that is `unsure` and is a real and useful answer.
+- `pass`  — the video shows the criterion satisfied.
+- `fail`  — the video shows it is NOT satisfied.
+- `unsure` — no frame shows the feature well enough to decide. Genuinely unsure, \
+not "the last frame was blurry". If the whole video never shows it, that is \
+`unsure` and is a real and useful answer.
 
 Judge only what is visible. Never infer a torque, a pressure, an internal \
 condition, a material or an exact dimension from video. If a criterion needs a \
@@ -2099,7 +2111,7 @@ def frame_seconds(name: str) -> float | None:
 def grade_sequence(
     *, model: str, frame_paths: list[Path], criteria: list[str],
     subject: str | None = None, key: str | None = None,
-    max_tokens: int = 4000, post=_post,
+    max_tokens: int = 8000, post=_post,
 ) -> dict:
     """Grade every criterion of one subtask against one sampled sequence.
 
@@ -2142,8 +2154,28 @@ def grade_sequence(
         return result
 
     parsed = parse_json_object(result["text"]) or {}
+    items = parsed.get("criteria")
+    if not items:
+        # A reply clipped by max_tokens dies mid-object and parses to nothing,
+        # which used to take every point of the call with it — 3,996 completion
+        # tokens of good verdicts thrown away for the one the cap cut in half.
+        # The complete items before the cut are real verdicts; take them one by
+        # one and let only the severed one stay ungraded.
+        items = []
+        for match in re.finditer(r'\{[^{}]*"index"[^{}]*\}', result["text"] or ""):
+            try:
+                items.append(json.loads(match.group(0)))
+            except json.JSONDecodeError:
+                continue
     by_index = {}
-    for item in parsed.get("criteria") or []:
+    for item in items or []:
+        # A degraded reply can put anything in this list — the on-device arms
+        # return bare ints when a sequence outruns them. Whatever is not a
+        # numbered object is simply not a verdict; it must skip, not raise,
+        # because one malformed entry would otherwise take down the whole
+        # call's parse and turn ten good verdicts into none.
+        if not isinstance(item, dict):
+            continue
         try:
             by_index[int(item.get("index"))] = item
         except (TypeError, ValueError):

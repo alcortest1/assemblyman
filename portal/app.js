@@ -174,6 +174,35 @@
 
   function subIndex(task) { return Math.min(state.sub, task.subtasks.length - 1); }
 
+  /* The subtasks grouped by the clip they are graded on, in first-appearance order.
+     Both assessment screens are asking a question about a clip — Photo assessment
+     about its last frame, Video assessment about a sequence sampled across it — so
+     the clip is the axis to pick along. AM.I.D.S1's thirty subtasks are seven clips
+     carrying three to five spans each, and a thirty-cell rail makes you scroll past
+     four spans of bending to reach the flare.
+
+     A subtask the run recorded no clip against collects into a trailing group rather
+     than being dropped: four tasks have one, AM.III.M.S5 is nothing but those, and a
+     rail keyed on clips would otherwise make a compiled criterion unreachable. */
+  function clipGroups(task) {
+    var order = [], byClip = {}, loose = [];
+    task.subtasks.forEach(function (s, i) {
+      if (!s.frameVideo) { loose.push(i); return; }
+      if (!byClip[s.frameVideo]) { byClip[s.frameVideo] = []; order.push(s.frameVideo); }
+      byClip[s.frameVideo].push(i);
+    });
+    var groups = order.map(function (clip) { return { clip: clip, subs: byClip[clip] }; });
+    if (loose.length) groups.push({ clip: null, subs: loose });
+    return groups;
+  }
+
+  function groupOf(groups, sub) {
+    for (var i = 0; i < groups.length; i++) {
+      if (groups[i].subs.indexOf(sub) !== -1) return i;
+    }
+    return 0;
+  }
+
   function clipsLabel(t) {
     return t.clips ? t.clips + (t.clips === 1 ? ' clip' : ' clips') : 'no video';
   }
@@ -458,7 +487,12 @@
     ]);
 
     var parts = [head];
-    if (state.tab !== 'docs') parts.push(renderRail(task, i));
+    // The assessment screens pick along the clip; the others still pick along the subtask.
+    var byClip = state.tab === 'assess' || state.tab === 'vassess';
+    if (state.tab !== 'docs') {
+      parts.push(byClip ? renderClipRail(task, i, state.tab === 'vassess')
+                        : renderRail(task, i));
+    }
 
     if (state.tab === 'detail') parts.push(renderHierarchy(task, st));
     else if (state.tab === 'assess') parts.push(renderAssess(task, st));
@@ -484,6 +518,80 @@
         el('span', { class: 'rail-sub', text: s.stepsCount + ' steps · ' + s.atomsCount + ' atoms' })
       ]);
     }));
+  }
+
+  /* The rail the two assessment screens use: one cell per clip, with that clip's
+     spans listed beneath it. `withSpans` is what separates them — Video assessment
+     grades a sequence sampled across a span, so its rows carry the interval and the
+     frame count; Photo assessment grades one still, so its rows carry the timestamp
+     of the frame that actually goes to the model. Same clips, different evidence,
+     and the rows say which. */
+  function renderClipRail(task, current, withSpans) {
+    var groups = clipGroups(task);
+    var active = groupOf(groups, current);
+
+    var rail = el('div', { class: 'rail' }, groups.map(function (g, gi) {
+      var head = task.subtasks[g.subs[0]];
+      var points = g.subs.reduce(function (n, i) {
+        return n + pointsOf(task.subtasks[i]).length;
+      }, 0);
+      return el('button', {
+        class: 'rail-cell', type: 'button', 'aria-current': String(gi === active),
+        on: { click: function () { setState({ sub: g.subs[0], expanded: null, reply: null }); } }
+      }, [
+        el('span', { class: 'plate rail-plate' }, [
+          crosshair(14),
+          plateImage(framePaths(task.code, head.frameVideo, head.frameFile), ''),
+          el('span', { class: 'rail-ts', text: (head.frameFile || '').replace('.jpg', '') })
+        ]),
+        el('span', {
+          class: 'rail-name',
+          text: String(gi + 1).padStart(2, '0') + ' ' + (g.clip || 'No clip recorded')
+        }),
+        el('span', {
+          class: 'rail-sub',
+          text: g.subs.length + (g.subs.length === 1 ? ' subtask · ' : ' subtasks · ') +
+                points + (points === 1 ? ' point' : ' points')
+        })
+      ]);
+    }));
+
+    var group = groups[active];
+    var rows = group.subs.map(function (i) {
+      var s = task.subtasks[i];
+      var meta;
+      if (withSpans) {
+        var span = spanFor(task, i);
+        meta = !span ? 'no sampled sequence'
+          : (span.whole ? 'whole clip · ' + fmtTime(span.t1)
+                        : fmtTime(span.t0) + ' – ' + fmtTime(span.t1)) +
+            ' · ' + span.frames.length + ' frames';
+      } else {
+        var t = frameSeconds(s.frameFile);
+        meta = (t === null ? 'no frame' : 'last frame · t' + fmtTime(t)) +
+               ' · ' + pointsOf(s).length + (pointsOf(s).length === 1 ? ' point' : ' points');
+      }
+      return el('button', {
+        class: 'span-cell', type: 'button', 'aria-current': String(i === current),
+        on: { click: function () { setState({ sub: i, expanded: null, reply: null }); } }
+      }, [
+        el('span', { class: 'span-cell-name', text: s.label }),
+        el('span', { class: 'span-cell-meta', text: meta })
+      ]);
+    });
+
+    return el('div', { class: 'rail-stack' }, [
+      rail,
+      el('div', { class: 'span-list' }, [
+        el('span', {
+          class: 'span-list-label',
+          text: group.clip
+            ? (withSpans ? 'Spans graded on this clip · sampled at ' + SAMPLE_FPS_LABEL
+                         : 'Stills graded on this clip · the last frame of each span')
+            : 'Subtasks with no clip recorded against them'
+        })
+      ].concat(rows))
+    ]);
   }
 
   /* tab · hierarchy */
@@ -599,6 +707,13 @@
   /* tab · photo assessment */
 
   function renderAssess(task, st) {
+    probeServer();
+    loadRunStore('photo', task.code);
+    // Newest first, same order as the video tab: a run just made on this page,
+    // then one serve.py persisted, then the saved CLI run in the built extract.
+    var liveGrid = liveRuns['photo' + task.code + '#' + subIndex(task)] ||
+                   (runStores.photo[task.code] || {})[st.raw.sheet] || null;
+
     // A drafted sheet only stands in where no run was saved for this subtask.
     var draftKey = task.code + '#' + subIndex(task);
     var drafted = !st.hasRun && state.drafted === draftKey;
@@ -689,15 +804,32 @@
           el('span', { class: 'excluded', text: st.excluded })
         ]),
         el('div', { class: 'controls' }, controls),
-        el('div', { class: 'run-row' }, [
-          el('button', { class: 'btn btn-primary blueprint', type: 'button' }, [corners(), 'Run · 4 models']),
-          el('span', { class: 'plate-note', text: runCost })
-        ])
+        (function () {
+          var hostedArms = (serverInfo && serverInfo.server && serverInfo.arms) || [];
+          var canRun = hostedArms.length && st.points.length &&
+                       st.raw.frameFile && st.raw.frameVideo && !liveRunning;
+          return el('div', { class: 'run-row' }, [
+            el('button', {
+              class: 'btn btn-primary blueprint', type: 'button', disabled: !canRun,
+              on: { click: function () { runPhotoLive(task, st); } }
+            }, [corners(), liveRunning ? 'Running…'
+                : hostedArms.length ? 'Run · ' + hostedArms.length + ' models'
+                : 'Run · 4 models']),
+            el('span', { class: 'plate-note', text: liveRunning ||
+              (canRun
+                ? 'Live: one call per arm against this frame, the points graded ' +
+                  'together, through serve.py. No perturbed sheet rides a live run — ' +
+                  'the CLI pipeline grades those. Saves to data/photo_runs/' +
+                  task.code + '.json.'
+                : runCost) })
+          ]);
+        })()
       ])
     ]);
 
+    var run = liveGrid || st.raw.run;
     var right = el('div', { class: 'assess-right' },
-      st.hasRun ? renderGrid(task, st) : [
+      run ? renderGrid(task, st, run) : [
         el('div', { class: 'empty-center' }, [
           el('div', { class: 'empty-note' }, [
             el('span', {
@@ -719,8 +851,8 @@
     return el('div', { class: 'assess' }, [left, right]);
   }
 
-  function renderGrid(task, st) {
-    var run = st.raw.run;
+  function renderGrid(task, st, run) {
+    run = run || st.raw.run;
 
     function cells(list, rk) {
       return list.map(function (c, mi) {
@@ -797,7 +929,7 @@
         text: 'Every control expects fail. Decisive pairs: perturbed points whose original the same model passed on the same frame — the photograph settles the condition and the work meets the real standard, so a control pass there has no observability excuse.'
       }),
       el('span', { class: 'spacer' }),
-      el('span', { class: 'control-stats', text: st.controlStats })
+      el('span', { class: 'control-stats', text: run.controlStats || st.controlStats })
     ]));
 
     var reply = replyFor(run);
@@ -844,9 +976,14 @@
    * timestamp. The points are passed unchanged — this screen moves the evidence, not
    * the standard, so a verdict that differs differs because of what motion shows.
    *
-   * No video-eval run exists in the tree, so the clip column is empty everywhere. The
-   * photo column beside it is real, off the saved run, and it is the thing a video run
-   * would have to beat: the unsures are where a still could not settle the condition.
+   * The grid is the design's: the video run's own arms as columns, a verdict cell
+   * citing the moment that settled it, the segment roll-up beneath, and a cell's
+   * reply carrying the frames its call actually held. It fills from the newest
+   * `build/video_eval/<ACS>/vrun_*.json` that graded something and shows the
+   * design's empty state everywhere the runner has not reached — which is most
+   * tasks. The photo verdicts stay on their own tab; the two runs ask different
+   * arms different questions, and drawing them as one grid implied a pairing
+   * that does not exist.
    */
 
   // Seconds off a frame's own name — t000041_50.jpg is 41.50 s. Same encoding the
@@ -913,6 +1050,460 @@
       (images * 0.028).toFixed(2) + ' priced at the photo run’s per-call rate per frame. ' +
       'Treat it as an order of magnitude, not a quote: the sequence shares one criterion ' +
       'across its frames, and no video run has been costed for real.';
+  }
+
+  /* ── the live run ──────────────────────────────────────────────────────────
+   *
+   * The Run button is real where the on-device arms are serving. Each arm is a
+   * llama-server on its own port answering the browser directly (they ship CORS
+   * open on localhost), so the portal can put the sequence to them without any
+   * backend of its own: fetch the sampled frames, one chat call per arm, the
+   * points graded together. Nothing is written — the run lives in this browser
+   * session, and build/video_eval/ stays the CLI's. On a deployed portal no arm
+   * answers and the button stays inert, which is the truthful state there.
+   *
+   * The hosted arms are never called from here: their routes need an API key,
+   * and a key in a web page is published, not used.
+   */
+
+  // The pilot's grading decision: sequences are graded by the Gemini arms, which
+  // take a whole 40–50-frame span in one call. The on-device candidates cap at 12
+  // frames — a quarter of the evidence — so they are set aside for grading, and
+  // this stays false until that decision changes. The machinery below is kept:
+  // flipping this back re-enables the in-page run against local servers.
+  var ON_DEVICE_GRADING = false;
+
+  // Port registry and per-call frame cap — mirrors the on-device entries in the
+  // eval harness registry (id, port, cap). Past ~2× the cap LFM2 stops returning
+  // the criteria JSON at all, so the cap is what makes a call a call.
+  var LOCAL_ARMS = [
+    { id: 'local/lfm2-vl-3b-q8', label: 'LFM2-VL-3B Q8', port: 8081, cap: 12 },
+    { id: 'local/lfm2-vl-3b-q4', label: 'LFM2-VL-3B Q4', port: 8082, cap: 12 },
+    { id: 'local/lfm2.5-vl-1.6b-q4', label: 'LFM2.5-VL 1.6B', port: 8083, cap: 12 }
+  ];
+
+  // Must match the runner's SEQUENCE_PROMPT — the screen's live verdicts and the
+  // CLI's saved ones must be answers to the same question or the grid is two
+  // experiments drawn as one.
+  var SEQUENCE_PROMPT =
+    'You are grading a student\'s aircraft-maintenance work for an FAA Part 147 ' +
+    'training pilot.\n\n' +
+    'You are shown a VIDEO of the procedure being executed — a sequence of frames in ' +
+    'chronological order, each labelled with its timestamp. The final frames show the ' +
+    'work as the student left it.\n\n' +
+    'GRADE THE FINISHED PRODUCT against the numbered criteria. Return a verdict for ' +
+    'EVERY numbered criterion, in the order given. Do not merge, skip, or add any.\n\n' +
+    'WHAT THE VIDEO CHANGES\n\n' +
+    'The product is graded as it ends, but the video is your evidence for how it got ' +
+    'there. A condition of the finished work that the last frame obscures — a hand, a ' +
+    'tool, the camera angle — may be plainly visible moments earlier: that is ' +
+    'evidence, and the timestamp is your citation. A criterion about how the work was ' +
+    'done (order, technique, handling) is graded on the frames that show it being done.\n\n' +
+    'Do not answer `unsure` because the final frame is unclear if an earlier frame ' +
+    'settles the point.\n\n' +
+    'VERDICTS\n' +
+    '- `pass`  — the video shows the criterion satisfied.\n' +
+    '- `fail`  — the video shows it is NOT satisfied.\n' +
+    '- `unsure` — no frame shows the feature well enough to decide. ' +
+    'Genuinely unsure, not "the last frame was blurry". If the whole video never ' +
+    'shows it, that is `unsure` and is a real and useful answer.\n\n' +
+    'Judge only what is visible. Never infer a torque, a pressure, an internal ' +
+    'condition, a material or an exact dimension from video. If a criterion needs a ' +
+    'measurement and no scale reference appears in any frame, it is `unsure`.\n\n' +
+    'Cite the timestamp you relied on whenever you answer pass or fail. Keep each ' +
+    '`note` under 20 words.\n\n' +
+    'Reply with JSON only, no prose around it:\n' +
+    '{"criteria": [\n' +
+    '   {"index": <1-based, matching the numbering given>,\n' +
+    '    "verdict": "pass" | "fail" | "unsure",\n' +
+    '    "at": "<timestamp you relied on, e.g. 12.00, or null>",\n' +
+    '    "note": "<what you saw that decided it>"}\n' +
+    ' ],\n' +
+    ' "observed": "<what the sequence shows overall, under 40 words>"}';
+
+  // The photo twin of SEQUENCE_PROMPT: one still, same numbered-criteria JSON,
+  // confidence where the video cites a timestamp. The two prompts share their
+  // discipline — visible-only, no inferred measurements, unsure is an answer —
+  // so a photo verdict and a video verdict remain answers to the same standard.
+  var PHOTO_PROMPT =
+    'You are grading a student\'s aircraft-maintenance work for an FAA Part 147 ' +
+    'training pilot, from a single PHOTOGRAPH of the finished work.\n\n' +
+    'GRADE THE FINISHED PRODUCT against the numbered criteria. Return a verdict for ' +
+    'EVERY numbered criterion, in the order given. Do not merge, skip, or add any.\n\n' +
+    'VERDICTS\n' +
+    '- `pass`  — the photograph shows the criterion satisfied.\n' +
+    '- `fail`  — the photograph shows it is NOT satisfied.\n' +
+    '- `unsure` — the photograph does not show the feature well enough to decide. ' +
+    'That is a real and useful answer.\n\n' +
+    'Judge only what is visible. Never infer a torque, a pressure, an internal ' +
+    'condition, a material or an exact dimension from a photograph. If a criterion ' +
+    'needs a measurement and no scale reference appears in frame, it is `unsure`.\n\n' +
+    'Keep each `note` under 20 words.\n\n' +
+    'Reply with JSON only, no prose around it:\n' +
+    '{"criteria": [\n' +
+    '   {"index": <1-based, matching the numbering given>,\n' +
+    '    "verdict": "pass" | "fail" | "unsure",\n' +
+    '    "confidence": 0.0-1.0,\n' +
+    '    "note": "<what you saw that decided it>"}\n' +
+    ' ],\n' +
+    ' "observed": "<what the photo shows overall, under 40 words>"}';
+
+  // Session-scoped: what is serving, and the runs this browser made. The hosted
+  // arm list comes from serve.py's /api/health — the server holds the keys and
+  // therefore knows which arms have a route; this page never sees a key.
+  var armsUp = null;          // on-device: null = not probed · [] = none · [arm, ...]
+  var serverInfo = null;      // null = not probed · {server: bool, arms: [{id, label}]}
+  var runStores = { video: {}, photo: {} };  // kind → task.code → persisted grids
+  var liveRuns = {};          // kind + task.code + '#' + sub → grid made this session
+  var liveRunning = null;     // progress line while a run is underway
+
+  function probeServer() {
+    if (serverInfo !== null) return;
+    serverInfo = { server: false, arms: [] };
+    fetch('/api/health')
+      .then(function (r) { return r.json(); })
+      .then(function (h) {
+        if (h && h.server) {
+          serverInfo = { server: true, arms: h.arms || [] };
+          setState({});
+        }
+      })
+      .catch(function () {});
+  }
+
+  // The runs serve.py persisted for this task, fetched once per task and merged
+  // under the built extract: a run made after the last data build must not
+  // vanish on reload just because the builder has not run since.
+  function loadRunStore(kind, code) {
+    if (runStores[kind][code] !== undefined) return;
+    runStores[kind][code] = null;
+    fetch('data/' + kind + '_runs/' + encodeURIComponent(code) + '.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (store) {
+        if (store) { runStores[kind][code] = store; setState({}); }
+      })
+      .catch(function () {});
+  }
+
+  function probeArms() {
+    if (armsUp !== null) return;
+    armsUp = [];
+    if (!ON_DEVICE_GRADING) return;
+    LOCAL_ARMS.forEach(function (arm) {
+      fetch('http://127.0.0.1:' + arm.port + '/health')
+        .then(function (r) { return r.json(); })
+        .then(function (h) {
+          if (h && h.status === 'ok') { armsUp.push(arm); setState({}); }
+        })
+        .catch(function () {});
+    });
+  }
+
+  function thinFrames(frames, cap) {
+    if (frames.length <= cap) return frames;
+    var idx = {}, out = [];
+    for (var i = 0; i < cap; i++) idx[Math.round(i * (frames.length - 1) / (cap - 1))] = true;
+    Object.keys(idx).map(Number).sort(function (a, b) { return a - b; })
+      .forEach(function (k) { out.push(frames[k]); });
+    return out;
+  }
+
+  function fetchFrame(task, clip, name) {
+    // The full frame where the tree has one, the thumb where it does not —
+    // plateImage's fallback, applied to what the arm is shown.
+    var paths = framePaths(task.code, clip, name);
+    return fetch(paths[0]).then(function (r) {
+      if (!r.ok) return fetch(paths[1]).then(function (r2) {
+        if (!r2.ok) throw new Error('no frame ' + name);
+        return r2.blob();
+      });
+      return r.blob();
+    }).then(function (blob) {
+      return new Promise(function (resolve, reject) {
+        var fr = new FileReader();
+        fr.onload = function () { resolve(fr.result); };
+        fr.onerror = reject;
+        fr.readAsDataURL(blob);
+      });
+    });
+  }
+
+  function parseReply(text) {
+    var s = String(text || '').replace(/```(?:json)?/g, '');
+    var a = s.indexOf('{'), b = s.lastIndexOf('}');
+    if (a === -1 || b <= a) return null;
+    try { return JSON.parse(s.slice(a, b + 1)); } catch (e) { return null; }
+  }
+
+  function runLive(task, st, span) {
+    var key = 'video' + task.code + '#' + subIndex(task);
+    var arms = armsUp || [];
+    if (!arms.length || liveRunning) return;
+
+    var criteria = st.points.map(function (p) { return p.text; });
+    var numbered = criteria.map(function (c, i) { return (i + 1) + '. ' + c; }).join('\n');
+
+    liveRunning = 'starting · 0/' + arms.length + ' arms';
+    setState({});
+
+    // One arm at a time, matching the CLI runner: the arms share this machine's
+    // GPU and memory, and concurrency there is what took a server down.
+    var results = [];
+    var chain = Promise.resolve();
+    arms.forEach(function (arm, ai) {
+      chain = chain.then(function () {
+        liveRunning = arm.label + ' · ' + ai + '/' + arms.length + ' arms done';
+        setState({});
+        var sent = thinFrames(span.frames, arm.cap);
+        var stamps = sent.map(function (f) { return frameSeconds(f); });
+        var labelled = stamps.map(function (s, i) { return (i + 1) + '=t' + s.toFixed(2); }).join(', ');
+        return Promise.all(sent.map(function (f) { return fetchFrame(task, span.clip, f); }))
+          .then(function (urls) {
+            var content = [{ type: 'text', text:
+              'THE WORK\n' + st.label + '\n\n' +
+              'SEQUENCE\n' + sent.length + ' frames follow in chronological order. ' +
+              'Their timestamps in seconds are ' + labelled + '.\n\n' +
+              'NUMBERED CRITERIA\n' + numbered + '\n\n' +
+              'Return a verdict for all ' + criteria.length + ' criteria, in order, ' +
+              'using the whole sequence.' }];
+            urls.forEach(function (u) {
+              content.push({ type: 'image_url', image_url: { url: u } });
+            });
+            return fetch('http://127.0.0.1:' + arm.port + '/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model: arm.id, max_tokens: 4000,
+                // LEAP's published sampling — what the phone will run.
+                temperature: 0.1, min_p: 0.15, repeat_penalty: 1.05,
+                messages: [
+                  { role: 'system', content: SEQUENCE_PROMPT },
+                  { role: 'user', content: content }
+                ]
+              })
+            });
+          })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var text = (((data.choices || [])[0] || {}).message || {}).content || '';
+            results.push({ arm: arm, sent: sent, text: text, parsed: parseReply(text) });
+          })
+          .catch(function (e) {
+            results.push({ arm: arm, sent: sent || [], text: String(e), parsed: null });
+          });
+      });
+    });
+
+    chain.then(function () {
+      liveRuns[key] = buildLiveGrid(st, span, results,
+        'live run — this browser only, nothing written');
+      liveRunning = null;
+      setState({ reply: null });
+    });
+  }
+
+  /* One roll-up cell from one arm's verdicts, in the photo roll-up's own shape:
+     status, a compact P/F/U split, and the full sentence for the hover. */
+  function rollupCell(verdicts) {
+    var got = verdicts.filter(function (v) { return v !== 'none'; });
+    if (!got.length) return ['none', 'ungraded', 'no verdicts from this arm'];
+    var p = got.filter(function (v) { return v === 'pass'; }).length;
+    var f = got.filter(function (v) { return v === 'fail'; }).length;
+    var u = got.filter(function (v) { return v === 'unsure'; }).length;
+    var status = f ? 'fail' : (u ? 'review' : 'pass');
+    return [status, p + 'P ' + f + 'F ' + u + 'U',
+            p + ' pass · ' + f + ' fail · ' + u + ' unsure of ' + got.length];
+  }
+
+  /* One grid from one set of arm replies, whichever arms they came from. */
+  function buildLiveGrid(st, span, results, runId) {
+    var rows = st.points.map(function (_, ri) {
+      return { cells: results.map(function (res) {
+        var item = ((res.parsed || {}).criteria || []).filter(function (c) {
+          return c && typeof c === 'object' && +c.index === ri + 1;
+        })[0];
+        var v = item && String(item.verdict || '').toLowerCase();
+        if (v !== 'pass' && v !== 'fail' && v !== 'unsure') return ['none', 'not graded'];
+        var at = item.at != null && item.at !== '' && item.at !== 'null' ? String(item.at) : null;
+        // Compact cells, like the built grid's: the cited moment, or a clipped
+        // note. The full note is one click away in the reply panel.
+        var note = String(item.note || '').trim();
+        return [v, at ? 't=' + at : (note.length > 22 ? note.slice(0, 21) + '…' : note)];
+      }) };
+    });
+    var rollup = results.map(function (_, mi) {
+      return rollupCell(rows.map(function (r) { return r.cells[mi][0]; }));
+    });
+    var replies = {}, framesSent = {}, capNotes = [];
+    results.forEach(function (res, mi) {
+      replies['m' + mi] = res.text;
+      framesSent['m' + mi] = res.sent;
+      if (span.frames.length > res.sent.length) {
+        capNotes.push(res.arm.label + ' accepts ' + res.sent.length + ' frames per call — ' +
+          (span.frames.length - res.sent.length) + ' of ' + span.frames.length +
+          ' dropped at even spacing before the call.');
+      }
+    });
+    return {
+      live: true, runId: runId,
+      fps: 0.5, models: results.map(function (r) { return r.arm.label; }),
+      clip: span.clip, rows: rows, rollup: rollup, replies: replies,
+      framesSent: framesSent, capNotes: capNotes, cost: 0
+    };
+  }
+
+  /* The hosted run: same prompt, same parsing, same grid — only the transport
+     differs. serve.py attaches the frames and the key and forwards one call per
+     arm; the whole span goes in, uncapped, because taking a sequence whole is
+     the reason these are the grading arms. The grid is persisted server-side so
+     it survives a reload and a data rebuild. */
+  function runHosted(task, st, span) {
+    var key = 'video' + task.code + '#' + subIndex(task);
+    var arms = (serverInfo && serverInfo.arms) || [];
+    if (!arms.length || liveRunning) return;
+
+    var criteria = st.points.map(function (p) { return p.text; });
+    var numbered = criteria.map(function (c, i) { return (i + 1) + '. ' + c; }).join('\n');
+    var stamps = span.frames.map(function (f) { return frameSeconds(f); });
+    var labelled = stamps.map(function (s, i) { return (i + 1) + '=t' + s.toFixed(2); }).join(', ');
+    var userText =
+      'THE WORK\n' + st.label + '\n\n' +
+      'SEQUENCE\n' + span.frames.length + ' frames follow in chronological order. ' +
+      'Their timestamps in seconds are ' + labelled + '.\n\n' +
+      'NUMBERED CRITERIA\n' + numbered + '\n\n' +
+      'Return a verdict for all ' + criteria.length + ' criteria, in order, ' +
+      'using the whole sequence.';
+
+    liveRunning = 'starting · 0/' + arms.length + ' arms';
+    setState({});
+
+    var results = [];
+    var chain = Promise.resolve();
+    arms.forEach(function (arm, ai) {
+      chain = chain.then(function () {
+        liveRunning = arm.label + ' · ' + ai + '/' + arms.length + ' arms done';
+        setState({});
+        return fetch('/api/video/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: arm.id, task_code: task.code, clip: span.clip,
+            frames: span.frames, system: SEQUENCE_PROMPT, user_text: userText
+          })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var text = data.text || (data.error ? '[' + data.error + '] ' + (data.message || '') : '');
+            results.push({ arm: arm, sent: span.frames, text: text,
+                           parsed: parseReply(data.text || '') });
+          })
+          .catch(function (e) {
+            results.push({ arm: arm, sent: span.frames, text: String(e), parsed: null });
+          });
+      });
+    });
+
+    chain.then(function () {
+      var grid = buildLiveGrid(st, span, results,
+        'hosted run · saved to data/video_runs/' + task.code + '.json');
+      liveRuns[key] = grid;
+      persistRun('video', task, st, grid);
+      liveRunning = null;
+      setState({ reply: null });
+    });
+  }
+
+  function persistRun(kind, task, st, grid) {
+    var store = runStores[kind][task.code] || {};
+    store[st.raw.sheet] = grid;
+    runStores[kind][task.code] = store;
+    fetch('/api/video/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: kind, task_code: task.code,
+                             sheet: st.raw.sheet, grid: grid })
+    }).catch(function () {});
+  }
+
+  /* The photo run, live: the same still the saved runs graded — the span's last
+     frame — put to the same hosted arms with the photo twin of the prompt. One
+     call per arm, points graded together. It cannot draft or grade a perturbed
+     sheet, and does not pretend to: the grid it builds says so where the saved
+     grid prints control stats. */
+  function runPhotoLive(task, st) {
+    var key = 'photo' + task.code + '#' + subIndex(task);
+    var arms = (serverInfo && serverInfo.arms) || [];
+    if (!arms.length || liveRunning || !st.raw.frameFile || !st.raw.frameVideo) return;
+
+    var criteria = st.points.map(function (p) { return p.text; });
+    var numbered = criteria.map(function (c, i) { return (i + 1) + '. ' + c; }).join('\n');
+    var userText =
+      'THE WORK\n' + st.label + '\n\n' +
+      'One photograph of the finished work is attached.\n\n' +
+      'NUMBERED CRITERIA\n' + numbered + '\n\n' +
+      'Return a verdict for all ' + criteria.length + ' criteria, in order.';
+
+    liveRunning = 'starting · 0/' + arms.length + ' arms';
+    setState({});
+
+    var results = [];
+    var chain = Promise.resolve();
+    arms.forEach(function (arm, ai) {
+      chain = chain.then(function () {
+        liveRunning = arm.label + ' · ' + ai + '/' + arms.length + ' arms done';
+        setState({});
+        return fetch('/api/video/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: arm.id, task_code: task.code, clip: st.raw.frameVideo,
+            frames: [st.raw.frameFile], system: PHOTO_PROMPT, user_text: userText
+          })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var text = data.text || (data.error ? '[' + data.error + '] ' + (data.message || '') : '');
+            results.push({ arm: arm, text: text, parsed: parseReply(data.text || '') });
+          })
+          .catch(function (e) {
+            results.push({ arm: arm, text: String(e), parsed: null });
+          });
+      });
+    });
+
+    chain.then(function () {
+      // Shaped like the saved photo grid, so renderGrid draws it unchanged.
+      var replies = {};
+      var rows = st.points.map(function (p, ri) {
+        return {
+          label: (ri + 1) + ' · ' + p.text.slice(0, 76),
+          cells: results.map(function (res, mi) {
+            var item = ((res.parsed || {}).criteria || []).filter(function (c) {
+              return c && typeof c === 'object' && +c.index === ri + 1;
+            })[0];
+            var v = item && String(item.verdict || '').toLowerCase();
+            if (v !== 'pass' && v !== 'fail' && v !== 'unsure') return ['none', 'not graded'];
+            if (item.note) replies['r' + ri + 'm' + mi] = String(item.note);
+            var conf = typeof item.confidence === 'number'
+              ? item.confidence.toFixed(2) : '';
+            return [v, conf];
+          })
+        };
+      });
+      var rollup = results.map(function (_, mi) {
+        return rollupCell(rows.map(function (r) { return r.cells[mi][0]; }));
+      });
+      var grid = {
+        live: true, models: results.map(function (r) { return r.arm.label; }),
+        rows: rows, rollup: rollup, replies: replies, negLines: [],
+        controlStats: 'live run · no perturbed sheet — the saved control grid ' +
+                      'returns if data/photo_runs/' + task.code + '.json is removed'
+      };
+      liveRuns[key] = grid;
+      persistRun('photo', task, st, grid);
+      liveRunning = null;
+      setState({ reply: null });
+    });
   }
 
   function renderVideoAssess(task, st) {
@@ -1018,34 +1609,74 @@
           ]) : null
         ]),
 
-        el('div', { class: 'run-row' }, [
-          el('button', { class: 'btn btn-primary blueprint', type: 'button', disabled: true },
-             [corners(), 'Run · ' + models + ' models']),
-          el('span', { class: 'plate-note',
-                       text: videoCostText(st.points.length, span.frames.length, models) })
-        ]),
-        el('span', { class: 'plate-note', text:
-          'Run is inert: no video-eval runner exists in alcor_agents, and nothing on this ' +
-          'screen writes. build/photo_eval/ has no counterpart yet.' })
+        (function () {
+          var hostedArms = (serverInfo && serverInfo.server && serverInfo.arms) || [];
+          var canLocal = ON_DEVICE_GRADING && armsUp && armsUp.length;
+          var note = liveRunning
+            ? liveRunning
+            : hostedArms.length
+            ? 'One call per arm (' + hostedArms.map(function (a) { return a.label; }).join(', ') +
+              ') over the whole ' + span.frames.length + '-frame span — no frame cap. ' +
+              'serve.py holds the key and forwards the call; the grid saves to ' +
+              'data/video_runs/' + task.code + '.json and survives a reload.'
+            : (serverInfo && serverInfo.server)
+            ? 'serve.py is up but holds no key. Add OPENROUTER_API_KEY=… (all four ' +
+              'arms) or GEMINI_API_KEY=… (the Gemini two) to portal/.env and restart ' +
+              'it; this button wakes up on its own.'
+            : videoCostText(st.points.length, span.frames.length, models);
+          return el('div', { class: 'run-row' }, [
+            el('button', {
+              class: 'btn btn-primary blueprint', type: 'button',
+              disabled: !(hostedArms.length || canLocal) || !!liveRunning || !st.points.length,
+              on: { click: function () {
+                if (hostedArms.length) runHosted(task, st, span);
+                else if (canLocal) runLive(task, st, span);
+              } }
+            }, [corners(), liveRunning ? 'Running…'
+                : hostedArms.length ? 'Run · ' + hostedArms.length + ' models'
+                : canLocal ? 'Run · ' + armsUp.length + ' on-device ' +
+                             (armsUp.length === 1 ? 'arm' : 'arms')
+                : 'Run']),
+            el('span', { class: 'plate-note', text: note })
+          ]);
+        })(),
+        (serverInfo && serverInfo.server) ? null : el('span', { class: 'plate-note', text:
+          'Run is inert on a static serve: a hosted arm needs a key, and a key in ' +
+          'a web page is published, not used. Serve the portal with `python3 serve.py` ' +
+          'and an OPENROUTER_API_KEY (or GEMINI_API_KEY) in portal/.env, and the ' +
+          'button grades the span live. The grid otherwise reads whatever the newest ' +
+          'CLI run left in the data extract.' })
       ])
     ]);
 
+    probeArms();
+    probeServer();
+    loadRunStore('video', task.code);
+
+    // Newest first: a run just made on this page, then one serve.py persisted,
+    // then whatever the built extract carries from the CLI runner.
+    var vrun = liveRuns['video' + task.code + '#' + subIndex(task)] ||
+               (runStores.video[task.code] || {})[st.raw.sheet] ||
+               st.raw.vrun;
     var right = el('div', { class: 'assess-right' },
-      st.hasRun ? renderCompare(task, st, span, models) : [
+      vrun ? renderVideoGrid(task, st, span, vrun) : [
         el('div', { class: 'empty-center' }, [
           el('div', { class: 'empty-note' }, [
             el('span', {
               class: 'empty-title',
-              text: st.points.length ? 'No photo run to compare against' : 'Nothing compiled for this target'
+              text: st.points.length ? 'No saved run for this segment' : 'Nothing compiled for this target'
             }),
             el('span', {
               class: 'empty-body',
               text: st.points.length
-                ? 'This screen reads a clip verdict against the photo verdict for the same ' +
-                  'point. The latest saved run did not grade this subtask, so there is no ' +
-                  'photo column — and no video run exists to fill the other one.'
+                ? 'The compiled criterion is ready (' + st.points.length + ' points). Run hands ' +
+                  'each arm the ' + span.frames.length + '-frame sequence sampled at ' +
+                  SAMPLE_FPS_LABEL + ' — one call per subtask, the points graded together. ' +
+                  'Results save to build/video_eval/' + task.code + '/.'
                 : NO_POINTS_NOTE
-            })
+            }),
+            st.points.length ? el('span', { class: 'plate-note',
+              text: videoCostText(st.points.length, span.frames.length, models) }) : null
           ])
         ])
       ]);
@@ -1053,202 +1684,119 @@
     return el('div', { class: 'assess' }, [left, right]);
   }
 
-  /* The pair worth reading: what a still settled, and what it could not. Every clip
-     cell is empty — that is the state of the tree, not a loading placeholder. */
-  function renderCompare(task, st, span, models) {
-    var run = st.raw.run;
-
-    var unsettled = run.rows.filter(function (r) {
-      return r.cells.some(function (c) { return c[0] === 'unsure'; });
-    }).length;
-
-    /* Both columns tallied, and the clip column is tallied precisely because it is empty.
-       A verdict count that quietly reported only the photo side would read, on a screen
-       headed "Video assessment", as though the sequence had been graded — the one thing
-       this screen must never imply. The photo tally is the standing total; the clip tally
-       is a row of zeros against the same denominator, which is what shows the gap. */
-    function tallyOf(key) {
-      var t = { pass: 0, fail: 0, unsure: 0, graded: 0 };
-      run.rows.forEach(function (r) {
-        (r[key] || []).forEach(function (c) {
-          var v = (c && c[0]) || '';
-          // `none` is ungraded, and is deliberately not counted as a verdict:
-          // the denominator that matters is what was actually asked.
-          if (t[v] === undefined) return;
-          t[v] += 1;
-          t.graded += 1;
-        });
-      });
-      return t;
-    }
-
-    var tally = tallyOf('cells');
-    var clipTally = tallyOf('clipCells');
-    var cells = run.rows.length * modelNames().length;
-
-    /* The paired set: the (point, model) cells BOTH columns graded, and the list of
-       models the clip run actually reached. Every comparison below is counted over
-       this set and nothing else — see the Δ note for why that matters. */
-    var paired = { photoUnsure: 0, clipUnsure: 0, moved: 0, n: 0 };
-    var clipModels = [];
-    modelNames().forEach(function (_, mi) {
-      var reached = false;
-      run.rows.forEach(function (r) {
-        var c = (r.clipCells || [])[mi];
-        if (!c || c[0] === 'none') return;
-        reached = true;
-        paired.n += 1;
-        var photo = (r.cells[mi] || [])[0];
-        if (photo === 'unsure') paired.photoUnsure += 1;
-        if (c[0] === 'unsure') paired.clipUnsure += 1;
-        if (photo && photo !== c[0]) paired.moved += 1;
-      });
-      if (reached) clipModels.push(mi);
-    });
-    var partial = clipModels.length && clipModels.length < modelNames().length;
+  /* The video grid, as the design draws it: the run's own arms as columns — today
+     the on-device candidates — a verdict cell citing the moment that settled it,
+     and a segment roll-up beneath. Clicking a cell opens the arm's reply and the
+     frames the call actually carried, which the per-arm cap can make thinner than
+     the span; the note above the grid says by how much. */
+  function renderVideoGrid(task, st, span, vrun) {
+    var v = vrun || st.raw.vrun;
+    var photoRows = (st.raw.run && st.raw.run.rows) || [];
 
     var out = [
-      el('div', { class: 'cmp-head' }, [
+      el('div', { class: 'grid-head' }, [
         el('div', {
           class: 'grid-head-label',
-          text: 'Photo verdict vs clip verdict · click a photo cell for its reply' +
-                (partial
-                  ? ' · clip reached ' + clipModels.length + ' of ' + modelNames().length + ' models'
-                  : '')
+          text: 'Segment run · one call per arm, the points graded together · ' +
+                'click a cell for the reply and the frames it cites'
         })
-      ].concat(modelNames().map(function (m) {
+      ].concat(v.models.map(function (m) {
         return el('div', { class: 'grid-model', text: m });
       })))
     ];
 
-    /* The clip verdict under its photo verdict. An ungraded cell stays the em dash
-       it always was — a model that was never asked must not be drawn as one that
-       looked and could not say. Where the two disagree the cell is marked, because
-       the disagreement is the finding: it is where the sequence changed the answer. */
-    function clipCell(row, mi) {
-      var c = (row.clipCells || [])[mi];
-      if (!c || c[0] === 'none') {
-        return el('span', { class: 'cmp-clip', title: 'not graded on the clip', text: '—' });
-      }
-      var photo = (row.cells[mi] || [])[0];
-      var moved = photo && photo !== c[0];
-      return el('span', {
-        class: 'cmp-clip is-graded' + (moved ? ' is-moved' : ''),
-        title: 'clip · ' + c[0] + (c[1] ? ' · ' + c[1] : '') +
-               (moved ? ' (still said ' + photo + ')' : '')
-      }, [
-        el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })
-      ]);
+    if (v.capNotes && v.capNotes.length) {
+      out.push(el('div', { class: 'cap-note' }, v.capNotes.map(function (n) {
+        return el('span', { text: n });
+      })));
     }
 
-    run.rows.forEach(function (r, ri) {
-      out.push(el('div', { class: 'cmp-row' }, [
-        el('div', { class: 'grid-row-label', text: r.label })
+    v.rows.forEach(function (r, ri) {
+      var label = (photoRows[ri] && photoRows[ri].label) ||
+                  (st.points[ri] ? st.points[ri].n + ' ' + st.points[ri].text
+                                 : String(ri + 1) + ' ·');
+      out.push(el('div', { class: 'grid-row' }, [
+        el('div', { class: 'grid-row-label', text: label })
       ].concat(r.cells.map(function (c, mi) {
-        var key = 'r' + ri + 'm' + mi;
-        return el('div', { class: 'cmp-cell' }, [
-          el('button', {
-            class: 'cell cmp-photo' + (state.reply === key ? ' is-open' : ''), type: 'button',
-            title: 'photo · ' + c[0],
-            on: { click: function () { setState({ reply: state.reply === key ? null : key }); } }
-          }, [el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })]),
-          clipCell(r, mi)
-        ]);
+        var key = 'v' + ri + 'm' + mi;
+        return el('button', {
+          class: 'cell' + (state.reply === key ? ' is-open' : ''), type: 'button',
+          title: c[0] + (c[1] ? ' · ' + c[1] : ''),
+          on: { click: function () { setState({ reply: state.reply === key ? null : key }); } }
+        }, [el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })]);
       }))));
     });
 
-    function tallyPart(kind, n, denom) {
-      return el('span', { class: 'vtally-part' }, [
-        el('span', { class: 'vtally-swatch is-' + kind }),
-        el('b', { class: 'vtally-n', text: String(n) }),
-        el('span', { class: 'vtally-kind', text: kind }),
-        el('span', { class: 'vtally-pct',
-                     text: denom ? '· ' + Math.round((100 * n) / denom) + '%' : '' })
+    out.push(el('div', { class: 'rollup' }, [
+      el('div', { class: 'rollup-label', text: 'Segment roll-up — one fail fails · unsure → review' })
+    ].concat(v.rollup.map(function (c) {
+      // Same cell the photo roll-up draws: status, the P/F/U split, the full
+      // sentence on hover — the two tabs must read the same way.
+      return el('div', { class: 'rollup-cell', title: c[2] || '' }, [
+        el('span', { class: cellCls(c[0]), style: 'font-size:9px;font-weight:600',
+                     text: c[0] === 'none' ? c[1] : c[0] }),
+        c[0] === 'none' ? null : el('span', { class: 'rollup-split', text: c[1] })
       ]);
-    }
+    }))));
 
-    function tallyLine(name, t, note) {
-      return el('div', { class: 'vtally-line' + (t.graded ? '' : ' is-empty') }, [
-        el('span', { class: 'vtally-col', text: name }),
-        tallyPart('pass', t.pass, t.graded),
-        tallyPart('fail', t.fail, t.graded),
-        tallyPart('unsure', t.unsure, t.graded),
-        el('span', { class: 'spacer' }),
-        el('span', { class: 'vtally-total', text: note })
-      ]);
-    }
-
-    /* The comparison the screen exists to make, stated as a number rather than
-       left for the reader to count across the grid. Percentages are of what each
-       column actually graded, not of the full grid: the clip column covers only
-       the models the run could reach, and dividing both by the same denominator
-       would read as the sequence having abstained on the rest. */
-    var lines = [
-      tallyLine('Photo', tally, cells + ' verdicts · ' + run.rows.length + ' points × ' +
-                                modelNames().length + ' models'),
-      tallyLine('Clip', clipTally, clipTally.graded
-        ? clipTally.graded + ' of ' + cells + ' graded'
-        : '0 of ' + cells + ' graded')
-    ];
-
-    /* Both sides counted over the SAME cells — the ones the clip actually graded.
-       Rating the photo column across all four models while the clip column covers
-       only the two the run reached is not a comparison, it is a denominator: on
-       "Identify the Damage" it reported 18% → 0% where the like-for-like figure is
-       9% → 0%, because five of that subtask's eight photo unsures belong to Opus 5,
-       a model the clip run never asked. An overclaim on the one screen whose entire
-       purpose is a fair comparison is the worst place to have one. */
-    if (paired.n) {
-      var pRate = paired.photoUnsure / paired.n;
-      var cRate = paired.clipUnsure / paired.n;
-      var deltaN = paired.photoUnsure - paired.clipUnsure;
-      var rates = Math.round(pRate * 100) + '% → ' + Math.round(cRate * 100) + '%';
-      lines.push(el('div', { class: 'vtally-line vtally-delta' }, [
-        el('span', { class: 'vtally-col', text: 'Δ' }),
-        el('span', { class: 'vtally-note' }, [
-          // A rise in unsure is the sequence declining to decide. That is a result,
-          // and it is stated as plainly as a fall — not folded into a "fewer" that
-          // happens to carry a minus sign.
-          el('b', {
-            text: deltaN === 0 ? 'No change in unsure'
-              : Math.abs(deltaN) + (deltaN > 0 ? ' fewer unsure' : ' more unsure')
-          }),
-          deltaN === 0
-            ? ' between the still and the clip — ' + rates + '.'
-            : ' on the clip than on the still — ' + rates + '.' +
-              (deltaN < 0 ? ' More frames did not help here.' : ''),
-          ' Counted over the ' + paired.n + ' verdicts both columns graded' +
-          (partial
-            ? ', which is ' + clipModels.length + ' of ' + modelNames().length +
-              ' models — the rest were never asked on the clip, so their photo unsures ' +
-              'are excluded from both sides rather than counted against the sequence.'
-            : '.'),
-          paired.moved
-            ? ' ' + paired.moved + ' of those ' + paired.n +
-              (paired.moved === 1 ? ' verdicts moved; the marked cell is which.'
-                                  : ' verdicts moved; the marked cells are which.')
-            : ' No verdict moved.'
-        ])
-      ]));
-    }
-
-    out.push(el('div', { class: 'vtally' }, lines));
-
+    /* No perturbed controls ride a video run — a control probes the grader's
+       agreement on a still, and re-running it on the sequence would spend on a
+       question about the photo run. Stated on the face, where the photo grid
+       states its control stats. */
     out.push(el('div', { class: 'control-note' }, [
-      el('span', { class: 'control-note-text' }, [
-        el('b', { text: unsettled + ' of ' + run.rows.length + ' points' }),
-        ' carry at least one unsure on the still — a model saying the frame does not show ' +
-        'enough to decide. Those are what a sequence is for, and they are the only honest ' +
-        'measure of whether this screen earns its calls. The rest a photograph already settled.'
-      ]),
+      el('span', { class: 'control-note-text', text:
+        'No perturbed controls ride this run: the perturbed sheet probes the grader ' +
+        'on the still, and the Photo assessment tab carries it. The video run grades ' +
+        'the original points only.' }),
       el('span', { class: 'spacer' }),
       el('span', { class: 'control-stats',
-                   text: span.frames.length + ' frames · ' + SAMPLE_FPS_LABEL })
+                   text: v.runId + ' · sampled at ' + v.fps + ' fps · $' + (v.cost || 0).toFixed(2) })
     ]));
 
-    var reply = replyFor(run);
+    var reply = videoReplyFor(task, st, v);
     if (reply) out.push(reply);
     return out;
+  }
+
+  /* The reply, and the evidence: the frames this arm's call actually carried, with
+     the cited moment marked. The photo reply shows text alone; here the claim is
+     about a span, so the frames are the only way to check the citation. */
+  function videoReplyFor(task, st, v) {
+    if (!state.reply) return null;
+    var m = state.reply.match(/^v(\d+)m(\d+)$/);
+    if (!m) return null;
+    var row = v.rows[+m[1]];
+    if (!row) return null;
+    var c = row.cells[+m[2]];
+    var sent = v.framesSent['m' + m[2]] || [];
+    var cited = c[1] && c[1].indexOf('t=') === 0
+      ? parseFloat(c[1].slice(2).replace(/^t/, '')) : null;
+
+    var strip = sent.length ? el('div', { class: 'seq reply-frames' }, sent.map(function (f) {
+      var t = frameSeconds(f);
+      var hit = cited !== null && t !== null && Math.abs(t - cited) < 1.01;
+      return el('span', { class: 'seq-frame' + (hit ? ' is-cited' : '') }, [
+        plateImage(framePaths(task.code, v.clip, f), ''),
+        el('span', { class: 'seq-ts', text: t === null ? f : fmtTime(t) })
+      ]);
+    })) : null;
+
+    return el('div', { class: 'reply' }, [
+      el('div', { class: 'reply-head' }, [
+        el('span', { class: 'reply-model', text: v.models[+m[2]] }),
+        el('span', { class: cellCls(c[0]) + ' tag-xs', text: c[0] }),
+        el('span', { class: 'reply-point', text: (st.points[+m[1]] || {}).text || '' }),
+        el('span', { class: 'spacer' }),
+        el('button', { class: 'linkish reply-close', type: 'button', text: 'Close ✕',
+                       on: { click: function () { setState({ reply: null }); } } })
+      ]),
+      el('div', { class: 'reply-body', text: v.replies['m' + m[2]] ||
+        (c[0] === 'none' ? 'This arm returned no verdict for this point.' : (c[1] || '')) }),
+      strip ? el('span', { class: 'col-label reply-frames-label', text:
+        'The ' + sent.length + ' frames this call carried' +
+        (cited !== null ? ' · cited t=' + fmtTime(cited) : '') }) : null,
+      strip
+    ]);
   }
 
   /* tab · videos & frames */
@@ -1664,6 +2212,7 @@
           })
         ])
       ]),
+      renderVideoTally(),
       el('div', { style: 'display:flex;flex-direction:column;gap:8px' }, [
         el('h2', { class: 'sec-title', text: 'Which tasks produce gradeable evidence' }),
         taskTable,
@@ -1674,6 +2223,43 @@
             ' Click a row to open the task.'
         })
       ])
+    ]);
+  }
+
+  /* The video assessments, tallied over the newest valid run per task — the
+     same runs the Video assessment tab draws, so this table and those grids
+     agree. No perturbed column here: controls ride the photo runs only, so a
+     video tally that printed one would be inventing a number. */
+  function renderVideoTally() {
+    var v = DATA.evals.video;
+    if (!v || !v.totals || !v.totals.graded) return null;
+    var t = v.totals;
+    var table = el('div', { class: 'table-box' }, [
+      el('div', { class: 'vev-head' }, ['Model', 'Pass', 'Fail', 'Unsure', 'Ungraded', 'Pass rate']
+        .map(function (h) { return el('span', { text: h }); }))
+    ].concat((v.models || []).map(function (m) {
+      return el('div', { class: 'vev-row' }, m.map(function (x) {
+        return el('span', { text: x });
+      }));
+    })).concat([
+      el('div', { class: 'vev-row vev-total' }, [
+        el('span', { text: 'All arms' }),
+        el('span', { text: String(t.pass) }),
+        el('span', { text: String(t.fail) }),
+        el('span', { text: String(t.unsure) }),
+        el('span', { text: String(t.ungraded) }),
+        el('span', { text: t.graded ? Math.round((100 * t.pass) / t.graded) + '%' : '—' })
+      ])
+    ]));
+    return el('div', { style: 'display:flex;flex-direction:column;gap:8px' }, [
+      el('h2', { class: 'sec-title', text: 'Video assessment — overall tally' }),
+      table,
+      el('span', { class: 'note', text:
+        t.graded.toLocaleString() + ' verdicts over ' + t.tasks + ' tasks · ' +
+        t.calls + ' calls at 0.5 fps · $' + (t.cost || 0).toFixed(2) + '. The same ' +
+        'compiled points the photo runs grade, moved onto the span — an ungraded ' +
+        'point is a reply that stopped short of it, never a verdict. Controls ride ' +
+        'the photo runs only, so no perturbed column appears here.' })
     ]);
   }
 

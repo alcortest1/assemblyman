@@ -49,6 +49,20 @@ MODELS = OrderedDict([
 ])
 MODEL_IDS = list(MODELS)
 
+# Arms a video run can carry that are not photo columns — today the on-device
+# candidates. The video grid's columns are whatever arms its run graded (the
+# design draws the run, not the registry), so labels live here rather than in
+# MODELS, whose order is the photo grid.
+ARM_LABELS = {
+    "local/lfm2-vl-3b-q8": "LFM2-VL-3B Q8",
+    "local/lfm2-vl-3b-q4": "LFM2-VL-3B Q4",
+    "local/lfm2.5-vl-1.6b-q4": "LFM2.5-VL 1.6B",
+}
+
+
+def arm_label(mid: str) -> str:
+    return MODELS.get(mid) or ARM_LABELS.get(mid) or mid.split("/")[-1]
+
 # Frames per clip kept for the Videos tab strip.
 STRIP = 16
 THUMB_PX = 320
@@ -113,6 +127,25 @@ def latest_run(code: str):
     return None
 
 
+def is_probe(rolls_up_to: str | None, target_id: str | None) -> bool:
+    """Whether a run target probes a section rather than being a subtask of its own.
+
+    A run grades more than the pack's sections. `step:dl.s1` is one step of
+    `section:determine-the-line-route`, and `section:...#vmsghdgf5` is that same
+    section's criterion reworded for a match test. Both belong under a section that
+    is already on the screen.
+
+    Read off `rolls_up_to` where there is one and the target id otherwise, because a
+    reworded probe carries no `rolls_up_to` at all — which is exactly the case that
+    has to be caught, since it then groups under the empty string.
+
+    Unknown id shapes are not probes. Dropping a graded result the Evals table still
+    scores is the worse failure, so this names precisely what it removes.
+    """
+    probe = rolls_up_to or target_id or ""
+    return probe.startswith("step:") or "#" in probe
+
+
 def video_run_files(code: str) -> list:
     d = AGENTS / "build" / "video_eval" / code
     return sorted(d.glob("vrun_*.json")) if d.is_dir() else []
@@ -133,14 +166,88 @@ def latest_video_run(code: str):
     return None
 
 
-def video_verdicts(run) -> dict:
-    """(target_id, model) -> the clip verdict and what settled it."""
-    out = {}
-    for row in run.get("results") or []:
-        for point in row.get("points") or []:
-            if point.get("verdict"):
-                out[(point["target_id"], row.get("model"))] = point
-    return out
+def video_grid(gid: str, entries: list, vrun: dict | None) -> dict | None:
+    """The Video assessment grid for one subtask, shaped as the design draws it.
+
+    Columns are the video run's own arms, in the run's order — not MODEL_IDS,
+    which is the photo grid. The two screens ask different questions of
+    different runs, and a video graded by the on-device candidates must not be
+    drawn as four hosted columns that were never called.
+
+    Rows are the same points, in the same order, as the photo grid beside it —
+    the runner keys its work off the photo run precisely so this line-up holds.
+    """
+    if not vrun:
+        return None
+    by_model: "OrderedDict[str, dict]" = OrderedDict()
+    for row in vrun.get("results") or []:
+        if row.get("gid") == gid:
+            by_model[row.get("model")] = row
+    if not by_model:
+        return None
+    models = ([m for m in (vrun.get("models") or []) if m in by_model]
+              or list(by_model))
+
+    rows, replies, frames_sent, notes = [], {}, {}, []
+    for mi, mid in enumerate(models):
+        r = by_model[mid]
+        if r.get("raw_text"):
+            replies[f"m{mi}"] = r["raw_text"].strip()
+        elif r.get("error"):
+            replies[f"m{mi}"] = f"[{r['error']}] {r.get('message') or ''}".strip()
+        frames_sent[f"m{mi}"] = r.get("frames") or []
+        # The design's cap note, computed off what the run recorded: which arms
+        # had frames dropped at even spacing before the call, and how many.
+        if r.get("dropped"):
+            notes.append(f"{arm_label(mid)} accepts {r['frame_count']} frames per call — "
+                         f"{r['dropped']} of {r['span_frames']} dropped at even spacing "
+                         "before the call.")
+
+    for ri, (tid, _blob) in enumerate(entries):
+        cells = []
+        for mid in models:
+            p = next((p for p in (by_model[mid].get("points") or [])
+                      if p.get("target_id") == tid), None)
+            if not p or not p.get("verdict"):
+                cells.append(["none", "not graded"])
+                continue
+            at = p.get("at")
+            # The cell carries the cited moment and nothing else — a verdict
+            # whose note ran forty words made the grid unreadable. The note
+            # waits in the reply panel, one click away.
+            note = (p.get("note") or "").strip()
+            detail = (f"t={at}" if at not in (None, "", "null")
+                      else (note[:21] + "…" if len(note) > 22 else note))
+            cells.append([p["verdict"], detail])
+        rows.append({"cells": cells})
+
+    # Segment roll-up, one column per arm, in the photo roll-up's own shape —
+    # status, a compact P/F/U split, and the full sentence on hover — so the two
+    # tabs read the same way: one fail fails, an unsure sends the segment to
+    # review, and an arm that graded nothing stays ungraded rather than passing
+    # on silence.
+    rollup = []
+    for mi in range(len(models)):
+        got = [r["cells"][mi][0] for r in rows if r["cells"][mi][0] != "none"]
+        if not got:
+            rollup.append(["none", "ungraded", "no verdicts from this arm"])
+            continue
+        p, f, u = (got.count(k) for k in ("pass", "fail", "unsure"))
+        status = "fail" if f else ("review" if u else "pass")
+        rollup.append([status, f"{p}P {f}F {u}U",
+                       f"{p} pass · {f} fail · {u} unsure of {len(got)}"])
+
+    any_row = next(iter(by_model.values()))
+    cost = sum(r.get("cost_usd") or 0 for r in by_model.values())
+    return {
+        "runId": vrun.get("run_id"),
+        "fps": vrun.get("sample_fps"),
+        "models": [arm_label(m) for m in models],
+        "clip": any_row.get("video"),
+        "rows": rows, "rollup": rollup, "replies": replies,
+        "framesSent": frames_sent, "capNotes": notes,
+        "cost": round(cost, 4),
+    }
 
 
 def segmented_clips(code: str) -> set:
@@ -346,7 +453,8 @@ def build_task(code: str) -> dict | None:
     targets_prov = "build/criteria/"
     if not targets and run:
         targets = len({r.get("rolls_up_to") for r in (run.get("results") or [])
-                       if (r.get("polarity") or "original") == "original" and r.get("rolls_up_to")})
+                       if (r.get("polarity") or "original") == "original" and r.get("rolls_up_to")
+                       and not is_probe(r.get("rolls_up_to"), r.get("target_id"))})
         targets_prov = "saved run" if targets else "none compiled"
 
     # Sections are the design's subtasks; steps keep their order inside one.
@@ -381,8 +489,7 @@ def build_task(code: str) -> dict | None:
         })
 
     vrun = latest_video_run(code)
-    attach_runs(subtasks, run, len(run_files(code)), segmented_clips(code),
-                video_verdicts(vrun) if vrun else {})
+    attach_runs(subtasks, run, len(run_files(code)), segmented_clips(code), vrun)
 
     # A subtask the latest run did not grade still has its compiled criterion; show
     # that rather than letting the UI fall back to a generic placeholder set.
@@ -428,7 +535,7 @@ def build_task(code: str) -> dict | None:
 
 
 def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
-                seg_clips: set | None = None, vverdicts: dict | None = None) -> None:
+                seg_clips: set | None = None, vrun: dict | None = None) -> None:
     """Map a saved run's results onto the subtask that owns them."""
     if not run:
         return
@@ -453,10 +560,26 @@ def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
         else:
             originals[tid] = blob
 
-    # Group originals under their subtask (rolls_up_to), preserving order.
+    # Group originals under their subtask (rolls_up_to), preserving order — minus the
+    # probes (see `is_probe`), which cost twice over:
+    #
+    #   · appended as subtasks of their own they put the same clip on the rail three
+    #     to six times — AM.I.D.S1 came out at thirty subtasks over seven clips and
+    #     AM.I.D.S7 at nineteen over four, where the runs that graded sections alone
+    #     came out right, AM.II.A.S6 at eight and AM.I.D.S8 at three;
+    #   · and a reworded probe groups under the empty string, which `slug("")` makes
+    #     a substring of every label below, letting it win the match for a section it
+    #     has nothing to do with. That is what put AM.I.D.S7's "Cut The Hose" on a
+    #     1-point reworded probe and pushed its real 7-point `section:cut-the-hose`
+    #     into the appended rows under the same name, on a different clip.
+    #
+    # Filtered here rather than at the append below, so it fixes the match too.
     groups: "OrderedDict[str, list]" = OrderedDict()
     for tid, blob in originals.items():
-        groups.setdefault(blob["meta"].get("rolls_up_to") or "", []).append((tid, blob))
+        gid = blob["meta"].get("rolls_up_to") or ""
+        if is_probe(gid, tid):
+            continue
+        groups.setdefault(gid, []).append((tid, blob))
 
     def norm(text: str) -> str:
         return slug(re.sub(r"\(.*?\)", "", (text or "").split("—")[-1]))
@@ -470,7 +593,7 @@ def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
         if gid is None:
             continue
         entries = groups.pop(gid)
-        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips, vverdicts))
+        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips, vrun))
 
     # A run can grade targets no pack section matches: AM.I.E.S1 compiles to a single
     # "Procedure" section while the run grades its three sheet variants separately.
@@ -485,15 +608,14 @@ def attach_runs(subtasks: list, run: dict | None, run_count: int = 0,
             "steps": [], "fromRun": True,
             "excluded": "Not compiled into a pack section — this target exists only in the run.",
         }
-        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips, vverdicts))
+        st.update(build_grid(gid, entries, negatives, run, run_count, seg_clips, vrun))
         subtasks.append(st)
 
 
 def build_grid(gid: str, entries: list, negatives: dict, run: dict,
                run_count: int = 0, seg_clips: set | None = None,
-               vverdicts: dict | None = None) -> dict:
+               vrun: dict | None = None) -> dict:
     seg_clips = seg_clips or set()
-    vverdicts = vverdicts or {}
     rows, neg_lines, replies, points = [], [], {}, []
     frame_file = frame_video = None
     calls = 0
@@ -518,21 +640,7 @@ def build_grid(gid: str, entries: list, negatives: dict, run: dict,
             if res.get("raw_text"):
                 replies[f"r{ri}m{mi}"] = res["raw_text"].strip()
 
-        # The clip column, point for point beside the photo one. `none` where the
-        # video run did not grade it — never `unsure`, which would read as a model
-        # having looked at the sequence and declined to call it.
-        clip_cells = []
-        for mid in MODEL_IDS:
-            v = vverdicts.get((tid, mid))
-            if not v:
-                clip_cells.append(["none", "not graded"])
-                continue
-            at = v.get("at")
-            detail = f"t={at}" if at not in (None, "", "null") else (v.get("note") or "")
-            clip_cells.append([v["verdict"], detail])
-
-        row = {"label": f"{ri + 1} · {text[:76]}", "cells": cells,
-               "clipCells": clip_cells}
+        row = {"label": f"{ri + 1} · {text[:76]}", "cells": cells}
 
         nblob = negatives.get(tid)
         if nblob:
@@ -581,6 +689,7 @@ def build_grid(gid: str, entries: list, negatives: dict, run: dict,
     flat = [c for r in rows if "neg" in r for c in r["neg"]["cells"]]
     accepted = sum(1 for c in flat if c[0] == "accepted")
     graded_ctl = [c for c in flat if c[0] != "none"]
+    vgrid = video_grid(gid, entries, vrun)
     return {
         "sheetPoints": points,
         "run": {
@@ -589,6 +698,7 @@ def build_grid(gid: str, entries: list, negatives: dict, run: dict,
                              f"not passed {sum(1 for c in graded_ctl if c[0] != 'accepted')} · "
                              f"accepted {accepted}"),
         },
+        **({"vrun": vgrid} if vgrid else {}),
         "frameFile": frame_file or "",
         "frameVideo": frame_video or "",
         "frameProv": "frame_reviewed" if frame_video in seg_clips else "frame_suggested",
@@ -687,10 +797,48 @@ def build_evals(tasks: list) -> dict:
             str(d["accepted"]), mid == "anthropic/claude-opus-5",
         ])
 
+    # Video assessment, tallied over the newest valid run per task — the same
+    # rule the Video assessment tab reads by, so this tally and those grids
+    # agree. Ungraded is counted and shown: a reply that stopped short of a
+    # point left it ungraded, and a tally that hid that would read as coverage.
+    v_models: "OrderedDict[str, dict]" = OrderedDict()
+    v_tot = {"pass": 0, "fail": 0, "unsure": 0, "ungraded": 0}
+    v_tasks = v_calls = 0
+    v_cost = 0.0
+    for t in tasks:
+        vrun = latest_video_run(t["code"])
+        if not vrun:
+            continue
+        v_tasks += 1
+        v_calls += vrun.get("summary", {}).get("calls") or 0
+        v_cost += vrun.get("summary", {}).get("cost_usd") or 0.0
+        for row in vrun.get("results") or []:
+            rec = v_models.setdefault(row.get("model"),
+                                      {"pass": 0, "fail": 0, "unsure": 0, "ungraded": 0})
+            for p in row.get("points") or []:
+                verdict = p.get("verdict")
+                k = verdict if verdict in ("pass", "fail", "unsure") else "ungraded"
+                rec[k] += 1
+                v_tot[k] += 1
+    ordered = [m for m in MODEL_IDS if m in v_models] + \
+              [m for m in v_models if m not in MODEL_IDS]
+    v_graded = v_tot["pass"] + v_tot["fail"] + v_tot["unsure"]
+    video = {
+        "models": [[arm_label(m),
+                    str(v_models[m]["pass"]), str(v_models[m]["fail"]),
+                    str(v_models[m]["unsure"]), str(v_models[m]["ungraded"]),
+                    (lambda g: f"{v_models[m]['pass'] / g:.0%}" if g else "—")(
+                        v_models[m]["pass"] + v_models[m]["fail"] + v_models[m]["unsure"])]
+                   for m in ordered],
+        "totals": {**v_tot, "graded": v_graded, "tasks": v_tasks,
+                   "calls": v_calls, "cost": round(v_cost, 2)},
+    }
+
     tot_o = sum(d["orig"][0] for d in per_model.values()) / (sum(d["orig"][1] for d in per_model.values()) or 1)
     tot_n = sum(d["neg"][0] for d in per_model.values()) / (sum(d["neg"][1] for d in per_model.values()) or 1)
     tot_f = sum(d["flipped"] for d in per_model.values())
     return {
+        "video": video,
         "modelRows": model_rows,
         "taskRows": task_rows,
         "totals": ["All tasks", f"{totals['points']:,}", f"{tot_o:.0%}", f"{tot_n:.0%}",
