@@ -568,6 +568,78 @@ code { font-family: ui-monospace, monospace; }
   color: rgba(255, 255, 255, 0.6); position: absolute; bottom: 2px; right: 3px;
 }
 
+/* Area of focus — a keyframed crop box over the source clip. The stage keeps the
+   plate's footprint; .focus-layer is fitted to the letterboxed content each
+   frame, so the box's percent coordinates are fractions of the frame itself. */
+.focus-toggle { font-size: 10px; height: 26px; padding: 0 10px; }
+.focus-editor { display: flex; flex-direction: column; gap: 8px; }
+.focus-stage {
+  position: relative; height: 340px; background: var(--color-accent-900);
+  overflow: hidden; flex: none; touch-action: none;
+}
+.focus-video, .focus-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; display: block;
+}
+.focus-canvas { display: none; background: black; }
+.focus-stage.is-preview .focus-canvas { display: block; }
+.focus-stage.is-preview .focus-video { visibility: hidden; }
+.focus-stage.is-preview .focus-layer { display: none; }
+.focus-layer { position: absolute; }
+/* The oversized shadow dims everything outside the box; the stage clips it. */
+.focus-box {
+  position: absolute; border: 1.5px solid var(--color-accent);
+  box-shadow: 0 0 0 9999px rgba(8, 12, 18, 0.55); cursor: move;
+}
+.focus-handle {
+  position: absolute; width: 10px; height: 10px;
+  background: var(--color-accent); border: 1px solid rgba(255, 255, 255, 0.85);
+}
+.focus-handle.nw { left: -5px; top: -5px; cursor: nwse-resize; }
+.focus-handle.se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+.focus-handle.ne { right: -5px; top: -5px; cursor: nesw-resize; }
+.focus-handle.sw { left: -5px; bottom: -5px; cursor: nesw-resize; }
+.focus-box-tag {
+  position: absolute; left: -1.5px; top: -19px; white-space: nowrap;
+  font-family: ui-monospace, monospace; font-size: 9px; padding: 1px 5px;
+  color: rgba(255, 255, 255, 0.9); background: rgba(0, 0, 0, 0.55);
+}
+.focus-missing {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; padding: 30px; text-align: center;
+  font-size: 11px; line-height: 1.6; color: rgba(255, 255, 255, 0.75);
+}
+/* display:flex would otherwise beat the [hidden] UA rule */
+.focus-missing[hidden] { display: none; }
+.focus-transport { display: flex; align-items: center; gap: 10px; }
+.focus-btn { font-size: 10px; height: 26px; padding: 0 10px; flex: none; }
+.focus-scrub-wrap { position: relative; flex: 1; display: flex; align-items: center; }
+.focus-scrub { width: 100%; margin: 0; accent-color: var(--color-accent); }
+.focus-ticks { position: absolute; left: 0; right: 0; top: -3px; height: 4px; pointer-events: none; }
+.focus-tick { position: absolute; width: 2px; height: 4px; background: var(--color-accent-600); }
+.focus-time, .focus-zoom {
+  font-family: ui-monospace, monospace; font-size: 10px;
+  color: var(--color-neutral-600); flex: none;
+}
+.focus-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.focus-note { font-size: 10px; color: var(--color-neutral-500); }
+.focus-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.focus-none { font-size: 10px; color: var(--color-neutral-500); line-height: 1.5; }
+.focus-chip { display: inline-flex; align-items: center; border: 1px solid var(--color-divider); }
+.focus-chip-t, .focus-chip-x {
+  border: 0; background: none; cursor: pointer; padding: 3px 6px;
+  font-family: ui-monospace, monospace; font-size: 9.5px; color: var(--color-neutral-700);
+}
+.focus-chip-t:hover { color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 8%, transparent); }
+.focus-chip-x { padding-left: 2px; color: var(--color-neutral-500); }
+.focus-chip-x:hover { color: var(--color-accent-800); }
+.focus-progress { position: relative; height: 3px; background: var(--color-neutral-300); display: none; }
+.focus-progress.is-on { display: block; }
+.focus-progress i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--color-accent); }
+.focus-result { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--color-divider); padding: 10px 12px; }
+.focus-result-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.focus-result-video { width: 100%; max-height: 320px; background: black; }
+
 /* ── tab · documentation ────────────────────────────────────────────────── */
 
 .docs { flex: 1; min-height: 0; display: flex; }

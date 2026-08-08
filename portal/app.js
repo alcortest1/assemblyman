@@ -142,6 +142,7 @@
     expanded: null,     // step id whose checks/errors are open
     clipIdx: 0,
     frameIdx: null,     // null → the clip's last frame
+    focusOn: false,     // Videos tab: the area-of-focus editor replaces the plate
     reply: null,        // 'r<row>m<model>' | 'n<row>m<model>'
     doc: 0,
     drafted: null,      // '<taskCode>#<subIdx>' once a perturbed sheet is drafted
@@ -166,7 +167,8 @@
     ensureTask(code);
     setState({
       nav: 'task', taskCode: code, tab: tab || 'detail', sub: 0,
-      expanded: null, clipIdx: 0, frameIdx: null, reply: null, doc: 0
+      expanded: null, clipIdx: 0, frameIdx: null, reply: null, doc: 0,
+      focusOn: false
     });
   }
 
@@ -1804,6 +1806,593 @@
   var BAND_SHADES = ['var(--color-accent-300)', 'var(--color-accent-500)',
                      'var(--color-accent-700)', 'var(--color-accent-400)', 'var(--color-accent-600)'];
 
+  /* ── area of focus ────────────────────────────────────────────────────────
+   *
+   * A keyframed crop box over the source clip. A key is {t, cx, cy, w}: seconds,
+   * then centre and width as fractions of the frame. Height IS width — the box
+   * keeps the clip's own aspect, so a single number carries the whole zoom and
+   * two boxes always interpolate cleanly (no aspect to fight over between keys).
+   *
+   * The editor lives outside setState: a playing <video> cannot survive the
+   * full-DOM re-render every state change performs, so everything per-frame —
+   * box position, scrubber, cropped preview — runs on its own rAF loop that
+   * dies when its stage leaves the document. Track edits mutate module state
+   * and the position survives a re-render through focusSession.
+   */
+
+  var focusTracks = {};    // '<code>/<clip>' → { keys: [...] } working copies
+  var focusFetched = {};   // code → true once data/focus_tracks/<code>.json was merged
+  var focusSession = { key: null, time: 0, playing: false, preview: false, results: {} };
+
+  function focusKeyOf(code, clip) { return code + '/' + clip; }
+
+  function tsSeconds(name) {
+    var m = /^t(\d{6})_(\d{2})/.exec(name || '');
+    return m ? (+m[1]) + (+m[2]) / 100 : 0;
+  }
+
+  // Saved tracks are static data — the page reads them back without the server.
+  function ensureFocusTracks(code) {
+    if (focusFetched[code]) return;
+    focusFetched[code] = true;
+    getJSON('data/focus_tracks/' + encodeURIComponent(code) + '.json')
+      .then(function (store) {
+        Object.keys(store || {}).forEach(function (clip) {
+          var k = focusKeyOf(code, clip);
+          // An open editor has already made a working copy — an empty one, since
+          // focusTrackFor runs before this fetch lands. Fill any keyless copy;
+          // never overwrite keys the session has actually drawn.
+          var cur = focusTracks[k];
+          if ((!cur || !cur.keys.length) && store[clip] && Array.isArray(store[clip].keys)) {
+            focusTracks[k] = { keys: store[clip].keys.slice().sort(function (a, b) { return a.t - b.t; }) };
+          }
+        });
+        render();
+      })
+      .catch(function () {});  // no file yet — nothing was ever saved
+  }
+
+  function focusTrackFor(code, clip) {
+    var k = focusKeyOf(code, clip);
+    if (!focusTracks[k]) focusTracks[k] = { keys: [] };
+    return focusTracks[k];
+  }
+
+  function clampBox(b) {
+    var w = Math.min(1, Math.max(0.08, b.w));
+    return { cx: Math.min(1 - w / 2, Math.max(w / 2, b.cx)),
+             cy: Math.min(1 - w / 2, Math.max(w / 2, b.cy)), w: w };
+  }
+
+  // The box at time t: hold outside the keyed span, smoothstep between keys —
+  // the ease keeps a straight lerp's hard starts and stops out of the pan.
+  function focusBoxAt(track, t) {
+    var keys = track.keys;
+    if (!keys.length) return { cx: 0.5, cy: 0.5, w: 1 };
+    if (t <= keys[0].t) return keys[0];
+    var last = keys[keys.length - 1];
+    if (t >= last.t) return last;
+    for (var i = 0; i < keys.length - 1; i++) {
+      var a = keys[i], b = keys[i + 1];
+      if (t >= a.t && t <= b.t) {
+        var s = b.t > a.t ? (t - a.t) / (b.t - a.t) : 0;
+        s = s * s * (3 - 2 * s);
+        return { cx: a.cx + (b.cx - a.cx) * s,
+                 cy: a.cy + (b.cy - a.cy) * s,
+                 w: a.w + (b.w - a.w) * s };
+      }
+    }
+    return last;
+  }
+
+  // An adjustment lands on the key already at the playhead, or becomes one.
+  function upsertFocusKey(track, t, box) {
+    var b = clampBox(box);
+    for (var i = 0; i < track.keys.length; i++) {
+      if (Math.abs(track.keys[i].t - t) < 0.12) {
+        track.keys[i].cx = b.cx; track.keys[i].cy = b.cy; track.keys[i].w = b.w;
+        return;
+      }
+    }
+    track.keys.push({ t: Math.round(t * 100) / 100, cx: b.cx, cy: b.cy, w: b.w });
+    track.keys.sort(function (a, b2) { return a.t - b2.t; });
+  }
+
+  /* Auto-detection: the clip's sampled strip goes to Gemini Flash through the
+   * same /api/video/run route the assessment grids use — the page builds the
+   * prompt and parses the reply, the server only holds the key. Gemini answers
+   * in its native detection dialect, box_2d [ymin, xmin, ymax, xmax] on a
+   * 0-1000 grid, one box per frame; each becomes a keyframe at that frame's
+   * filename timestamp. */
+
+  var FOCUS_MODEL = 'google/gemini-3.6-flash';
+
+  var DETECT_SYSTEM = 'You locate the area of focus in frames sampled from a video of an ' +
+    'aviation maintenance procedure. The area of focus is where the work is happening: the ' +
+    'hands, the tool in use and the part being worked on. Reply with JSON only — no prose, ' +
+    'no code fences.';
+
+  function detectPrompt(count) {
+    return 'Here are ' + count + ' frames sampled in chronological order from one video ' +
+      'clip. For each frame, in order, give one bounding box around the area of focus. ' +
+      'Cover the hands, the active tool and the part being worked on; keep the box tight ' +
+      'but do not cut off mid-action hands or the workpiece. If no action is visible — an ' +
+      'empty bench, a title card — use the full frame [0,0,1000,1000].\n\n' +
+      'Answer with a JSON array of exactly ' + count + ' entries, one per frame in the ' +
+      'order shown: {"frame": <0-based index>, "box_2d": [ymin, xmin, ymax, xmax]} with ' +
+      'coordinates normalized to 0-1000.';
+  }
+
+  // The model was told "JSON only", but a fenced or wrapped reply still parses,
+  // and Flash occasionally glitches a single row — so when JSON.parse fails,
+  // well-formed entries are pulled out one by one rather than sinking the reply.
+  function parseDetectedBoxes(text) {
+    var s = String(text || '').replace(/```[a-z]*\n?/gi, '').trim();
+    var candidates = [s];
+    var a = s.indexOf('['), b = s.lastIndexOf(']');
+    if (a >= 0 && b > a) candidates.push(s.slice(a, b + 1));
+    for (var i = 0; i < candidates.length; i++) {
+      try {
+        var v = JSON.parse(candidates[i]);
+        if (Array.isArray(v)) return v;
+        if (v && typeof v === 'object') {
+          for (var k in v) if (Array.isArray(v[k])) return v[k];
+        }
+      } catch (e) { /* try the next shape */ }
+    }
+    var out = [];
+    var row = /"frame"\s*:\s*(\d+)[^{[]*?"box_2d"\s*:\s*\[\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\]/g;
+    var m;
+    while ((m = row.exec(s))) {
+      out.push({ frame: +m[1], box_2d: [+m[2], +m[3], +m[4], +m[5]] });
+    }
+    return out.length ? out : null;
+  }
+
+  function detectedKeys(entries, stamps) {
+    var ordered = entries.slice();
+    if (ordered.every(function (e) { return e && typeof e.frame === 'number'; })) {
+      ordered.sort(function (a, b) { return a.frame - b.frame; });
+    }
+    var keys = [];
+    for (var i = 0; i < ordered.length; i++) {
+      var entry = ordered[i];
+      var box = entry && entry.box_2d;
+      if (!box || box.length !== 4) continue;
+      var nums = Array.prototype.map.call(box, Number);
+      if (!nums.every(isFinite)) continue;
+      // The entry's own frame index picks the timestamp, so a salvaged reply
+      // with a dropped row cannot shift every later box onto the wrong moment.
+      var at = (typeof entry.frame === 'number' && entry.frame >= 0) ? entry.frame : i;
+      if (at >= stamps.length) continue;
+      var y0 = nums[0] / 1000, x0 = nums[1] / 1000, y1 = nums[2] / 1000, x1 = nums[3] / 1000;
+      // The crop is square in frame fractions — take the box's larger side and
+      // pad it, so the detection always fits inside with a little context.
+      var k = clampBox({ cx: (x0 + x1) / 2, cy: (y0 + y1) / 2,
+                         w: Math.max(x1 - x0, y1 - y0) * 1.15 });
+      k.t = stamps[at];
+      keys.push(k);
+    }
+    // A 3-tap smooth damps per-frame jitter; the ends stay pinned.
+    for (var j = 1; j < keys.length - 1; j++) {
+      ['cx', 'cy', 'w'].forEach(function (f) {
+        keys[j][f] = keys[j - 1][f] * 0.25 + keys[j][f] * 0.5 + keys[j + 1][f] * 0.25;
+      });
+    }
+    // Keep only keys that actually move the box; first and last always stay.
+    var kept = [];
+    keys.forEach(function (k2, idx) {
+      var prev = kept[kept.length - 1];
+      if (!prev || idx === keys.length - 1 ||
+          Math.abs(k2.cx - prev.cx) > 0.015 || Math.abs(k2.cy - prev.cy) > 0.015 ||
+          Math.abs(k2.w - prev.w) > 0.015) kept.push(k2);
+    });
+    return kept.map(function (k3) {
+      var c = clampBox(k3); c.t = k3.t; return c;
+    });
+  }
+
+  function focusEditor(task, clip) {
+    ensureFocusTracks(task.code);
+    var track = focusTrackFor(task.code, clip);
+    var key = focusKeyOf(task.code, clip);
+    if (focusSession.key !== key) {
+      focusSession.key = key; focusSession.time = 0;
+      focusSession.playing = false; focusSession.preview = false;
+    }
+
+    var rendering = false;
+    var recMime = '';
+
+    var video = el('video', {
+      class: 'focus-video', muted: true, playsinline: true, preload: 'auto',
+      src: 'videos/' + encodeURIComponent(task.code) + '/' + encodeURIComponent(clip) + '.mp4'
+    });
+    video.muted = true;  // the attribute alone does not satisfy autoplay policy
+
+    var canvas = el('canvas', { class: 'focus-canvas' });
+    var ctx = canvas.getContext('2d');
+    var boxTag = el('span', { class: 'focus-box-tag' });
+    var box = el('div', { class: 'focus-box' }, [
+      el('i', { class: 'focus-handle nw', 'data-h': 'nw' }),
+      el('i', { class: 'focus-handle ne', 'data-h': 'ne' }),
+      el('i', { class: 'focus-handle sw', 'data-h': 'sw' }),
+      el('i', { class: 'focus-handle se', 'data-h': 'se' }),
+      boxTag
+    ]);
+    // Fitted to the letterboxed content each frame, so the box's percent
+    // coordinates are fractions of the frame itself, not of the stage.
+    var frameLayer = el('div', { class: 'focus-layer' }, [box]);
+    var notice = el('div', { class: 'focus-missing', hidden: true, text:
+      'Source video not reachable — videos/' + task.code + '/' + clip + '.mp4. ' +
+      'The static deploy carries extracted frames only; run python3 serve.py ' +
+      'beside alcor_agents/ to stream the clip.' });
+    var stage = el('div', { class: 'focus-stage' }, [video, canvas, frameLayer, notice]);
+
+    var playBtn = el('button', { class: 'btn btn-secondary focus-btn', type: 'button', text: 'Play' });
+    var scrub = el('input', { class: 'focus-scrub', type: 'range', min: '0', max: '1000', value: '0',
+                              'aria-label': 'playhead' });
+    var ticks = el('div', { class: 'focus-ticks' });
+    var timeLbl = el('span', { class: 'focus-time', text: '—' });
+    var zoomLbl = el('span', { class: 'focus-zoom', text: '×1.0' });
+
+    var keyBtn = el('button', { class: 'btn btn-secondary focus-btn', type: 'button', text: '+ Keyframe' });
+    var detectBtn = el('button', { class: 'btn btn-secondary focus-btn', type: 'button',
+                                   text: 'Detect focus · Gem 3.6 Flash' });
+    var prevBtn = el('button', { class: 'btn btn-secondary focus-btn', type: 'button', text: 'Cropped preview' });
+    var renderBtn = el('button', { class: 'btn btn-primary focus-btn', type: 'button', text: 'Render focus video' });
+    var saveBtn = el('button', { class: 'btn btn-secondary focus-btn', type: 'button', text: 'Save track' });
+    var clearBtn = el('button', { class: 'linkish', type: 'button', text: 'Clear keyframes' });
+    var saveNote = el('span', { class: 'focus-note' });
+
+    var chips = el('div', { class: 'focus-chips' });
+    var progFill = el('i');
+    var progress = el('div', { class: 'focus-progress' }, [progFill]);
+    var resultWrap = el('div', { class: 'focus-result-slot' });
+
+    /* geometry ─ the stage letterboxes; the layer hugs the video content */
+
+    function contentRect() {
+      var sw = stage.clientWidth, sh = stage.clientHeight;
+      var vw = video.videoWidth || 16, vh = video.videoHeight || 9;
+      var scale = Math.min(sw / vw, sh / vh);
+      return { left: (sw - vw * scale) / 2, top: (sh - vh * scale) / 2,
+               width: vw * scale, height: vh * scale };
+    }
+
+    function pointerFrac(e) {
+      var r = frameLayer.getBoundingClientRect();
+      return { x: (e.clientX - r.left) / (r.width || 1),
+               y: (e.clientY - r.top) / (r.height || 1) };
+    }
+
+    function drawCrop() {
+      var b = clampBox(focusBoxAt(track, video.currentTime));
+      var vw = video.videoWidth, vh = video.videoHeight;
+      if (!vw || !canvas.width) return;
+      ctx.drawImage(video, (b.cx - b.w / 2) * vw, (b.cy - b.w / 2) * vh,
+                    b.w * vw, b.w * vh, 0, 0, canvas.width, canvas.height);
+    }
+
+    /* keyframe list — chips and scrubber ticks, rebuilt after every edit */
+
+    function refreshKeysUI() {
+      clear(chips);
+      if (!track.keys.length) {
+        append(chips, el('span', { class: 'focus-none', text:
+          'No keyframes — the full frame plays. Drag the box, pull a corner or ' +
+          'scroll to zoom; every adjustment records a keyframe at the playhead.' }));
+      } else {
+        append(chips, el('span', { class: 'col-label', text: track.keys.length + ' keyframes' }));
+        track.keys.forEach(function (k) {
+          append(chips, el('span', { class: 'focus-chip' }, [
+            el('button', { class: 'focus-chip-t', type: 'button',
+                           text: fmtTime(k.t) + ' ×' + (1 / k.w).toFixed(1),
+                           title: 'seek to this keyframe',
+                           on: { click: function () { video.currentTime = k.t; } } }),
+            el('button', { class: 'focus-chip-x', type: 'button', text: '✕',
+                           'aria-label': 'delete keyframe at ' + fmtTime(k.t),
+                           on: { click: function () {
+                             var at = track.keys.indexOf(k);
+                             if (at >= 0) track.keys.splice(at, 1);
+                             refreshKeysUI();
+                           } } })
+          ]));
+        });
+      }
+      clear(ticks);
+      if (video.duration) {
+        track.keys.forEach(function (k) {
+          append(ticks, el('i', { class: 'focus-tick',
+                                  style: 'left:' + (k.t / video.duration * 100) + '%' }));
+        });
+      }
+    }
+
+    /* box editing — move, corner-resize, wheel zoom; all key at the playhead */
+
+    var drag = null;
+    box.addEventListener('pointerdown', function (e) {
+      if (rendering) return;
+      var h = e.target.getAttribute && e.target.getAttribute('data-h');
+      drag = { mode: h || 'move', b0: clampBox(focusBoxAt(track, video.currentTime)),
+               p0: pointerFrac(e) };
+      box.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    box.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var p = pointerFrac(e), b0 = drag.b0, b;
+      if (drag.mode === 'move') {
+        b = { cx: b0.cx + (p.x - drag.p0.x), cy: b0.cy + (p.y - drag.p0.y), w: b0.w };
+      } else {
+        // Opposite corner anchored, aspect locked — the pointer's larger reach wins.
+        var ax = drag.mode.indexOf('w') >= 0 ? b0.cx + b0.w / 2 : b0.cx - b0.w / 2;
+        var ay = drag.mode.indexOf('n') >= 0 ? b0.cy + b0.w / 2 : b0.cy - b0.w / 2;
+        var w = Math.min(1, Math.max(0.08, Math.max(Math.abs(p.x - ax), Math.abs(p.y - ay))));
+        b = { cx: ax + (drag.mode.indexOf('w') >= 0 ? -w / 2 : w / 2),
+              cy: ay + (drag.mode.indexOf('n') >= 0 ? -w / 2 : w / 2), w: w };
+      }
+      upsertFocusKey(track, video.currentTime, b);
+    });
+    function endDrag() { if (drag) { drag = null; refreshKeysUI(); } }
+    box.addEventListener('pointerup', endDrag);
+    box.addEventListener('pointercancel', endDrag);
+
+    stage.addEventListener('wheel', function (e) {
+      if (rendering || focusSession.preview || !video.videoWidth) return;
+      e.preventDefault();
+      var b = clampBox(focusBoxAt(track, video.currentTime));
+      upsertFocusKey(track, video.currentTime,
+        { cx: b.cx, cy: b.cy, w: b.w * Math.exp(e.deltaY * 0.0015) });
+      refreshKeysUI();
+    }, { passive: false });
+
+    /* transport */
+
+    playBtn.addEventListener('click', function () {
+      if (video.paused) video.play(); else video.pause();
+    });
+    video.addEventListener('play', function () {
+      playBtn.textContent = 'Pause';
+      if (!rendering) focusSession.playing = true;
+    });
+    video.addEventListener('pause', function () {
+      playBtn.textContent = 'Play';
+      if (!rendering) focusSession.playing = false;
+    });
+
+    var scrubbing = false;
+    scrub.addEventListener('input', function () {
+      scrubbing = true;
+      if (video.duration) video.currentTime = (+scrub.value / 1000) * video.duration;
+    });
+    scrub.addEventListener('change', function () { scrubbing = false; });
+
+    keyBtn.addEventListener('click', function () {
+      upsertFocusKey(track, video.currentTime, focusBoxAt(track, video.currentTime));
+      refreshKeysUI();
+    });
+    clearBtn.addEventListener('click', function () {
+      track.keys.length = 0;
+      refreshKeysUI();
+    });
+
+    detectBtn.addEventListener('click', function () {
+      var strip = ((task.strips || {})[clip] || []).slice(0, 48);
+      if (!strip.length) {
+        saveNote.textContent = 'no extracted frames to detect from — re-run build_portal_data.py';
+        return;
+      }
+      detectBtn.disabled = true;
+      saveNote.textContent = 'detecting · ' + strip.length + ' frames → Gemini 3.6 Flash…';
+      fetch('/api/video/run', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: FOCUS_MODEL, task_code: task.code, clip: clip, frames: strip,
+          system: DETECT_SYSTEM, user_text: detectPrompt(strip.length)
+        })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        detectBtn.disabled = rendering;
+        if (!j || j.error) {
+          saveNote.textContent = 'detect failed — ' + ((j && (j.message || j.error)) || 'no reply');
+          return;
+        }
+        var entries = parseDetectedBoxes(j.text);
+        var keys = entries ? detectedKeys(entries, strip.map(tsSeconds)) : [];
+        if (!keys.length) {
+          saveNote.textContent = 'detect failed — the reply held no usable boxes';
+          return;
+        }
+        track.keys = keys;
+        refreshKeysUI();
+        saveNote.textContent = 'Gemini keyed ' + keys.length + ' of ' + strip.length +
+          ' frames — adjust by hand, then Save track';
+      }).catch(function () {
+        detectBtn.disabled = rendering;
+        saveNote.textContent = 'static serve — detection needs serve.py and its key';
+      });
+    });
+
+    function syncPreview() {
+      stage.classList.toggle('is-preview', focusSession.preview || rendering);
+      prevBtn.textContent = focusSession.preview ? 'Edit box' : 'Cropped preview';
+    }
+    prevBtn.addEventListener('click', function () {
+      focusSession.preview = !focusSession.preview;
+      syncPreview();
+    });
+
+    /* lifecycle */
+
+    video.addEventListener('loadedmetadata', function () {
+      // Output keeps the clip's aspect at its own resolution, capped and even —
+      // encoders reject odd dimensions.
+      var outW = Math.min(video.videoWidth || 640, 1280); outW -= outW % 2;
+      var outH = Math.round(outW * video.videoHeight / video.videoWidth / 2) * 2;
+      canvas.width = outW; canvas.height = outH || 2;
+      if (focusSession.time > 0 && focusSession.time < video.duration) {
+        video.currentTime = focusSession.time;
+      }
+      if (focusSession.playing && !rendering) video.play();
+      refreshKeysUI();
+    });
+    video.addEventListener('error', function () {
+      notice.hidden = false;
+      frameLayer.style.display = 'none';
+      [playBtn, keyBtn, prevBtn, renderBtn].forEach(function (b) { b.disabled = true; });
+      timeLbl.textContent = 'no video';
+    });
+
+    function tick() {
+      if (!stage.isConnected) return;  // re-render replaced this editor — stop
+      requestAnimationFrame(tick);
+      if (!video.videoWidth) return;
+      var r = contentRect();
+      frameLayer.style.left = r.left + 'px';
+      frameLayer.style.top = r.top + 'px';
+      frameLayer.style.width = r.width + 'px';
+      frameLayer.style.height = r.height + 'px';
+      var t = video.currentTime;
+      focusSession.time = t;
+      var b = clampBox(focusBoxAt(track, t));
+      box.style.left = ((b.cx - b.w / 2) * 100) + '%';
+      box.style.top = ((b.cy - b.w / 2) * 100) + '%';
+      box.style.width = (b.w * 100) + '%';
+      box.style.height = (b.w * 100) + '%';
+      boxTag.textContent = fmtTime(t) + ' · ×' + (1 / b.w).toFixed(1);
+      zoomLbl.textContent = '×' + (1 / b.w).toFixed(1);
+      if (video.duration) {
+        if (!scrubbing) scrub.value = String(Math.round(t / video.duration * 1000));
+        timeLbl.textContent = fmtTime(t) + ' / ' + fmtTime(video.duration);
+        if (rendering) progFill.style.width = (t / video.duration * 100) + '%';
+      }
+      if ((focusSession.preview || rendering) && canvas.width) drawCrop();
+    }
+    requestAnimationFrame(tick);
+
+    /* the final video — the crop track rendered in real time to a file */
+
+    function pickMime() {
+      var mimes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+      for (var i = 0; i < mimes.length; i++) {
+        if (MediaRecorder.isTypeSupported(mimes[i])) return mimes[i];
+      }
+      return '';
+    }
+
+    function setBusy(busy) {
+      [playBtn, scrub, keyBtn, detectBtn, prevBtn, renderBtn, saveBtn, clearBtn]
+        .forEach(function (b) { b.disabled = busy; });
+      progress.classList.toggle('is-on', busy);
+      renderBtn.textContent = busy ? 'Rendering — playing the clip once…' : 'Render focus video';
+    }
+
+    function showResult() {
+      clear(resultWrap);
+      var res = focusSession.results[key];
+      if (!res) return;
+      append(resultWrap, el('div', { class: 'focus-result' }, [
+        el('div', { class: 'focus-result-row' }, [
+          el('span', { class: 'col-label', text: 'Final focus video' }),
+          el('a', { class: 'linkish', href: res.url, download: res.name, text: 'Download ' + res.name }),
+          el('span', { class: 'focus-note', text: res.meta })
+        ]),
+        el('video', { class: 'focus-result-video', src: res.url, controls: true, playsinline: true })
+      ]));
+    }
+
+    function renderFocusVideo() {
+      if (rendering || !video.videoWidth) return;
+      if (!window.MediaRecorder || !canvas.captureStream) {
+        saveNote.textContent = 'this browser has no MediaRecorder — cannot render here';
+        return;
+      }
+      recMime = pickMime();
+      var rec;
+      try {
+        rec = new MediaRecorder(canvas.captureStream(30),
+          recMime ? { mimeType: recMime, videoBitsPerSecond: 8000000 }
+                  : { videoBitsPerSecond: 8000000 });
+      } catch (err) {
+        saveNote.textContent = 'recorder refused: ' + err.message;
+        return;
+      }
+      rendering = true;
+      setBusy(true);
+      syncPreview();
+      var chunks = [];
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = function () {
+        rendering = false;
+        setBusy(false);
+        syncPreview();
+        progFill.style.width = '0';
+        var old = focusSession.results[key];
+        if (old) URL.revokeObjectURL(old.url);
+        var blob = new Blob(chunks, { type: recMime || 'video/webm' });
+        focusSession.results[key] = {
+          url: URL.createObjectURL(blob),
+          name: clip + '__focus.' + (recMime.indexOf('mp4') >= 0 ? 'mp4' : 'webm'),
+          meta: (blob.size / 1048576).toFixed(1) + ' MB · ' + canvas.width + '×' + canvas.height +
+                ' · ' + track.keys.length + ' keyframes, rendered in-browser'
+        };
+        showResult();
+      };
+      video.pause();
+      var onEnded = function () {
+        video.removeEventListener('ended', onEnded);
+        drawCrop();  // land the last frame before the stream closes
+        rec.stop();
+      };
+      var onSeeked = function () {
+        video.removeEventListener('seeked', onSeeked);
+        drawCrop();
+        rec.start(250);
+        video.addEventListener('ended', onEnded);
+        video.play();
+      };
+      video.addEventListener('seeked', onSeeked);
+      video.currentTime = 0;
+    }
+    renderBtn.addEventListener('click', renderFocusVideo);
+
+    saveBtn.addEventListener('click', function () {
+      saveNote.textContent = 'saving…';
+      fetch('/api/video/focus', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_code: task.code, clip: clip, track: { keys: track.keys } })
+      }).then(function (r) {
+        return r.json().then(function (j) {
+          saveNote.textContent = r.ok ? 'saved · ' + j.path
+            : 'save failed — ' + (j.message || j.error || r.status);
+        });
+      }).catch(function () {
+        saveNote.textContent = 'static serve — tracks need serve.py to persist';
+      });
+    });
+
+    refreshKeysUI();
+    syncPreview();
+    showResult();
+
+    return el('div', { class: 'focus-editor' }, [
+      stage,
+      el('div', { class: 'focus-transport' }, [
+        playBtn, timeLbl,
+        el('span', { class: 'focus-scrub-wrap' }, [ticks, scrub]),
+        zoomLbl, keyBtn
+      ]),
+      progress,
+      el('div', { class: 'focus-actions' }, [
+        detectBtn, prevBtn, renderBtn, saveBtn, clearBtn,
+        el('span', { class: 'spacer' }), saveNote
+      ]),
+      chips,
+      resultWrap
+    ]);
+  }
+
   function renderVideos(task) {
     if (!task.clips) {
       return el('div', { class: 'empty-center' }, [
@@ -1849,13 +2438,24 @@
       ]);
     })));
 
+    var focusOn = !!state.focusOn;
+
     var pane = el('div', { class: 'video-pane' }, [
       el('div', { class: 'video-head' }, [
         el('h2', { class: 'video-title', text: names[ci] }),
         tag('tag tag-outline', task.segmented ? 'reviewed segmentation' : 'suggested boundaries — even pace'),
-        el('span', { class: 'sub-meta', text: 'click a band to jump · click a frame to inspect' })
+        el('span', { class: 'sub-meta', text: focusOn
+          ? 'drag the box · corners resize · scroll zooms · adjustments key at the playhead'
+          : 'click a band to jump · click a frame to inspect' }),
+        el('span', { class: 'spacer' }),
+        el('button', {
+          class: 'btn btn-secondary focus-toggle', type: 'button',
+          'aria-pressed': String(focusOn),
+          text: focusOn ? 'Exit area of focus' : 'Area of focus',
+          on: { click: function () { setState({ focusOn: !state.focusOn }); } }
+        })
       ]),
-      el('div', { class: 'plate plate-video' }, [
+      focusOn ? focusEditor(task, clip) : el('div', { class: 'plate plate-video' }, [
         crosshair(40),
         plateImage(framePaths(task.code, clip, nameOf(fi)), clip),
         el('span', { class: 'plate-file', text: nameOf(fi) }),
@@ -1870,7 +2470,9 @@
             title: label, 'aria-label': label,
             style: 'background:' + BAND_SHADES[i % BAND_SHADES.length],
             on: { click: function () {
-              setState({ frameIdx: Math.min(Math.round((i + 1) * (frameCount / stepsIn)) - 1, frameCount - 1) });
+              var j = Math.min(Math.round((i + 1) * (frameCount / stepsIn)) - 1, frameCount - 1);
+              if (state.focusOn) focusSession.time = tsSeconds(nameOf(j));
+              setState({ frameIdx: j });
             } }
           });
         })),
@@ -1887,7 +2489,12 @@
         return el('button', {
           class: 'frame' + (i === fi ? ' is-current' : ''), type: 'button',
           'aria-label': 'frame ' + (i + 1), 'aria-current': String(i === fi),
-          on: { click: function () { setState({ frameIdx: i }); } }
+          on: { click: function () {
+            // In the focus editor the strip doubles as a scrubber: the frame's
+            // filename timestamp is where the rebuilt player resumes.
+            if (state.focusOn) focusSession.time = tsSeconds(nameOf(i));
+            setState({ frameIdx: i });
+          } }
         }, [
           plateImage(framePaths(task.code, clip, nameOf(i)), ''),
           el('span', { class: 'frame-ts', text: tsOf(i) })

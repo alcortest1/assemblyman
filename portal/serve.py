@@ -8,10 +8,15 @@ route needs an API key and a key in a web page is published, not used. So this
 wrapper holds the key server-side and does exactly three things:
 
     GET  /api/health      — is a key configured?
+    GET  /videos/<ACS>/<clip>.mp4
+                          — the source clip out of alcor_agents/data/videos/,
+                            with byte-range support so the player can seek
     POST /api/video/run   — one arm, one call: attach the named frames, forward
                             to the Gemini API, return the raw reply text
     POST /api/video/save  — persist the grid the page built, so the run
                             survives a reload
+    POST /api/video/focus — persist a clip's area-of-focus track (the keyframed
+                            crop box the Videos tab edits)
 
 The key comes from GEMINI_API_KEY in the environment or `portal/.env` (one line:
 GEMINI_API_KEY=...). Runs land in `data/video_runs/<ACS>.json`, keyed by the
@@ -30,6 +35,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -37,6 +43,9 @@ from pathlib import Path
 PORTAL = Path(__file__).resolve().parent
 DATA = PORTAL / "data"
 RUNS = DATA / "video_runs"
+FOCUS = DATA / "focus_tracks"
+# Source clips stay in the working tree — the extract only carries their frames.
+VIDEOS = PORTAL.parent / "alcor_agents" / "data" / "videos"
 
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 OPENROUTER_API = "https://openrouter.ai/api/v1/chat/completions"
@@ -56,6 +65,7 @@ SAFE_CODE = re.compile(r"^[A-Za-z0-9.]{1,32}$")
 SAFE_CLIP = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 SAFE_FRAME = re.compile(r"^t\d{6}_\d{2}\.jpg$")
 SAFE_SHEET = re.compile(r"^[a-z0-9_-]{1,80}$")
+VIDEO_URL = re.compile(r"^/videos/([A-Za-z0-9.]{1,32})/([A-Za-z0-9_-]{1,64})\.mp4$")
 
 
 def read_key(name: str) -> str | None:
@@ -94,8 +104,9 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(PORTAL), **kwargs)
 
-    def log_message(self, fmt, *args):  # static chatter off, API lines on
-        if args and "/api/" in str(args[0]):
+    def log_message(self, fmt, *args):  # static chatter off, API and clip lines on
+        first = str(args[0]) if args else ""
+        if "/api/" in first or "/videos/" in first:
             super().log_message(fmt, *args)
 
     def send_json(self, payload, status: int = 200) -> None:
@@ -107,9 +118,57 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):  # noqa: N802
-        if self.path.split("?")[0] == "/api/health":
-            return self.send_json({"server": True, "arms": arms()})
+        path = urllib.parse.unquote(self.path.split("?")[0])
+        if path == "/api/health":
+            return self.send_json({"server": True, "arms": arms(),
+                                   "videos": VIDEOS.is_dir()})
+        clip = VIDEO_URL.match(path)
+        if clip:
+            return self.send_video(clip.group(1), clip.group(2))
         return super().do_GET()
+
+    def send_video(self, code: str, clip: str) -> None:
+        """One source clip, honouring Range — seeking needs 206s, not one long 200."""
+        path = VIDEOS / code / f"{clip}.mp4"
+        if not path.is_file():
+            return self.send_error(404, "No such clip")
+        size = path.stat().st_size
+        start, end = 0, size - 1
+        rng = self.headers.get("Range")
+        if rng:
+            m = re.match(r"^bytes=(\d*)-(\d*)$", rng.strip())
+            if not m or not (m.group(1) or m.group(2)):
+                rng = None  # a shape we do not speak — answer with the whole file
+            elif m.group(1):
+                start = int(m.group(1))
+                if m.group(2):
+                    end = min(int(m.group(2)), size - 1)
+            else:  # bytes=-N — the final N bytes, how players find the moov atom
+                start = max(0, size - int(m.group(2)))
+            if rng and (start > end or start >= size):
+                self.send_response(416)
+                self.send_header("Content-Range", f"bytes */{size}")
+                self.end_headers()
+                return
+        self.send_response(206 if rng else 200)
+        self.send_header("Content-Type", "video/mp4")
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(end - start + 1))
+        if rng:
+            self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+        self.end_headers()
+        try:
+            with path.open("rb") as f:
+                f.seek(start)
+                remaining = end - start + 1
+                while remaining > 0:
+                    chunk = f.read(min(65536, remaining))
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    remaining -= len(chunk)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # players abandon ranges mid-flight as a matter of course
 
     def do_POST(self):  # noqa: N802
         route = self.path.split("?")[0]
@@ -124,6 +183,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self.video_run(body)
         if route == "/api/video/save":
             return self.video_save(body)
+        if route == "/api/video/focus":
+            return self.video_focus(body)
         return self.send_error(404)
 
     def video_run(self, body: dict) -> None:
@@ -238,6 +299,42 @@ class Handler(SimpleHTTPRequestHandler):
         store[sheet] = grid
         path.write_text(json.dumps(store, indent=1))
         return self.send_json({"saved": True, "path": f"data/{kind}_runs/{code}.json"})
+
+    def video_focus(self, body: dict) -> None:
+        """Persist a clip's area-of-focus track: keyframes of a crop box.
+
+        Keys are {t, cx, cy, w} — seconds, then centre and width as fractions of
+        the frame. Height is width: the box shares the clip's aspect, so one
+        number is the whole zoom. Lands in data/focus_tracks/<ACS>.json keyed by
+        clip, which the page reads back as plain static data.
+        """
+        code = str(body.get("task_code") or "")
+        clip = str(body.get("clip") or "")
+        track = body.get("track")
+        if not (SAFE_CODE.match(code) and SAFE_CLIP.match(clip) and isinstance(track, dict)):
+            return self.send_error(400, "task_code, clip and track are required")
+        keys = track.get("keys")
+
+        def num(v) -> bool:
+            return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+        if not (isinstance(keys, list) and len(keys) <= 200
+                and all(isinstance(k, dict)
+                        and all(num(k.get(f)) for f in ("t", "cx", "cy", "w"))
+                        for k in keys)):
+            return self.send_error(400, "track.keys must be <=200 {t,cx,cy,w} entries")
+        FOCUS.mkdir(parents=True, exist_ok=True)
+        path = FOCUS / f"{code}.json"
+        try:
+            store = json.loads(path.read_text()) if path.exists() else {}
+        except (OSError, json.JSONDecodeError):
+            store = {}
+        store[clip] = {"keys": [
+            {f: round(float(k[f]), 4) for f in ("t", "cx", "cy", "w")}
+            for k in sorted(keys, key=lambda k: k["t"])
+        ]}
+        path.write_text(json.dumps(store, indent=1))
+        return self.send_json({"saved": True, "path": f"data/focus_tracks/{code}.json"})
 
 
 def main() -> int:
