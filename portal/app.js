@@ -1357,9 +1357,11 @@
   /* The hosted run: same prompt, same parsing, same grid — only the transport
      differs. serve.py attaches the frames and the key and forwards one call per
      arm; the whole span goes in, uncapped, because taking a sequence whole is
-     the reason these are the grading arms. The grid is persisted server-side so
-     it survives a reload and a data rebuild. */
-  function runHosted(task, st, span) {
+     the reason these are the grading arms. When a perturbed sheet rides along,
+     each arm takes a second call with the kept lines as its numbered criteria —
+     same prompt, same frames, and the arm is never told these are controls.
+     The grid is persisted server-side so it survives a reload and a rebuild. */
+  function runHosted(task, st, span, negLines) {
     var key = 'video' + task.code + '#' + subIndex(task);
     var arms = (serverInfo && serverInfo.arms) || [];
     if (!arms.length || liveRunning) return;
@@ -1368,13 +1370,22 @@
     var numbered = criteria.map(function (c, i) { return (i + 1) + '. ' + c; }).join('\n');
     var stamps = span.frames.map(function (f) { return frameSeconds(f); });
     var labelled = stamps.map(function (s, i) { return (i + 1) + '=t' + s.toFixed(2); }).join(', ');
-    var userText =
-      'THE WORK\n' + st.label + '\n\n' +
-      'SEQUENCE\n' + span.frames.length + ' frames follow in chronological order. ' +
-      'Their timestamps in seconds are ' + labelled + '.\n\n' +
-      'NUMBERED CRITERIA\n' + numbered + '\n\n' +
-      'Return a verdict for all ' + criteria.length + ' criteria, in order, ' +
-      'using the whole sequence.';
+    function seqText(list) {
+      return 'THE WORK\n' + st.label + '\n\n' +
+        'SEQUENCE\n' + span.frames.length + ' frames follow in chronological order. ' +
+        'Their timestamps in seconds are ' + labelled + '.\n\n' +
+        'NUMBERED CRITERIA\n' + list.map(function (c, i) { return (i + 1) + '. ' + c; }).join('\n') +
+        '\n\nReturn a verdict for all ' + list.length + ' criteria, in order, ' +
+        'using the whole sequence.';
+    }
+    var userText = seqText(criteria);
+
+    // The kept lines, remembering which point each one perturbs — the pairing
+    // is what makes a control pass readable against its original.
+    var kept = (negLines || []).map(function (l, i) { return { line: l, point: i }; })
+      .filter(function (k) { return k.line.status.indexOf('skipped') !== 0; });
+    var ctlUserText = kept.length
+      ? seqText(kept.map(function (k) { return k.line.text; })) : null;
 
     liveRunning = 'starting · 0/' + arms.length + ' arms';
     setState({});
@@ -1385,6 +1396,9 @@
       chain = chain.then(function () {
         liveRunning = arm.label + ' · ' + ai + '/' + arms.length + ' arms done';
         setState({});
+        var res = { arm: arm, sent: span.frames, text: '', parsed: null,
+                    ctlText: '', ctlParsed: null };
+        results.push(res);
         return fetch('/api/video/run', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1395,12 +1409,28 @@
         })
           .then(function (r) { return r.json(); })
           .then(function (data) {
-            var text = data.text || (data.error ? '[' + data.error + '] ' + (data.message || '') : '');
-            results.push({ arm: arm, sent: span.frames, text: text,
-                           parsed: parseReply(data.text || '') });
+            res.text = data.text || (data.error ? '[' + data.error + '] ' + (data.message || '') : '');
+            res.parsed = parseReply(data.text || '');
           })
-          .catch(function (e) {
-            results.push({ arm: arm, sent: span.frames, text: String(e), parsed: null });
+          .catch(function (e) { res.text = String(e); })
+          .then(function () {
+            if (!ctlUserText) return;
+            liveRunning = arm.label + ' · controls · ' + ai + '/' + arms.length + ' arms done';
+            setState({});
+            return fetch('/api/video/run', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model: arm.id, task_code: task.code, clip: span.clip,
+                frames: span.frames, system: SEQUENCE_PROMPT, user_text: ctlUserText
+              })
+            })
+              .then(function (r) { return r.json(); })
+              .then(function (data) {
+                res.ctlText = data.text || (data.error ? '[' + data.error + '] ' + (data.message || '') : '');
+                res.ctlParsed = parseReply(data.text || '');
+              })
+              .catch(function (e) { res.ctlText = String(e); });
           });
       });
     });
@@ -1408,11 +1438,58 @@
     chain.then(function () {
       var grid = buildLiveGrid(st, span, results,
         'hosted run · saved to data/video_runs/' + task.code + '.json');
+      if (kept.length) attachVideoControls(grid, negLines, kept, results);
       liveRuns[key] = grid;
       persistRun('video', task, st, grid);
       liveRunning = null;
       setState({ reply: null });
     });
+  }
+
+  /* Controls onto the video grid, in the photo grid's own dialect: a control
+     cell is `fail ✓` (expected), `unsure not_pass ✓`, or — where the same arm
+     passed the original point on the same sequence — `accepted`, the decisive
+     pair with no observability excuse. The roll-up splits in two like the photo
+     grid's, and the stats line counts the same way. */
+  function attachVideoControls(grid, negLines, kept, results) {
+    var accepted = 0;
+    kept.forEach(function (k, ki) {
+      var row = grid.rows[k.point];
+      if (!row) return;
+      var cells = results.map(function (res, mi) {
+        var item = ((res.ctlParsed || {}).criteria || []).filter(function (c) {
+          return c && typeof c === 'object' && +c.index === ki + 1;
+        })[0];
+        var v = item && String(item.verdict || '').toLowerCase();
+        if (v !== 'pass' && v !== 'fail' && v !== 'unsure') return ['none', 'not graded'];
+        var at = item.at != null && item.at !== '' && item.at !== 'null' ? String(item.at) : null;
+        if (v === 'unsure') return ['unsure', 'not_pass ✓'];
+        if (v === 'fail') return ['fail', at ? 't=' + at : '✓'];
+        if (row.cells[mi][0] === 'pass') { accepted += 1; return ['accepted', 'pass ✗ accepted']; }
+        return ['pass', at ? 't=' + at : ''];
+      });
+      row.neg = { label: k.line.mark + ' · ' + k.line.text, src: '', cells: cells };
+    });
+    negLines.forEach(function (l, i) {
+      if (l.status.indexOf('skipped') === 0 && grid.rows[i]) {
+        grid.rows[i].skip = l.mark + ' · ' + l.status;
+      }
+    });
+    grid.rollup = {
+      criteria: grid.rollup,
+      controls: results.map(function (_, mi) {
+        return rollupCell(grid.rows.filter(function (r) { return r.neg; })
+          .map(function (r) {
+            var v = r.neg.cells[mi][0];
+            return v === 'accepted' ? 'pass' : v;
+          }));
+      })
+    };
+    results.forEach(function (res, mi) { grid.replies['c' + mi] = res.ctlText; });
+    grid.negLines = negLines;
+    var total = kept.length * results.length;
+    grid.controlStats = total + ' perturbed points · not passed ' + (total - accepted) +
+                        ' · accepted ' + accepted;
   }
 
   function persistRun(kind, task, st, grid) {
@@ -1534,6 +1611,30 @@
     var models = modelNames().length;
     var vc = videoChecks(st);
 
+    probeArms();
+    probeServer();
+    loadRunStore('video', task.code);
+
+    // Newest first: a run just made on this page, then one serve.py persisted,
+    // then whatever the built extract carries from the CLI runner.
+    var vrun = liveRuns['video' + task.code + '#' + subIndex(task)] ||
+               (runStores.video[task.code] || {})[st.raw.sheet] ||
+               st.raw.vrun;
+
+    /* The perturbed sheet is the photo tab's, reused verbatim. A control moves
+       the standard; this tab moves the evidence — moving both at once would
+       leave nothing to compare, so the lines come from the saved video run,
+       else the saved photo run, else the same in-page draft the photo tab makes.
+       Scored the photo way: every control expects fail, unsure is not_pass, and
+       a pass is the grader accepting a standard the work does not meet. */
+    var draftKey = task.code + '#' + subIndex(task);
+    var negLines =
+      (vrun && vrun.negLines && vrun.negLines.length) ? vrun.negLines
+      : (st.hasRun && st.raw.run.negLines && st.raw.run.negLines.length) ? st.raw.run.negLines
+      : (state.drafted === draftKey && st.points.length) ? draftPerturbed(st.points)
+      : [];
+    var keptLines = keptOf(negLines);
+
     /* left · what the model is handed */
 
     var seq = el('div', { class: 'seq' }, span.frames.map(function (f) {
@@ -1612,13 +1713,53 @@
         ]),
 
         (function () {
+          var controls = [
+            el('div', { class: 'controls-head' }, [
+              el('span', { class: 'col-label', text: 'Controls · perturbed sheet — shared with Photo assessment' }),
+              negLines.length ? tag('tag tag-outline', keptLines + ' of ' + negLines.length + ' kept') : null
+            ])
+          ];
+          if (negLines.length) {
+            controls.push(el('div', { class: 'neg-box' }, negLines.map(function (l) {
+              var skipped = l.status.indexOf('skipped') === 0;
+              return el('div', { class: 'neg-line' }, [
+                el('div', { class: 'neg-row' }, [
+                  el('span', { class: 'neg-mark', text: l.mark }),
+                  el('span', { class: 'neg-text' + (skipped ? ' is-skipped' : ''), text: l.text }),
+                  tag(skipped ? 'tag tag-neutral' : 'tag tag-accent', l.status)
+                ]),
+                l.from ? el('span', { class: 'neg-from', text: 'from ' + l.from }) : null
+              ]);
+            })));
+            controls.push(el('span', { class: 'plate-note' }, [
+              'The same moved standards the photo grid grades, put to the sequence. Every control ',
+              el('b', { text: 'expects fail' }),
+              ' — the video shows work meeting the real standard, so the moved one is unmet. ' +
+              'unsure scores not_pass; a pass is the grader accepting a standard the work does not meet.'
+            ]));
+          } else {
+            controls.push(el('button', {
+              class: 'btn btn-secondary draft-btn', type: 'button', text: 'Draft perturbed sheet · 1 call',
+              on: { click: function () { setState({ drafted: draftKey }); } }
+            }));
+            controls.push(el('span', { class: 'plate-note', text:
+              'No perturbed sheet for this subtask yet. Drafting moves one stated standard per ' +
+              'point — the same sheet the photo tab drafts, so a still verdict and a sequence ' +
+              'verdict stay answers about the same moved bar.' }));
+          }
+          return el('div', { class: 'controls' }, controls);
+        })(),
+
+        (function () {
           var hostedArms = (serverInfo && serverInfo.server && serverInfo.arms) || [];
           var canLocal = ON_DEVICE_GRADING && armsUp && armsUp.length;
           var note = liveRunning
             ? liveRunning
             : hostedArms.length
             ? 'One call per arm (' + hostedArms.map(function (a) { return a.label; }).join(', ') +
-              ') over the whole ' + span.frames.length + '-frame span — no frame cap. ' +
+              ') over the whole ' + span.frames.length + '-frame span — no frame cap' +
+              (keptLines ? ', plus a control call per arm grading the ' + keptLines +
+                           ' kept perturbations on the same frames' : '') + '. ' +
               'serve.py holds the key and forwards the call; the grid saves to ' +
               'data/video_runs/' + task.code + '.json and survives a reload.'
             : (serverInfo && serverInfo.server)
@@ -1631,7 +1772,7 @@
               class: 'btn btn-primary blueprint', type: 'button',
               disabled: !(hostedArms.length || canLocal) || !!liveRunning || !st.points.length,
               on: { click: function () {
-                if (hostedArms.length) runHosted(task, st, span);
+                if (hostedArms.length) runHosted(task, st, span, negLines);
                 else if (canLocal) runLive(task, st, span);
               } }
             }, [corners(), liveRunning ? 'Running…'
@@ -1651,15 +1792,6 @@
       ])
     ]);
 
-    probeArms();
-    probeServer();
-    loadRunStore('video', task.code);
-
-    // Newest first: a run just made on this page, then one serve.py persisted,
-    // then whatever the built extract carries from the CLI runner.
-    var vrun = liveRuns['video' + task.code + '#' + subIndex(task)] ||
-               (runStores.video[task.code] || {})[st.raw.sheet] ||
-               st.raw.vrun;
     var right = el('div', { class: 'assess-right' },
       vrun ? renderVideoGrid(task, st, span, vrun) : [
         el('div', { class: 'empty-center' }, [
@@ -1713,46 +1845,81 @@
       })));
     }
 
+    function cellButtons(cells, prefix, ri) {
+      return cells.map(function (c, mi) {
+        var key = prefix + ri + 'm' + mi;
+        return el('button', {
+          class: 'cell' + (state.reply === key ? ' is-open' : ''), type: 'button',
+          title: c[0] + (c[1] ? ' · ' + c[1] : ''),
+          on: { click: function () { setState({ reply: state.reply === key ? null : key }); } }
+        }, [el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })]);
+      });
+    }
+
     v.rows.forEach(function (r, ri) {
       var label = (photoRows[ri] && photoRows[ri].label) ||
                   (st.points[ri] ? st.points[ri].n + ' ' + st.points[ri].text
                                  : String(ri + 1) + ' ·');
       out.push(el('div', { class: 'grid-row' }, [
         el('div', { class: 'grid-row-label', text: label })
-      ].concat(r.cells.map(function (c, mi) {
-        var key = 'v' + ri + 'm' + mi;
-        return el('button', {
-          class: 'cell' + (state.reply === key ? ' is-open' : ''), type: 'button',
-          title: c[0] + (c[1] ? ' · ' + c[1] : ''),
-          on: { click: function () { setState({ reply: state.reply === key ? null : key }); } }
-        }, [el('span', { class: cellCls(c[0]), style: 'font-size:9px', text: cellTxt(c[0], c[1]) })]);
+      ].concat(cellButtons(r.cells, 'v', ri))));
+
+      if (r.neg) {
+        out.push(el('div', { class: 'grid-row-neg' }, [
+          el('div', { class: 'grid-row-neg-label' }, [
+            tag('tag tag-outline', 'control'),
+            el('span', { text: r.neg.label }),
+            r.neg.src ? el('span', { class: 'grid-row-neg-src', text: '· ' + r.neg.src }) : null
+          ])
+        ].concat(cellButtons(r.neg.cells, 'c', ri))));
+      }
+      if (r.skip) {
+        out.push(el('div', { class: 'grid-skip' }, [
+          tag('tag tag-neutral', 'control skipped'), el('span', { text: r.skip })
+        ]));
+      }
+    });
+
+    // Older runs carry one flat roll-up; a run with controls splits it in two,
+    // and the pair reads exactly like the photo grid's.
+    var rolls = Array.isArray(v.rollup)
+      ? [{ label: 'Segment roll-up — one fail fails · unsure → review', cells: v.rollup }]
+      : [
+          { label: 'Segment roll-up — one fail fails · unsure → review',
+            cells: v.rollup.criteria || [] },
+          { label: 'Controls roll-up — every control expects fail',
+            cells: v.rollup.controls || [], controls: true }
+        ];
+
+    rolls.forEach(function (roll) {
+      if (!roll.cells.length) return;
+      out.push(el('div', { class: 'rollup' + (roll.controls ? ' is-controls' : '') }, [
+        el('div', { class: 'rollup-label', text: roll.label })
+      ].concat(roll.cells.map(function (c) {
+        // Same cell the photo roll-up draws: status, the P/F/U split, the full
+        // sentence on hover — the two tabs must read the same way.
+        return el('div', { class: 'rollup-cell', title: c[2] || '' }, [
+          el('span', { class: cellCls(c[0]), style: 'font-size:9px;font-weight:600',
+                       text: c[0] === 'none' ? c[1] : c[0] }),
+          c[0] === 'none' ? null : el('span', { class: 'rollup-split', text: c[1] })
+        ]);
       }))));
     });
 
-    out.push(el('div', { class: 'rollup' }, [
-      el('div', { class: 'rollup-label', text: 'Segment roll-up — one fail fails · unsure → review' })
-    ].concat(v.rollup.map(function (c) {
-      // Same cell the photo roll-up draws: status, the P/F/U split, the full
-      // sentence on hover — the two tabs must read the same way.
-      return el('div', { class: 'rollup-cell', title: c[2] || '' }, [
-        el('span', { class: cellCls(c[0]), style: 'font-size:9px;font-weight:600',
-                     text: c[0] === 'none' ? c[1] : c[0] }),
-        c[0] === 'none' ? null : el('span', { class: 'rollup-split', text: c[1] })
-      ]);
-    }))));
-
-    /* No perturbed controls ride a video run — a control probes the grader's
-       agreement on a still, and re-running it on the sequence would spend on a
-       question about the photo run. Stated on the face, where the photo grid
-       states its control stats. */
+    var hasControls = v.rows.some(function (r) { return r.neg; });
     out.push(el('div', { class: 'control-note' }, [
-      el('span', { class: 'control-note-text', text:
-        'No perturbed controls ride this run: the perturbed sheet probes the grader ' +
-        'on the still, and the Photo assessment tab carries it. The video run grades ' +
-        'the original points only.' }),
+      el('span', { class: 'control-note-text', text: hasControls
+        ? 'Every control expects fail. Decisive pairs: perturbed points whose original ' +
+          'the same arm passed on the same sequence — the video settles the condition ' +
+          'and the work meets the real standard, so a control pass there has no ' +
+          'observability excuse.'
+        : 'No perturbed controls rode this run — it graded the original points only. ' +
+          'Draft (or reuse) the perturbed sheet on the left and Run again to grade the ' +
+          'kept lines alongside, one extra call per arm.' }),
       el('span', { class: 'spacer' }),
-      el('span', { class: 'control-stats',
-                   text: v.runId + ' · sampled at ' + v.fps + ' fps · $' + (v.cost || 0).toFixed(2) })
+      el('span', { class: 'control-stats', text:
+        (v.controlStats ? v.controlStats + ' · ' : '') +
+        v.runId + ' · sampled at ' + v.fps + ' fps · $' + (v.cost || 0).toFixed(2) })
     ]));
 
     var reply = videoReplyFor(task, st, v);
@@ -1765,12 +1932,15 @@
      about a span, so the frames are the only way to check the citation. */
   function videoReplyFor(task, st, v) {
     if (!state.reply) return null;
-    var m = state.reply.match(/^v(\d+)m(\d+)$/);
+    // v<row>m<model> is an original point's cell; c<row>m<model> is its control's.
+    var m = state.reply.match(/^([vc])(\d+)m(\d+)$/);
     if (!m) return null;
-    var row = v.rows[+m[1]];
-    if (!row) return null;
-    var c = row.cells[+m[2]];
-    var sent = v.framesSent['m' + m[2]] || [];
+    var isCtl = m[1] === 'c';
+    var row = v.rows[+m[2]];
+    var src = isCtl ? (row && row.neg) : row;
+    if (!src) return null;
+    var c = src.cells[+m[3]];
+    var sent = v.framesSent['m' + m[3]] || [];
     var cited = c[1] && c[1].indexOf('t=') === 0
       ? parseFloat(c[1].slice(2).replace(/^t/, '')) : null;
 
@@ -1785,14 +1955,18 @@
 
     return el('div', { class: 'reply' }, [
       el('div', { class: 'reply-head' }, [
-        el('span', { class: 'reply-model', text: v.models[+m[2]] }),
-        el('span', { class: cellCls(c[0]) + ' tag-xs', text: c[0] }),
-        el('span', { class: 'reply-point', text: (st.points[+m[1]] || {}).text || '' }),
+        el('span', { class: 'reply-model', text: v.models[+m[3]] }),
+        el('span', {
+          class: cellCls(c[0]) + ' tag-xs',
+          text: c[0] === 'accepted' ? 'pass ✗ accepted contradiction' : c[0]
+        }),
+        el('span', { class: 'reply-point', text: isCtl
+          ? src.label : ((st.points[+m[2]] || {}).text || '') }),
         el('span', { class: 'spacer' }),
         el('button', { class: 'linkish reply-close', type: 'button', text: 'Close ✕',
                        on: { click: function () { setState({ reply: null }); } } })
       ]),
-      el('div', { class: 'reply-body', text: v.replies['m' + m[2]] ||
+      el('div', { class: 'reply-body', text: v.replies[(isCtl ? 'c' : 'm') + m[3]] ||
         (c[0] === 'none' ? 'This arm returned no verdict for this point.' : (c[1] || '')) }),
       strip ? el('span', { class: 'col-label reply-frames-label', text:
         'The ' + sent.length + ' frames this call carried' +
@@ -1907,17 +2081,27 @@
 
   var FOCUS_MODEL = 'google/gemini-3.6-flash';
 
+  // The deliberate safety margin over what the detector called required: boxes
+  // are enlarged 5% so an important area at the edge is never what the crop
+  // cuts off. Applied where detected keys are built.
+  var FOCUS_MARGIN = 1.05;
+
   var DETECT_SYSTEM = 'You locate the area of focus in frames sampled from a video of an ' +
     'aviation maintenance procedure. The area of focus is where the work is happening: the ' +
-    'hands, the tool in use and the part being worked on. Reply with JSON only — no prose, ' +
-    'no code fences.';
+    'hands, the tool in use, the part being worked on, and any equipment, wire, hose, line ' +
+    'or material that is in use in the activity. Nothing in use may be missed. Reply with ' +
+    'JSON only — no prose, no code fences.';
 
   function detectPrompt(count) {
     return 'Here are ' + count + ' frames sampled in chronological order from one video ' +
       'clip. For each frame, in order, give one bounding box around the area of focus. ' +
-      'Cover the hands, the active tool and the part being worked on; keep the box tight ' +
-      'but do not cut off mid-action hands or the workpiece. If no action is visible — an ' +
-      'empty bench, a title card — use the full frame [0,0,1000,1000].\n\n' +
+      'Cover the hands, the active tool, the part being worked on, and ANY equipment, ' +
+      'wire, hose, line or material in use — the full length of a wire being routed, ' +
+      'twisted or laced, the tester or gauge being read, the fitting being tightened. ' +
+      'It is better to make the box larger than to cut off anything in use; never crop ' +
+      'mid-action hands, the workpiece, or an item of equipment that the activity is ' +
+      'using. If no action is visible — an empty bench, a title card — use the full ' +
+      'frame [0,0,1000,1000].\n\n' +
       'Answer with a JSON array of exactly ' + count + ' entries, one per frame in the ' +
       'order shown: {"frame": <0-based index>, "box_2d": [ymin, xmin, ymax, xmax]} with ' +
       'coordinates normalized to 0-1000.';
@@ -1968,8 +2152,12 @@
       var y0 = nums[0] / 1000, x0 = nums[1] / 1000, y1 = nums[2] / 1000, x1 = nums[3] / 1000;
       // The crop is square in frame fractions — take the box's larger side and
       // pad it, so the detection always fits inside with a little context.
+      // FOCUS_MARGIN rides on top of that: a deliberate 5% over what the
+      // detector called required, so an important area at the box's edge — a
+      // fingertip, the end of a part — is not the thing the crop cuts off. The
+      // 3-tap smooth below can also shave a peak; the margin absorbs that too.
       var k = clampBox({ cx: (x0 + x1) / 2, cy: (y0 + y1) / 2,
-                         w: Math.max(x1 - x0, y1 - y0) * 1.15 });
+                         w: Math.max(x1 - x0, y1 - y0) * 1.15 * FOCUS_MARGIN });
       k.t = stamps[at];
       keys.push(k);
     }

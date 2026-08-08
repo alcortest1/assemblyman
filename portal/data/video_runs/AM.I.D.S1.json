@@ -606,5 +606,662 @@
   },
   "capNotes": [],
   "cost": 0
+ },
+ "install_rigid_line_on_aircraft": {
+  "live": true,
+  "runId": "hosted run \u00b7 saved to data/video_runs/AM.I.D.S1.json",
+  "fps": 0.5,
+  "models": [
+   "Opus 5",
+   "Gemini 3.1 Pro",
+   "Gem 3.6 Flash",
+   "GPT-5.6 Sol"
+  ],
+  "clip": "install_fluid_line",
+  "rows": [
+   {
+    "cells": [
+     [
+      "pass",
+      "t=20.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t20.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P1 \u00b7 Line is disconnected at one or both ends, with a B-nut left unengaged from its fitting",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=20.00"
+      ],
+      [
+       "fail",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=t20.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P2 \u00b7 Each B-nut shows an exposed thread gap between the nut and the fitting body",
+     "src": "",
+     "cells": [
+      [
+       "unsure",
+       "not_pass \u2713"
+      ],
+      [
+       "pass",
+       "t=16.00"
+      ],
+      [
+       "fail",
+       "t=t16.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=20.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t18.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P3 \u00b7 Tube enters at least one fitting at a visible angle, sprung sideways to reach it",
+     "src": "",
+     "cells": [
+      [
+       "unsure",
+       "not_pass \u2713"
+      ],
+      [
+       "fail",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=t20.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=18.00"
+     ]
+    ],
+    "neg": {
+     "label": "P4 \u00b7 Bend in the installed line exhibits visible wrinkles or flattened sides along the curve",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=16.00"
+      ],
+      [
+       "pass",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=t18.00"
+      ],
+      [
+       "fail",
+       "t=16.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=18.00"
+     ]
+    ],
+    "neg": {
+     "label": "P5 \u00b7 Tube or B-nut exterior surfaces show visible wrench gouges or crushed hex flats",
+     "src": "",
+     "cells": [
+      [
+       "unsure",
+       "not_pass \u2713"
+      ],
+      [
+       "fail",
+       "t=16.00"
+      ],
+      [
+       "fail",
+       "t=t16.00"
+      ],
+      [
+       "fail",
+       "t=18.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=18.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P6 \u00b7 Fitting joints or surrounding tube surface exhibit a visible fluid film or wet sheen",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=16.00"
+      ],
+      [
+       "fail",
+       "t=t16.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=20.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t20.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P7 \u00b7 The finished work shows this defect: One end of the line hangs free, no B-nut on its fitting.",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=20.00"
+      ],
+      [
+       "fail",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=t20.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P8 \u00b7 The finished work shows this defect: A B-nut sits loose with exposed threads and an open joint.",
+     "src": "",
+     "cells": [
+      [
+       "unsure",
+       "not_pass \u2713"
+      ],
+      [
+       "fail",
+       "t=16.00"
+      ],
+      [
+       "fail",
+       "t=t16.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=18.00"
+     ]
+    ],
+    "neg": {
+     "label": "P9 \u00b7 The finished work shows this defect: The bend is kinked or flattened with a visible flat side.",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=16.00"
+      ],
+      [
+       "pass",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=t18.00"
+      ],
+      [
+       "fail",
+       "t=16.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=18.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P10 \u00b7 The finished work shows this defect: Fluid beads or runs from a B-nut joint.",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=16.00"
+      ],
+      [
+       "fail",
+       "t=t16.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=20.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t20.00"
+     ],
+     [
+      "pass",
+      "t=20.00"
+     ]
+    ],
+    "neg": {
+     "label": "P11 \u00b7 The finished work shows this defect: Tube is visibly bowed or twisted to force it onto the fittings.",
+     "src": "",
+     "cells": [
+      [
+       "fail",
+       "t=20.00"
+      ],
+      [
+       "fail",
+       "t=18.00"
+      ],
+      [
+       "fail",
+       "t=t20.00"
+      ],
+      [
+       "fail",
+       "t=20.00"
+      ]
+     ]
+    }
+   }
+  ],
+  "rollup": {
+   "criteria": [
+    [
+     "pass",
+     "11P 0F 0U",
+     "11 pass \u00b7 0 fail \u00b7 0 unsure of 11"
+    ],
+    [
+     "none",
+     "ungraded",
+     "no verdicts from this arm"
+    ],
+    [
+     "pass",
+     "11P 0F 0U",
+     "11 pass \u00b7 0 fail \u00b7 0 unsure of 11"
+    ],
+    [
+     "pass",
+     "11P 0F 0U",
+     "11 pass \u00b7 0 fail \u00b7 0 unsure of 11"
+    ]
+   ],
+   "controls": [
+    [
+     "fail",
+     "0P 7F 4U",
+     "0 pass \u00b7 7 fail \u00b7 4 unsure of 11"
+    ],
+    [
+     "fail",
+     "3P 8F 0U",
+     "3 pass \u00b7 8 fail \u00b7 0 unsure of 11"
+    ],
+    [
+     "fail",
+     "0P 11F 0U",
+     "0 pass \u00b7 11 fail \u00b7 0 unsure of 11"
+    ],
+    [
+     "fail",
+     "0P 11F 0U",
+     "0 pass \u00b7 11 fail \u00b7 0 unsure of 11"
+    ]
+   ]
+  },
+  "replies": {
+   "m0": "{\"criteria\": [\n  {\"index\": 1, \"verdict\": \"pass\", \"at\": \"20.00\", \"note\": \"Line spans between panels with a B-nut engaged on each blue fitting\"},\n  {\"index\": 2, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"Close-up shows B-nut seated on fitting, no thread gap visible at joint\"},\n  {\"index\": 3, \"verdict\": \"pass\", \"at\": \"20.00\", \"note\": \"Tube runs straight and square into both fittings, no side spring\"},\n  {\"index\": 4, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"90-degree bend is smooth and round, no wrinkles or flats\"},\n  {\"index\": 5, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"Tube and nut surfaces clean, no gouges or crushed flats seen\"},\n  {\"index\": 6, \"verdict\": \"pass\", \"at\": \"18.00\", \"note\": \"Joints and tube dry; dry mockup, no fluid film\"},\n  {\"index\": 7, \"verdict\": \"pass\", \"at\": \"20.00\", \"note\": \"Both ends captured on fittings, nothing hanging free\"},\n  {\"index\": 8, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"No loose nut with exposed threads or open joint visible\"},\n  {\"index\": 9, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"Bend round in cross-section, no kink or flat side\"},\n  {\"index\": 10, \"verdict\": \"pass\", \"at\": \"18.00\", \"note\": \"No beads or runs at any B-nut joint\"},\n  {\"index\": 11, \"verdict\": \"pass\", \"at\": \"20.00\", \"note\": \"Tube lies straight without bow or twist between fittings\"}\n ],\n \"observed\": \"Student hand-starts and tightens B-nuts on fittings across two mockup panels, then final close views show a bent rigid line installed dry at both ends.\"}",
+   "m1": "```json\n{\"criteria\": [\n   {\"index\": 1,\n    \"verdict\": \"pass\",\n    \"at\": \"20.00\",\n    \"note\": \"Both ends of the line are connected with B-nuts engaged.\"},\n   {\"index\": 2,\n    \"verdict\": \"unsure\",\n    \"at\": \"16.00\",\n    \"note\": \"B-nuts are threaded on, but it is unclear if they are fully drawn up without a gap.\"},\n   {\"index\": 3,\n    \"verdict\": \"fail\",\n    \"at\": \"14.00\",\n    \"note\": \"Student must hold the tube in place against spring tension to thread the",
+   "m2": "```json\n{\"criteria\": [\n   {\"index\": 1, \"verdict\": \"pass\", \"at\": \"t20.00\", \"note\": \"Line is attached at both ends with B-nuts engaged.\"},\n   {\"index\": 2, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"B-nut is fully drawn up against fitting without thread gap.\"},\n   {\"index\": 3, \"verdict\": \"pass\", \"at\": \"t18.00\", \"note\": \"Tube enters fitting straight and perpendicular.\"},\n   {\"index\": 4, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"Bends are smooth, round, and free of flat spots.\"},\n   {\"index\": 5, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"Anodized surfaces of B-nut and tube show no wrench gouges.\"},\n   {\"index\": 6, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"Fittings and tube surfaces are completely dry.\"},\n   {\"index\": 7, \"verdict\": \"pass\", \"at\": \"t20.00\", \"note\": \"Both line ends are connected to fittings.\"},\n   {\"index\": 8, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"B-nuts are seated without open joints or exposed threads.\"},\n   {\"index\": 9, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"Bend profile is uniform without flattening or kinks.\"},\n   {\"index\": 10, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"No fluid droplets or runs at joints.\"},\n   {\"index\": 11, \"verdict\": \"pass\", \"at\": \"t20.00\", \"note\": \"Tube fits cleanly without visible bowing or twisting.\"}\n ],\n \"observed\": \"The student hand-installs a rigid aluminum fluid line between two bulkhead fittings, threading and seating both B-nuts cleanly. Final inspection confirms proper alignment, smooth bends, flush nut seating, and undamaged surfaces.\"}\n```",
+   "m3": "{\"criteria\":[{\"index\":1,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"Line spans both fittings with a B-nut engaged at each end.\"},{\"index\":2,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"Both B-nuts appear seated against their fittings without exposed thread gaps.\"},{\"index\":3,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"Tube approaches both end fittings straight and square.\"},{\"index\":4,\"verdict\":\"pass\",\"at\":\"18.00\",\"note\":\"Visible bends are smooth and rounded without wrinkles or flat sides.\"},{\"index\":5,\"verdict\":\"pass\",\"at\":\"18.00\",\"note\":\"Visible tube and B-nut exteriors show no gouges or crushed flats.\"},{\"index\":6,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"Both joints and surrounding tube surfaces appear dry.\"},{\"index\":7,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"Neither end hangs free; both ends have installed B-nuts.\"},{\"index\":8,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"No loose B-nut, exposed threads, or open joint is visible.\"},{\"index\":9,\"verdict\":\"pass\",\"at\":\"18.00\",\"note\":\"No kink or flattened bend is visible.\"},{\"index\":10,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"No fluid beads or runs are visible at either joint.\"},{\"index\":11,\"verdict\":\"pass\",\"at\":\"20.00\",\"note\":\"Installed tube shows no forced bowing or twisting between fittings.\"}],\"observed\":\"The sequence shows the rigid line aligned, connected, and drawn up at both fittings, ending with smooth bends, seated B-nuts, and dry, undamaged visible surfaces.\"}",
+   "c0": "{\"criteria\": [\n  {\"index\": 1, \"verdict\": \"fail\", \"at\": \"20.00\", \"note\": \"Final view shows tube engaged in blue B-nut fittings at both ends\"},\n  {\"index\": 2, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Resolution/angle never shows thread gap at nut-to-fitting shoulders\"},\n  {\"index\": 3, \"verdict\": \"unsure\", \"at\": \"20.00\", \"note\": \"Tube appears aligned with fittings, but entry angle not clearly resolvable\"},\n  {\"index\": 4, \"verdict\": \"fail\", \"at\": \"16.00\", \"note\": \"Bend curve appears smooth and round, no wrinkles or flat sides\"},\n  {\"index\": 5, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Hex flats never shown close enough to assess gouging\"},\n  {\"index\": 6, \"verdict\": \"fail\", \"at\": \"18.00\", \"note\": \"Tube and fitting joints appear dry; no wet sheen visible\"},\n  {\"index\": 7, \"verdict\": \"fail\", \"at\": \"20.00\", \"note\": \"No free-hanging end; both ends terminate at fittings\"},\n  {\"index\": 8, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Cannot judge nut engagement or open joint from available views\"},\n  {\"index\": 9, \"verdict\": \"fail\", \"at\": \"16.00\", \"note\": \"Bend uniform, no kink or flattened side visible\"},\n  {\"index\": 10, \"verdict\": \"fail\", \"at\": \"18.00\", \"note\": \"No beads or runs of fluid at any B-nut joint\"},\n  {\"index\": 11, \"verdict\": \"fail\", \"at\": \"20.00\", \"note\": \"Straight run between fittings, no visible bow or twist\"}\n ],\n \"observed\": \"Student hand-starts and tightens B-nuts on a rigid line between two blue bulkhead fittings on a test panel; closing frames show the line installed, smoothly bent, and dry.\"}",
+   "c1": "```json\n{\"criteria\": [\n   {\"index\": 1,\n    \"verdict\": \"fail\",\n    \"at\": \"18.00\",\n    \"note\": \"Both B-nuts are engaged on their respective fittings.\"},\n   {\"index\": 2,\n    \"verdict\": \"pass\",\n    \"at\": \"16.00\",\n    \"note\": \"Exposed threads are visible on the fittings behind the B-nuts.\"},\n   {\"index\": 3,\n    \"verdict\": \"fail\",\n    \"at\": \"18.00\",\n    \"note\": \"The tube enters both fittings straight, not at an angle.\"},\n   {\"index\": 4,\n    \"verdict\": \"pass\",\n    \"at\": \"18.00\",\n    \"note\": \"The bend in the tube is sharply kinked and flattened.\"},\n   {\"index\": 5,\n    \"verdict\": \"fail\",\n    \"at\": \"16.00\",\n    \"note\": \"No wrench marks are visible; only hand tightening was shown.\"},\n   {\"index\": 6,\n    \"verdict\": \"fail\",\n    \"at\": \"16.00\",\n    \"note\": \"The fittings and tube appear completely dry.\"},\n   {\"index\": 7,\n    \"verdict\": \"fail\",\n    \"at\": \"18.00\",\n    \"note\": \"Both ends of the line are attached to fittings.\"},\n   {\"index\": 8,\n    \"verdict\": \"fail\",\n    \"at\": \"16.00\",\n    \"note\": \"The joints are closed, not open, though threads are exposed.\"},\n   {\"index\": 9,\n    \"verdict\": \"pass\",\n    \"at\": \"18.00\",\n    \"note\": \"The bend is severely kinked with a flattened side.\"},\n   {\"index\": 10,\n    \"verdict\": \"fail\",\n    \"at\": \"16.00\",\n    \"note\": \"No fluid is present on the assembly.\"},\n   {\"index\": 11,\n    \"verdict\": \"fail\",\n    \"at\": \"18.00\",\n    \"note\": \"The straight sections of the tube are not bowed or twisted.\"}\n ],\n \"observed\": \"The student installs a rigid tube between two fittings, hand-tightening the B-nuts. The installed tube has a severe kink at the bend.\"}\n```",
+   "c2": "```json\n{\"criteria\": [\n   {\"index\": 1, \"verdict\": \"fail\", \"at\": \"t20.00\", \"note\": \"Both B-nuts are fully engaged with their respective fittings.\"},\n   {\"index\": 2, \"verdict\": \"fail\", \"at\": \"t16.00\", \"note\": \"B-nut is fully threaded flush against fitting body with no thread gap.\"},\n   {\"index\": 3, \"verdict\": \"fail\", \"at\": \"t20.00\", \"note\": \"Tube enters fittings straight without being sprung sideways.\"},\n   {\"index\": 4, \"verdict\": \"fail\", \"at\": \"t18.00\", \"note\": \"Bends along tube are smooth with no visible wrinkles or flattened sides.\"},\n   {\"index\": 5, \"verdict\": \"fail\", \"at\": \"t16.00\", \"note\": \"B-nut hex flats and tube exterior show no wrench gouges or damage.\"},\n   {\"index\": 6, \"verdict\": \"fail\", \"at\": \"t16.00\", \"note\": \"Surfaces are completely dry with no fluid film or sheen.\"},\n   {\"index\": 7, \"verdict\": \"fail\", \"at\": \"t20.00\", \"note\": \"Both ends of line are attached to fittings.\"},\n   {\"index\": 8, \"verdict\": \"fail\", \"at\": \"t16.00\", \"note\": \"B-nut is fully threaded and closed with no exposed threads.\"},\n   {\"index\": 9, \"verdict\": \"fail\", \"at\": \"t18.00\", \"note\": \"Bends are smooth and round without kinks or flat sides.\"},\n   {\"index\": 10, \"verdict\": \"fail\", \"at\": \"t16.00\", \"note\": \"No fluid is present anywhere on the assembly.\"},\n   {\"index\": 11, \"verdict\": \"fail\", \"at\": \"t20.00\", \"note\": \"Tube is properly shaped and not bowed or forced onto fittings.\"}\n ],\n \"observed\": \"Student installs a rigid fluid line between two bulkhead fittings by hand, achieving a clean, properly aligned installation with fully engaged B-nuts.\"}```",
+   "c3": "{\"criteria\":[{\"index\":1,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"Both line ends are connected with B-nuts engaged.\"},{\"index\":2,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"No exposed thread gaps are visible at either B-nut.\"},{\"index\":3,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"Tube enters both fittings without visible sideways misalignment.\"},{\"index\":4,\"verdict\":\"fail\",\"at\":\"16.00\",\"note\":\"Visible bend is smooth without wrinkles or flattened sides.\"},{\"index\":5,\"verdict\":\"fail\",\"at\":\"18.00\",\"note\":\"B-nut and tube exteriors show no visible gouges or crushed flats.\"},{\"index\":6,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"Joints and surrounding tube appear dry without wet sheen.\"},{\"index\":7,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"Neither line end hangs free; both have B-nuts installed.\"},{\"index\":8,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"B-nuts appear seated with no exposed threads or open joint.\"},{\"index\":9,\"verdict\":\"fail\",\"at\":\"16.00\",\"note\":\"The bend retains a smooth, rounded profile without a kink.\"},{\"index\":10,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"No fluid beads or runs are visible at either joint.\"},{\"index\":11,\"verdict\":\"fail\",\"at\":\"20.00\",\"note\":\"Installed tube shows no visible forced bowing or twisting.\"}],\"observed\":\"The rigid line is installed between both panel fittings. Final views show seated B-nuts, smooth bends, aligned entries, dry joints, and no visible exterior damage.\"}"
+  },
+  "framesSent": {
+   "m0": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg"
+   ],
+   "m1": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg"
+   ],
+   "m2": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg"
+   ],
+   "m3": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg"
+   ]
+  },
+  "capNotes": [],
+  "cost": 0,
+  "negLines": [
+   {
+    "mark": "P1",
+    "from": "1. Line is connected at both ends, a B-nut engaged on each fitting",
+    "text": "Line is disconnected at one or both ends, with a B-nut left unengaged from its fitting",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P2",
+    "from": "2. Each B-nut is drawn up to its fitting with no thread gap at the joint",
+    "text": "Each B-nut shows an exposed thread gap between the nut and the fitting body",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P3",
+    "from": "3. Tube enters each fitting straight and square, not sprung sideways to reach it",
+    "text": "Tube enters at least one fitting at a visible angle, sprung sideways to reach it",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P4",
+    "from": "4. Bend in the installed line is smooth and round, free of wrinkles or flat sides",
+    "text": "Bend in the installed line exhibits visible wrinkles or flattened sides along the curve",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P5",
+    "from": "5. Tube and B-nut exterior surfaces show no wrench gouges or crushed flats",
+    "text": "Tube or B-nut exterior surfaces show visible wrench gouges or crushed hex flats",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P6",
+    "from": "6. Fitting joints and surrounding tube surface are dry, no fluid film present",
+    "text": "Fitting joints or surrounding tube surface exhibit a visible fluid film or wet sheen",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P7",
+    "from": "7. The finished work shows no such defect: One end of the line hangs free, no B-nut on its fitting.",
+    "text": "The finished work shows this defect: One end of the line hangs free, no B-nut on its fitting.",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P8",
+    "from": "8. The finished work shows no such defect: A B-nut sits loose with exposed threads and an open joint.",
+    "text": "The finished work shows this defect: A B-nut sits loose with exposed threads and an open joint.",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P9",
+    "from": "9. The finished work shows no such defect: The bend is kinked or flattened with a visible flat side.",
+    "text": "The finished work shows this defect: The bend is kinked or flattened with a visible flat side.",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P10",
+    "from": "10. The finished work shows no such defect: Fluid beads or runs from a B-nut joint.",
+    "text": "The finished work shows this defect: Fluid beads or runs from a B-nut joint.",
+    "status": "perturbed"
+   },
+   {
+    "mark": "P11",
+    "from": "11. The finished work shows no such defect: Tube is visibly bowed or twisted to force it onto the fittings.",
+    "text": "The finished work shows this defect: Tube is visibly bowed or twisted to force it onto the fittings.",
+    "status": "perturbed"
+   }
+  ],
+  "controlStats": "44 perturbed points \u00b7 not passed 44 \u00b7 accepted 0"
  }
 }
