@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIM Inspector</title>
+<meta name="description" content="Data inspection and evals for the Alcor × AIM Fremont pilot — compiled task packs, photo assessment criteria, reference footage and the perturbation controls that separate a grader from a model that passes everything.">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="styles/industry.css">
+<link rel="stylesheet" href="styles/inspector.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── header ─────────────────────────────────────────────────────────── -->
+  <header class="hdr">
+    <svg class="hdr-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"
+         stroke="var(--color-accent)" stroke-width="1.5" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14"></rect>
+      <path d="M3 10h18M8 5v5"></path>
+    </svg>
+    <button class="hdr-wordmark" id="go-home" type="button">AIM Inspector</button>
+    <span class="tag tag-accent hdr-badge">PILOT</span>
+
+    <div class="seg hdr-nav" role="tablist" aria-label="Sections">
+      <button class="hdr-nav-btn" role="tab" id="nav-tasks" data-nav="home"
+              aria-controls="main" type="button">Tasks</button>
+      <button class="hdr-nav-btn" role="tab" id="nav-evals" data-nav="evals"
+              aria-controls="main" type="button">Evals</button>
+    </div>
+
+    <span class="spacer"></span>
+
+    <label class="hdr-conf">
+      <input type="checkbox" id="show-confidence" checked>
+      <span>Confidence</span>
+    </label>
+
+    <span class="hdr-stats" id="hdr-stats"></span>
+  </header>
+
+  <!-- ── body ───────────────────────────────────────────────────────────── -->
+  <div class="body">
+
+    <!-- sidebar: task list, grouped by subject. Built by app.js. -->
+    <nav class="sidebar" aria-label="Tasks">
+      <div class="sidebar-list" id="sidebar-list"></div>
+      <p class="sidebar-note">
+        Reads the working tree. Reload to pick up recompiled packs.
+        Only Photo assessment writes (<code>build/photo_eval/</code>).
+      </p>
+    </nav>
+
+    <!-- main: task browser, task detail, or the evals dashboard. Built by app.js. -->
+    <main class="main" id="main"></main>
+
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

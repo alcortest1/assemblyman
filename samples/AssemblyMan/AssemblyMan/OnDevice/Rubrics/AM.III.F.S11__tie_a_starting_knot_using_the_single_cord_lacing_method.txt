@@ -1,0 +1,31 @@
+TASK CODE:    AM.III.F.S11
+TASK TITLE:   Replace a Wire Bundle Lacing
+SUBTASK CODE: tie_a_starting_knot_using_the_single_cord_lacing_method
+SUBTASK:      Tie a Starting Knot Using the Single Cord-Lacing Method
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+tie_a_starting_knot_using_the_single_cord_lacing_method — VLM GRADING CRITERIA
+
+Assess the completed starting knot on the wire bundle: clove hitch secured by a double-looped overhand knot visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A cord hitch is drawn tight around the wire bundle at one clear location.
+2. The knot lies on a clear section of bundle, clear of clamps or connectors.
+3. A second knot of crossed loops sits against the hitch, not spaced away from it.
+4. Cord tails are cut off short rather than left as long loose lengths.
+
+Critical defects
+- Cord lies loose around the bundle, standing away from the wires.
+- Only one knot is present, with no locking knot against the hitch.
+- Wire insulation is cut, nicked, or gouged near the knot.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.F.S11/procedure.md § Tie a Starting Knot Using the Single Cord-Lacing Method
+- Manual: FAA-H-8083-31B ch. 9 p. 9-87; FAA-H-8083-31B ch. 9 p. 9-88
+- Notes: Handbook Figure 9-148 shows a 3/8 inch minimum trim; tail length is not measurable in a photograph, so only gross excess or absence of trimming is graded.; The 1 inch maximum bundle diameter for single cord lacing and the 8 inch cord allowance cannot be verified from an image.; Whether the knot holds tension when released, and the internal path of the crossings, are not settleable from a photograph.; Intermediate half hitches along the bundle belong to the next subtask; their absence is correct here.

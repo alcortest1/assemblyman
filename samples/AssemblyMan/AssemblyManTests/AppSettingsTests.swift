@@ -46,7 +46,7 @@ final class AppSettingsTests: XCTestCase {
     XCTAssertTrue(settings.streamsOverWiFi)
     XCTAssertEqual(settings.quality, .high)
     XCTAssertEqual(settings.frameRate, .thirty)
-    XCTAssertEqual(settings.streamSpec, "1080p · 30 fps · Wi-Fi")
+    XCTAssertEqual(settings.streamSpec, "720p · 30 fps · Wi-Fi")
   }
 
   /// The choice has to outlive a launch, or every session silently starts back on Bluetooth.
@@ -62,10 +62,13 @@ final class AppSettingsTests: XCTestCase {
   // MARK: - Tiers
 
   func testBluetoothOffersTheLowerPair() {
+    // Explicit rather than assumed: the transport defaults to Wi-Fi, so a test about the
+    // Bluetooth pair has to say so. It did not, and had been failing.
+    settings.streamsOverWiFi = false
     XCTAssertEqual(settings.availableQualities, [.low, .medium])
     XCTAssertFalse(
       settings.availableQualities.contains(.high),
-      "1080p needs the bandwidth only Wi-Fi provides"
+      "720p needs the bandwidth only Wi-Fi provides"
     )
   }
 
@@ -79,6 +82,9 @@ final class AppSettingsTests: XCTestCase {
   /// Turning Wi-Fi on from the lowest tier should jump to the best available, not sit on a
   /// value the new tier no longer lists.
   func testEnablingWiFiFromLowRaisesQualityToHigh() {
+    // Has to start on Bluetooth for enabling Wi-Fi to be a change at all — assigning the
+    // value it already holds is a no-op, and the clamp this covers lives in `didSet`.
+    settings.streamsOverWiFi = false
     settings.quality = .low
     settings.streamsOverWiFi = true
     XCTAssertEqual(settings.quality, .high)
@@ -87,7 +93,7 @@ final class AppSettingsTests: XCTestCase {
   func testEnablingWiFiKeepsAQualityThatRemainsAvailable() {
     settings.quality = .medium
     settings.streamsOverWiFi = true
-    XCTAssertEqual(settings.quality, .medium, "720p exists on both tiers, so it should stick")
+    XCTAssertEqual(settings.quality, .medium, "504p exists on both tiers, so it should stick")
   }
 
   func testDisablingWiFiDropsHighDownToMedium() {
@@ -140,17 +146,60 @@ final class AppSettingsTests: XCTestCase {
     XCTAssertGreaterThan(high.width * high.height, medium.width * medium.height)
   }
 
+  /// The labels are derived from the SDK rather than written down, because when they were
+  /// written down every one of them was wrong: the tiers were advertised as 1080p, 720p and
+  /// 480p when the SDK sends 720x1280, 504x896 and 360x640. The app claimed a resolution the
+  /// glasses cannot produce, and the live chip misreported the one they were sending — which
+  /// matters most at exactly the moment someone is asking why the feed looks poor.
+  func testLabelsComeFromTheSDKAndNotFromMemory() {
+    for quality in AppSettings.Quality.allCases {
+      let size = quality.streamingResolution.videoFrameSize
+      XCTAssertEqual(
+        quality.label,
+        "\(min(size.width, size.height))p",
+        "\(quality) must be named for the frame the SDK actually sends"
+      )
+    }
+  }
+
+  func testLabelsAreTheTiersTheSDKDocuments() {
+    XCTAssertEqual(AppSettings.Quality.high.label, "720p")
+    XCTAssertEqual(AppSettings.Quality.medium.label, "504p")
+    XCTAssertEqual(AppSettings.Quality.low.label, "360p")
+    XCTAssertFalse(
+      AppSettings.Quality.allCases.contains { $0.label == "1080p" },
+      "no tier is 1080p; the glasses top out at 720x1280"
+    )
+  }
+
+  func testDimensionsLabelReportsBothEdgesForDiagnostics() {
+    XCTAssertEqual(AppSettings.Quality.high.dimensionsLabel, "720x1280")
+    let size = AppSettings.Quality.medium.frameSize
+    XCTAssertEqual(AppSettings.Quality.medium.dimensionsLabel, "\(size.width)x\(size.height)")
+  }
+
+  /// Raw values are identifiers now, not labels. If one ever reads as a resolution again it is
+  /// on its way to being displayed as one.
+  func testRawValuesAreIdentifiersRatherThanResolutions() {
+    for quality in AppSettings.Quality.allCases {
+      XCTAssertFalse(
+        quality.rawValue.hasSuffix("p") && quality.rawValue.dropLast().allSatisfy(\.isNumber),
+        "\(quality.rawValue) looks like a label; labels come from the SDK"
+      )
+    }
+  }
+
   // MARK: - Presentation
 
   func testStreamSpecReportsTheWiFiTransport() {
     settings.streamsOverWiFi = true
     settings.quality = .high
     settings.frameRate = .twentyFour
-    XCTAssertEqual(settings.streamSpec, "1080p · 24 fps · Wi-Fi")
+    XCTAssertEqual(settings.streamSpec, "720p · 24 fps · Wi-Fi")
   }
 
   func testLiveLabelIsUppercasedForTheOverlayChip() {
     settings.quality = .high
-    XCTAssertEqual(settings.liveLabel, "Live · 1080P 30FPS")
+    XCTAssertEqual(settings.liveLabel, "Live · 720P 30FPS")
   }
 }

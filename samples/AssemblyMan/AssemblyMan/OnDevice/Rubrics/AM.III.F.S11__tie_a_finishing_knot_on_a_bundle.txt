@@ -1,0 +1,31 @@
+TASK CODE:    AM.III.F.S11
+TASK TITLE:   Replace a Wire Bundle Lacing
+SUBTASK CODE: tie_a_finishing_knot_on_a_bundle
+SUBTASK:      Tie a Finishing Knnot on a Bundle
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+tie_a_finishing_knot_on_a_bundle — VLM GRADING CRITERIA
+
+Assess the completed finishing knot terminating a laced wire bundle visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A finishing knot is present at the end of the lacing run, terminating the bundle.
+2. The finishing knot encircles the full bundle, with cord passing twice around it.
+3. Multiple over-and-under locking wraps are visible on the taut lacing past the finishing knot.
+4. The cord tail is trimmed short, with no long loose strand hanging from the knot.
+
+Critical defects
+- The finishing knot is open or unravelled, with cord hanging free of the bundle.
+- Cord passes around only part of the bundle, leaving wires outside the lacing.
+- Wire insulation is cut, nicked or gouged adjacent to the finishing knot.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.F.S11/procedure.md § Tie a Finishing Knnot on a Bundle; tasks/AM.III.F.S11/procedure.md — Subtask 4 of 4: Tie a Finishing Knot on a Bundle
+- Manual: FAA-H-8083-31B ch. 9 p. 9-87; FAA-H-8083-31B ch. 9 p. 9-88
+- Notes: Handbook p. 9-87 specifies a clove hitch secured by a square knot for ties, while the procedure and p. 9-88 specify a clove hitch secured by a double-looped overhand knot; the procedure sheet controls here.; A photograph cannot settle cord tension, spacing measurements, tail length, or whether the knot will hold under vibration; these are excluded.; Knot type may be partly obscured by the bundle; criteria address only features visible from the photographed side.

@@ -1,0 +1,336 @@
+{
+ "proof_test_the_hose_assembly": {
+  "live": true,
+  "runId": "hosted run \u00b7 saved to data/video_runs/AM.I.D.S7.json",
+  "fps": 0.5,
+  "models": [
+   "Opus 5",
+   "Gemini 3.1 Pro",
+   "Gem 3.6 Flash",
+   "GPT-5.6 Sol"
+  ],
+  "clip": "flex_hose_4",
+  "rows": [
+   {
+    "cells": [
+     [
+      "fail",
+      "t=30.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "fail",
+      "t=t30.00"
+     ],
+     [
+      "fail",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "fail",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "fail",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "fail",
+      "t=t30.00"
+     ],
+     [
+      "fail",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "fail",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "fail",
+      "t=t30.00"
+     ],
+     [
+      "fail",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "fail",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=30.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=22.00"
+     ],
+     [
+      "none",
+      "not graded"
+     ],
+     [
+      "pass",
+      "t=t30.00"
+     ],
+     [
+      "pass",
+      "t=30.00"
+     ]
+    ]
+   }
+  ],
+  "rollup": [
+   [
+    "fail",
+    "fail \u00b7 3 of 11"
+   ],
+   [
+    "none",
+    "ungraded"
+   ],
+   [
+    "fail",
+    "fail \u00b7 5 of 11"
+   ],
+   [
+    "fail",
+    "fail \u00b7 3 of 11"
+   ]
+  ],
+  "replies": {
+   "m0": "{\"criteria\": [\n  {\"index\": 1, \"verdict\": \"fail\", \"at\": \"30.00\", \"note\": \"Hose never coupled to any test stand port; work stays on bench with hand tools\"},\n  {\"index\": 2, \"verdict\": \"unsure\", \"at\": \"22.00\", \"note\": \"Hose end fittings small and low detail; cap/plug presence not resolvable\"},\n  {\"index\": 3, \"verdict\": \"fail\", \"at\": \"22.00\", \"note\": \"No pressure gauge or test stand appears in any frame\"},\n  {\"index\": 4, \"verdict\": \"fail\", \"at\": \"22.00\", \"note\": \"No gauge present, so no pointer indication of pressure\"},\n  {\"index\": 5, \"verdict\": \"unsure\", \"at\": \"22.00\", \"note\": \"Assembly never pressurized; leak condition cannot be assessed\"},\n  {\"index\": 6, \"verdict\": \"unsure\", \"at\": \"22.00\", \"note\": \"Hose lies loosely on bench, unpressurized; no test run to judge\"},\n  {\"index\": 7, \"verdict\": \"pass\", \"at\": \"22.00\", \"note\": \"No fluid spray, drips, or wetting anywhere on hose or fittings\"},\n  {\"index\": 8, \"verdict\": \"unsure\", \"at\": \"30.00\", \"note\": \"No stand connection at all; opposite-end cap status not visible\"},\n  {\"index\": 9, \"verdict\": \"pass\", \"at\": \"22.00\", \"note\": \"Hose cover intact, smooth, no blisters or protruding braid\"},\n  {\"index\": 10, \"verdict\": \"pass\", \"at\": \"22.00\", \"note\": \"Socket appears seated against hose, no visible gap\"},\n  {\"index\": 11, \"verdict\": \"pass\", \"at\": \"22.00\", \"note\": \"Hose lies in gentle curve, no kink or collapse\"}\n ],\n \"observed\": \"Student assembles/handles a short hose and end fittings on a plywood bench with wrenches; no test stand, gauge, or pressurization ever appears through the final frame.\"}",
+   "m1": "```json\n{\"criteria\": [\n   {\"index\": 1,\n    \"verdict\": \"fail\",\n    \"at\": \"30.00\",\n    \"note\": \"The hose assembly remains on the workbench and is not connected to a test stand.\"},\n   {\"index\": 2,\n    \"verdict\": \"fail\",\n    \"at\": \"30.00\",\n    \"note\": \"The hose is not connected to a stand and only has plastic dust caps fitted.\"},\n   {\"index\": 3,\n    \"verdict\": \"fail\",\n    \"at\": \"30.00\",\n    \"note\": \"No test stand or pressure gauge is visible anywhere in the workspace.\"},\n",
+   "m2": "```json\n{\"criteria\": [\n   {\"index\": 1,\n    \"verdict\": \"fail\",\n    \"at\": \"t30.00\",\n    \"note\": \"The hose assembly remains unattached on the workbench throughout.\"},\n   {\"index\": 2,\n    \"verdict\": \"fail\",\n    \"at\": \"t30.00\",\n    \"note\": \"The hose is not installed on a test stand.\"},\n   {\"index\": 3,\n    \"verdict\": \"fail\",\n    \"at\": \"t30.00\",\n    \"note\": \"No test stand or pressure gauge is present in frame.\"},\n   {\"index\": 4,\n    \"verdict\": \"fail\",\n    \"at\": \"t30.00\",\n    \"note\": \"No pressure gauge is visible and no pressure is applied.\"},\n   {\"index\": 5,\n    \"verdict\": \"pass\",\n    \"at\": \"t30.00\",\n    \"note\": \"The hose and fittings on the bench appear completely dry.\"},\n   {\"index\": 6,\n    \"verdict\": \"fail\",\n    \"at\": \"t30.00\",\n    \"note\": \"The hose was not pressurized or placed on a test run.\"},\n   {\"index\": 7,\n    \"verdict\": \"pass\",\n    \"at\": \"t30.00\",\n    \"note\": \"No fluid spraying or dripping is present.\"},\n   {\"index\": 8,\n    \"verdict\": \"pass\",\n    \"at\": \"t30.00\",\n    \"note\": \"No open hose end defect on a test setup was observed.\"},\n   {\"index\": 9,\n    \"verdict\": \"pass\",\n    \"at\": \"t30.00\",\n    \"note\": \"The hose cover is intact with no blistering, bursting, or braid protrusion.\"},\n   {\"index\": 10,\n    \"verdict\": \"pass\",\n    \"at\": \"t30.00\",\n    \"note\": \"No socket separation or gap is visible on the hose.\"},\n   {\"index\": 11,\n    \"verdict\": \"pass\",\n    \"at\": \"t30.00\",\n    \"note\": \"The hose shows no kinking or sharp collapsing.\"}\n ],\n \"observed\": \"The student uses wrenches at a workbench to assemble small fittings and adapters. The hose assembly remains on the bench unattached to any test stand, and no proof pressurization takes place.\"}",
+   "m3": "{\"criteria\":[{\"index\":1,\"verdict\":\"fail\",\"at\":\"30.00\",\"note\":\"Hose remains on the bench; neither end is coupled to a test stand.\"},{\"index\":2,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"The opposite hose end visibly retains a yellow protective cap.\"},{\"index\":3,\"verdict\":\"fail\",\"at\":\"30.00\",\"note\":\"No test stand pressure gauge is visible with the hose assembly.\"},{\"index\":4,\"verdict\":\"fail\",\"at\":\"30.00\",\"note\":\"No gauge or off-zero pointer is visible.\"},{\"index\":5,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"Visible hose cover and end junctions appear dry without weeping.\"},{\"index\":6,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"Hose rests in a smooth, gentle curve without sharp bends.\"},{\"index\":7,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"No fluid spraying or dripping is visible.\"},{\"index\":8,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"The opposite hose end is closed by a yellow cap.\"},{\"index\":9,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"Hose cover shows no visible burst, blister, or protruding braid.\"},{\"index\":10,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"No visible socket separation or gap appears at either hose end.\"},{\"index\":11,\"verdict\":\"pass\",\"at\":\"30.00\",\"note\":\"Hose is not visibly kinked or collapsed.\"}],\"observed\":\"The student handles and tightens fitting hardware while the capped hose remains on the bench. No test stand, gauge, pressurization, or leakage appears.\"}"
+  },
+  "framesSent": {
+   "m0": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg"
+   ],
+   "m1": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg"
+   ],
+   "m2": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg"
+   ],
+   "m3": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg"
+   ]
+  },
+  "capNotes": [],
+  "cost": 0
+ }
+}

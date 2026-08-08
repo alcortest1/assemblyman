@@ -1,0 +1,31 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: set_up_rivet_gun
+SUBTASK:      Set up Rivet Gun
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+set_up_rivet_gun — VLM GRADING CRITERIA
+
+Assess the completed rivet gun with its set and retaining spring installed and air supply connected visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A rivet set is installed in the nose of the rivet gun.
+2. A retaining spring is threaded onto the gun barrel over the set.
+3. The working tip of the set faces outward, away from the gun.
+4. An air hose is attached to the gun's air inlet fitting.
+
+Critical defects
+- The gun nose is empty, with no rivet set in it.
+- The spring hangs loose off the barrel threads, set free to fall out.
+- The set tip is visibly chipped, cracked or mushroomed.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Set up Rivet Gun
+- Manual: none cited
+- Notes: Procedure pairs a concave tip with a cone spring (universal) and a disk head with a cylinder spring (countersunk); the photograph cannot establish which rivet type is intended.; Regulator pressure setting and spring tightening torque are not visible in a photograph.

@@ -59,6 +59,23 @@ final class LiveKitRelay {
   private(set) var isAgentPresent = false
   private(set) var diagnostics: LiveKitFrameSink.Diagnostics = .empty
 
+  /// The most recent verdict, or the grade currently running. Held here rather than only
+  /// pushed through `onGrade` so a view appearing mid-grade can draw the current state.
+  private(set) var latestGrade: GradeProtocol.Grade?
+
+  /// What this room can grade against, as published by the agent. Empty until it joins and
+  /// says so, which is why the picker is only offered once this has arrived.
+  private(set) var catalogue: [GradeProtocol.Catalogue.Task] = []
+
+  /// Fires on every grade message, in-progress and final. The view model uses it to open the
+  /// result sheet the moment a grade starts.
+  @ObservationIgnored var onGrade: (@MainActor (GradeProtocol.Grade) -> Void)?
+
+  /// Fires when the agent has named the work in a photograph. The view model uses it to
+  /// pre-select the picker, which is already open and waiting by then.
+  @ObservationIgnored var onIdentification:
+    (@MainActor (GradeProtocol.Identification) -> Void)?
+
   var isConfigured: Bool { configuration.isConfigured }
 
   /// What the ready screen's RELAY row shows.
@@ -190,6 +207,95 @@ final class LiveKitRelay {
     }
   }
 
+  // MARK: - Photo assessment
+  //
+  // The agent asks for a photograph over RPC and the phone answers with a byte stream. Two
+  // channels because they carry different things: the request is small and needs an answer,
+  // the photograph is hundreds of kilobytes and a data packet holds about fifteen.
+
+  /// Supplies a JPEG of the work when the agent asks for one. Set by the session view model,
+  /// which owns the glasses stream. Returning nil declines the request — the agent then grades
+  /// from the relayed video instead, which it says so in the result.
+  @ObservationIgnored var onCaptureRequest: (@MainActor @Sendable () async -> Data?)?
+
+  /// Registers the RPC the agent calls. Failure is not fatal: without it the agent falls back
+  /// to the video frame, so the operator gets a worse grade rather than none.
+  private func registerCaptureHandler(on room: Room) async {
+    do {
+      try await room.registerRpcMethod(GradeProtocol.captureMethod) { [weak self] invocation in
+        guard let self else { return "{\"ok\":false,\"reason\":\"relay gone\"}" }
+
+        let requestID = (try? JSONDecoder().decode(
+          GradeProtocol.CaptureRequest.self,
+          from: Data(invocation.payload.utf8)
+        ))?.requestID ?? ""
+
+        // Acknowledge now and photograph afterwards. The shutter, the transfer off the
+        // glasses and the upload together run well past the RPC's response window, and an
+        // RPC that times out tells the agent the phone is unreachable when it is in fact
+        // busy taking the picture it asked for.
+        Task { @MainActor in await self.captureAndSend(requestID: requestID) }
+        return "{\"ok\":true}"
+      }
+      note("capture handler registered (\(GradeProtocol.captureMethod))")
+    } catch {
+      note("could not register the capture handler: \(describe(error))")
+    }
+  }
+
+  private func captureAndSend(requestID: String) async {
+    guard let handler = onCaptureRequest else {
+      note("capture requested but nothing is listening")
+      return
+    }
+    guard let jpeg = await handler() else {
+      note("capture requested but the glasses returned nothing")
+      return
+    }
+    await send(jpeg, topic: GradeProtocol.captureTopic, attributes: ["request_id": requestID])
+  }
+
+  /// Sends a photograph the operator chose to have graded, with the codes they picked.
+  func sendForGrading(_ jpeg: Data, taskCode: String, subtaskCode: String) async {
+    await send(
+      jpeg,
+      topic: GradeProtocol.gradeRequestTopic,
+      attributes: ["task_code": taskCode, "subtask_code": subtaskCode]
+    )
+  }
+
+  /// Sends a photograph to be named rather than graded.
+  ///
+  /// Separate from `sendForGrading` because it carries no codes — naming them is the whole
+  /// point — and because the answer is a suggestion the operator may ignore. Nothing is graded
+  /// as a result of this call.
+  func sendForIdentification(_ jpeg: Data) async {
+    await send(jpeg, topic: GradeProtocol.identifyRequestTopic, attributes: [:])
+  }
+
+  private func send(_ jpeg: Data, topic: String, attributes: [String: String]) async {
+    guard let room, status == .live || status == .connected else {
+      note("not in a room — \(topic) not sent")
+      return
+    }
+    do {
+      let writer = try await room.localParticipant.streamBytes(
+        options: StreamByteOptions(
+          topic: topic,
+          attributes: attributes,
+          mimeType: "image/jpeg",
+          name: "capture.jpg",
+          totalSize: jpeg.count
+        )
+      )
+      try await writer.write(jpeg)
+      try await writer.close()
+      note("sent \(jpeg.count) bytes on \(topic)")
+    } catch {
+      note("failed to send on \(topic): \(describe(error))")
+    }
+  }
+
   // MARK: - Connect / publish
 
   private func connectAndPublish(
@@ -260,6 +366,10 @@ final class LiveKitRelay {
       } else {
         throw RelayError.capturerUnavailable
       }
+
+      // Before connecting, so a request that arrives with the agent's first breath is not
+      // dropped for want of a handler.
+      await registerCaptureHandler(on: room)
 
       note("connecting to \(configuration.serverURL) room \(code.display)")
       try await room.connect(url: configuration.serverURL, token: token)
@@ -344,10 +454,19 @@ final class LiveKitRelay {
         videoPublication = nil
         delegateProxy = nil
       }
+      // `noPixels` is the line that matters when a publish times out with frames flowing:
+      // "offered=225 forwarded=225 format=—" reads as a WebRTC fault, when what it actually
+      // means is that every one of those 225 frames was an encoded sample with no pixels in
+      // it. Naming the media subtype turns a session-long hunt into one line.
       note(
         "FAILED: \(describe(error)) "
           + "[offered=\(diagnostics.framesOffered) forwarded=\(diagnostics.framesForwarded) "
-          + "format=\(diagnostics.pixelFormatDescription)]"
+          + "format=\(diagnostics.pixelFormatDescription)"
+          + (diagnostics.framesWithoutPixelBuffer > 0
+            ? " noPixels=\(diagnostics.framesWithoutPixelBuffer) "
+              + "subtype=\(diagnostics.mediaSubTypeDescription)"
+            : "")
+          + "]"
       )
       if let connectingRoom { await connectingRoom.disconnect() }
     }
@@ -395,6 +514,20 @@ final class LiveKitRelay {
     case let .participants(count, hasAgent):
       remoteParticipantCount = count
       isAgentPresent = hasAgent
+    case let .grade(grade):
+      latestGrade = grade
+      onGrade?(grade)
+    case let .identification(identification):
+      note("identification: " + (identification.matched
+        ? "\(identification.taskCode ?? "?") / \(identification.subtaskCode ?? "?")"
+        : "none (\(identification.reason ?? "unknown"))"))
+      onIdentification?(identification)
+    case let .catalogue(catalogue):
+      // Replaces rather than merges. The agent republishes the whole list on every join, and
+      // a stale subtask left behind from an earlier build would sit in the picker offering a
+      // grade against a rubric that no longer exists.
+      self.catalogue = catalogue.tasks
+      note("catalogue: \(catalogue.tasks.count) tasks")
     }
   }
 
@@ -451,6 +584,12 @@ enum RelayError: Error, LocalizedError {
       if diagnostics.framesOffered == 0 {
         return "No frames arrived from the glasses."
       }
+      // Checked before the pixel-format case: with encoded frames there is no pixel format
+      // to report, so the format message would read "delivers —" and say nothing.
+      if diagnostics.isDeliveringEncodedFrames {
+        return "Glasses are sending encoded \(diagnostics.mediaSubTypeDescription) frames, "
+          + "not pixels. Ask the DAT SDK for VideoCodec.raw, or decode before relaying."
+      }
       if diagnostics.isPixelFormatSupported == false {
         return "Glasses deliver \(diagnostics.pixelFormatDescription), which WebRTC cannot encode."
       }
@@ -468,6 +607,11 @@ enum RelayRoomEvent: Sendable {
   case didDisconnect(String?)
   case didFailToConnect(String?)
   case participants(count: Int, hasAgent: Bool)
+  /// A verdict, or a grade that has just started, from the agent.
+  case grade(GradeProtocol.Grade)
+  /// What this room can grade against, published by the agent when it joins.
+  case catalogue(GradeProtocol.Catalogue)
+  case identification(GradeProtocol.Identification)
 }
 
 /// Bridges room callbacks — which arrive on the SDK's own threads — onto the main actor.
@@ -505,6 +649,25 @@ final class RoomDelegateProxy: NSObject, RoomDelegate, Sendable {
 
   func room(_ room: Room, participantDidDisconnect participant: RemoteParticipant) {
     report(room)
+  }
+
+  /// Grading traffic. Anything on another topic, or that this build cannot decode, is dropped
+  /// rather than logged as an error: the agent is free to add message kinds a shipped phone
+  /// has never heard of, and that must not read as a fault here.
+  func room(
+    _ room: Room,
+    participant: RemoteParticipant?,
+    didReceiveData data: Data,
+    forTopic topic: String,
+    encryptionType: EncryptionType
+  ) {
+    guard topic == GradeProtocol.gradeTopic else { return }
+    switch GradeProtocol.decode(data) {
+    case .grade(let grade): onEvent(.grade(grade))
+    case .catalogue(let catalogue): onEvent(.catalogue(catalogue))
+    case .identification(let identification): onEvent(.identification(identification))
+    case nil: break
+    }
   }
 
   private func report(_ room: Room) {

@@ -10,5 +10,12 @@
 	<true/>
 	<key>com.apple.developer.networking.wifi-info</key>
 	<true/>
+	<!-- The on-device grader holds ~3.3 GB of weights while it reads a photograph, on top of
+	     WebRTC encode, a Metal compositor and two CoreML models. Without this the app is
+	     jetsammed the first time it loads the model. Raising the ceiling also raises the odds
+	     of being killed in the background, which is why LocalGrader unloads on a memory
+	     warning rather than treating the entitlement as headroom to spend. -->
+	<key>com.apple.developer.kernel.increased-memory-limit</key>
+	<true/>
 </dict>
 </plist>

@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.D.S7
+TASK TITLE:   Fabricate a Flexible Hose
+SUBTASK CODE: determine_the_distance_and_hose
+SUBTASK:      Determine the Distance and Hose
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+determine_the_distance_and_hose — VLM GRADING CRITERIA
+
+Assess the completed flexible hose marked with masking tape for length, with its matching MS fitting assembly visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Masking tape band is wrapped around the hose, encircling it fully
+2. Tape band edges are square to the hose axis, not spiralling
+3. A tape measure or rule appears in frame with the hose
+4. Hose lay line dash number and a fitting dash number are both legible
+
+Critical defects
+- Hose is already cut or slit at the tape mark
+- Hose shows a kink, crushed section, or cover cut through to braid
+- Fitting dash number visibly differs from the hose lay line dash number
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S7/procedure.md § Determine the Distance and Hose
+- Manual: FAA-H-8083-30B ch. 9 p. 9-19; FAA-H-8083-30B ch. 9 p. 9-21
+- Notes: A photograph cannot establish the measured route length or that the 5-8 percent allowance was added.; Hose material, pressure class and system compatibility are not verifiable from the image.

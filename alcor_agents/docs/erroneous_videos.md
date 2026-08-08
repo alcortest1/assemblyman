@@ -229,17 +229,27 @@ each.
 
 ### Observed behaviour of `runway/aleph-2` (2026-08-05, `bend_the_line`)
 
-Two paid attempts at `wrong_bend_angle`, $1.40 each:
+Four paid attempts across two error types, $1.40 each ($5.60 total), **none
+accepted**:
 
-| Attempt | Scene | Equipment | Camera | Defect visible | Outcome |
-| --- | --- | --- | --- | --- | --- |
-| 1 | 1.00 | 1.00 | 1.00 | no | *"identical to the original"* |
-| 2 (with retry feedback) | 0.60 | 0.30 | 0.80 | no | floating/detached hands, warped tool, tube vanishes |
+| Error | Attempt | Scene | Equip | Camera | Defect | Outcome |
+| --- | --- | --- | --- | --- | --- | --- |
+| `wrong_bend_angle` | 1 | 1.00 | 1.00 | 1.00 | no | *"identical to the original"* — edit silently declined |
+| `wrong_bend_angle` | 2 | 0.60 | 0.30 | 0.80 | no | floating/detached hands, warped tool, tube vanishes |
+| `kinked_bend` | 1 | 0.00 | 0.00 | 0.00 | no | tube destroyed, first bend also ruined |
+| `kinked_bend` | 2 | 0.00 | 0.00 | 0.00 | yes | scene replaced entirely — different room, hallucinated bystanders |
 
-The lesson is that **scene preservation and edit compliance trade off sharply**.
-Left alone the model reproduces the source almost exactly and silently declines
-the edit; pushed harder it degrades the subject rather than changing its
-geometry. Neither attempt produced a usable negative example.
+**Scene preservation and edit compliance trade off sharply, with no usable
+middle setting.** Left alone the model reproduces the source exactly and declines
+the edit; pushed toward the edit it destroys the subject and then the scene. The
+`kinked_bend` attempts — a *local* deformation, predicted to be the easier case —
+failed worse than the global angle change.
+
+The conclusion for this footage is that `runway/aleph-2` cannot introduce a
+controlled, physically-specific defect into first-person maintenance video while
+holding the workshop fixed. This is a model-capability limit, not a pipeline
+defect: the splice path was verified independently and preserved duration to
+40 ms, dimensions, audio and colour on every one of these runs.
 
 Practical implications when choosing an error:
 

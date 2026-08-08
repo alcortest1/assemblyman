@@ -1,0 +1,35 @@
+TASK CODE:    AM.I.D.S1
+TASK TITLE:   Fabricate a Rigid Line with a Flare and a Bend
+SUBTASK CODE: install_fluid_line
+SUBTASK:      Install Rigid Line on Aircraft
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+install_fluid_line — VLM GRADING CRITERIA
+
+Assess the completed rigid line installed and tightened on the aircraft fittings visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Line is connected at both ends, a B-nut engaged on each fitting
+2. Each B-nut is drawn up to its fitting with no thread gap at the joint
+3. Tube enters each fitting straight and square, not sprung sideways to reach it
+4. Bend in the installed line is smooth and round, free of wrinkles or flat sides
+5. Tube and B-nut exterior surfaces show no wrench gouges or crushed flats
+6. Fitting joints and surrounding tube surface are dry, no fluid film present
+
+Critical defects
+- One end of the line hangs free, no B-nut on its fitting
+- A B-nut sits loose with exposed threads and an open joint
+- The bend is kinked or flattened with a visible flat side
+- Fluid beads or runs from a B-nut joint
+- Tube is visibly bowed or twisted to force it onto the fittings
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S1/procedure.md § Install Rigid Line on Aircraft
+- Manual: FAA-H-8083-30B ch. 9 p. 9-5; FAA-H-8083-30B ch. 9 p. 9-1
+- Notes: Final tightening (high torque rise plus one-third turn) and use of a backup wrench cannot be settled from a photograph; only the resulting seated joint is graded.; Pressure integrity, internal condition, tube material and wall thickness are not visible; a dry joint in the photograph does not establish a leak-free system.; Percent flattening at the bend requires measurement; only visible kinks, wrinkles or flat sides are graded.

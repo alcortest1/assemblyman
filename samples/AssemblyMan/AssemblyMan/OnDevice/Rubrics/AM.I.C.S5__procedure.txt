@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.C.S5
+TASK TITLE:   Calculate Weight and Balance for an Aircraft After an Equipment Change.
+SUBTASK CODE: procedure
+SUBTASK:      Procedure
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+procedure — VLM GRADING CRITERIA
+
+Assess the completed weight-and-balance worksheet computing CG after an equipment change visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Weight, arm, and moment entries are filled in for each weighed location.
+2. Summed totals appear at the bottom of the weight and moment columns.
+3. A CG value in inches is recorded on the worksheet.
+4. A written CG range appears with a marked in-range or out-of-range conclusion.
+
+Critical defects
+- The arm column carries a summed total at its bottom.
+- No moment column or moment values appear on the worksheet.
+- CG value lies outside the written range but is marked acceptable.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.C.S5/procedure.md § Procedure
+- Manual: FAA-H-8083-30B ch. 6 p. 6-6
+- Notes: No numeric CG limits are supplied; the procedure's 64"-70" figure is an example only, so the range must be read from the worksheet itself.; The photograph cannot establish that recorded weights, arms, or the datum match the scales or TCDS, nor confirm arithmetic accuracy.; FAA-H-8083-30B ch. 6 p. 6-6 — located by content search, not cited by the procedure sheet; standards taken from it are provisional.

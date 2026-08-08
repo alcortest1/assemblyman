@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.E.S1
+TASK TITLE:   Install safety wire on nuts, bolts, and turnbuckles
+SUBTASK CODE: wire_safety_on_bolts_with_safety_wire_pliers
+SUBTASK:      Perform the Wire Safety on Bolts (With Safety Wire Pliers)
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+wire_safety_on_bolts_with_safety_wire_pliers — VLM GRADING CRITERIA
+
+Assess the completed safety wire installation joining two bolt heads, twisted with safety wire pliers and finished with a pigtail visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A single continuous twisted wire pair links two bolt holes.
+2. Twists between the bolts are even and continuous, with no untwisted slack span.
+3. Twist density measured against a rule or scale in frame shows 6-8 wraps per inch.
+4. Pigtail end is bent back toward the bolt head, not left standing out.
+
+Critical defects
+- The wire loop rides up over the bolt head, leaving a slack loop.
+- A wire strand is visibly broken, kinked, or frayed.
+- The cut pigtail end stands straight out unbent as a snag hazard.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.E.S1/procedure.md § Perform the Wire Safety on Bolts (With Safety Wire Pliers)
+- Manual: FAA-H-8083-30B ch. 7 p. 7-80
+- Notes: The 6-8 wraps per inch figure comes only from the procedure sheet; the handbook states 'tight and even' without a number.; Wire tautness, correct tightening direction relative to the nut, and whether the wire is new cannot be settled from a photograph.; Turnbuckle safetying belongs to the next subtask; its absence is correct.; FAA-H-8083-30B ch. 7 p. 7-80 — located by page label, not cited by the procedure sheet; standards taken from it are provisional.

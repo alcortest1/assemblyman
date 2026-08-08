@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.D.S1
+TASK TITLE:   Fabricate a Rigid Line with a Flare and a Bend
+SUBTASK CODE: cut_the_line
+SUBTASK:      Cut the Tubing
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+cut_the_line — VLM GRADING CRITERIA
+
+Assess the completed length of rigid tubing cut free from the stock at the marked location visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Tubing is fully severed into a separate cut length, not merely scored
+2. A felt-tip length mark is visible on the tubing or at the cut end
+3. Cut end shows no crushed, oval or collapsed profile from cutter pressure
+4. Tube body is straight and free of kinks, wrinkles or flattening
+
+Critical defects
+- Tube end is crushed flat or closed off at the cut
+- Tube is split, cracked or gouged along its length
+- Tubing is kinked or wrinkled, showing a collapsed wall
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S1/procedure.md § Cut the Tubing
+- Manual: FAA-H-8083-30B ch. 9 p. 9-2
+- Notes: Deburring, sizing and fitting installation belong to the next subtask; their absence is correct here.; A photograph cannot settle tube OD, wall thickness, alloy, squareness of the face or cut length; no criterion relies on these.; Handbook advises cutting roughly 10 percent long, but the mark's placement cannot be verified in frame.

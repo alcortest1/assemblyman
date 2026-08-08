@@ -149,8 +149,35 @@ struct StreamView: View {
     // unmounted for reasons that must not end the session.
     .fullScreenCover(isPresented: $viewModel.showPhotoPreview) {
       if let photo = viewModel.capturedPhoto {
-        PhotoPreviewView(photo: photo) {
+        PhotoPreviewView(
+          photo: photo,
+          // Only offered once the agent has said what it can grade. Without that the picker
+          // would open on an empty list, which reads as a broken button rather than as an
+          // assistant that is not in the room.
+          onGrade: viewModel.canRequestGrade ? { viewModel.offerCapturedPhotoForGrading() } : nil
+        ) {
           viewModel.dismissPhotoPreview()
+        }
+      }
+    }
+    // The verdict, and the picker that precedes a hand-started one. Sheets rather than full
+    // screen covers: the operator is mid-job and the feed staying visible behind them is
+    // worth more than the extra room.
+    .sheet(isPresented: $viewModel.showSubtaskPicker) {
+      SubtaskPickerView(
+        tasks: viewModel.gradeCatalogue,
+        suggestion: viewModel.suggestion,
+        isIdentifying: viewModel.isIdentifying,
+        onPick: { taskCode, subtaskCode in
+          viewModel.gradeAwaitingPhoto(taskCode: taskCode, subtaskCode: subtaskCode)
+        },
+        onCancel: { viewModel.cancelSubtaskPicker() }
+      )
+    }
+    .sheet(isPresented: $viewModel.showGradeSheet) {
+      if let grade = viewModel.currentGrade {
+        GradeSheetView(grade: grade, fallbackNote: viewModel.offlineGradingReason) {
+          viewModel.dismissGradeSheet()
         }
       }
     }
@@ -345,18 +372,30 @@ struct StreamView: View {
     // to watch counters move.
     let diagnostics = viewModel.relay.frameSink.diagnostics
     let compositor = viewModel.relay.frameSink.compositor
-    if diagnostics.framesOffered > 0 {
-      // Assembled in steps rather than one expression: as a single concatenation with
-      // interpolation and three conditionals the type checker gives up on it.
-      Text(Self.diagnosticsText(diagnostics, compositor, viewModel.relay.microphoneIssue))
-      .font(Theme.body(9).monospacedDigit())
-      .foregroundStyle(
-        diagnostics.isPixelFormatSupported == false || compositor.lastFailure != nil
-          ? .red : .white.opacity(0.5)
-      )
-      .padding(.horizontal, 6)
-      .padding(.vertical, 2)
-      .background(Theme.accent900.opacity(0.5))
+    VStack(alignment: .leading, spacing: 3) {
+      // What the glasses were asked for against what arrived. First thing to read when the
+      // feed misbehaves, and it has to be legible before the relay has offered a single frame
+      // — "nothing yet" is itself one of the answers.
+      Text(viewModel.deliveredSpec)
+        .font(Theme.body(9).monospacedDigit())
+        .foregroundStyle(viewModel.isDownscaled ? .orange : .white.opacity(0.5))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Theme.accent900.opacity(0.5))
+
+      if diagnostics.framesOffered > 0 {
+        // Assembled in steps rather than one expression: as a single concatenation with
+        // interpolation and three conditionals the type checker gives up on it.
+        Text(Self.diagnosticsText(diagnostics, compositor, viewModel.relay.microphoneIssue))
+          .font(Theme.body(9).monospacedDigit())
+          .foregroundStyle(
+            diagnostics.isPixelFormatSupported == false || compositor.lastFailure != nil
+              ? .red : .white.opacity(0.5)
+          )
+          .padding(.horizontal, 6)
+          .padding(.vertical, 2)
+          .background(Theme.accent900.opacity(0.5))
+      }
     }
   }
 
@@ -371,6 +410,12 @@ struct StreamView: View {
     ]
     if diagnostics.isPixelFormatSupported == false {
       parts.append("UNSUPPORTED")
+    }
+    // The failure that otherwise reads as a healthy session: counters climbing, format "—",
+    // and a black feed everywhere. Named here because it is the only place it can be seen
+    // without attaching a console — collecting device logs needs root.
+    if diagnostics.isDeliveringEncodedFrames {
+      parts.append("ENCODED \(diagnostics.mediaSubTypeDescription) — NO PIXELS")
     }
     // Present only while burning in an overlay, so its absence is as informative as its
     // value when a viewer reports a bare feed. A climbing skip count means compositing

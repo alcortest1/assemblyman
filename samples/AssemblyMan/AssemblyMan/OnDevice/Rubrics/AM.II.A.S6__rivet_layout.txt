@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: rivet_layout
+SUBTASK:      Perform Rivet Layout
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+rivet_layout — VLM GRADING CRITERIA
+
+Assess the completed rivet layout marked out on the patch and mating material visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Marker edge-distance line runs parallel to and set in from each patch edge
+2. Edge-distance lines are present along every edge of the riveted overlap
+3. Rivet dots sit on the marked edge-distance lines, inboard of the material edge
+4. Rivet dots appear on both the patch and the mating skin or component
+5. Dots along each line are evenly spaced by eye, none bunched or doubled
+6. No holes are drilled at any marked dot location
+
+Critical defects
+- A marked dot lies on or past the material edge, no margin
+- Marked dots fall within the cut-out opening instead of the overlap
+- The patch in frame carries no layout marks on its surface
+- Rivet dots scattered with no discernible row or line alignment
+- Visible crack, tear or deep gouge in the marked patch material
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Perform Rivet Layout
+- Manual: FAA-H-8083-31B ch. 4 p. 4-92; FAA-H-8083-31B ch. 4 p. 4-96
+- Notes: Handbook gives numeric edge distances and pitch (1/4", 5/16", approx 1" spacing, staggered rows 1/2" apart) tied to rivet size and skin thickness; neither rivet size nor thickness is visible, so no numeric value is graded here.; Handbook p. 4-92 states the pattern must conform to the applicable aircraft manual; that document is not in frame.; The photograph cannot settle rivet selection, calculated distances, or exact spacing.

@@ -25,6 +25,8 @@
 		8FD96B872E6F0A9800F56AB1 /* StreamSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD96B6F2E6F0A9800F56AB1 /* StreamSessionViewModel.swift */; };
 		8FD96B882E6F0A9800F56AB1 /* StreamSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD96B752E6F0A9800F56AB1 /* StreamSessionView.swift */; };
 		8FD96B8A2E6F0A9800F56AB1 /* PhotoPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD96B742E6F0A9800F56AB1 /* PhotoPreviewView.swift */; };
+		AA0220000000000000000002 /* SubtaskPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0210000000000000000002 /* SubtaskPickerView.swift */; };
+		AA0220000000000000000001 /* GradeSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0210000000000000000001 /* GradeSheetView.swift */; };
 		8FD96B8D2E6F0A9800F56AB1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FD96B772E6F0A9800F56AB1 /* Assets.xcassets */; };
 		8FD96B952E6F0F7D00F56AB1 /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB1 /* MWDATCore */; };
 		8FD96B952E6F0F7D00F56AB2 /* MWDATCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB2 /* MWDATCamera */; };
@@ -108,6 +110,8 @@
 		8FD96B6F2E6F0A9800F56AB1 /* StreamSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSessionViewModel.swift; sourceTree = "<group>"; };
 		8FD96B722E6F0A9800F56AB1 /* HomeScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenView.swift; sourceTree = "<group>"; };
 		8FD96B742E6F0A9800F56AB1 /* PhotoPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPreviewView.swift; sourceTree = "<group>"; };
+		AA0210000000000000000002 /* SubtaskPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtaskPickerView.swift; sourceTree = "<group>"; };
+		AA0210000000000000000001 /* GradeSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeSheetView.swift; sourceTree = "<group>"; };
 		8FD96B752E6F0A9800F56AB1 /* StreamSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSessionView.swift; sourceTree = "<group>"; };
 		8FD96B772E6F0A9800F56AB1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8FD96B782E6F0A9800F56AB1 /* AssemblyMan.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AssemblyMan.entitlements; sourceTree = "<group>"; };
@@ -148,6 +152,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AA0110000000000000000001 /* LiveKit */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = LiveKit; sourceTree = "<group>"; };
+		AA0110000000000000000002 /* OnDevice */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = OnDevice; sourceTree = "<group>"; };
 		E66CC00E2F3E05D900B07379 /* AssemblyManUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AssemblyManUITests; sourceTree = "<group>"; };
 		E699CC962E8150670052C240 /* AssemblyManTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AssemblyManTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -275,6 +280,8 @@
 				8FD96B722E6F0A9800F56AB1 /* HomeScreenView.swift */,
 				8FFD605F2E84A2F70035E446 /* MainAppView.swift */,
 				8FD96B742E6F0A9800F56AB1 /* PhotoPreviewView.swift */,
+				AA0210000000000000000002 /* SubtaskPickerView.swift */,
+				AA0210000000000000000001 /* GradeSheetView.swift */,
 				8FFD60532E849D0D0035E446 /* RegistrationView.swift */,
 				8FD96B752E6F0A9800F56AB1 /* StreamSessionView.swift */,
 				E6A188472EB918740097D0E1 /* StreamView.swift */,
@@ -293,6 +300,7 @@
 				B20000212FB2000100000001 /* YOLO */,
 				E66CC01A2F3E1A9300B07379 /* TestResources */,
 				AA0110000000000000000001 /* LiveKit */,
+				AA0110000000000000000002 /* OnDevice */,
 				8FD96B702E6F0A9800F56AB1 /* ViewModels */,
 				8FD96B762E6F0A9800F56AB1 /* Views */,
 				8FD96B772E6F0A9800F56AB1 /* Assets.xcassets */,
@@ -375,11 +383,13 @@
 			);
 			fileSystemSynchronizedGroups = (
 				AA0110000000000000000001 /* LiveKit */,
+				AA0110000000000000000002 /* OnDevice */,
 			);
 			name = AssemblyMan;
 			packageProductDependencies = (
 				AA0120000000000000000002 /* LiveKit */,
 				B20000412FB2000100000001 /* UltralyticsYOLO */,
+				AA0140000000000000000002 /* LeapSDK */,
 			);
 			productName = AssemblyMan;
 			productReference = 3A3A3A3A3A3A3A3A3A3A3A3A /* AssemblyMan.app */;
@@ -466,6 +476,7 @@
 				95F7F3332DEF0D91006D1C1A /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
 				AA0120000000000000000001 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 				B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */,
+				AA0140000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */,
 			);
 			productRefGroup = 7A7A7A7A7A7A7A7A7A7A7A7A /* Products */;
 			projectDirPath = "";
@@ -537,6 +548,8 @@
 				8FFD60602E84A2F70035E446 /* MainAppView.swift in Sources */,
 				8FFD60612E84A2F70035E446 /* DebugMenuView.swift in Sources */,
 				8FD96B8A2E6F0A9800F56AB1 /* PhotoPreviewView.swift in Sources */,
+				AA0220000000000000000002 /* SubtaskPickerView.swift in Sources */,
+				AA0220000000000000000001 /* GradeSheetView.swift in Sources */,
 				E66D30242E7DA71900470B48 /* MockDeviceKitButton.swift in Sources */,
 				8F8F00782E8ACB4600A4BDAF /* WearablesViewModel.swift in Sources */,
 				E6A188482EB918740097D0E1 /* StreamView.swift in Sources */,
@@ -935,6 +948,14 @@
 				version = 8.9.11;
 			};
 		};
+		AA0140000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Liquid4All/leap-ios.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.9.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -967,6 +988,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B20000312FB2000100000001 /* XCRemoteSwiftPackageReference "yolo-ios-app" */;
 			productName = UltralyticsYOLO;
+		};
+		AA0140000000000000000002 /* LeapSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0140000000000000000001 /* XCRemoteSwiftPackageReference "leap-ios" */;
+			productName = LeapSDK;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

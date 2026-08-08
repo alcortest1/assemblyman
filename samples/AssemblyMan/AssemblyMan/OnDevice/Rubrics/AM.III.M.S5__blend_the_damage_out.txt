@@ -1,0 +1,31 @@
+TASK CODE:    AM.III.M.S5
+TASK TITLE:   Perform a Minor Repair to a Metal Propeller Blade
+SUBTASK CODE: blend_the_damage_out
+SUBTASK:      Blend the Damage Out
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+blend_the_damage_out — VLM GRADING CRITERIA
+
+Assess the completed blended and fine-sanded repair area on a metal propeller blade visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Damaged area is blended into a rounded depression with no sharp corners or V-shaped notches
+2. Blended area transitions gradually into surrounding blade surface with no abrupt step visible
+3. Repair surface shows fine uniform sanding scratches, not coarse file marks or gouges
+4. No burrs, raised lips or torn metal remain at the perimeter of the blend
+
+Critical defects
+- A crack is visible in or beside the blended area
+- Blend cuts across the full width of leading or trailing edge
+- Blade is bent, gouged deeply, or shows a hole through the surface
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.M.S5/procedure.md § Blend the Damage Out
+- Manual: FAA-H-8083-32B ch. 10 p. 10-45; FAA-H-8083-32B ch. 10 p. 10-46
+- Notes: Handbook pages 10-45/10-46 cover turbine compressor blades, not propellers; blending and no-crack standards used here are provisional.; Procedure sheet cites AC 43.13-1B pp. 8-29 to 8-31, which was not supplied; no numeric depth or radius limits are asserted.; Depth of material removed, allowable repair limits, and surface smoothness by feel cannot be settled from a photograph.; Cleaning and solvent wipe belong to the next subtask; residual metal dust is the expected state here.; FAA-H-8083-32B ch. 10 p. 10-45; FAA-H-8083-32B ch. 10 p. 10-46 — located by content search, not cited by the procedure sheet; standards taken from them are provisional.

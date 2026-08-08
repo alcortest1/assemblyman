@@ -1,0 +1,35 @@
+TASK CODE:    AM.I.D.S8
+TASK TITLE:   Fabricate a  Flareless-Fitting-Tube Connection
+SUBTASK CODE: cut_the_tubing
+SUBTASK:      Cut the Tubing
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+cut_the_tubing — VLM GRADING CRITERIA
+
+Assess the completed cut and deburred length of rigid tubing, before any sleeve or nut is installed visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Tubing is fully severed into a separate piece with the cut end free.
+2. Cut end retains a round cross-section, not pinched flat or oval.
+3. Bore at the cut end is open and clear of any raised burr ring.
+4. Outside edge of the cut end is smooth, with no raised curled lip.
+5. Tube wall adjacent to the cut is free of gouges or deep score grooves.
+6. Tube end is bare: no sleeve and no B-nut installed on it yet.
+
+Critical defects
+- Cut end is crushed flat or collapsed out of round.
+- Tube shows a kink, wrinkle or flattened section along its length.
+- Cut end carries a torn, jagged tab of partially severed metal.
+- Bore of the tube contains loose metal chips or shavings.
+- Deep spiral or circumferential cuts scar the tube wall away from the cut.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S8/procedure.md § Cut the Tubing
+- Manual: FAA-H-8083-30B ch. 9 p. 9-6; FAA-H-8083-30B ch. 9 p. 9-5
+- Notes: Handbook p. 9-6 requires ends 'perfectly square' and the original inside diameter restored; neither squareness nor bore dimension can be settled from a photograph, so no criterion rests on them.; No length dimension appears in the procedure or handbook text supplied; the photograph cannot establish cut length or tube material.; Sleeve and B-nut installation belongs to the next subtask (Preset the Sleeve); their absence is the correct state here.

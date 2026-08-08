@@ -17,6 +17,10 @@ import SwiftUI
 
 struct PhotoPreviewView: View {
   let photo: UIImage
+  /// Sends this photo to be graded. Nil when nothing in the room can grade it — the assistant
+  /// owns the rubrics, so with no assistant present there is nothing to grade against and the
+  /// action is not offered rather than offered and failing.
+  var onGrade: (() -> Void)?
   let onDismiss: () -> Void
 
   @State private var showShareSheet = false
@@ -96,13 +100,44 @@ struct PhotoPreviewView: View {
   }
 
   private var actions: some View {
+    VStack(spacing: 12) {
+      // Above Share and Close, and full width: grading is what this photograph is for in a
+      // training session, and burying it beside the share sheet would say otherwise.
+      if let onGrade {
+        Button {
+          onGrade()
+        } label: {
+          Text("Grade this")
+            .font(Theme.body(13, weight: .semibold))
+            .tracking(13 * 0.06)
+            .textCase(.uppercase)
+            .foregroundStyle(.white)
+          .frame(maxWidth: .infinity)
+          .frame(height: 48)
+          .background(Theme.accent700)
+        }
+        .buttonStyle(PressableStyle(pressedOverlay: Theme.accent800))
+        .accessibilityIdentifier("grade_photo_button")
+      }
+
+      secondaryActions
+    }
+  }
+
+  /// Filing and retaking, under the grade action.
+  ///
+  /// Named for what they do to the work rather than for the mechanism: filing is the share
+  /// sheet, and retaking is dismissing back to the feed the operator is still pointed at. A
+  /// student photographing a finished job is deciding what happens to it, not managing a
+  /// window.
+  private var secondaryActions: some View {
     HStack(spacing: 12) {
       Button {
         showShareSheet = true
       } label: {
         HStack(spacing: 8) {
           Icon(glyph: .share, size: 16, color: Theme.accent900)
-          Text("Share")
+          Text("File for review")
             .font(Theme.body(13, weight: .semibold))
             .tracking(13 * 0.06)
             .textCase(.uppercase)
@@ -113,11 +148,12 @@ struct PhotoPreviewView: View {
         .background(.white)
       }
       .buttonStyle(PressableStyle(pressedOverlay: Theme.accent100))
+      .accessibilityIdentifier("file_for_review_button")
 
       Button {
         dismissWithAnimation()
       } label: {
-        Text("Close")
+        Text("Retake")
           .font(Theme.body(13, weight: .semibold))
           .tracking(13 * 0.06)
           .textCase(.uppercase)
@@ -127,6 +163,7 @@ struct PhotoPreviewView: View {
           .overlay { Rectangle().strokeBorder(.white.opacity(0.6), lineWidth: Theme.hairline) }
       }
       .buttonStyle(PressableStyle(pressedOverlay: .white.opacity(0.12)))
+      .accessibilityIdentifier("retake_photo_button")
     }
   }
 

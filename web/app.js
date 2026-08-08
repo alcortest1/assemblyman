@@ -37,6 +37,9 @@
     tab: 'room',
     stage: 'op',
     toast: '',
+    /* The agent's last grading message, or null when the sheet is closed. Set from the
+       LiveKit data topic, never from the portal itself — the portal does not grade. */
+    grade: null,
     ovMarks: true,
     ovGrid: false,
     selId: 'assist',
@@ -239,6 +242,128 @@
     return mm + ':' + ss;
   }
 
+  // ── grade sheet ──────────────────────────────────────────────────────────
+  /* The agent grades a still of the operator's work against a written rubric and
+     publishes the result on a LiveKit data topic. This draws it over the stage:
+     which criteria passed, which failed, and — the distinction that matters to a
+     student — whether a failure was bad work or an unusable photograph.
+
+     `state.grade` holds the last message received. A `grading` message opens the
+     sheet with the criteria greyed out and no verdicts, so the seconds the model
+     spends thinking read as work in progress rather than a request that went
+     nowhere. */
+
+  var GRADE_DISMISS_MS = 45000;
+  var gradeTimer = null;
+
+  function onAgentData(message) {
+    if (!message || (message.type !== 'grade' && message.type !== 'grading')) return;
+    state.grade = message;
+    clearTimeout(gradeTimer);
+    // A finished grade clears itself so the stage is not permanently covered; one still
+    // running does not, because there is no telling how long the model will take.
+    if (message.type === 'grade') {
+      gradeTimer = setTimeout(function () { dismissGrade(); }, GRADE_DISMISS_MS);
+    }
+    renderGrade();
+  }
+
+  function dismissGrade() {
+    clearTimeout(gradeTimer);
+    state.grade = null;
+    renderGrade();
+  }
+
+  function gradeRow(item, pending) {
+    var li = document.createElement('li');
+    li.className = 'grade-item' + (pending ? ' pending' : ' ' + String(item.verdict).toLowerCase());
+    // A criterion that failed for want of a view is not the same as work that is wrong,
+    // and a student can only act on the first by taking another photograph.
+    if (!pending && item.verdict === 'FAIL' && item.observable === false) li.className += ' unseen';
+
+    var mark = document.createElement('span');
+    mark.className = 'grade-mark';
+    mark.textContent = pending ? '·'
+      : item.verdict === 'PASS' ? '✓'
+      : item.observable === false ? '?' : '✕';
+    mark.setAttribute('aria-hidden', 'true');
+
+    var text = document.createElement('span');
+    text.className = 'grade-text';
+    text.textContent = item.text;
+
+    li.appendChild(mark);
+    li.appendChild(text);
+
+    if (!pending && item.note) {
+      var note = document.createElement('span');
+      note.className = 'grade-item-note';
+      note.textContent = item.note;
+      li.appendChild(note);
+    }
+    // Screen readers get the verdict in words; the glyph alone is not a verdict.
+    li.setAttribute('aria-label',
+      (pending ? 'Not yet graded' : item.verdict === 'PASS' ? 'Passed'
+        : item.observable === false ? 'Failed, not shown in the photo' : 'Failed')
+      + ': ' + item.text);
+    return li;
+  }
+
+  function renderGrade() {
+    var sheet = $('grade-sheet');
+    if (!sheet) return;
+    var g = state.grade;
+    show(sheet, !!g);
+    if (!g) return;
+
+    var pending = g.type === 'grading';
+    var failed = g.error ? null : (g.criteria || []).filter(function (c) { return c.verdict === 'FAIL'; });
+
+    var verdict = $('grade-verdict');
+    verdict.textContent = pending ? 'GRADING…' : g.error ? 'UNAVAILABLE' : g.overall;
+    verdict.className = 'grade-verdict ' + (pending ? 'pending' : g.error ? 'error' : String(g.overall).toLowerCase());
+
+    $('grade-subtask').textContent = g.subtask || g.subtask_code || '—';
+    $('grade-task').textContent = [g.task_code, g.task_title].filter(Boolean).join(' · ');
+    $('grade-score').textContent = pending || g.error ? ''
+      : g.passed + '/' + g.total;
+
+    var observed = $('grade-observed');
+    observed.textContent = g.error ? (g.message || '') : (g.observed || '');
+    show(observed, !!observed.textContent);
+
+    var list = $('grade-list');
+    list.innerHTML = '';
+    (g.criteria || []).forEach(function (item) { list.appendChild(gradeRow(item, pending)); });
+
+    var defects = g.critical_defects || [];
+    var defectList = $('grade-defect-list');
+    defectList.innerHTML = '';
+    defects.forEach(function (d) {
+      var li = document.createElement('li');
+      li.textContent = d;
+      defectList.appendChild(li);
+    });
+    show($('grade-defects'), defects.length > 0);
+
+    // The rubrics are machine-drafted and unreviewed. Saying so on the sheet itself is the
+    // only place it reliably reaches whoever is reading the verdict.
+    var note = $('grade-note');
+    if (pending) note.textContent = 'Reading the frame…';
+    else if (g.error) note.textContent = '';
+    else if (failed && failed.length && failed.every(function (c) { return c.observable === false; })) {
+      note.textContent = 'Everything that failed did so because the photo does not show it.';
+    } else note.textContent = 'Machine-drafted rubric — a first opinion, not a final mark.';
+
+    var meta = [];
+    if (!pending && !g.error) {
+      if (g.model) meta.push(g.model);
+      if (g.latency_s) meta.push(g.latency_s + 's');
+      if (g.frame && g.frame.width) meta.push(g.frame.width + '×' + g.frame.height);
+    }
+    $('grade-meta').textContent = meta.join(' · ');
+  }
+
   // ── toast ────────────────────────────────────────────────────────────────
 
   var toastTimer = null;
@@ -323,6 +448,7 @@
 
     window.PortalLive.connect(code, {
       onUpdate: onLiveUpdate,
+      onData: onAgentData,
       publishLocalMedia: true
     }).then(function (result) {
       state.joining = false;
@@ -743,6 +869,7 @@
       renderStudio();
     }
 
+    renderGrade();
     renderToast();
     syncUrl();
   }
@@ -865,6 +992,13 @@
       render();
     });
 
+    $('grade-close').addEventListener('click', dismissGrade);
+    // Escape closes the sheet. It sits over the stage rather than trapping focus, so the
+    // usual dialog dismissal is the one thing that has to work.
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.grade) dismissGrade();
+    });
+
     window.addEventListener('hashchange', function () {
       if (location.hash === path()) return;
       stopTimer();
@@ -891,6 +1025,7 @@
     state.joining = true;
     window.PortalLive.connect(state.code, {
       onUpdate: onLiveUpdate,
+      onData: onAgentData,
       // A shared link is not consent to turn on this browser's camera and microphone.
       publishLocalMedia: false
     }).then(function (result) {

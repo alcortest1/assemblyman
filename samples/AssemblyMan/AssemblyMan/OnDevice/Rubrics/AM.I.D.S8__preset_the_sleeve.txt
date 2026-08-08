@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.D.S8
+TASK TITLE:   Fabricate a  Flareless-Fitting-Tube Connection
+SUBTASK CODE: preset_the_sleeve
+SUBTASK:      Preset the Sleeve
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+preset_the_sleeve — VLM GRADING CRITERIA
+
+Assess the completed flareless tube connection with the sleeve preset, tube nut tightened onto the fitting in a vise visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Tube nut is threaded onto the fitting body, drawn up tight against it
+2. Fitting is clamped in a vise, held squarely with the tube in line
+3. Tube enters the nut straight, with no visible bend or cocking at the joint
+4. Tube end is square to its axis where visible, with no ragged burr or chips
+
+Critical defects
+- Tube is visibly collapsed, crushed or necked down at the nut
+- Tube end is bare against the fitting with no nut installed
+- Nut is cracked, split, or its threads are visibly stripped
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S8/procedure.md § Preset the Sleeve
+- Manual: FAA-H-8083-30B ch. 9 p. 9-6; FAA-H-8083-30B ch. 9 p. 9-8
+- Notes: Handbook and procedure agree on presetting steps; no numeric conflict found.; Turn count, tube bottoming, thread lubrication and sleeve pilot clearance cannot be judged from a photograph.; Sleeve and tube extension beyond the sleeve pilot are hidden inside the nut at this stage; that check belongs to the next subtask.

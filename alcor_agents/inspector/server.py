@@ -1238,7 +1238,8 @@ def negative_sheet(acs: str, target: dict, criterion: str | None = None,
                 "skipped": [], "cost_usd": 0.0}
 
     subject = target.get("step_title") or target.get("label") or ""
-    drafted = drafter(model=model, criterion=text, subject=subject)
+    drafted = drafter(model=model, criterion=text, subject=subject,
+                      lines=parsed["criteria"])
     spend = drafted.get("cost_usd") or 0.0
     if drafted.get("error"):
         return {"error": drafted["error"], "message": drafted.get("message"),
@@ -1336,9 +1337,13 @@ def negative_items(target: dict, base: dict, include: bool = True,
     label = f"{target['label']} — negated"
     # Which positive point each control negates, where a stored map says so.
     # Ids are positional, so this cannot be recovered by matching c1 to c1 on a
-    # sheet that skipped a line.
-    paired = {p.get("id"): p for p in ((target.get("negative") or {}).get("points") or [])
-              if isinstance(p, dict)}
+    # sheet that skipped a line — and for the same reason the map is dropped
+    # the moment the text stops being the text it was built from. An edit that
+    # adds or removes a line shifts every id below it, and a control read
+    # against the wrong positive is worse than one left unpaired.
+    stored = target.get("negative") or {}
+    paired = ({p.get("id"): p for p in (stored.get("points") or []) if isinstance(p, dict)}
+              if (stored.get("criterion") or "").strip() == text else {})
     shared = {**base, "polarity": "negative", "negative_of": target["target_id"],
               "expected": "fail"}
     checks = sheet_checks(text)
@@ -1394,6 +1399,47 @@ def polarity_report(results: list[dict], rollups: list[dict]) -> dict:
             return None
         return round(original["pass_rate"] - negative["pass_rate"], 4)
 
+    def paired(rows: list[dict]) -> dict:
+        """Negated points whose positive counterpart the photo actually settled.
+
+        The overall gap has a confound that can swallow it whole. These frames
+        are footage of work in progress, so a negated line can be *true* of the
+        photograph by accident — "a safety wire is missing from one end of the
+        turnbuckle" is a correct reading of a frame taken while the first wire
+        is still being threaded, and a grader doing its job passes it. Counted
+        with the rest, honest readings like that look like a grader agreeing
+        with anything.
+
+        So this restricts to the pairs where the same model answered `pass` to
+        the positive form of the same condition on the same frame. There the
+        photograph demonstrably settles the condition and the work demonstrably
+        satisfies it, so the negation is contradicted and `fail` is the only
+        correct answer. Anything else is the grader, not the footage.
+        """
+        positives = {(r.get("model"), r.get("check_id"),
+                      (r.get("rolls_up_to") or r.get("target_id") or "")): r
+                     for r in rows if (r.get("polarity") or "original") != "negative"
+                     and not r.get("error")}
+        flipped = held = abstained = 0
+        for row in rows:
+            if row.get("polarity") != "negative" or row.get("error"):
+                continue
+            parent = (row.get("negative_of")
+                      or (row.get("rolls_up_to") or "").replace(NEGATIVE_SUFFIX, ""))
+            positive = positives.get((row.get("model"), row.get("negative_of_point"), parent))
+            if not positive or positive.get("verdict") != "pass":
+                continue
+            if row.get("verdict") == "fail":
+                flipped += 1
+            elif row.get("verdict") == "pass":
+                held += 1
+            else:
+                abstained += 1
+        pairs = flipped + held + abstained
+        return {"pairs": pairs, "flipped": flipped, "accepted": held,
+                "abstained": abstained,
+                "flip_rate": round(flipped / pairs, 4) if pairs else None}
+
     def side(rows: list[dict], rolls: list[dict], polarity: str) -> tuple[dict, dict]:
         return (tally([r for r in rows if (r.get("polarity") or "original") == polarity]),
                 subtasks([r for r in rolls if (r.get("polarity") or "original") == polarity]))
@@ -1409,6 +1455,7 @@ def polarity_report(results: list[dict], rollups: list[dict]) -> dict:
             "original_subtasks": original_rolls, "negative_subtasks": negative_rolls,
             "point_gap": gap(original, negative),
             "subtask_gap": gap(original_rolls, negative_rolls),
+            "paired": paired(mine),
         }
     original, original_rolls = side(results, rollups, "original")
     negative, negative_rolls = side(results, rollups, "negative")
@@ -1417,6 +1464,7 @@ def polarity_report(results: list[dict], rollups: list[dict]) -> dict:
         "original_subtasks": original_rolls, "negative_subtasks": negative_rolls,
         "point_gap": gap(original, negative),
         "subtask_gap": gap(original_rolls, negative_rolls),
+        "paired": paired(results),
     })
     return report
 

@@ -1,0 +1,35 @@
+TASK CODE:    AM.I.D.S7
+TASK TITLE:   Fabricate a Flexible Hose
+SUBTASK CODE: assemble_the_end_fitting
+SUBTASK:      Assemble the End Fitting
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+assemble_the_end_fitting — VLM GRADING CRITERIA
+
+Assess the completed hose end with its socket and nipple assembled as an MS end fitting visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Socket is threaded onto the hose end, gripping the hose over its full socket length
+2. A visible gap separates the nipple hex from the socket face, not metal-to-metal contact
+3. Nipple is installed into the socket and its hex remains exposed for wrench access
+4. Cover is removed only in a band at the fitting end, exposing wire braid beneath
+5. Hose cover remains intact and undamaged beyond the stripped band
+6. Hose enters the fitting straight, with no kink or flattening at the socket mouth
+
+Critical defects
+- Wire braid strands are cut, splayed or unwound in the stripped band
+- Socket is on the hose with an open bore and no nipple installed
+- Nipple hex is bottomed flush against the socket with no gap
+- Inner tube is split, torn or extruded out of the fitting
+- Hose is kinked or collapsed where it enters the socket
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S7/procedure.md § Assemble the End Fitting
+- Manual: FAA-H-8083-30B ch. 9 p. 9-19
+- Notes: Procedure and handbook agree on the .005"-.031" nipple-to-socket clearance; the photograph can show only that a gap exists, not its dimension.; Lubricant type and application, hose pressure class, socket rotation direction and MIL-H-8790 braid sealant are not determinable from the image and are not graded.; Proof-testing belongs to the next subtask; its absence is the correct state here.

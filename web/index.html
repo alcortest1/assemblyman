@@ -148,6 +148,44 @@
         <span class="stage-chip stage-live"><span class="blink"></span>LIVE · 720P 30FPS</span>
         <span class="stage-chip stage-elapsed" id="elapsed">12:34</span>
       </div>
+
+      <!-- Grade sheet. Opens over the stage the moment the agent starts grading and fills in
+           when the verdict lands, so a request that takes several seconds is visibly running
+           rather than apparently ignored. app.js owns everything inside it. -->
+      <div class="grade-sheet" id="grade-sheet" role="dialog" aria-modal="false"
+           aria-labelledby="grade-subtask" hidden>
+        <div class="blueprint grade-card">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+          <div class="grade-head">
+            <span class="grade-verdict" id="grade-verdict">GRADING</span>
+            <span class="grade-titles">
+              <span class="grade-subtask" id="grade-subtask">—</span>
+              <span class="grade-task" id="grade-task"></span>
+            </span>
+            <span class="spacer"></span>
+            <span class="grade-score" id="grade-score"></span>
+            <button class="grade-close" id="grade-close" type="button" aria-label="Close grade">×</button>
+          </div>
+
+          <div class="grade-observed" id="grade-observed" hidden></div>
+
+          <div class="grade-body">
+            <ol class="grade-list" id="grade-list"></ol>
+
+            <div class="grade-defects" id="grade-defects" hidden>
+              <div class="grade-defects-head">CRITICAL DEFECTS SEEN</div>
+              <ul class="grade-defect-list" id="grade-defect-list"></ul>
+            </div>
+          </div>
+
+          <div class="grade-foot">
+            <span class="grade-note" id="grade-note"></span>
+            <span class="spacer"></span>
+            <span class="grade-meta" id="grade-meta"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <aside class="rail">

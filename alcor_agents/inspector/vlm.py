@@ -24,15 +24,46 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
-TIMEOUT_S = 120
+ENDPOINT = os.environ.get(
+    "ALCOR_VLM_ENDPOINT", "https://openrouter.ai/api/v1/chat/completions"
+).strip() or "https://openrouter.ai/api/v1/chat/completions"
+# Sized for the largest call the harness makes: a 35-frame sequence graded in
+# one request routinely runs past two minutes on the slower arms, and at 120
+# this cut off seven of AM.II.K.S3's twenty-eight calls mid-reply.
+TIMEOUT_S = 300
+
+# An on-device candidate is served locally by `llama-server`, which speaks the
+# same chat-completions dialect this module already posts — same base64 data
+# URIs, same message shape. Carrying the endpoint on the model entry rather than
+# swapping the global is what lets one run put a local model and a hosted one to
+# identical points in a single grid; two separate runs cannot be lined up,
+# because the grid is what the comparison is.
+LOCAL_HOST = os.environ.get("ALCOR_LOCAL_VLM_HOST", "http://127.0.0.1").rstrip("/")
+
+# LEAP runs llama.cpp on device and publishes these sampling parameters in each
+# model's `leap/<quant>.json` manifest. A measurement taken at different
+# settings is not a measurement of what will ship, so they are sent verbatim and
+# override this module's usual temperature 0.
+LEAP_SAMPLING = {"temperature": 0.1, "min_p": 0.15, "repeat_penalty": 1.05}
+
+
+def _local(port: int) -> str:
+    return f"{LOCAL_HOST}:{port}/v1/chat/completions"
+
 
 # Vision-capable models, with the OpenRouter per-million prices current when
 # this registry was written. Prices are used only for the pre-run estimate that
 # the UI shows; actual spend comes back per call in the response usage block.
+# `max_frames` is the most images one call to the model may carry. Where a
+# sequence outruns it, the caller drops frames at even spacing BEFORE the call
+# and says so — the alternative observed on the on-device arms is worse than an
+# error: past ~2× this cap LFM2 stops returning the criteria JSON entirely and
+# answers with a fragment ("Answer: 1"), so every point of a 43-frame span came
+# back ungraded while a 12-frame call graded all eleven. A model that grades a
+# thinner sequence is a result; a model that silently grades nothing is not.
 MODELS = [
     {"id": "anthropic/claude-opus-5", "label": "Opus 5", "vendor": "Anthropic",
-     "in_per_m": 5.00, "out_per_m": 25.00},
+     "in_per_m": 5.00, "out_per_m": 25.00, "max_frames": 64},
     {"id": "google/gemini-3.6-flash", "label": "Gemini 3.6 Flash", "vendor": "Google",
      "in_per_m": 1.50, "out_per_m": 7.50},
     # `-preview` is the whole id, not a qualifier that can be trimmed: there is
@@ -42,12 +73,41 @@ MODELS = [
      "vendor": "Google", "in_per_m": 2.00, "out_per_m": 12.00},
     {"id": "openai/gpt-5.6-sol", "label": "GPT-5.6 Sol", "vendor": "OpenAI",
      "in_per_m": 5.00, "out_per_m": 30.00},
+
+    # On-device candidates. Each needs its own `llama-server` on the port below
+    # — see scripts/serve_local_vlm.sh — which is why they carry a port each
+    # rather than sharing one: the arms are meant to run against the same points
+    # in the same run, and a server hosts one checkpoint.
+    #
+    # Q8_0 is the configuration LEAP actually publishes a manifest for, so it is
+    # the shippable arm. Q4_K_M is here to price what the cheaper quant costs in
+    # accuracy, and the 1.6B to say whether a model a quarter the size is close
+    # enough to matter.
+    {"id": "local/lfm2-vl-3b-q8", "label": "LFM2-VL-3B Q8_0", "vendor": "LiquidAI (on-device)",
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True, "max_frames": 12,
+     "endpoint": _local(8081), "sampling": LEAP_SAMPLING},
+    {"id": "local/lfm2-vl-3b-q4", "label": "LFM2-VL-3B Q4_K_M", "vendor": "LiquidAI (on-device)",
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True, "max_frames": 12,
+     "endpoint": _local(8082), "sampling": LEAP_SAMPLING},
+    {"id": "local/lfm2.5-vl-1.6b-q4", "label": "LFM2.5-VL-1.6B Q4_0",
+     "vendor": "LiquidAI (on-device)",
+     "in_per_m": 0.0, "out_per_m": 0.0, "local": True, "max_frames": 12,
+     "endpoint": _local(8083), "sampling": LEAP_SAMPLING},
 ]
 MODELS_BY_ID = {m["id"]: m for m in MODELS}
-# Every model, every run. A verdict from one model is an opinion; the useful
-# signal is where they disagree, and a run that silently left one out cannot
-# show that. Deselect in the picker for a deliberately cheap run.
-DEFAULT_MODELS = [m["id"] for m in MODELS]
+# Every hosted model, every run. A verdict from one model is an opinion; the
+# useful signal is where they disagree, and a run that silently left one out
+# cannot show that. Deselect in the picker for a deliberately cheap run.
+#
+# The local models are deliberately not defaults: they need a server running on
+# this machine, and a run that quietly included one would fail every call in
+# that column with a connection error that reads like a model fault.
+DEFAULT_MODELS = [m["id"] for m in MODELS if not m.get("local")]
+
+
+def is_local(model: str) -> bool:
+    """Whether this model is served from this machine, and so needs no API key."""
+    return bool(MODELS_BY_ID.get(model, {}).get("local"))
 
 VERDICTS = ("pass", "fail", "unsure")
 
@@ -183,16 +243,27 @@ Reply with JSON only, no prose around it:
  "missing_evidence": "<what a usable photo would need instead, or null>"}"""
 
 def _post(payload: dict, key: str) -> dict:
+    """Send one chat-completions request, to OpenRouter or to a local server.
+
+    Which of the two, and with what sampling, is decided by the model's registry
+    entry rather than by the caller. Every grading path in this module funnels
+    through here, so putting the choice in one place is what keeps a local arm
+    and a hosted arm identical in every respect except the model.
+    """
+    meta = MODELS_BY_ID.get(payload.get("model"), {})
+    endpoint = meta.get("endpoint") or ENDPOINT
+    if meta.get("sampling"):
+        payload = {**payload, **meta["sampling"]}
+
+    headers = {"Content-Type": "application/json"}
+    if not meta.get("local"):
+        headers["Authorization"] = f"Bearer {key}"
+        # OpenRouter attributes traffic with these; both are local-only.
+        headers["HTTP-Referer"] = "http://127.0.0.1:8765"
+        headers["X-Title"] = "Alcor Task Pack Inspector"
+
     request = urllib.request.Request(
-        ENDPOINT,
-        data=json.dumps(payload).encode(),
-        headers={
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json",
-            # OpenRouter attributes traffic with these; both are local-only.
-            "HTTP-Referer": "http://127.0.0.1:8765",
-            "X-Title": "Alcor Task Pack Inspector",
-        },
+        endpoint, data=json.dumps(payload).encode(), headers=headers,
     )
     with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:
         return json.load(response)
@@ -348,7 +419,7 @@ def pick_best_frame(
 ) -> dict:
     """Ask which of a sampled set of frames best shows the finished work."""
     key = load_api_key() if key is None else key
-    if not key:
+    if not key and not is_local(model):
         return {"error": "no_api_key", "message": "OPENROUTER_API_KEY is not set."}
     paths = [Path(p) for p in image_paths if Path(p).exists()]
     if not paths:
@@ -600,7 +671,7 @@ def _complete(
     sheet and handbook alone, with no photograph in existence to send.
     """
     key = load_api_key() if key is None else key
-    if not key:
+    if not key and not is_local(model):
         return {"error": "no_api_key", "message": "OPENROUTER_API_KEY is not set."}
 
     content: list[dict] = [{"type": "text", "text": user_text}]
@@ -1232,17 +1303,26 @@ stays word-for-word.
 EVERY LINE MUST
   * describe the SAME visible article as the line it replaces, in the same \
 photograph
-  * be POSITIVELY CONTRADICTED by correct work: something the photograph shows \
-is not so, not something the photograph cannot settle
+  * ASSERT A WRONG STATE THAT IS THERE TO BE SEEN. State what the photograph \
+would show if the work were wrong — "the tube end is crushed oval", "the pigtail \
+stands straight out". Never state that something is missing, absent, or not \
+visible: "no marker marks are visible", "marker marks are entirely absent" ask a \
+grader to prove a negative from one frame, and it answers "cannot tell". An \
+abstention measures nothing, so a line phrased as an absence has been wasted.
+  * BE AT LEAST AS DEMANDING AS THE LINE IT REPLACES. The control is the same \
+bar aimed the wrong way, never a lower one. Anything permissive — "may", "as \
+long as", "either is acceptable", "need not", "provided that" — is satisfied by \
+correct work, so it passes, and a control that passes has measured nothing \
+either. No hedging the wrong state into something optional.
   * stay roughly the length of the line it replaces, and read like a rubric — \
 an instructor should not be able to pick it out as synthetic
   * never negate an unobservable property. "The alloy is not 2024-T3", "the \
-torque is below 40 in-lb" are answered "cannot tell" by a grader doing its job, \
-and a line that earns an abstention has measured nothing.
-  * never introduce a measurement, scale reference, rule or instrument the \
-original line did not already require. "Twist density measured against a rule in \
-frame shows 1-3 per inch" cannot be answered from a photograph with no rule in \
-it, so it measures the framing rather than the grading.
+torque is below 40 in-lb" are answered "cannot tell" by a grader doing its job.
+  * never require evidence the original line did not already require — no \
+measurement, scale, rule, gauge or instrument it did not name, and no closer \
+view than it assumed. "Twist density measured against a rule in frame shows 1-3 \
+per inch" cannot be answered from a photograph with no rule in it, so it \
+measures the framing rather than the grading.
   * never be absurd. "The wire is made of cheese" proves nothing about grading.
 
 Where a line rests on something a photograph cannot settle in the first place, \
@@ -1257,11 +1337,92 @@ the original text:
  "skipped":  [{"n": 2, "why": "<short reason>"}]}"""
 
 
+# Two ways a negated line measures nothing, both seen in the first sweep of
+# these packs, and neither visible in the result — a run reports a rate either
+# way. They are checked here rather than trusted to the prompt because the cost
+# of missing one is a control that quietly agrees with correct work.
+PERMISSIVE = re.compile(
+    r"\b(may|might|can be|could be|need not|needs? not|as long as|so long as|"
+    r"provided that|if desired|optional(?:ly)?|acceptable|permitted|allowed|"
+    r"either .{0,30}\bor\b|does not (?:need|have) to|no requirement)\b", re.I)
+# Only what the line actually *claims*, which is its head. A trailing contrast —
+# "shows a visible thread gap, not drawn fully up to its fitting" — asserts a
+# state that is there to be seen and reads perfectly well; rejecting it for the
+# word "not" threw away five working lines out of ten in the first pass.
+ABSENCE = re.compile(
+    r"^\s*(no|none|nothing|neither)\b"
+    r"|\b(?:is|are|remains?|appears?|stays?)\s+(?:completely\s+|entirely\s+|fully\s+)?"
+    r"(?:absent|missing|devoid of)\b"
+    r"|\bno\b[^,.;]{0,48}\b(?:is|are)\s+(?:visible|present|seen|apparent)\b", re.I)
+INSTRUMENT = re.compile(
+    r"\b(rule|ruler|scale|gauge|calipers?|micrometer|tape measure|protractor|"
+    r"measured against|graduated|magnif\w+|close-?up|macro)\b", re.I)
+_TRIVIAL = frozenset(
+    "the a an is are was were be been being of to in on at and or with for from "
+    "by as it its this that these those show shows showing shown finished work "
+    "each any all not no".split())
+
+
+def _content_words(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z]+", (text or "").lower())
+            if w not in _TRIVIAL and len(w) > 2}
+
+
+def negative_line_problem(negated: str, original: str) -> str | None:
+    """Why this line would measure nothing, or None if it would.
+
+    Absence and permissiveness are the two failure modes: the first is answered
+    `unsure` because one frame cannot prove a negative, the second is answered
+    `pass` because correct work satisfies it. Both come back as a number in a
+    report that looks exactly like a working control.
+    """
+    line = (negated or "").strip()
+    if not line:
+        return "empty"
+    if PERMISSIVE.search(line):
+        return "permissive — correct work satisfies it, so it can only pass"
+    if ABSENCE.search(line):
+        return ("phrased as an absence — one frame cannot prove a negative, "
+                "so it can only earn an abstention")
+    if INSTRUMENT.search(line) and not INSTRUMENT.search(original or ""):
+        return "requires evidence the criterion did not — it measures the framing"
+    if line.strip().rstrip(".").lower() == (original or "").strip().rstrip(".").lower():
+        return "unchanged from the criterion it is meant to negate"
+    # Enough overlap to be about the same article, scaled to how much there is
+    # to overlap with: a four-word condition and its negation may legitimately
+    # share only the noun, and demanding two words of a short line rejected
+    # perfectly good rewrites.
+    source = _content_words(original)
+    if source and len(_content_words(line) & source) < (1 if len(source) <= 4 else 2):
+        return "describes a different subject from the line it replaces"
+    return None
+
+
+REPAIR_PROMPT = """\
+Some control lines you wrote measure nothing, for the reason given against each. \
+Rewrite ONLY those, under the same rules: assert a definite wrong state that is \
+there to be seen in the same photograph, about the same article, at least as \
+demanding as the line it replaces. Never phrase it as something missing, absent \
+or not visible. Never make it optional or permissive. Never require a closer view \
+or an instrument the original did not.
+
+Reply with JSON only:
+{"criteria": [{"n": <the same number>, "statement": "<the rewritten line>",
+               "kind": "inversion" | "substitution",
+               "changed": "<what you altered, under 12 words>"}]}"""
+
+
 def draft_negative_sheet(
     *, model: str, criterion: str, subject: str | None = None,
-    key: str | None = None, max_tokens: int = 4000, post=_post,
+    lines: list[dict] | None = None, key: str | None = None,
+    max_tokens: int = 4000, post=_post,
 ) -> dict:
     """Negate a criterion sheet's numbered conditions, line for line.
+
+    `lines` is the caller's own parse of the numbered conditions — `[{"n": 1,
+    "text": ...}]` — used to check each negation against the line it replaces.
+    Without it the checks that need the original are skipped rather than guessed
+    at from a second parse that could disagree with the caller's.
 
     Returns the negated lines keyed by the number they replace, so the caller
     can rebuild the sheet in the original's own shape rather than trusting a
@@ -1334,6 +1495,48 @@ def draft_negative_sheet(
          "why": str(item.get("why") or "").strip()}
         for item in (parsed.get("skipped") or []) if isinstance(item, dict)
     ]
+
+    # Lines that would measure nothing get one rewrite, then are dropped. A
+    # dropped line makes the control visibly shorter than the criterion it
+    # mirrors, which is a warning an operator can act on; a line that can only
+    # abstain or only pass is a number that looks like a result.
+    numbered = {item["n"]: item["text"] for item in (lines or [])
+                if isinstance(item, dict) and item.get("n")}
+    problems = {n: problem for n, line in criteria.items()
+                if (problem := negative_line_problem(line["statement"], numbered.get(n, "")))}
+    if problems:
+        listing = "\n".join(
+            f'{n}. rejected: {why}\n   criterion: {numbered.get(n, "")}\n'
+            f'   your line: {criteria[n]["statement"]}'
+            for n, why in sorted(problems.items()))
+        repair = _complete(model=model, system=NEGATIVE_SHEET_PROMPT + "\n\n" + REPAIR_PROMPT,
+                           user_text=f"GRADING CRITERIA\n{criterion.strip()}\n\n{listing}",
+                           max_tokens=max_tokens, key=key, post=post)
+        spend = round(spend + (repair.get("cost_usd") or 0), 6)
+        fixed = parse_json_object(repair.get("text") or "") or {}
+        for item in fixed.get("criteria") or []:
+            if not isinstance(item, dict):
+                continue
+            try:
+                number = int(item.get("n"))
+            except (TypeError, ValueError):
+                continue
+            text = str(item.get("statement") or "").strip()
+            if number not in problems or not text:
+                continue
+            if negative_line_problem(text, numbered.get(number, "")):
+                continue
+            kind = str(item.get("kind") or "inversion").strip().lower()
+            criteria[number] = {
+                "statement": text,
+                "kind": kind if kind in ("inversion", "substitution") else "inversion",
+                "changed": str(item.get("changed") or "").strip(),
+            }
+            problems.pop(number)
+    for number, why in problems.items():
+        criteria.pop(number, None)
+        skipped.append({"n": number, "section": "criteria", "why": why})
+
     return {"error": None, "criteria": criteria, "skipped": skipped,
             "cost_usd": spend, "latency_s": attempts[-1]["latency_s"]}
 
@@ -1640,7 +1843,7 @@ def grade(
     # `None` means "use the ambient key"; an explicit "" means "no key", which
     # must not silently fall back to the one in the environment.
     key = load_api_key() if key is None else key
-    if not key:
+    if not key and not is_local(model):
         return {"model": model, "error": "no_api_key",
                 "message": "OPENROUTER_API_KEY is not set.", "verdict": None}
     if not paths:
@@ -1824,3 +2027,181 @@ def estimate_cost(model_ids: list[str], calls_per_model: int,
     return {"total_usd": round(total, 4), "per_model": per_model,
             "calls": calls_per_model * len(per_model),
             "images_per_call": images}
+
+
+# ------------------------------------------------------------ sequence grading
+#
+# The photo grader answers one criterion about one still, and it abstains a great
+# deal: across the saved runs 1,045 of 1,952 verdicts are `unsure`, most of them
+# a model saying the frame does not show the thing being asked about. A frame is
+# one instant of a process, and much of what a criterion asks about — whether a
+# cut was square, whether a line was scribed before it was drilled — is a state
+# that existed at some point during the work rather than at the moment filming
+# stopped.
+#
+# So this grades the sequence: every frame of a subtask's span, in order, each
+# labelled with its own timestamp, judged in ONE call per model.
+#
+# One call, not one per point. It is cheaper, but that is not the reason. A
+# criterion sheet is a set of conditions about the same article, and a grader
+# reading them together can use one to place another — "the sleeve is on at
+# t=12" settles a later point about assembly order. Splitting the sheet into
+# independent calls throws that away and re-sends the whole sequence each time,
+# which is how a 23-frame span becomes 23 frames × 11 points of upload.
+
+SEQUENCE_PROMPT = """\
+You are grading a student's aircraft-maintenance work for an FAA Part 147 \
+training pilot.
+
+You are shown a VIDEO of the procedure being executed — a sequence of frames in \
+chronological order, each labelled with its timestamp. The final frames show the \
+work as the student left it.
+
+GRADE THE FINISHED PRODUCT against the numbered criteria. Return a verdict for \
+EVERY numbered criterion, in the order given. Do not merge, skip, or add any.
+
+WHAT THE VIDEO CHANGES
+
+The product is graded as it ends, but the video is your evidence for how it got \
+there. A condition of the finished work that the last frame obscures — a hand, a \
+tool, the camera angle — may be plainly visible moments earlier: that is \
+evidence, and the timestamp is your citation. A criterion about how the work was \
+done (order, technique, handling) is graded on the frames that show it being done.
+
+Do not answer `unsure` because the final frame is unclear if an earlier frame \
+settles the point.
+
+VERDICTS
+- `pass`  — the video shows the criterion satisfied.
+- `fail`  — the video shows it is NOT satisfied.
+- `unsure` — no frame shows the feature well enough to decide. Genuinely unsure, \
+not "the last frame was blurry". If the whole video never shows it, that is \
+`unsure` and is a real and useful answer.
+
+Judge only what is visible. Never infer a torque, a pressure, an internal \
+condition, a material or an exact dimension from video. If a criterion needs a \
+measurement and no scale reference appears in any frame, it is `unsure`.
+
+Cite the timestamp you relied on whenever you answer pass or fail. Keep each \
+`note` under 20 words.
+
+Reply with JSON only, no prose around it:
+{"criteria": [
+   {"index": <1-based, matching the numbering given>,
+    "verdict": "pass" | "fail" | "unsure",
+    "at": "<timestamp you relied on, e.g. 12.00, or null>",
+    "note": "<what you saw that decided it>"}
+ ],
+ "observed": "<what the sequence shows overall, under 40 words>"}"""
+
+
+def frame_seconds(name: str) -> float | None:
+    """Read `t000012_50.jpg` as 12.5 seconds.
+
+    The filename is the timestamp — that is the convention the extraction writes
+    and the portal relies on, and it is what lets a verdict cite a moment back to
+    the video without a lookup table.
+    """
+    match = re.match(r"t(\d+)_(\d+)", Path(name).stem)
+    if not match:
+        return None
+    return int(match.group(1)) + int(match.group(2)) / 100.0
+
+
+def grade_sequence(
+    *, model: str, frame_paths: list[Path], criteria: list[str],
+    subject: str | None = None, key: str | None = None,
+    max_tokens: int = 8000, post=_post,
+) -> dict:
+    """Grade every criterion of one subtask against one sampled sequence.
+
+    Returns `criteria`, one entry per input criterion in input order, whether or
+    not the model returned one for it — a point that silently vanished would read
+    as a criterion that did not apply, when it is one nobody checked.
+    """
+    paths = [Path(p) for p in frame_paths]
+    missing = [p.name for p in paths if not p.exists()]
+    if missing:
+        return {"error": "missing_frames", "message": f"{len(missing)} frames absent: "
+                                                      f"{', '.join(missing[:3])}"}
+    if not paths:
+        return {"error": "no_frames", "message": "No frames in the span."}
+    if not criteria:
+        return {"error": "no_criteria", "message": "No criteria for this subtask."}
+
+    stamps = [frame_seconds(p.name) for p in paths]
+    labelled = ", ".join(
+        f"{i + 1}=t{s:.2f}" for i, s in enumerate(stamps) if s is not None
+    )
+    numbered = "\n".join(f"{i + 1}. {c}" for i, c in enumerate(criteria))
+
+    parts = []
+    if subject:
+        parts.append(f"THE WORK\n{subject.strip()}")
+    parts.append(
+        f"SEQUENCE\n{len(paths)} frames follow in chronological order. Their timestamps "
+        f"in seconds are {labelled}."
+    )
+    parts.append(f"NUMBERED CRITERIA\n{numbered}")
+    parts.append(
+        f"Return a verdict for all {len(criteria)} criteria, in order, using the whole "
+        "sequence."
+    )
+
+    result = _complete(model=model, system=SEQUENCE_PROMPT, user_text="\n\n".join(parts),
+                       image_paths=paths, max_tokens=max_tokens, key=key, post=post)
+    if result.get("error"):
+        return result
+
+    parsed = parse_json_object(result["text"]) or {}
+    items = parsed.get("criteria")
+    if not items:
+        # A reply clipped by max_tokens dies mid-object and parses to nothing,
+        # which used to take every point of the call with it — 3,996 completion
+        # tokens of good verdicts thrown away for the one the cap cut in half.
+        # The complete items before the cut are real verdicts; take them one by
+        # one and let only the severed one stay ungraded.
+        items = []
+        for match in re.finditer(r'\{[^{}]*"index"[^{}]*\}', result["text"] or ""):
+            try:
+                items.append(json.loads(match.group(0)))
+            except json.JSONDecodeError:
+                continue
+    by_index = {}
+    for item in items or []:
+        # A degraded reply can put anything in this list — the on-device arms
+        # return bare ints when a sequence outruns them. Whatever is not a
+        # numbered object is simply not a verdict; it must skip, not raise,
+        # because one malformed entry would otherwise take down the whole
+        # call's parse and turn ten good verdicts into none.
+        if not isinstance(item, dict):
+            continue
+        try:
+            by_index[int(item.get("index"))] = item
+        except (TypeError, ValueError):
+            continue
+
+    graded = []
+    for i, text in enumerate(criteria, 1):
+        item = by_index.get(i) or {}
+        verdict = str(item.get("verdict") or "").strip().lower()
+        if verdict not in VERDICTS:
+            # A reply that ran out of tokens loses its later points. They are
+            # `none`, not `unsure`: no model declined to call them, none was asked.
+            graded.append({"index": i, "criterion": text, "verdict": None,
+                           "at": None, "note": "No verdict returned."})
+            continue
+        graded.append({
+            "index": i, "criterion": text, "verdict": verdict,
+            "at": item.get("at"), "note": str(item.get("note") or "").strip(),
+        })
+
+    return {
+        "error": None, "model": model, "criteria": graded,
+        "observed": str(parsed.get("observed") or "").strip(),
+        "frames": [p.name for p in paths],
+        "raw_text": result["text"],
+        "cost_usd": result["cost_usd"], "latency_s": result["latency_s"],
+        "prompt_tokens": result["prompt_tokens"],
+        "completion_tokens": result["completion_tokens"],
+    }

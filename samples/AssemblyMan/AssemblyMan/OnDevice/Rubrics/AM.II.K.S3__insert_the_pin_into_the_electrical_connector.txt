@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.K.S3
+TASK TITLE:   Assemble an Aircraft Electrical Connector
+SUBTASK CODE: insert_the_pin_into_the_electrical_connector
+SUBTASK:      Insert the Pin into the Electrical Connector
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+insert_the_pin_into_the_electrical_connector — VLM GRADING CRITERIA
+
+Assess the completed electrical connector with the crimped pin termination installed in its contact cavity visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A crimped contact is installed in a contact cavity of the connector
+2. The contact body is seated flush with or below the connector insert face, not standing proud
+3. Only one wire enters the connector at the occupied cavity
+4. The installer tool is clear of the connector, not left in the cavity
+5. Wire insulation is continuous up to the connector rear grommet, no bare conductor showing
+6. The connector insert/grommet around the occupied cavity is intact, no tears or gouges
+
+Critical defects
+- Contact protrudes above the insert face instead of sitting in the cavity
+- Contact and wire lie loose outside the connector, no contact in any cavity
+- Pin contact visibly bent, crushed, or its tip broken off
+- Two wires occupy the same contact cavity
+- Connector rubber insert visibly torn or gouged at the cavity
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.K.S3/procedure.md § Insert the Pin into the Electrical Connector
+- Manual: FAA-H-8083-31B ch. 9 p. 9-94
+- Notes: Procedure Step 4 tug check confirms seating by feel; a photograph cannot settle whether the contact retention clip is locked.; Handbook p. 9-94 requires plastic sealing plugs in unwired cavities; the procedure sheet does not call for plugs at this subtask, so empty cavities are not graded here.; Contact size, plating, and crimp integrity are not determinable from the image.

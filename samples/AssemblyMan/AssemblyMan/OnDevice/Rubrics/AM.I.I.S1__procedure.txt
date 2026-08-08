@@ -1,0 +1,32 @@
+TASK CODE:    AM.I.I.S1
+TASK TITLE:   Complete an FAA Form 337 for a Major Repair or Alteration
+SUBTASK CODE: procedure
+SUBTASK:      Procedure
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+procedure — VLM GRADING CRITERIA
+
+Assess the completed completed FAA Form 337 for a major repair or alteration visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Block 1 shows aircraft make, model, serial number and registration number entered
+2. Block 2 shows the registered owner's name and address entered
+3. Block 4 has one box marked, either repair or alteration, not both
+4. Block 8 text names the approved data used for the work
+5. Block 6 shows a signature and a completion date
+
+Critical defects
+- Block 8 is blank, with no description of work performed
+- Both repair and alteration boxes in Block 4 are marked
+- Block 6 signature line on the form is blank
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.I.S1/procedure.md § Procedure
+- Manual: FAA-H-8083-30B ch. 2 p. 2-15
+- Notes: A photograph cannot establish whether cited data is approved, current, or applicable to the serial number shown.; Distribution of copies to owner and FAA, and the separate logbook entry, are not visible in a photograph of the form.; FAA-H-8083-30B ch. 2 p. 2-15 — located by content search, not cited by the procedure sheet; standards taken from it are provisional.

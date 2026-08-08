@@ -1,0 +1,35 @@
+TASK CODE:    AM.I.D.S8
+TASK TITLE:   Fabricate a  Flareless-Fitting-Tube Connection
+SUBTASK CODE: inspect_the_preset_connection
+SUBTASK:      Inspect the Preset Connection
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+inspect_the_preset_connection — VLM GRADING CRITERIA
+
+Assess the completed preset flareless tube end with its sleeve and B-nut, disconnected from the fitting for inspection visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Tube assembly is separated from the fitting; no fitting engaged in the B-nut
+2. B-nut and sleeve both remain on the tube end
+3. Tube end protrudes visibly beyond the end face of the sleeve pilot
+4. A rule, scale, or caliper in frame spans the sleeve pilot face to the tube end
+5. Sleeve cutting edge bite mark is visible as a ring impression on the tube
+6. Tube end bore remains open and round, not pinched shut
+
+Critical defects
+- Tube is split or cracked at the sleeve cutting edge
+- Tube end is flush with or recessed behind the sleeve pilot
+- Tube is crushed flat or closed at the sleeve cut
+- Tube end is bare, with no sleeve between the B-nut and the tube end
+- Tube is sharply kinked or bent immediately behind the sleeve
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S8/procedure.md § Inspect the Preset Connection
+- Manual: FAA-H-8083-30B ch. 9 p. 9-6; FAA-H-8083-30B ch. 9 p. 9-8
+- Notes: Procedure sheet says 0.015" for corrosion-resistant steel; handbook p. 9-6 text says 'steel tubing' while Figure 9-14 on p. 9-8 says 'corrosion-resistant steel tubing'. Neither clearance is judged here.; A photograph cannot establish the 3/32"-1/8" protrusion value, sleeve pilot clearance, tube material, or that the sleeve moves only in rotation; only the presence and position of the parts and visible damage are graded.

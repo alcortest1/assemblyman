@@ -1,0 +1,31 @@
+TASK CODE:    AM.III.M.S5
+TASK TITLE:   Perform a Minor Repair to a Metal Propeller Blade
+SUBTASK CODE: prepare_the_damaged_area
+SUBTASK:      Prepare the Damaged Area
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+prepare_the_damaged_area — VLM GRADING CRITERIA
+
+Assess the completed damaged metal propeller blade area cleaned, measured and outlined for repair visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Damage on the blade is enclosed by a closed dye or marker outline
+2. Outline is a smooth contoured shape tapering into the damage, no sharp corners
+3. Blade surface inside and around the outline is clean, free of oil, dirt and debris
+4. Metal inside the outline is intact, with no filing or sanding cuts present
+
+Critical defects
+- A crack extends from the damaged area
+- Part of the damage lies outside the marked outline
+- Marker or dye covers the damage, hiding it from inspection
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.M.S5/procedure.md § Prepare the Damaged Area
+- Manual: FAA-H-8083-32B ch. 10 p. 10-45
+- Notes: Chapter 10 pages address turbine compressor blades, not propellers; the no-cracks and rounded-contour standards are treated as provisional.; Cleaning method, gauge zeroing, recorded dimensions and compliance with manufacturer repair limits cannot be settled from a photograph.; Blending and material removal belong to the next subtask; their absence is the correct state here.; FAA-H-8083-32B ch. 10 p. 10-45 — located by content search, not cited by the procedure sheet; standards taken from it are provisional.

@@ -1,0 +1,34 @@
+TASK CODE:    AM.I.D.S1
+TASK TITLE:   Fabricate a Rigid Line with a Flare and a Bend
+SUBTASK CODE: route_the_line
+SUBTASK:      Determine the Line Route
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+route_the_line — VLM GRADING CRITERIA
+
+Assess the completed safety-wire route pattern marked for bends and measured for tubing length visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A single continuous length of safety wire is present as the route pattern.
+2. Felt-tip marker marks are visible on the wire at bend locations.
+3. Marker marks are visible at both ends of the wire.
+4. The wire lies straight and flat alongside a tape measure or scale in frame.
+5. The wire's zero end is set at the tape measure's zero or a stated start graduation.
+6. The wire shows smooth, rounded bend forms rather than sharp folds where bends are marked.
+
+Critical defects
+- The safety wire is severed into two or more separate pieces.
+- A sharp kink or crimp interrupts the wire route path.
+- The wire in frame carries no marker marks at bends or ends.
+- The wire is coiled or looped back over itself, not one route path.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S1/procedure.md § Determine the Line Route
+- Manual: FAA-H-8083-30B ch. 9 p. 9-3
+- Notes: Procedure directs adding 1/2" per bend to the straightened wire length; a photograph cannot confirm this arithmetic or the recorded worksheet figure, so no criterion tests it.; Handbook pp. 9-3, 9-5, 9-6 cover cutting, bending and flaring, which belong to later subtasks; absence of cut, bent or flared tubing is the correct state here.; The photograph cannot establish that the mapped route clears obstructions or meets a minimum bend radius for the tube size.

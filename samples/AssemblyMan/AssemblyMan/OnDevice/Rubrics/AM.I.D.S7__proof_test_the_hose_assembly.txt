@@ -1,0 +1,35 @@
+TASK CODE:    AM.I.D.S7
+TASK TITLE:   Fabricate a Flexible Hose
+SUBTASK CODE: proof_test_the_hose_assembly
+SUBTASK:      Proof-Test the Hose Assembly
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+proof_test_the_hose_assembly — VLM GRADING CRITERIA
+
+Assess the completed flexible hose assembly capped and pressurized on the hydraulic hose test stand visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. One end fitting of the hose assembly is coupled to the test stand port.
+2. The opposite end fitting carries a cap or plug, with no open port.
+3. A test stand pressure gauge is visible in frame with the assembly.
+4. The gauge pointer is off zero, showing the assembly under pressure.
+5. Hose cover, socket-to-hose junctions and both fittings appear dry, with no fluid weeping.
+6. The pressurized hose lies in a smooth run, free of kinks or sharp bends.
+
+Critical defects
+- Fluid is spraying or dripping from a fitting or the hose cover.
+- The hose end opposite the stand is open, with no cap or plug fitted.
+- The hose cover is burst, blistered, or wire braid is protruding.
+- A socket has pulled away from the hose, leaving a gap.
+- The pressurized hose is kinked or collapsed at a sharp bend.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S7/procedure.md § Proof-Test the Hose Assembly
+- Manual: FAA-H-8083-30B ch. 9 p. 9-19; FAA-H-8083-30B ch. 9 p. 9-21
+- Notes: Procedure sheet and handbook agree; no numeric conflict found.; The photograph cannot establish the test medium, the proof pressure applied, whether pressure was held without decay, or that trapped air was bled; only the pressurized configuration and absence of visible leakage are gradeable.; Proof-test pressure is set by the hose manufacturer, so no pressure value is graded from the gauge face.

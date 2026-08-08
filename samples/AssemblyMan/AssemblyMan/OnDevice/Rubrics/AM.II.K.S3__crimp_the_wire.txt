@@ -1,0 +1,35 @@
+TASK CODE:    AM.II.K.S3
+TASK TITLE:   Assemble an Aircraft Electrical Connector
+SUBTASK CODE: crimp_the_wire
+SUBTASK:      Crimp the Wire
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+crimp_the_wire — VLM GRADING CRITERIA
+
+Assess the completed crimped pin contact terminated on a single stripped wire, removed from the crimper visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. One pin contact is crimped onto the end of a single wire.
+2. Crimp indentation marks are visible on the contact's wire barrel.
+3. Wire insulation stops outside the barrel; bare conductor enters the barrel.
+4. No loose conductor strands protrude outside or alongside the crimp barrel.
+5. The pin's mating end is straight, unflattened, and free of tool marks.
+6. The crimped contact is loose and not seated in a connector cavity.
+
+Critical defects
+- The wire is separated from the pin contact.
+- The crimp barrel is split, cracked, or crushed through.
+- The pin mating end is visibly bent or flattened.
+- Two wires are terminated in the one crimp barrel.
+- Insulation is captured inside the barrel with no bare conductor entering it.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.K.S3/procedure.md § Crimp the Wire
+- Manual: FAA-H-8083-31B ch. 9 p. 9-94
+- Notes: Neither source gives numeric crimp dimensions; no measurement criterion is written.; The procedure's pull test and the crimper cycle cannot be settled from a photograph; only the resulting termination is graded.; Insertion into the connector belongs to the next subtask, so its absence is correct here.

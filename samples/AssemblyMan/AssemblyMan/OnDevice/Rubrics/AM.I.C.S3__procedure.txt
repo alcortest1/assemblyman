@@ -1,0 +1,32 @@
+TASK CODE:    AM.I.C.S3
+TASK TITLE:   Calculate Ballast Weight Shift and Required Weight Location.
+SUBTASK CODE: procedure
+SUBTASK:      Procedure
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+procedure — VLM GRADING CRITERIA
+
+Assess the completed worksheet showing the ballast weight calculation and required ballast location visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Aircraft total weight is written on the worksheet in pounds
+2. An out-of-range CG distance in inches is written as a subtraction of two CG values
+3. A ballast location is written as a station or arm in inches
+4. The ballast formula appears with weight times CG shift divided by distance from ballast location to limit
+5. A final ballast weight answer is written in pounds
+
+Critical defects
+- Division and multiplication are transposed in the written formula
+- The written arithmetic gives a result other than the shown numbers produce
+- The final answer is blank or has no pounds unit
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.C.S3/procedure.md § Procedure
+- Manual: none cited
+- Notes: Values in the procedure (2,500 lb, 64"-70", 71.2", +45", 120 lb) are illustrative examples; the assigned problem data may differ, so no numeric value is required.; A photograph of a worksheet cannot establish that the weight used is the loaded weight, that the CG limits match the published range, or that the nearest exceeded limit was chosen.

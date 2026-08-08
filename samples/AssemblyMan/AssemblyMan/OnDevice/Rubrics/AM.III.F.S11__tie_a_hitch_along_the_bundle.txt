@@ -1,0 +1,31 @@
+TASK CODE:    AM.III.F.S11
+TASK TITLE:   Replace a Wire Bundle Lacing
+SUBTASK CODE: tie_a_hitch_along_the_bundle
+SUBTASK:      Tie a Hitch Along the Bundle
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+tie_a_hitch_along_the_bundle — VLM GRADING CRITERIA
+
+Assess the completed wire bundle with one or more intermediate half hitches tied along it after the starting knot visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. At least one hitch is tied on the bundle beyond the starting knot
+2. Each hitch cord fully encircles the wire bundle
+3. Hitch crossings lie on one side, aligned in a row with the starting knot
+4. A continuous run of lacing cord connects the starting knot to the hitch
+
+Critical defects
+- Hitch is open or unlooped, cord simply laid across the bundle
+- Wire insulation is cut, pinched or broken where the cord bears
+- Individual wires escape the hitch and lie outside the bundle
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.F.S11/procedure.md § Tie a Hitch Along the Bundle
+- Manual: FAA-H-8083-31B ch. 9 p. 9-88; FAA-H-8083-31B ch. 9 p. 9-87
+- Notes: Procedure specifies approximately 6" hitch spacing; a photograph cannot settle that spacing, so it is not graded.; Hitch tightness, cord tension and bundle diameter are not gradeable from a still image.; The finishing knot belongs to the next subtask; its absence is the correct state here.; Handbook p. 9-88 shows a 3/8" minimum trim, which applies to the finishing knot, not to this subtask.

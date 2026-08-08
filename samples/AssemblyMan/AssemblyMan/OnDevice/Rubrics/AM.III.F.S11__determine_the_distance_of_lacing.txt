@@ -1,0 +1,34 @@
+TASK CODE:    AM.III.F.S11
+TASK TITLE:   Replace a Wire Bundle Lacing
+SUBTASK CODE: determine_the_distance_of_lacing
+SUBTASK:      Determine the Distance of Lacing
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+determine_the_distance_of_lacing — VLM GRADING CRITERIA
+
+Assess the completed gathered wire bundle with its measuring tape and the cut length of lacing cord visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Loose wires are gathered into one parallel bundle rather than lying separately
+2. A tape measure lies alongside the bundle with its graduated scale visible
+3. A cut length of lacing cord is present in the frame, free of any spool
+4. The cut cord, laid or coiled beside the bundle, is visibly longer than the bundle run
+5. The cord is one continuous piece with two cut ends, not several fragments
+6. No knot, hitch or cord wrap is present on the bundle
+
+Critical defects
+- Wire insulation is cut, nicked or stripped bare on the bundle
+- The cut cord is visibly shorter than the bundle it will lace
+- Wires splay and cross in random directions, forming no bundle
+- Cord is severed into multiple short unusable pieces
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.III.F.S11/procedure.md § Determine the Distance of Lacing
+- Manual: FAA-H-8083-31B ch. 9 p. 9-87
+- Notes: Bundle diameter, tape reading, and the 2x cord length calculation are measurements a photograph cannot settle; only the coarse comparison of cord length to bundle run is graded.; Waxed lacing cord type cannot be confirmed visually; no criterion depends on cord material.; The starting knot belongs to the next subtask; its absence here is the correct state.

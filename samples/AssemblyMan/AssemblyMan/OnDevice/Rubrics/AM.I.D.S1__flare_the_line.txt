@@ -1,0 +1,31 @@
+TASK CODE:    AM.I.D.S1
+TASK TITLE:   Fabricate a Rigid Line with a Flare and a Bend
+SUBTASK CODE: flare_the_line
+SUBTASK:      Flare the Tube
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+flare_the_line — VLM GRADING CRITERIA
+
+Assess the completed flared rigid tube end with its sleeve and B-nut installed visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. A cone-shaped flare, wider than the tube body, is formed at the tube end.
+2. A B-nut and a sleeve are on the tube behind the flare.
+3. Sleeve pulled to the flare shows a thin blue ring around the flared end.
+4. Flare surface is free of cracks, splits, nicks or scratches.
+
+Critical defects
+- The flare is split or cracked at its rim.
+- The tube end is bare, with no sleeve or B-nut on it.
+- The B-nut threads face away from the flared end.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.I.D.S1/procedure.md § Flare the Tube
+- Manual: FAA-H-8083-30B ch. 9 p. 9-4; FAA-H-8083-30B ch. 9 p. 9-5
+- Notes: Procedure specifies a 47° flare; handbook p. 9-4 specifies dies producing 35° to 37°. Conflict unresolved; no angle criterion written.; The photograph cannot settle flare angle, wall thinning, or internal condition of the flare.; Pressure testing belongs to the next subtask; its absence is correct here.

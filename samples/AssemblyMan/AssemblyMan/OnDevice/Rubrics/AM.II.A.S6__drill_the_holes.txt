@@ -1,0 +1,31 @@
+TASK CODE:    AM.II.A.S6
+TASK TITLE:   Prepare and Install a Patch to Repair an Aircraft or Component
+SUBTASK CODE: drill_the_holes
+SUBTASK:      Drill the Holes
+
+Machine-drafted from the procedure sheet and FAA handbook. Not reviewed by a
+subject-matter expert.
+
+==============================================================================
+drill_the_holes — VLM GRADING CRITERIA
+
+Assess the completed drilled and deburred rivet holes in the skin, doubler and filler of a patch repair visible in the image. Evaluate each criterion independently as PASS or FAIL.
+
+Criteria
+1. Each rivet layout mark on the skin has a drilled hole through it.
+2. Drilled holes appear round and uniform, not elongated, torn or triangular.
+3. Visible hole edges show no burr ring or raised metal.
+4. Doubler and filler holes align with skin holes, shown by cleco pins in place.
+
+Critical defects
+- A drilled hole breaks out through a part edge or cutout.
+- Skin or doubler is cracked or torn between adjacent holes.
+- Metal around a hole is dished, gouged or deformed by chuck contact.
+
+Overall decision
+Overall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion “FAIL — not demonstrated in image.” Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.
+
+Source basis
+- Procedure: tasks/AM.II.A.S6/procedure.md § Drill the Holes
+- Manual: FAA-H-8083-31B ch. 4 p. 4-85; FAA-H-8083-31B ch. 4 p. 4-96
+- Notes: Photograph cannot settle drill bit size, hole diameter, edge distance or pitch measurements.; Backside deburring and hole alignment beneath the skin are not visible; only near-side condition is graded.; Rivet setting belongs to a later subtask; absence of set rivets is correct here.

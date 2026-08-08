@@ -1,0 +1,610 @@
+{
+ "determine_the_line_route": {
+  "live": true,
+  "runId": "hosted run \u00b7 saved to data/video_runs/AM.I.D.S1.json",
+  "fps": 0.5,
+  "models": [
+   "Opus 5",
+   "Gemini 3.1 Pro",
+   "Gem 3.6 Flash",
+   "GPT-5.6 Sol"
+  ],
+  "clip": "route_the_line",
+  "rows": [
+   {
+    "cells": [
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=14.00"
+     ],
+     [
+      "pass",
+      "t=18.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=18.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=38.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "Resolution too low to\u2026"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "Wire straightened bef\u2026"
+     ],
+     [
+      "pass",
+      "t=12.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=12.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=40.00"
+     ],
+     [
+      "pass",
+      "t=12.00"
+     ],
+     [
+      "pass",
+      "t=t40.00"
+     ],
+     [
+      "pass",
+      "t=40.00"
+     ]
+    ]
+   }
+  ],
+  "rollup": [
+   [
+    "review",
+    "review \u00b7 2 unsure"
+   ],
+   [
+    "pass",
+    "pass \u00b7 10/10"
+   ],
+   [
+    "pass",
+    "pass \u00b7 10/10"
+   ],
+   [
+    "pass",
+    "pass \u00b7 10/10"
+   ]
+  ],
+  "replies": {
+   "m0": "{\"criteria\": [\n  {\"index\": 1, \"verdict\": \"pass\", \"at\": \"40.00\", \"note\": \"One continuous wire held between both hands along tape, no splices.\"},\n  {\"index\": 2, \"verdict\": \"pass\", \"at\": \"14.00\", \"note\": \"Marker seen applied to wire at bend/end points on fixture.\"},\n  {\"index\": 3, \"verdict\": \"pass\", \"at\": \"18.00\", \"note\": \"Both wire ends marked with felt-tip during marking step.\"},\n  {\"index\": 4, \"verdict\": \"pass\", \"at\": \"38.00\", \"note\": \"Straightened wire laid alongside extended tape measure on bench.\"},\n  {\"index\": 5, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Resolution too low to confirm wire end aligned with tape zero/hook.\"},\n  {\"index\": 6, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Wire straightened before measuring; bend radii never shown close up.\"},\n  {\"index\": 7, \"verdict\": \"pass\", \"at\": \"40.00\", \"note\": \"Single unbroken wire in final measurement frames; only excess trimmed.\"},\n  {\"index\": 8, \"verdict\": \"pass\", \"at\": \"40.00\", \"note\": \"Wire lies straight along tape with no visible kink or crimp.\"},\n  {\"index\": 9, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"Marking of ends and bends performed with felt-tip marker.\"},\n  {\"index\": 10, \"verdict\": \"pass\", \"at\": \"40.00\", \"note\": \"Wire extended in one straight path, not coiled or overlapped.\"}\n ],\n \"observed\": \"Student forms safety wire around a fixture route, marks bends and ends with marker, trims excess with pliers, straightens the wire, then measures its overall length against a tape measure.\"}",
+   "m1": "```json\n{\n  \"criteria\": [\n    {\n      \"index\": 1,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"A single continuous wire is measured at the end.\"\n    },\n    {\n      \"index\": 2,\n      \"verdict\": \"pass\",\n      \"at\": \"18.00\",\n      \"note\": \"Student marks the wire at a bend location.\"\n    },\n    {\n      \"index\": 3,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"Marks are visible near both ends of the straightened wire.\"\n    },\n    {\n      \"index\": 4,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"The wire is held straight alongside the tape measure.\"\n    },\n    {\n      \"index\": 5,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"The left end of the wire aligns with the tape measure's zero hook.\"\n    },\n    {\n      \"index\": 6,\n      \"verdict\": \"pass\",\n      \"at\": \"12.00\",\n      \"note\": \"The wire forms smooth curves through the routing path.\"\n    },\n    {\n      \"index\": 7,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"The final measured wire is a single, unsevered piece.\"\n    },\n    {\n      \"index\": 8,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"The straightened wire shows no sharp kinks or crimps.\"\n    },\n    {\n      \"index\": 9,\n      \"verdict\": \"pass\",\n      \"at\": \"40.00\",\n      \"note\": \"Black marker marks are clearly visible on the final wire.\"\n    },\n    {\n      \"index\": 10,\n      \"verdict\": \"pass\",\n      \"at\": \"12.00\",\n      \"note\": \"The wire follows a single path without looping back.\"\n    }\n  ],\n  \"observed\": \"The student routes a single wire through the fixture, marks bends and ends, cuts it, straightens it, and measures the final length against a tape measure, satisfying all criteria.\"\n}\n```",
+   "m2": "```json\n{\"criteria\": [\n   {\"index\": 1,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Single continuous piece of safety wire shown.\"},\n   {\"index\": 2,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Marker marks visible on wire at bends.\"},\n   {\"index\": 3,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Marker marks visible at ends of wire.\"},\n   {\"index\": 4,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Wire held straight alongside tape measure.\"},\n   {\"index\": 5,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Left end of wire aligned with 1-inch mark on tape.\"},\n   {\"index\": 6,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Wire shows smooth bends without sharp folds.\"},\n   {\"index\": 7,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Wire is in a single continuous piece.\"},\n   {\"index\": 8,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"No sharp kinks or crimps present on wire.\"},\n   {\"index\": 9,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Wire clearly carries felt-tip marker marks.\"},\n   {\"index\": 10,\n    \"verdict\": \"pass\",\n    \"at\": \"t40.00\",\n    \"note\": \"Wire is straight, not coiled or looped.\"}\n ],\n \"observed\": \"The student forms safety wire along the route, marks bends and ends with a marker, cuts excess, straightens the wire, and aligns it flat alongside a tape measure starting at 1 inch.\"}\n```",
+   "m3": "{\"criteria\":[{\"index\":1,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"One continuous wire length is laid across the tape.\"},{\"index\":2,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Dark marker marks are visible at multiple route locations.\"},{\"index\":3,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Dark marks are visible at the wire's left and right ends.\"},{\"index\":4,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Wire lies straight and flat alongside the extended tape measure.\"},{\"index\":5,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Left wire end is aligned with the tape hook and zero.\"},{\"index\":6,\"verdict\":\"pass\",\"at\":\"12.00\",\"note\":\"Formed route shows gradual rounded bends without sharp folds.\"},{\"index\":7,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Finished route pattern remains one unsevered wire piece.\"},{\"index\":8,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Straightened wire shows no visible sharp kink or crimp.\"},{\"index\":9,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Multiple dark marker marks remain visible on the finished wire.\"},{\"index\":10,\"verdict\":\"pass\",\"at\":\"40.00\",\"note\":\"Wire forms one straight route path without coils or overlap.\"}],\"observed\":\"Student formed one wire through the route, marked ends and bends, cut excess, straightened it, and laid the finished marked pattern along a tape measure.\"}"
+  },
+  "framesSent": {
+   "m0": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ],
+   "m1": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ],
+   "m2": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ],
+   "m3": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ]
+  },
+  "capNotes": [],
+  "cost": 0
+ },
+ "cut_the_tubing": {
+  "live": true,
+  "runId": "hosted run \u00b7 saved to data/video_runs/AM.I.D.S1.json",
+  "fps": 0.5,
+  "models": [
+   "Opus 5",
+   "Gemini 3.1 Pro",
+   "Gem 3.6 Flash",
+   "GPT-5.6 Sol"
+  ],
+  "clip": "cut_the_line",
+  "rows": [
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=38.00"
+     ],
+     [
+      "unsure",
+      "The video ends before\u2026"
+     ],
+     [
+      "fail",
+      "t=t38.00"
+     ],
+     [
+      "unsure",
+      "The tubing remains ob\u2026"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "pass",
+      "t=16.00"
+     ],
+     [
+      "pass",
+      "t=t16.00"
+     ],
+     [
+      "pass",
+      "t=16.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=38.00"
+     ],
+     [
+      "unsure",
+      "The cut end is never \u2026"
+     ],
+     [
+      "unsure",
+      "Cutting is incomplete\u2026"
+     ],
+     [
+      "unsure",
+      "The cut-end profile i\u2026"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=34.00"
+     ],
+     [
+      "pass",
+      "t=4.00"
+     ],
+     [
+      "pass",
+      "t=t2.00"
+     ],
+     [
+      "pass",
+      "t=38.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "unsure",
+      "t=38.00"
+     ],
+     [
+      "unsure",
+      "The cut end is not vi\u2026"
+     ],
+     [
+      "unsure",
+      "Cut end is not visibl\u2026"
+     ],
+     [
+      "unsure",
+      "The finished cut end \u2026"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=26.00"
+     ],
+     [
+      "pass",
+      "t=4.00"
+     ],
+     [
+      "pass",
+      "t=t2.00"
+     ],
+     [
+      "pass",
+      "t=38.00"
+     ]
+    ]
+   },
+   {
+    "cells": [
+     [
+      "pass",
+      "t=34.00"
+     ],
+     [
+      "pass",
+      "t=4.00"
+     ],
+     [
+      "pass",
+      "t=t2.00"
+     ],
+     [
+      "pass",
+      "t=38.00"
+     ]
+    ]
+   }
+  ],
+  "rollup": [
+   [
+    "review",
+    "review \u00b7 3 unsure"
+   ],
+   [
+    "review",
+    "review \u00b7 3 unsure"
+   ],
+   [
+    "fail",
+    "fail \u00b7 1 of 7"
+   ],
+   [
+    "review",
+    "review \u00b7 3 unsure"
+   ]
+  ],
+  "replies": {
+   "m0": "{\"criteria\": [\n  {\"index\": 1, \"verdict\": \"unsure\", \"at\": \"38.00\", \"note\": \"Cutter shown emptied and small object in hand, but two separate pieces never clearly shown\"},\n  {\"index\": 2, \"verdict\": \"pass\", \"at\": \"16.00\", \"note\": \"Felt-tip pen applied to tubing, 'Mark the length' step shown\"},\n  {\"index\": 3, \"verdict\": \"unsure\", \"at\": \"38.00\", \"note\": \"No close view of cut end profile in any frame\"},\n  {\"index\": 4, \"verdict\": \"pass\", \"at\": \"34.00\", \"note\": \"Tube appears straight through cutter, no kinks or flat spots visible\"},\n  {\"index\": 5, \"verdict\": \"unsure\", \"at\": \"38.00\", \"note\": \"Cut end never imaged closely enough to judge crushing\"},\n  {\"index\": 6, \"verdict\": \"pass\", \"at\": \"26.00\", \"note\": \"Tube surface along length appears smooth, no splits or gouges\"},\n  {\"index\": 7, \"verdict\": \"pass\", \"at\": \"34.00\", \"note\": \"Tube body shows uniform round profile, no wrinkles or collapse\"}\n ],\n \"observed\": \"Student reads tubing OD 0.25\\\", measures required length with tape, marks with felt-tip, aligns tube cutter to the mark, and rotates cutter; final frames show cutter and hands, no close inspection of cut end.\"}",
+   "m1": "```json\n{\"criteria\": [\n   {\"index\": 1,\n    \"verdict\": \"unsure\",\n    \"at\": null,\n    \"note\": \"The video ends before the tubing is fully severed.\"},\n   {\"index\": 2,\n    \"verdict\": \"pass\",\n    \"at\": \"16.00\",\n    \"note\": \"A black felt-tip mark is clearly visible on the tubing.\"},\n   {\"index\": 3,\n    \"verdict\": \"unsure\",\n    \"at\": null,\n    \"note\": \"The cut end is never shown as the video ends before cutting is complete.\"},\n   {\"index\": 4,\n    \"verdict\": \"pass\",\n    \"at\": \"4.00\",\n    \"note\": \"The tubing body is straight and shows no kinks or flattening.\"},\n   {\"index\": 5,\n    \"verdict\": \"unsure\",\n    \"at\": null,\n    \"note\": \"The cut end is not visible to check for crushing.\"},\n   {\"index\": 6,\n    \"verdict\": \"pass\",\n    \"at\": \"4.00\",\n    \"note\": \"The visible length of the tubing shows no splits or gouges.\"},\n   {\"index\": 7,\n    \"verdict\": \"pass\",\n    \"at\": \"4.00\",\n    \"note\": \"The tubing is straight with no kinks or wrinkles visible.\"}\n ],\n \"observed\": \"The student measures and marks the tubing, then begins cutting it with a tube cutter. However, the video ends before the cut is completed, so the final severed end cannot be evaluated.\"}\n```",
+   "m2": "```json\n{\"criteria\": [\n   {\"index\": 1, \"verdict\": \"fail\", \"at\": \"t38.00\", \"note\": \"Video ends while cutting; tubing remains in one unsevered piece.\"},\n   {\"index\": 2, \"verdict\": \"pass\", \"at\": \"t16.00\", \"note\": \"A felt-tip mark is drawn on the tube and visible during cutter alignment.\"},\n   {\"index\": 3, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Cutting is incomplete, so the finished cut end profile is not visible.\"},\n   {\"index\": 4, \"verdict\": \"pass\", \"at\": \"t2.00\", \"note\": \"Tube body is straight and free of kinks, wrinkles, or flattening.\"},\n   {\"index\": 5, \"verdict\": \"unsure\", \"at\": null, \"note\": \"Cut end is not visible because cutting was not completed.\"},\n   {\"index\": 6, \"verdict\": \"pass\", \"at\": \"t2.00\", \"note\": \"Tube surface shows no splits, cracks, or gouges along its length.\"},\n   {\"index\": 7, \"verdict\": \"pass\", \"at\": \"t2.00\", \"note\": \"Tubing is straight with no kinks, wrinkles, or collapsed walls.\"}\n ],\n \"observed\": \"The student measures 0.25-inch tubing, marks the length with a felt-tip pen, aligns the tube cutter, and rotates it, but the video ends before the tube is cut through.\"}\n```",
+   "m3": "{\"criteria\":[{\"index\":1,\"verdict\":\"unsure\",\"at\":null,\"note\":\"The tubing remains obscured by the cutter; separation is never clearly displayed.\"},{\"index\":2,\"verdict\":\"pass\",\"at\":\"16.00\",\"note\":\"A dark felt-tip length mark is visible where the marker contacts the tubing.\"},{\"index\":3,\"verdict\":\"unsure\",\"at\":null,\"note\":\"The cut-end profile is never shown clearly.\"},{\"index\":4,\"verdict\":\"pass\",\"at\":\"38.00\",\"note\":\"Visible tubing remains straight without kinks, wrinkles, or flattening.\"},{\"index\":5,\"verdict\":\"unsure\",\"at\":null,\"note\":\"The finished cut end is not exposed for inspection.\"},{\"index\":6,\"verdict\":\"pass\",\"at\":\"38.00\",\"note\":\"Visible tube length shows no split, crack, or longitudinal gouge.\"},{\"index\":7,\"verdict\":\"pass\",\"at\":\"38.00\",\"note\":\"Visible tubing shows no kink, wrinkle, or collapsed wall.\"}],\"observed\":\"The student measured and marked straight tubing, then rotated a tubing cutter around the mark. The cutter obscures the end, and completed separation is not clearly shown.\"}"
+  },
+  "framesSent": {
+   "m0": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ],
+   "m1": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ],
+   "m2": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ],
+   "m3": [
+    "t000000_00.jpg",
+    "t000002_00.jpg",
+    "t000004_00.jpg",
+    "t000006_00.jpg",
+    "t000008_00.jpg",
+    "t000010_00.jpg",
+    "t000012_00.jpg",
+    "t000014_00.jpg",
+    "t000016_00.jpg",
+    "t000018_00.jpg",
+    "t000020_00.jpg",
+    "t000022_00.jpg",
+    "t000024_00.jpg",
+    "t000026_00.jpg",
+    "t000028_00.jpg",
+    "t000030_00.jpg",
+    "t000032_00.jpg",
+    "t000034_00.jpg",
+    "t000036_00.jpg",
+    "t000038_00.jpg",
+    "t000040_00.jpg"
+   ]
+  },
+  "capNotes": [],
+  "cost": 0
+ }
+}
