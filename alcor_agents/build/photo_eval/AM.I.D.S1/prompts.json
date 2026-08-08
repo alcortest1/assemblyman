@@ -1,0 +1,547 @@
+{
+  "task": {
+    "criterion": "Overall Result: PASS or FAIL\nCriteria: mark each criterion PASS or FAIL\nCritical defects: list visible defects or \u201cnone\u201d\nReasoning: 1\u20133 sentences\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion FAIL \u2014 not demonstrated. Evaluate only affirmative visual evidence; do not infer hidden dimensions, internal damage, torque, or pressure.\nCUT_THE_LINE\nCriteria\nTubing matches the required size and material when identification or a reference is visible.\nCut location aligns with the marked length.\nEnd is cut square to the tube axis.\nCut is complete and clean.\nTube remains round and the opening is not restricted.\nCritical defects\nCut clearly at the wrong location\nSeverely angled or incomplete cut\nCrushed, collapsed, or significantly oval tube end\nCrack, split, or deep cutter damage\nVisible reduction or closure of the tube opening",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "section:determine-the-line-route": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "route_the_line \u2014 VLM GRADING CRITERIA\nAssess the completed safety-wire route pattern marked for bends and measured for tubing length visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Multiple separate lengths of safety wire are present as the route pattern.\n2. No felt-tip marker marks are visible on the wire at any bend locations.\n3. Marker marks are missing from both ends of the wire.\n4. The wire lies curled and lifted away from the tape measure or scale in frame.\n5. The wire's zero end is offset significantly past the tape measure's zero or stated start graduation.\n6. The wire shows sharp folds rather than smooth, rounded bend forms where bends are marked.\n7. The finished work shows this defect: The safety wire is severed into two or more separate pieces.\n8. The finished work shows this defect: A sharp kink or crimp interrupts the wire route path.\n9. The finished work shows this defect: The wire in frame carries no marker marks at bends or ends.\n10. The finished work shows this defect: The wire is coiled or looped back over itself, not one route path.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "single continuous length to multiple separate lengths",
+          "positive": "A single continuous length of safety wire is present as the route pattern.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "marks are visible to no marks are visible",
+          "positive": "Felt-tip marker marks are visible on the wire at bend locations.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "visible at both ends to missing from both ends",
+          "positive": "Marker marks are visible at both ends of the wire.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "straight and flat to curled and lifted away",
+          "positive": "The wire lies straight and flat alongside a tape measure or scale in frame.",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "substitution",
+          "changed": "set at to offset significantly past",
+          "positive": "The wire's zero end is set at the tape measure's zero or a stated start graduation.",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "substitution",
+          "changed": "smooth, rounded bend forms rather than sharp folds to sharp folds rather than smooth, rounded bend forms",
+          "positive": "The wire shows smooth, rounded bend forms rather than sharp folds where bends are marked.",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The safety wire is severed into two or more separate pieces.",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A sharp kink or crimp interrupts the wire route path.",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The wire in frame carries no marker marks at bends or ends.",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The wire is coiled or looped back over itself, not one route path.",
+          "id": "c10"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "route_the_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed safety-wire route pattern marked for bends and measured for tubing length visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A single continuous length of safety wire is present as the route pattern.\n2. Felt-tip marker marks are visible on the wire at bend locations.\n3. Marker marks are visible at both ends of the wire.\n4. The wire lies straight and flat alongside a tape measure or scale in frame.\n5. The wire's zero end is set at the tape measure's zero or a stated start graduation.\n6. The wire shows smooth, rounded bend forms rather than sharp folds where bends are marked.\n\nCritical defects\n- The safety wire is severed into two or more separate pieces.\n- A sharp kink or crimp interrupts the wire route path.\n- The wire in frame carries no marker marks at bends or ends.\n- The wire is coiled or looped back over itself, not one route path.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:19:20Z",
+      "reviewed_by": null
+    }
+  },
+  "section:cut-the-tubing": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "cut_the_line \u2014 VLM GRADING CRITERIA\nAssess the completed length of rigid tubing cut free from the stock at the marked location visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tubing remains partially attached to the stock or is merely scored rather than fully severed\n2. No felt-tip length mark is visible on the tubing or at the cut end\n3. Cut end shows a crushed, oval, or collapsed profile from cutter pressure\n4. Tube body is visibly bent or shows kinks, wrinkles, or flattening along its length\n5. The finished work shows this defect: Tube end is crushed flat or closed off at the cut.\n6. The finished work shows this defect: Tube is split, cracked or gouged along its length.\n7. The finished work shows this defect: Tubing is kinked or wrinkled, showing a collapsed wall.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "fully severed into a separate cut length to remains partially attached or merely scored",
+          "positive": "Tubing is fully severed into a separate cut length, not merely scored",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "is visible to no felt-tip length mark is visible",
+          "positive": "A felt-tip length mark is visible on the tubing or at the cut end",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "shows no to shows a",
+          "positive": "Cut end shows no crushed, oval or collapsed profile from cutter pressure",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "is straight and free of to is visibly bent or shows",
+          "positive": "Tube body is straight and free of kinks, wrinkles or flattening",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube end is crushed flat or closed off at the cut",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is split, cracked or gouged along its length",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tubing is kinked or wrinkled, showing a collapsed wall",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "cut_the_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed length of rigid tubing cut free from the stock at the marked location visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tubing is fully severed into a separate cut length, not merely scored\n2. A felt-tip length mark is visible on the tubing or at the cut end\n3. Cut end shows no crushed, oval or collapsed profile from cutter pressure\n4. Tube body is straight and free of kinks, wrinkles or flattening\n\nCritical defects\n- Tube end is crushed flat or closed off at the cut\n- Tube is split, cracked or gouged along its length\n- Tubing is kinked or wrinkled, showing a collapsed wall\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:19:44Z",
+      "reviewed_by": null
+    }
+  },
+  "section:deburr-and-resize-tubing-ends": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "deburr_the_line \u2014 VLM GRADING CRITERIA\nAssess the completed deburred and resized tubing ends on the cut rigid tube visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube end opening is obstructed or obscured from view\n2. Outer edge of the tube end shows a rough, raised burr ring around the circumference\n3. Inner edge of the bore at the tube end shows a curled, protruding burr\n4. Tube ends are flared, with no fitting installed\n5. Tube is visibly bent near the end at this stage\n6. Outer surface near the end is coated in fluid slurry, obscuring the edge\n7. The finished work shows this defect: Torn or curled metal lip protrudes from the tube end.\n8. The finished work shows this defect: Tube end is visibly crushed or flattened out of round.\n9. The finished work shows this defect: A split or crack runs from the tube end along the wall.\n10. The finished work shows this defect: Loose metal chips or sanding grit sit at the tube opening.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "unobstructed and visible -> obstructed or obscured",
+          "positive": "Tube end opening is unobstructed and visible in frame for edge inspection",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "smooth edge with no raised burr -> rough, raised burr ring",
+          "positive": "Outer edge of the tube end shows a smooth, evenly broken edge with no raised burr ring",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "shows no curled or protruding burr -> shows a curled, protruding burr",
+          "positive": "Inner edge of the bore at the tube end shows no curled or protruding burr",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "unflared -> flared",
+          "positive": "Tube ends remain plain and unflared, with no fitting installed",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "remains straight with no bend -> is visibly bent near the end",
+          "positive": "Tube remains straight, with no bend formed at this stage",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "wiped free of fluid slurry -> coated in fluid slurry",
+          "positive": "Outer surface near the end is wiped free of fluid slurry so the edge can be seen",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Torn or curled metal lip protrudes from the tube end",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube end is visibly crushed or flattened out of round",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A split or crack runs from the tube end along the wall",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Loose metal chips or sanding grit sit at the tube opening",
+          "id": "c10"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "deburr_the_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed deburred and resized tubing ends on the cut rigid tube visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube end opening is unobstructed and visible in frame for edge inspection\n2. Outer edge of the tube end shows a smooth, evenly broken edge with no raised burr ring\n3. Inner edge of the bore at the tube end shows no curled or protruding burr\n4. Tube ends remain plain and unflared, with no fitting installed\n5. Tube remains straight, with no bend formed at this stage\n6. Outer surface near the end is wiped free of fluid slurry so the edge can be seen\n\nCritical defects\n- Torn or curled metal lip protrudes from the tube end\n- Tube end is visibly crushed or flattened out of round\n- A split or crack runs from the tube end along the wall\n- Loose metal chips or sanding grit sit at the tube opening\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:20:00Z",
+      "reviewed_by": null
+    }
+  },
+  "section:bending-the-tubing": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "bend_the_line \u2014 VLM GRADING CRITERIA\nAssess the completed rigid tube with its hand-formed bend(s), ends not yet flared visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube remains entirely straight with no completed bend formed along its length\n2. Bend outer wall exhibits visible wrinkles or corrugations\n3. Bend region shows a distinct kink or sharp collapse at the throat\n4. Tube is twisted out of plane on opposite sides of the bend\n5. Felt-tip bend layout mark is completely absent from the tube near the bend\n6. Tube ends are fully flared, consistent with flaring already performed\n7. The finished work shows this defect: Wrinkled or corrugated bend visible on the tube.\n8. The finished work shows this defect: Tube is kinked or collapsed flat at the bend.\n9. The finished work shows this defect: Crack or split visible in the bend wall.\n10. The finished work shows this defect: Tube is severed or buckled through at the bend.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "at least one completed bend to no completed bend",
+          "positive": "Tube shows at least one completed bend formed along its length",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "smooth, free of wrinkles to exhibits visible wrinkles",
+          "positive": "Bend outer wall is smooth, free of wrinkles or corrugations",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "shows no kink to shows a distinct kink",
+          "positive": "Bend region shows no kink or sharp collapse at the throat",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "remains straight in one plane to is twisted out of plane",
+          "positive": "Tube remains straight in one plane on each side of the bend, not twisted",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "visible on tube to completely absent from the tube",
+          "positive": "Felt-tip bend layout mark visible on tube near the bend",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "substitution",
+          "changed": "unflared to fully flared",
+          "positive": "Tube ends are open and unflared, consistent with flaring not yet performed",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wrinkled or corrugated bend visible on the tube",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is kinked or collapsed flat at the bend",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Crack or split visible in the bend wall",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is severed or buckled through at the bend",
+          "id": "c10"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "bend_the_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed rigid tube with its hand-formed bend(s), ends not yet flared visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube shows at least one completed bend formed along its length\n2. Bend outer wall is smooth, free of wrinkles or corrugations\n3. Bend region shows no kink or sharp collapse at the throat\n4. Tube remains straight in one plane on each side of the bend, not twisted\n5. Felt-tip bend layout mark visible on tube near the bend\n6. Tube ends are open and unflared, consistent with flaring not yet performed\n\nCritical defects\n- Wrinkled or corrugated bend visible on the tube\n- Tube is kinked or collapsed flat at the bend\n- Crack or split visible in the bend wall\n- Tube is severed or buckled through at the bend\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:23:25Z",
+      "reviewed_by": null
+    }
+  },
+  "section:flare-the-tube": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "flare_the_line \u2014 VLM GRADING CRITERIA\nAssess the completed flared rigid tube end with its sleeve and B-nut installed visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A cone-shaped flare, narrower than the tube body, is formed at the tube end.\n2. A B-nut and a sleeve are on the tube in front of the flare.\n3. Sleeve pulled to the flare shows a thin red ring around the flared end.\n4. Flare surface shows visible cracks, splits, nicks, or scratches.\n5. The finished work shows this defect: The flare is split or cracked at its rim.\n6. The finished work shows this defect: The tube end is bare, with no sleeve or B-nut on it.\n7. The finished work shows this defect: The B-nut threads face away from the flared end.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "changed 'wider' to 'narrower'",
+          "positive": "A cone-shaped flare, wider than the tube body, is formed at the tube end.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "changed 'behind' to 'in front of'",
+          "positive": "A B-nut and a sleeve are on the tube behind the flare.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "changed 'blue' to 'red'",
+          "positive": "Sleeve pulled to the flare shows a thin blue ring around the flared end.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "changed 'free of' to 'shows visible'",
+          "positive": "Flare surface is free of cracks, splits, nicks or scratches.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The flare is split or cracked at its rim.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The tube end is bare, with no sleeve or B-nut on it.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The B-nut threads face away from the flared end.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "flare_the_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed flared rigid tube end with its sleeve and B-nut installed visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A cone-shaped flare, wider than the tube body, is formed at the tube end.\n2. A B-nut and a sleeve are on the tube behind the flare.\n3. Sleeve pulled to the flare shows a thin blue ring around the flared end.\n4. Flare surface is free of cracks, splits, nicks or scratches.\n\nCritical defects\n- The flare is split or cracked at its rim.\n- The tube end is bare, with no sleeve or B-nut on it.\n- The B-nut threads face away from the flared end.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:22:12Z",
+      "reviewed_by": null
+    }
+  },
+  "section:pressure-test-the-tubing": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "test_fluid_line \u2014 VLM GRADING CRITERIA\nAssess the completed rigid line connected to the pressure tester inside the enclosed test box for leak check visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Fabricated rigid line is uncoupled from the pressure tester fitting with the B-nut disconnected.\n2. Rigid line lies outside the enclosed pressure test box, not inside it.\n3. B-nut is threaded onto the tester fitting with a clearly visible thread gap.\n4. Tube surface, sleeve base, or B-nut show pooled or running hydraulic fluid.\n5. The finished work shows this defect: Hydraulic fluid runs or beads at the sleeve base or B-nut joint.\n6. The finished work shows this defect: Tube shows a split, crack, or bulge along its length.\n7. The finished work shows this defect: Line is coupled to the tester but lies outside the enclosed box.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "coupled to uncoupled",
+          "positive": "Fabricated rigid line is coupled to a pressure tester fitting by its B-nut.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "inside to outside",
+          "positive": "Rigid line lies inside the enclosed pressure test box, not outside it.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "no visible thread gap to visible thread gap",
+          "positive": "B-nut is threaded onto the tester fitting with no visible thread gap.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "dry of to showing",
+          "positive": "Tube surface, sleeve base, and B-nut are dry of pooled or running hydraulic fluid.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Hydraulic fluid runs or beads at the sleeve base or B-nut joint.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube shows a split, crack, or bulge along its length.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Line is coupled to the tester but lies outside the enclosed box.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "test_fluid_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed rigid line connected to the pressure tester inside the enclosed test box for leak check visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Fabricated rigid line is coupled to a pressure tester fitting by its B-nut.\n2. Rigid line lies inside the enclosed pressure test box, not outside it.\n3. B-nut is threaded onto the tester fitting with no visible thread gap.\n4. Tube surface, sleeve base, and B-nut are dry of pooled or running hydraulic fluid.\n\nCritical defects\n- Hydraulic fluid runs or beads at the sleeve base or B-nut joint.\n- Tube shows a split, crack, or bulge along its length.\n- Line is coupled to the tester but lies outside the enclosed box.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:20:10Z",
+      "reviewed_by": null
+    }
+  },
+  "section:install-rigid-line-on-aircraft": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "install_fluid_line \u2014 VLM GRADING CRITERIA\nAssess the completed rigid line installed and tightened on the aircraft fittings visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Line is disconnected at one or both ends, with a B-nut left unengaged from its fitting\n2. Each B-nut shows an exposed thread gap between the nut and the fitting body\n3. Tube enters at least one fitting at a visible angle, sprung sideways to reach it\n4. Bend in the installed line exhibits visible wrinkles or flattened sides along the curve\n5. Tube or B-nut exterior surfaces show visible wrench gouges or crushed hex flats\n6. Fitting joints or surrounding tube surface exhibit a visible fluid film or wet sheen\n7. The finished work shows this defect: One end of the line hangs free, no B-nut on its fitting.\n8. The finished work shows this defect: A B-nut sits loose with exposed threads and an open joint.\n9. The finished work shows this defect: The bend is kinked or flattened with a visible flat side.\n10. The finished work shows this defect: Fluid beads or runs from a B-nut joint.\n11. The finished work shows this defect: Tube is visibly bowed or twisted to force it onto the fittings.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "connected at both ends to disconnected at one or both ends",
+          "positive": "Line is connected at both ends, a B-nut engaged on each fitting",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "no thread gap to exposed thread gap",
+          "positive": "Each B-nut is drawn up to its fitting with no thread gap at the joint",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "straight and square to at a visible angle",
+          "positive": "Tube enters each fitting straight and square, not sprung sideways to reach it",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "free of wrinkles or flat sides to exhibits visible wrinkles or flattened sides",
+          "positive": "Bend in the installed line is smooth and round, free of wrinkles or flat sides",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "show no wrench gouges to show visible wrench gouges",
+          "positive": "Tube and B-nut exterior surfaces show no wrench gouges or crushed flats",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "dry, no fluid film present to exhibit a visible fluid film or wet sheen",
+          "positive": "Fitting joints and surrounding tube surface are dry, no fluid film present",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "One end of the line hangs free, no B-nut on its fitting",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A B-nut sits loose with exposed threads and an open joint",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The bend is kinked or flattened with a visible flat side",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Fluid beads or runs from a B-nut joint",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is visibly bowed or twisted to force it onto the fittings",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "install_fluid_line \u2014 VLM GRADING CRITERIA\n\nAssess the completed rigid line installed and tightened on the aircraft fittings visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Line is connected at both ends, a B-nut engaged on each fitting\n2. Each B-nut is drawn up to its fitting with no thread gap at the joint\n3. Tube enters each fitting straight and square, not sprung sideways to reach it\n4. Bend in the installed line is smooth and round, free of wrinkles or flat sides\n5. Tube and B-nut exterior surfaces show no wrench gouges or crushed flats\n6. Fitting joints and surrounding tube surface are dry, no fluid film present\n\nCritical defects\n- One end of the line hangs free, no B-nut on its fitting\n- A B-nut sits loose with exposed threads and an open joint\n- The bend is kinked or flattened with a visible flat side\n- Fluid beads or runs from a B-nut joint\n- Tube is visibly bowed or twisted to force it onto the fittings\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:20:49Z",
+      "reviewed_by": null
+    }
+  }
+}

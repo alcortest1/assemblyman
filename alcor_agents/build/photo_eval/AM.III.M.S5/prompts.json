@@ -1,0 +1,193 @@
+{
+  "section:prepare-the-damaged-area": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "prepare_the_damaged_area \u2014 VLM GRADING CRITERIA\nAssess the completed damaged metal propeller blade area cleaned, measured and outlined for repair visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Damage on the blade is surrounded by an open, unclosed dye or marker line\n2. Outline is a jagged shape with sharp angular corners around the damage\n3. Blade surface inside and around the outline is contaminated with visible grease, oil, and grit debris\n4. Metal inside the outline shows deep gouges and distinct filing or sanding cuts\n5. The finished work shows this defect: A crack extends from the damaged area.\n6. The finished work shows this defect: Part of the damage lies outside the marked outline.\n7. The finished work shows this defect: Marker or dye covers the damage, hiding it from inspection.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "closed outline -> open, unclosed line",
+          "positive": "Damage on the blade is enclosed by a closed dye or marker outline",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "smooth contoured, no sharp corners -> jagged with sharp angular corners",
+          "positive": "Outline is a smooth contoured shape tapering into the damage, no sharp corners",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "clean, free of oil... -> contaminated with visible grease, oil...",
+          "positive": "Blade surface inside and around the outline is clean, free of oil, dirt and debris",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "intact, with no cuts -> shows deep gouges and distinct cuts",
+          "positive": "Metal inside the outline is intact, with no filing or sanding cuts present",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A crack extends from the damaged area",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Part of the damage lies outside the marked outline",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Marker or dye covers the damage, hiding it from inspection",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "prepare_the_damaged_area \u2014 VLM GRADING CRITERIA\n\nAssess the completed damaged metal propeller blade area cleaned, measured and outlined for repair visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Damage on the blade is enclosed by a closed dye or marker outline\n2. Outline is a smooth contoured shape tapering into the damage, no sharp corners\n3. Blade surface inside and around the outline is clean, free of oil, dirt and debris\n4. Metal inside the outline is intact, with no filing or sanding cuts present\n\nCritical defects\n- A crack extends from the damaged area\n- Part of the damage lies outside the marked outline\n- Marker or dye covers the damage, hiding it from inspection\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:07:00Z",
+      "reviewed_by": null
+    }
+  },
+  "section:blend-the-damage-out": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "blend_the_damage_out \u2014 VLM GRADING CRITERIA\nAssess the completed blended and fine-sanded repair area on a metal propeller blade visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Damaged area retains sharp corners or V-shaped notches within the depression\n2. Blended area meets the surrounding blade surface at a prominent, abrupt step\n3. Repair surface displays coarse file marks or gouges across the blended area\n4. Raised lips, burrs, or torn metal project from the perimeter of the blend\n5. The finished work shows this defect: A crack is visible in or beside the blended area.\n6. The finished work shows this defect: Blend cuts across the full width of leading or trailing edge.\n7. The finished work shows this defect: Blade is bent, gouged deeply, or shows a hole through the surface.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "no sharp corners or V-shaped notches to retains sharp corners",
+          "positive": "Damaged area is blended into a rounded depression with no sharp corners or V-shaped notches",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "transitions gradually to meets at a prominent, abrupt step",
+          "positive": "Blended area transitions gradually into surrounding blade surface with no abrupt step visible",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "fine uniform sanding scratches to coarse file marks or gouges",
+          "positive": "Repair surface shows fine uniform sanding scratches, not coarse file marks or gouges",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "No burrs, raised lips or torn metal remain to Raised lips, burrs, or torn metal project",
+          "positive": "No burrs, raised lips or torn metal remain at the perimeter of the blend",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A crack is visible in or beside the blended area",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Blend cuts across the full width of leading or trailing edge",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Blade is bent, gouged deeply, or shows a hole through the surface",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "blend_the_damage_out \u2014 VLM GRADING CRITERIA\n\nAssess the completed blended and fine-sanded repair area on a metal propeller blade visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Damaged area is blended into a rounded depression with no sharp corners or V-shaped notches\n2. Blended area transitions gradually into surrounding blade surface with no abrupt step visible\n3. Repair surface shows fine uniform sanding scratches, not coarse file marks or gouges\n4. No burrs, raised lips or torn metal remain at the perimeter of the blend\n\nCritical defects\n- A crack is visible in or beside the blended area\n- Blend cuts across the full width of leading or trailing edge\n- Blade is bent, gouged deeply, or shows a hole through the surface\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:07:00Z",
+      "reviewed_by": null
+    }
+  },
+  "section:clean-the-repair": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "clean_the_repair \u2014 VLM GRADING CRITERIA\nAssess the completed cleaned and measured blend repair area on a metal propeller blade visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Repair area is covered in fine metallic dust and sanding debris\n2. Blended depression is visible on the blade, its surface showing a prominent scratch pattern of coarse filing\n3. A steel scale or depth gauge is positioned entirely outside the repair area on the blade in frame\n4. Blade surface around the repair shows solvent-smeared residue and loose rag fibers\n5. The finished work shows this defect: A visible crack runs through or beside the blended area.\n6. The finished work shows this defect: Blade edge is gouged or notched with a sharp, unblended step.\n7. The finished work shows this defect: Loose metal filings or rag left resting on the blade.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "free of to covered in",
+          "positive": "Repair area is free of fine metallic dust and sanding debris",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "smooth with no scratch pattern to showing a prominent scratch pattern",
+          "positive": "Blended depression is visible on the blade, its surface smooth with no scratch pattern of coarse filing",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "on the repair area to entirely outside the repair area",
+          "positive": "A steel scale or depth gauge is positioned on the repair area in frame",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "shows no to shows",
+          "positive": "Blade surface around the repair shows no solvent-smeared residue or loose rag fibers",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A visible crack runs through or beside the blended area",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Blade edge is gouged or notched with a sharp, unblended step",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Loose metal filings or rag left resting on the blade",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "clean_the_repair \u2014 VLM GRADING CRITERIA\n\nAssess the completed cleaned and measured blend repair area on a metal propeller blade visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Repair area is free of fine metallic dust and sanding debris\n2. Blended depression is visible on the blade, its surface smooth with no scratch pattern of coarse filing\n3. A steel scale or depth gauge is positioned on the repair area in frame\n4. Blade surface around the repair shows no solvent-smeared residue or loose rag fibers\n\nCritical defects\n- A visible crack runs through or beside the blended area\n- Blade edge is gouged or notched with a sharp, unblended step\n- Loose metal filings or rag left resting on the blade\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:06:59Z",
+      "reviewed_by": null
+    }
+  }
+}

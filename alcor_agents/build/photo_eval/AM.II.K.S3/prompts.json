@@ -1,0 +1,461 @@
+{
+  "section:prepare-the-wire": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "prepare_the_wire \u2014 VLM GRADING CRITERIA\nAssess the completed wire cut, stripped and inserted into the pin contact, before crimping visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Wire insulation extends past the tip of the wire, completely covering the conductor strands.\n2. Bare conductor is positioned entirely outside the pin's wire barrel opening.\n3. A wide bare gap of exposed conductor extends between the insulation end and the barrel entry.\n4. Conductor strands are splayed outward and stand outside the barrel mouth.\n5. Two wires enter the pin contact.\n6. Pin barrel is flattened and exhibits visible crimp indentations and tool marks.\n7. The finished work shows this defect: Pin barrel is empty; the stripped wire lies beside it, uninserted.\n8. The finished work shows this defect: Insulation is pushed inside the barrel, no bare conductor entering the pin.\n9. The finished work shows this defect: Strands are visibly cut, broken or fanned outside the barrel mouth.\n10. The finished work shows this defect: The pin is bent, crushed or split along the barrel.\n11. The finished work shows this defect: Two wires are inserted into the single pin contact.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "reversed exposed conductor to insulation covering strands",
+          "positive": "Bare stranded conductor is visible at the prepared wire end, insulation removed cleanly.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "reversed inserted into barrel to positioned outside opening",
+          "positive": "Bare conductor is inserted into the pin's wire barrel opening.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "reversed short bare gap to wide exposed gap",
+          "positive": "Insulation ends at or just short of the barrel entry, with no long bare gap.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "reversed gathered strands to splayed outside barrel",
+          "positive": "All strands are gathered inside the barrel; none splayed or standing outside it.",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "substitution",
+          "changed": "changed one wire to two wires",
+          "positive": "Only one wire enters the pin contact.",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "reversed round and mark-free to flattened with indentations",
+          "positive": "Pin barrel is round and free of crimp indentations or tool marks.",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Pin barrel is empty; the stripped wire lies beside it, uninserted.",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Insulation is pushed inside the barrel, no bare conductor entering the pin.",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Strands are visibly cut, broken or fanned outside the barrel mouth.",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The pin is bent, crushed or split along the barrel.",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Two wires are inserted into the single pin contact.",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "prepare_the_wire \u2014 VLM GRADING CRITERIA\n\nAssess the completed wire cut, stripped and inserted into the pin contact, before crimping visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Bare stranded conductor is visible at the prepared wire end, insulation removed cleanly.\n2. Bare conductor is inserted into the pin's wire barrel opening.\n3. Insulation ends at or just short of the barrel entry, with no long bare gap.\n4. All strands are gathered inside the barrel; none splayed or standing outside it.\n5. Only one wire enters the pin contact.\n6. Pin barrel is round and free of crimp indentations or tool marks.\n\nCritical defects\n- Pin barrel is empty; the stripped wire lies beside it, uninserted.\n- Insulation is pushed inside the barrel, no bare conductor entering the pin.\n- Strands are visibly cut, broken or fanned outside the barrel mouth.\n- The pin is bent, crushed or split along the barrel.\n- Two wires are inserted into the single pin contact.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:57:26Z",
+      "reviewed_by": null
+    }
+  },
+  "section:set-up-the-dnc-crimper": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "set_up_the_dnc_crimper \u2014 VLM GRADING CRITERIA\nAssess the completed DNC crimper set up with its turret installed and wire-size selection made visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Turret sits visibly raised off the crimper tool face with an open gap underneath\n2. Turret set screws are backed out, protruding visibly above the surface of their holes\n3. Cotter key is partially withdrawn, standing proud of the handle selector dial hole\n4. The space between numbered positions on the selector dial is aligned with the handle index mark\n5. The solid turret web between crimp holes is centered over the tool opening\n6. Crimper jaws are fully closed with a contact inserted into the crimp hole\n7. The finished work shows this defect: Turret sits cocked or raised off the tool face.\n8. The finished work shows this defect: A turret set screw hole is visibly empty.\n9. The finished work shows this defect: Dial cotter key hole is empty, dial unrestrained.\n10. The finished work shows this defect: Turret is unlatched, with no crimp hole over the opening.\n11. The finished work shows this defect: Turret keying tang or crimp hole is visibly broken or deformed.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "seated flat and fully down to raised off tool face",
+          "positive": "Turret is seated flat and fully down on the crimper tool face",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "seated in their holes to backed out protruding",
+          "positive": "Turret set screws are present and seated in their holes, not backed out",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "installed through to partially withdrawn standing proud",
+          "positive": "Cotter key is installed through the handle selector dial",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "A numbered position to The space between numbered positions",
+          "positive": "A numbered position on the selector dial is aligned with the handle index mark",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "One turret crimp hole to The solid turret web between holes",
+          "positive": "One turret crimp hole is centered over the tool opening, not between positions",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "open and empty to fully closed with a contact inserted",
+          "positive": "Crimper jaws are open and the crimp hole is empty, no contact inserted",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Turret sits cocked or raised off the tool face",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A turret set screw hole is visibly empty",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Dial cotter key hole is empty, dial unrestrained",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Turret is unlatched, with no crimp hole over the opening",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Turret keying tang or crimp hole is visibly broken or deformed",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "set_up_the_dnc_crimper \u2014 VLM GRADING CRITERIA\n\nAssess the completed DNC crimper set up with its turret installed and wire-size selection made visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Turret is seated flat and fully down on the crimper tool face\n2. Turret set screws are present and seated in their holes, not backed out\n3. Cotter key is installed through the handle selector dial\n4. A numbered position on the selector dial is aligned with the handle index mark\n5. One turret crimp hole is centered over the tool opening, not between positions\n6. Crimper jaws are open and the crimp hole is empty, no contact inserted\n\nCritical defects\n- Turret sits cocked or raised off the tool face\n- A turret set screw hole is visibly empty\n- Dial cotter key hole is empty, dial unrestrained\n- Turret is unlatched, with no crimp hole over the opening\n- Turret keying tang or crimp hole is visibly broken or deformed\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:57:32Z",
+      "reviewed_by": null
+    }
+  },
+  "section:crimp-the-wire": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "crimp_the_wire \u2014 VLM GRADING CRITERIA\nAssess the completed crimped pin contact terminated on a single stripped wire, removed from the crimper visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. One pin contact is crimped onto the ends of two wires.\n2. Crimp indentation marks are visible on the pin's mating end.\n3. Wire insulation enters inside the barrel; bare conductor is completely covered.\n4. Loose conductor strands protrude outside or alongside the crimp barrel.\n5. The pin's mating end is bent, flattened, and covered in tool marks.\n6. The crimped contact is fully inserted and seated in a connector cavity.\n7. The finished work shows this defect: The wire is separated from the pin contact.\n8. The finished work shows this defect: The crimp barrel is split, cracked, or crushed through.\n9. The finished work shows this defect: The pin mating end is visibly bent or flattened.\n10. The finished work shows this defect: Two wires are terminated in the one crimp barrel.\n11. The finished work shows this defect: Insulation is captured inside the barrel with no bare conductor entering it.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "single wire to two wires",
+          "positive": "One pin contact is crimped onto the end of a single wire.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "wire barrel to pin's mating end",
+          "positive": "Crimp indentation marks are visible on the contact's wire barrel.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "stops outside to enters inside",
+          "positive": "Wire insulation stops outside the barrel; bare conductor enters the barrel.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "No loose conductor strands protrude to Loose conductor strands protrude",
+          "positive": "No loose conductor strands protrude outside or alongside the crimp barrel.",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "straight, unflattened, and free to bent, flattened, and covered",
+          "positive": "The pin's mating end is straight, unflattened, and free of tool marks.",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "substitution",
+          "changed": "loose and not seated to fully inserted and seated",
+          "positive": "The crimped contact is loose and not seated in a connector cavity.",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The wire is separated from the pin contact.",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The crimp barrel is split, cracked, or crushed through.",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The pin mating end is visibly bent or flattened.",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Two wires are terminated in the one crimp barrel.",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Insulation is captured inside the barrel with no bare conductor entering it.",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "crimp_the_wire \u2014 VLM GRADING CRITERIA\n\nAssess the completed crimped pin contact terminated on a single stripped wire, removed from the crimper visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. One pin contact is crimped onto the end of a single wire.\n2. Crimp indentation marks are visible on the contact's wire barrel.\n3. Wire insulation stops outside the barrel; bare conductor enters the barrel.\n4. No loose conductor strands protrude outside or alongside the crimp barrel.\n5. The pin's mating end is straight, unflattened, and free of tool marks.\n6. The crimped contact is loose and not seated in a connector cavity.\n\nCritical defects\n- The wire is separated from the pin contact.\n- The crimp barrel is split, cracked, or crushed through.\n- The pin mating end is visibly bent or flattened.\n- Two wires are terminated in the one crimp barrel.\n- Insulation is captured inside the barrel with no bare conductor entering it.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:57:30Z",
+      "reviewed_by": null
+    }
+  },
+  "section:insert-the-pin-into-the-electrical-connector": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "insert_the_pin_into_the_electrical_connector \u2014 VLM GRADING CRITERIA\nAssess the completed electrical connector with the crimped pin termination installed in its contact cavity visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The crimped contact lies uninstalled outside the connector body rather than inside a contact cavity.\n2. The contact body stands proud of the connector insert face rather than seating flush or below it.\n3. Two wires enter the connector at the occupied contact cavity.\n4. The installer tool remains engaged in the occupied contact cavity of the connector.\n5. Bare conductor is visibly exposed on the wire before it enters the connector rear grommet.\n6. The connector insert or grommet around the occupied cavity is torn or gouged.\n7. The finished work shows this defect: Contact protrudes above the insert face instead of sitting in the cavity.\n8. The finished work shows this defect: Contact and wire lie loose outside the connector, no contact in any cavity.\n9. The finished work shows this defect: Pin contact visibly bent, crushed, or its tip broken off.\n10. The finished work shows this defect: Two wires occupy the same contact cavity.\n11. The finished work shows this defect: Connector rubber insert visibly torn or gouged at the cavity.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "installed in a cavity to lying uninstalled outside the connector",
+          "positive": "A crimped contact is installed in a contact cavity of the connector",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "seated flush with or below to stands proud of the insert face",
+          "positive": "The contact body is seated flush with or below the connector insert face, not standing proud",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "Only one wire to Two wires",
+          "positive": "Only one wire enters the connector at the occupied cavity",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "tool is clear to tool remains engaged in cavity",
+          "positive": "The installer tool is clear of the connector, not left in the cavity",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "no bare conductor showing to bare conductor is visibly exposed",
+          "positive": "Wire insulation is continuous up to the connector rear grommet, no bare conductor showing",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "intact, no tears or gouges to torn or gouged",
+          "positive": "The connector insert/grommet around the occupied cavity is intact, no tears or gouges",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Contact protrudes above the insert face instead of sitting in the cavity",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Contact and wire lie loose outside the connector, no contact in any cavity",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Pin contact visibly bent, crushed, or its tip broken off",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Two wires occupy the same contact cavity",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Connector rubber insert visibly torn or gouged at the cavity",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "insert_the_pin_into_the_electrical_connector \u2014 VLM GRADING CRITERIA\n\nAssess the completed electrical connector with the crimped pin termination installed in its contact cavity visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A crimped contact is installed in a contact cavity of the connector\n2. The contact body is seated flush with or below the connector insert face, not standing proud\n3. Only one wire enters the connector at the occupied cavity\n4. The installer tool is clear of the connector, not left in the cavity\n5. Wire insulation is continuous up to the connector rear grommet, no bare conductor showing\n6. The connector insert/grommet around the occupied cavity is intact, no tears or gouges\n\nCritical defects\n- Contact protrudes above the insert face instead of sitting in the cavity\n- Contact and wire lie loose outside the connector, no contact in any cavity\n- Pin contact visibly bent, crushed, or its tip broken off\n- Two wires occupy the same contact cavity\n- Connector rubber insert visibly torn or gouged at the cavity\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:57:26Z",
+      "reviewed_by": null
+    }
+  },
+  "section:test-the-connector": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "test_the_connector \u2014 VLM GRADING CRITERIA\nAssess the completed mated electrical connector pair with its terminated wire, after the continuity and position check visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The two connector halves are separated and resting apart as disconnected components.\n2. An open gap is visible between the mating faces of the connector shells.\n3. Bare copper conductor is exposed and visible where the wire enters the rear of the connector.\n4. Wire insulation is cracked, split, or ruptured along its visible length to the connector.\n5. The wire is pulled back from the rear entry seal and sags loosely away from the connector.\n6. The connector shell, coupling ring, or rubber insert is cracked, split, or deformed.\n7. The finished work shows this defect: Connector halves rest cocked or half-engaged with an open gap between shells.\n8. The finished work shows this defect: The wire has pulled free of the connector rear and hangs loose.\n9. The finished work shows this defect: Exposed copper strands are visible outside the connector rear grommet.\n10. The finished work shows this defect: A contact pin on a connector face is visibly bent, crushed or broken off.\n11. The finished work shows this defect: The connector shell or rubber insert is split, gouged or torn.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "joined together to separated as disconnected components",
+          "positive": "Both connector halves are joined together as one mated assembly.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "no gap between faces to open gap visible",
+          "positive": "Mated shells are drawn fully together with no gap between their mating faces.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "no bare conductor showing to bare copper conductor exposed",
+          "positive": "Wire exits the rear of the connector with no bare conductor showing at the entry.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "continuous and unbroken to cracked, split, or ruptured",
+          "positive": "Wire insulation is continuous and unbroken along the visible length to the connector.",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "remains seated to pulled back and sagging loosely",
+          "positive": "Wire remains seated in the connector and is not pulled back or hanging loose.",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "intact and uncracked to cracked, split, or deformed",
+          "positive": "Connector shell, coupling ring and rubber insert are intact, uncracked and undeformed.",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Connector halves rest cocked or half-engaged with an open gap between shells.",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The wire has pulled free of the connector rear and hangs loose.",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Exposed copper strands are visible outside the connector rear grommet.",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A contact pin on a connector face is visibly bent, crushed or broken off.",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The connector shell or rubber insert is split, gouged or torn.",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "test_the_connector \u2014 VLM GRADING CRITERIA\n\nAssess the completed mated electrical connector pair with its terminated wire, after the continuity and position check visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Both connector halves are joined together as one mated assembly.\n2. Mated shells are drawn fully together with no gap between their mating faces.\n3. Wire exits the rear of the connector with no bare conductor showing at the entry.\n4. Wire insulation is continuous and unbroken along the visible length to the connector.\n5. Wire remains seated in the connector and is not pulled back or hanging loose.\n6. Connector shell, coupling ring and rubber insert are intact, uncracked and undeformed.\n\nCritical defects\n- Connector halves rest cocked or half-engaged with an open gap between shells.\n- The wire has pulled free of the connector rear and hangs loose.\n- Exposed copper strands are visible outside the connector rear grommet.\n- A contact pin on a connector face is visibly bent, crushed or broken off.\n- The connector shell or rubber insert is split, gouged or torn.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:57:36Z",
+      "reviewed_by": null
+    }
+  }
+}

@@ -1,0 +1,1041 @@
+{
+  "schema_version": 1,
+  "task_code": "AM.I.D.S1",
+  "generator": "packs/compile_pack.py",
+  "model": "anthropic/claude-opus-5",
+  "drafted_at": "2026-08-04T03:22:20Z",
+  "reviewed_by": null,
+  "sources": [
+    "procedure.md",
+    "steps.json",
+    "tasks.csv",
+    "references/handbook/faa_h_8083_30b_9_1_9_7.md"
+  ],
+  "entries": {
+    "dl.s1": {
+      "kind": "step",
+      "step_id": "dl.s1",
+      "section": "Determine the Line Route",
+      "step_text": "Use the safety wire method to map tubing length and bends.",
+      "criterion": "- Both wire ends are inserted into the two fittings being connected\n- Marker marks visible at each bend location and at both ends of the wire\n- Wire route passes clear of structure and components, not through obstructions\n- Wire is a single continuous length with no splices or coiled excess",
+      "sources": [
+        {
+          "condition": "Both ends of the safety wire are seated into their respective fittings, with the wire spanning the complete route.",
+          "source": "procedure sheet",
+          "note": "Sheet: insert one end into the first fitting, route to the second, cut excess 'to allow it to feed into the other fitting'.",
+          "assumed": false
+        },
+        {
+          "condition": "Felt-tip marks are present on the wire at each bend location and at both fitting ends.",
+          "source": "procedure sheet",
+          "note": "Sheet: 'Use a marker to mark the location of each bend and ends.'",
+          "assumed": false
+        },
+        {
+          "condition": "The wire path clears surrounding structure and components rather than cutting through an obstruction.",
+          "source": "procedure sheet",
+          "note": "Sheet: route 'taking the most appropriate route'; routing done 'to avoid obstructions and excessive material waste'.",
+          "assumed": false
+        },
+        {
+          "condition": "No bend in the mapped wire route is tighter than the standard bend radius for the tube size selected.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: 'Figure 9-4 shows preferred methods and standard bend radii for bending tubing by tube size.' Radius requires measurement against the table.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the wire bend radii meet the standard bend radius for the chosen tube size (requires measurement)",
+        "Whether the chosen route is the most appropriate one for the installation (requires observing the routing decision/aircraft area)",
+        "Total mapped length and the \u00bd\" per bend addition (requires tape-measure reading)"
+      ],
+      "required_framing": "One frame showing the entire routed safety wire in place with both fittings visible at the ends, taken close enough that the marker marks at the bends read clearly.",
+      "conflicts": []
+    },
+    "dl.s2": {
+      "kind": "step",
+      "step_id": "dl.s2",
+      "section": "Determine the Line Route",
+      "step_text": "Carefully remove the wire, keeping its shape.",
+      "criterion": "- Removed wire lies as a single template with all routed bends still formed, none opened or straightened\n- Felt-tip bend-location marks are visible on the wire\n- Felt-tip marks at both wire ends are visible\n- Wire shows no kinks, twists or crossovers that were not part of the routed path",
+      "sources": [
+        {
+          "condition": "The removed wire still holds the routed contour, with every bend at the same angle and location as when installed.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Carefully remove the wire, keeping its shape\" \u2014 shape is the template for bend locations.",
+          "assumed": false
+        },
+        {
+          "condition": "All felt-tip marks for the bend locations and both wire ends remain present and legible after removal.",
+          "source": "procedure sheet",
+          "note": "Routing note requires marking \"the location of each bend and ends\"; marks must survive to transfer to tubing.",
+          "assumed": false
+        },
+        {
+          "condition": "A drawing or photograph of the wire's shape exists as a record before the wire is further handled.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 2: \"Draw or photograph the shape to make.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The removed wire's shape still corresponds to a clear route between the two fittings without obstruction contact.",
+          "source": "procedure sheet",
+          "note": "Only verifiable by observing removal against the actual routing; a still of the wire alone cannot confirm the route.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Existence of the drawing or photograph record of the shape (document)",
+        "Whether the preserved shape actually matches the obstruction-free route between the two fittings (video of routing/removal)"
+      ],
+      "required_framing": "Lay the removed wire flat on the bench with the whole length in frame, shot square from above, marked side facing the camera, with a scale alongside.",
+      "conflicts": []
+    },
+    "dl.s3": {
+      "kind": "step",
+      "step_id": "dl.s3",
+      "section": "Determine the Line Route",
+      "step_text": "Straighten the wire and measure the total length.",
+      "criterion": "- The safety wire lies straight with no remaining bows, kinks or curls\n- The wire is laid flat along a tape measure or steel scale with the wire end at zero\n- Bend location marks made in step 1 are still visible on the wire and countable in the frame",
+      "sources": [
+        {
+          "condition": "The safety wire is fully straightened, with no residual bows, kinks or curls remaining along its length.",
+          "source": "procedure sheet",
+          "note": "Step 3 requires the wire be straightened before measuring; residual curvature understates the routed length.",
+          "assumed": false
+        },
+        {
+          "condition": "The measured straightened-wire length matches the tape/scale reading recorded on the worksheet.",
+          "source": "procedure sheet",
+          "note": "Senior note: 'Use a tape measure for length'; the reading itself must be taken, not seen.",
+          "assumed": false
+        },
+        {
+          "condition": "The recorded tubing length equals the wire length plus 1/2 inch for each marked bend.",
+          "source": "procedure sheet",
+          "note": "Senior note: 'add 1/2\" per bend. This is the length of tubing you will need.' Handbook states no per-bend figure.",
+          "assumed": false
+        },
+        {
+          "condition": "The recorded length includes extra material for bending variation rather than being the bare routed dimension.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: 'cut approximately 10 percent longer than the tube to be replaced to provide for minor variations in bending.'",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "The actual tape measure reading of the straightened wire length",
+        "The arithmetic adding 1/2 inch per bend to arrive at the tubing length",
+        "Whether the total allowance meets the handbook's approximately 10 percent extra length"
+      ],
+      "required_framing": "Lay the straightened wire flat alongside a tape measure with its end at the zero mark, shooting straight down so the entire wire, all bend marks, and the scale graduations are in one frame; include the worksheet with the recorded length and bend count.",
+      "conflicts": [
+        "Procedure sheet adds 1/2\" of extra material per bend; handbook p.9-2 calls for cutting approximately 10 percent longer overall \u2014 procedure sheet is operative as taught."
+      ]
+    },
+    "ct.s1": {
+      "kind": "step",
+      "step_id": "ct.s1",
+      "section": "Cut the Tubing",
+      "step_text": "Decide the size of tubing to use.",
+      "criterion": "- The selected tube shows legible printed OD and wall-thickness markings (or an alloy color band) in the photo\n- The tube stock is uncut, undamaged, free of kinks, scoring or corrosion at the ends\n- The selected stock is shown alongside the B-nut/sleeve and bender channel of the same nominal size",
+      "sources": [
+        {
+          "condition": "The tubing selected matches the size, wall thickness and material called out in the applicable maintenance data.",
+          "source": "both",
+          "note": "Handbook: \"Replacement tubing should be of the same size and material as the original tubing\"; procedure sheet: \"Use the tubing referred to in the manual\".",
+          "assumed": false
+        },
+        {
+          "condition": "Measured outside diameter of the selected stock equals the specified OD (e.g., 0.25\").",
+          "source": "both",
+          "note": "Handbook: \"Metal tubing is sized by outside diameter (OD)\"; the 0.25\" example figure is the procedure sheet's.",
+          "assumed": false
+        },
+        {
+          "condition": "The tube's printed diameter/wall-thickness markings or alloy color band are present and legible on the selected stock.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "\"The tube diameter is printed on all rigid tubing\" and wall thickness \"is printed on the tubing in thousandths of an inch\".",
+          "assumed": false
+        },
+        {
+          "condition": "Selected alloy is appropriate to the system pressure the line will serve.",
+          "source": "handbook FAA-H-8083-30B p.9-1",
+          "note": "Handbook assigns 2024-T3/5052-O/6061-T6 to \"1,000 to 1,500 psi systems\" and CRES to \"high-pressure hydraulic systems (3,000 psi or more)\".",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Measured outside diameter equals the specified size",
+        "Wall thickness value matches the specification",
+        "Agreement of the selection with the maintenance manual / TCDS data",
+        "Suitability of the alloy for the system's operating pressure"
+      ],
+      "required_framing": "One still of the selected length of tubing laid flat with the printed size/wall-thickness marking and any color band facing the camera, close enough to read, with the matching B-nut and sleeve beside it.",
+      "conflicts": []
+    },
+    "ct.s2": {
+      "kind": "step",
+      "step_id": "ct.s2",
+      "section": "Cut the Tubing",
+      "step_text": "Transfer length onto the tubing.",
+      "criterion": "- A single, legible marker line is present on the tubing at the cut location\n- The mark runs square to the tube axis, not diagonally, and is narrow enough to align a cutter wheel to\n- No competing or leftover marks appear near the intended cut point\n- The tube surface shows no scoring, gouging or scribe damage at the mark",
+      "sources": [
+        {
+          "condition": "Distance from the reference tube end to the mark equals the routed wire length plus \u00bd\" per bend.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Use a tape measure for length and add \u00bd\" per bend. This is the length of tubing you will need.\" Handbook gives no such figure.",
+          "assumed": false
+        },
+        {
+          "condition": "The mark is a single crisp line encircling or squarely crossing the tube, unambiguous for wheel alignment.",
+          "source": "procedure sheet",
+          "note": "Sheet requires the cutting wheel be aligned \"precisely\" with the marked line; handbook only speaks qualitatively of producing a square end.",
+          "assumed": false
+        },
+        {
+          "condition": "Cut length recorded on paper matches the routing measurement and bend allowance used for the mark.",
+          "source": "procedure sheet",
+          "note": "Sheet directs measuring the straightened wire and adding bend allowance; the written figure is the traceable record.",
+          "assumed": false
+        },
+        {
+          "condition": "Marked length includes surplus for bending variation, roughly 10 percent over the finished run.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"cut approximately 10 percent longer than the tube to be replaced to provide for minor variations in bending.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the marked distance equals the routed wire length plus \u00bd\" per bend",
+        "Whether bending/variation allowance (procedure \u00bd\" per bend; handbook ~10 percent) was actually included",
+        "Agreement between the recorded routing measurement and the mark position"
+      ],
+      "required_framing": "Lay the tube on the bench with a rule or tape zeroed on the reference end and running to the mark; frame so both the zero end and the marked line are readable in one shot.",
+      "conflicts": [
+        "Procedure sheet specifies adding \u00bd\" per bend to the routed length; handbook FAA-H-8083-30B p.9-2 says cut approximately 10 percent longer than the tube being replaced \u2014 procedure sheet governs as taught."
+      ]
+    },
+    "ct.s3": {
+      "kind": "step",
+      "step_id": "ct.s3",
+      "section": "Cut the Tubing",
+      "step_text": "Cut the tubing with a cutter tool.",
+      "criterion": "- The cut end face is clean and continuous, not torn, ragged or partially crushed\n- The tube at the cut retains a round cross-section with no flattening or wheel-track ridge\n- No deep circumferential scoring or gouging of the tube wall near the cut\n- The tube is free of visible chips, filings and cutting debris at the cut end",
+      "sources": [
+        {
+          "condition": "The cut end is square to the tube axis, with no angled or crooked face.",
+          "source": "both",
+          "note": "Handbook: \"it is important to produce a square end, free of burrs\"; \"A crooked flare is the result of the tubing not being cut squarely.\" Verified against a square.",
+          "assumed": false
+        },
+        {
+          "condition": "The tube at the cut is round and undeformed, with no flattening, ridging or wheel-track collapse.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"Too much pressure on the cutting wheel at one time could deform the tubing or cause excessive burring.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Finished cut length equals the routed wire length plus 1/2\" per bend, measured end to end.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Use a tape measure for length and add 1/2\" per bend. This is the length of tubing you will need.\" Handbook gives no such figure.",
+          "assumed": false
+        },
+        {
+          "condition": "The cutter type used suits the tubing material (rolling cutter only for soft aluminum/copper alloy).",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"The cutter can be used with any soft metal tubing\"; \"Special chipless cutters are available for cutting aluminum 6061-T6, corrosion-resistant steel, and titanium tubing.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Squareness of the cut end relative to the tube axis (needs a square or angle check)",
+        "Finished cut length versus routed wire length plus 1/2\" per bend (needs a scale reading)",
+        "Suitability of the cutter type for the tubing alloy (needs material identification/spec)",
+        "Whether the wheel was tightened intermittently rather than forced in one pass"
+      ],
+      "required_framing": "Macro shot of the freshly cut end filling the frame, tube axis pointing at the camera, plus a side view of the last inch of tube resting on a flat surface with a steel scale alongside.",
+      "conflicts": [
+        "Procedure sheet says cut length = routed length plus 1/2\" per bend; handbook p.9-2 says cut the new piece approximately 10 percent longer than the tube being replaced \u2014 procedure sheet is operative."
+      ]
+    },
+    "dr.s1": {
+      "kind": "step",
+      "step_id": "dr.s1",
+      "section": "Deburr and Resize Tubing Ends",
+      "step_text": "Use a single-edge deburr tool for inside diameter resizing the tubing.",
+      "criterion": "- Inside edge of the tube end is smooth, with no burr, curl or raised lip of metal visible\n- Chamfer inside the bore is even and concentric all the way around\n- Bore is clean and bright, with no chips, shavings or cuttings inside the tube\n- No scoring, gouging or visible cracking of the tube end",
+      "sources": [
+        {
+          "condition": "The inside edge of the tube end is smooth and free of any burr, raised lip or curl of metal.",
+          "source": "both",
+          "note": "Procedure: \"check the inside diameter is smooth\"; handbook p.9-2: \"carefully remove any burrs from inside and outside the tube.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The bore at the deburred end measures the tubing's original inside diameter, not belled or enlarged.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet requires \"the original size returned\"; handbook gives only ID calculation, no deburring tolerance.",
+          "assumed": false
+        },
+        {
+          "condition": "Wall thickness at the deburred end is not reduced or fractured relative to the printed wall thickness.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"use extreme care that the wall thickness of the end of the tubing is not reduced or fractured.\"",
+          "assumed": false
+        },
+        {
+          "condition": "No metal chips, shavings or cuttings remain inside the tube bore.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"Be sure all filings and cuttings are removed from the tube.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Inside diameter restored to the original tube ID (requires caliper/pin gauge reading)",
+        "Wall thickness at the end not reduced below the printed wall thickness (requires measurement)"
+      ],
+      "required_framing": "Close macro shot looking straight into the deburred tube end so the bore fills most of the frame, well lit, with the tube's printed size/wall markings visible in the same frame if possible.",
+      "conflicts": []
+    },
+    "dr.s2": {
+      "kind": "step",
+      "step_id": "dr.s2",
+      "section": "Deburr and Resize Tubing Ends",
+      "step_text": "Deburr the outside edge of the tubing end.",
+      "criterion": "- Outside edge of the tube end is evenly chamfered, with no burr, ragged lip or feathered edge\n- End face and outer surface are clean, with no metallic dust, grit or hydraulic fluid smear\n- No scoring, gouging or flat spots from the sandpaper on the outside of the tube near the end",
+      "sources": [
+        {
+          "condition": "The outside edge of the tube end is smoothly chamfered with no ragged lip, burr or sharp feathered edge.",
+          "source": "both",
+          "note": "Handbook: \"carefully remove any burrs from inside and outside the tube\"; procedure sheet requires sanding \"until the end is smooth\".",
+          "assumed": false
+        },
+        {
+          "condition": "Wall thickness at the tube end is not reduced or fractured relative to the tube's marked wall thickness.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"use extreme care that the wall thickness of the end of the tubing is not reduced or fractured\" \u2014 leads to defective flares.",
+          "assumed": false
+        },
+        {
+          "condition": "The tube end face is square to the tube axis, not sanded to an angle or oval.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"file the end square and smooth\"; p.9-4 \"A crooked flare is the result of the tubing not being cut squarely.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The tube end and outer surface are free of visible metallic dust, grit and fluid smears before flaring.",
+          "source": "both",
+          "note": "Handbook: \"Be sure all filings and cuttings are removed from the tube.\" Sheet uses hydraulic fluid as lubricant, which traps dust.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Wall thickness at the end not reduced or fractured (needs micrometer/caliper reading)",
+        "End squareness to the tube axis within tolerance (needs square or gauge check)",
+        "Complete removal of fine filings from inside the bore"
+      ],
+      "required_framing": "Close-up macro of the finished tube end filling the frame, shot slightly off-axis so both the end face and the outside edge chamfer are visible, with the tube's printed size/wall marking in the same frame if possible.",
+      "conflicts": []
+    },
+    "dr.s3": {
+      "kind": "step",
+      "step_id": "dr.s3",
+      "section": "Deburr and Resize Tubing Ends",
+      "step_text": "Check ends for burrs.",
+      "criterion": "- Outside edge of each tube end shows no ragged burr, lip or curl\n- Bore mouth appears clean and round with no raised metal or slivers\n- End face shows a uniform smooth finish, free of nicks, dents or gouges\n- Tube OD adjacent to the end is free of deep scratches or scoring",
+      "sources": [
+        {
+          "condition": "Both tube ends are free of burrs on the inside bore and the outside edge.",
+          "source": "both",
+          "note": "Handbook: \"carefully remove any burrs from inside and outside the tube\"; procedure sheet step 3 \"Check ends for burrs.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The inside diameter is smooth and back to its original nominal size, not belled or enlarged.",
+          "source": "both",
+          "note": "Procedure: \"check the inside diameter is smooth and the original size returned\"; handbook sizing by OD minus twice wall thickness.",
+          "assumed": false
+        },
+        {
+          "condition": "Wall thickness at the end is not reduced or fractured by deburring or sanding.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"use extreme care that the wall thickness of the end of the tubing is not reduced or fractured.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The end face is square to the tube axis and smooth, with no nicks, scratches or gouges.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"produce a square end, free of burrs\" and \"file the end square and smooth\"; squareness needs a square/gauge.",
+          "assumed": false
+        },
+        {
+          "condition": "No filings, sanding grit or metallic dust remain inside the tube after deburring.",
+          "source": "handbook FAA-H-8083-30B p.9-2",
+          "note": "Handbook: \"Be sure all filings and cuttings are removed from the tube\"; verified by watching the tube blown/wiped clean.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Inside diameter restored to original nominal size",
+        "Wall thickness not reduced or fractured at the end",
+        "End face squareness to the tube axis",
+        "Complete removal of filings and metallic dust from inside the tube"
+      ],
+      "required_framing": "Close macro shot straight down the tube axis showing the bore mouth, plus a second oblique shot of the same end showing the outside edge and end face; frame both finished ends.",
+      "conflicts": []
+    },
+    "bt.s1": {
+      "kind": "step",
+      "step_id": "bt.s1",
+      "section": "Bending the Tubing",
+      "step_text": "Measure and mark where the middle of each bend will be on the tubing.",
+      "criterion": "- One clear felt-tip mark visible on the tube for each planned bend\n- Marks are ink only; no scribe grooves, nicks or dents on the tube surface\n- Tube surface between marks is clean and undamaged\n- Reference end used for measuring is identifiable in frame (e.g. wire laid alongside tube)",
+      "sources": [
+        {
+          "condition": "A distinct mark is present on the tube for every bend mapped on the safety-wire template.",
+          "source": "procedure sheet",
+          "note": "Step requires a mark at each bend location; count must equal bends recorded during routing.",
+          "assumed": false
+        },
+        {
+          "condition": "Each mark's distance from the reference tube end matches the corresponding wire-template dimension.",
+          "source": "procedure sheet",
+          "note": "Senior note: 'Measure from the ends of the wire to the bend marks. Use that dimension to mark on the tubing.'",
+          "assumed": false
+        },
+        {
+          "condition": "Marks are felt-tip only, with no scribe lines, scratches or dents in the tube wall.",
+          "source": "both",
+          "note": "Sheet lists felt tip marker; handbook: tubing 'must be free from cracks, dents, nicks, scratches, or any other defects.'",
+          "assumed": false
+        },
+        {
+          "condition": "Mark count and spacing agree with the routing sketch/photo of the bent wire.",
+          "source": "procedure sheet",
+          "note": "Routing note 2: 'Draw or photograph the shape to make' \u2014 the sketch is the reference for verification.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Distance from tube end to each bend mark matching the wire-template dimension",
+        "Agreement of mark count/spacing with the routing sketch or photograph",
+        "Whether the mark represents the middle of the bend rather than its start"
+      ],
+      "required_framing": "Lay the marked tube flat beside the straightened/shaped safety wire and a tape measure, shooting straight down so all bend marks and the reference end are legible in one frame.",
+      "conflicts": []
+    },
+    "bt.s2": {
+      "kind": "step",
+      "step_id": "bt.s2",
+      "section": "Bending the Tubing",
+      "step_text": "Use a hand bender to bend the tubing.",
+      "criterion": "- Bend contour is smooth and continuous with no kink, wrinkle, or visible flat spot on the outer or inner radius\n- Tube cross-section at the bend appears round, not oval or creased\n- No scoring, gouging, or clamp marks on the tube surface where the bender jaws gripped\n- Only one bend appears at each marked location, with no evidence of re-bending or back-bending",
+      "sources": [
+        {
+          "condition": "The finished bend is smooth and free of kinks, wrinkles, or visible flat spots.",
+          "source": "handbook FAA-H-8083-30B p.9-3",
+          "note": "Handbook: \"Bend the tubing carefully to avoid excessive flattening, kinking, or wrinkling\"; \"Tubing with flattened, wrinkled, or irregular bends should not be installed.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The small diameter of any flattened portion of the bend is at least 75 percent of the original tube OD.",
+          "source": "handbook FAA-H-8083-30B p.9-3",
+          "note": "Handbook: \"the small diameter of the flattened portion must not be less than 75 percent of the original outside diameter.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The completed bend angle matches the angle called for by the routing template.",
+          "source": "both",
+          "note": "Handbook: \"pull the form handle until the zero mark on the form handle lines up with the desired angle of bend\"; sheet: \"until the upper handle 0 points to the desired degrees.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The bend center falls at the marked location, measured from the correct (L or R) reference end.",
+          "source": "both",
+          "note": "Handbook: \"align the mark on the tubing with the L on the form handle... If the measured end is on the right side, then align... with the R.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Flattened portion measuring at least 75 percent of original outside diameter",
+        "Actual bend angle in degrees",
+        "Bend radius compared to standard bend radius for the tube size",
+        "Distance from the reference end to the bend center",
+        "Whether the L or R indication line was used correctly during bending"
+      ],
+      "required_framing": "Lay the bent tube on a clean contrasting surface with the plane of the bend flat to the camera, shot square from above so the full bend arc and both legs are in frame; add a second close shot looking along the tube axis through the bend area.",
+      "conflicts": []
+    },
+    "bt.s3": {
+      "kind": "step",
+      "step_id": "bt.s3",
+      "section": "Bending the Tubing",
+      "step_text": "Repeat at each marked bend location.",
+      "criterion": "- All bend locations from the wire template are formed on the tube, in the correct order\n- Each bend outer radius is smooth, with no wrinkles, kinks or creases\n- No visible flat spot or ovaling at any bend\n- Tube surface at bends is free of scoring, gouges or bender jaw marks\n- Straight sections between bends remain straight and lie in the intended plane",
+      "sources": [
+        {
+          "condition": "Every marked bend location on the tube has a corresponding formed bend, matching the count and sequence of the wire template.",
+          "source": "procedure sheet",
+          "note": "Step directs repeating the bend at each marked location; template shape recorded per note 2 ('Draw or photograph the shape to make').",
+          "assumed": false
+        },
+        {
+          "condition": "Each bend is smooth and free of wrinkles, kinks, or visible flattening.",
+          "source": "both",
+          "note": "Handbook: 'Tubing with flattened, wrinkled, or irregular bends should not be installed'; procedure sheet requires smooth bender-formed bends.",
+          "assumed": false
+        },
+        {
+          "condition": "At each bend the small diameter of any flattened portion is not less than 75 percent of the original outside diameter.",
+          "source": "handbook FAA-H-8083-30B p.9-3",
+          "note": "Handbook: 'the small diameter of the flattened portion must not be less than 75 percent of the original outside diameter'.",
+          "assumed": false
+        },
+        {
+          "condition": "Bend angles and the distances between bends reproduce the wire-template dimensions within fit-up of both fittings.",
+          "source": "procedure sheet",
+          "note": "Sheet: 'Measure from the ends of the wire to the bend marks. Use that dimension to mark on the tubing.'",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Flattened portion at each bend measuring at least 75 percent of original OD",
+        "Actual bend angle in degrees at each location",
+        "Bend-to-bend distances matching the safety-wire template measurements",
+        "Whether the bender L/R alignment and zero indexing were used correctly for each bend"
+      ],
+      "required_framing": "Lay the fully bent line flat on the bench beside the wire template or routing sketch, entire line in one frame with all bends visible, plus a close-up of each bend's outer radius against a plain background.",
+      "conflicts": [
+        "Procedure sheet allows \u00bd\" extra length per bend; handbook p.9-2 says cut the new piece 'approximately 10 percent longer' \u2014 procedure sheet is operative as taught."
+      ]
+    },
+    "ft.s1": {
+      "kind": "step",
+      "step_id": "ft.s1",
+      "section": "Flare the Tube",
+      "step_text": "Install the hardware.",
+      "criterion": "- B-nut is on the tube with its threads pointing toward the end to be flared\n- Sleeve is on the tube between the B-nut and the tube end, larger opening toward that end\n- Tube end is still square and unflared with both pieces of hardware already on the tube\n- Sleeve and B-nut are the same nominal size as the tubing and show no cross-threading or damage",
+      "sources": [
+        {
+          "condition": "The B-nut is on the tube with its threaded end facing the tube end to be flared.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Slide the B-nut on the tube with the threads pointing towards the end being flared.\" Handbook only says slip nut on tube.",
+          "assumed": false
+        },
+        {
+          "condition": "The sleeve sits between the B-nut and the tube end with its larger opening facing that end.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Slide the sleeve on with the larger opening pointing towards the end of the tube being flared.\" Handbook is silent on orientation.",
+          "assumed": false
+        },
+        {
+          "condition": "Both nut and sleeve are on the tube while the end is still square and unflared.",
+          "source": "both",
+          "note": "Handbook p.9-4: \"Cut the tube squarely and remove all burrs. Slip the fitting nut and sleeve on the tube.\" Sequence precedes flaring in both sources.",
+          "assumed": false
+        },
+        {
+          "condition": "Nut and sleeve size matches the tube outside diameter and both slide freely on the tube.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet specifies tubing per manual (e.g. 0.25\" OD) with matching B-nut and sleeve; fit verified by measuring OD against hardware.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Nut and sleeve size correctness against the measured tube OD",
+        "Whether the hardware slides freely along the tube",
+        "Whether hardware was installed before flaring rather than slid on afterward from the far end"
+      ],
+      "required_framing": "Side-on close-up of the unflared tube end, filling the frame, with the sleeve and B-nut in place so the sleeve's larger opening and the nut's thread direction are both visible.",
+      "conflicts": []
+    },
+    "ft.s2": {
+      "kind": "step",
+      "step_id": "ft.s2",
+      "section": "Flare the Tube",
+      "step_text": "Use the flaring tool.",
+      "criterion": "- Flare is symmetrical and concentric about the tube axis, with even wall thickness all around\n- Flare face is square to the tube, not tilted or one-sided\n- No cracks, splits, nicks, scratches or die-jaw scoring on the flare or tube behind it\n- Flare surface is clean and smooth, free of debris or smeared metal",
+      "sources": [
+        {
+          "condition": "The finished flare is concentric and square to the tube axis, not lopsided or crooked.",
+          "source": "both",
+          "note": "Handbook: \"A crooked flare is the result of the tubing not being cut squarely\"; procedure sheet: \"holder is square to the tube.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Flare face and adjacent tube surface are free of cracks, splits, nicks, scratches or die scoring.",
+          "source": "both",
+          "note": "Handbook: \"The flare and tubing must be free from cracks, dents, nicks, scratches, or any other defects\"; sheet warns of scoring.",
+          "assumed": false
+        },
+        {
+          "condition": "Flare outside diameter is neither undersized nor oversized for the sleeve and B-nut thread engagement.",
+          "source": "handbook FAA-H-8083-30B p.9-4",
+          "note": "\"A flare made too small produces a weak joint... if made too large, it interferes with the proper engagement of the screw thread\"; handbook gives no figure.",
+          "assumed": false
+        },
+        {
+          "condition": "Flare angle matches the taught 47\u00b0 die form, not an automotive 45\u00b0 flare.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet states \"a good 47\u00b0 flare\"; the angle figure comes from the sheet only and needs gauge or comparator reading.",
+          "assumed": false
+        },
+        {
+          "condition": "Tube protruded about a dime's thickness through the tapered die and the anvil was run in until torque rose and the die seated.",
+          "source": "procedure sheet",
+          "note": "Sheet: extend \"about the thickness of a dime\" and rotate \"until a noticeable rise in torque is felt.\" Setup and feel are not visible afterward.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Flare angle (47\u00b0 per procedure sheet / 35\u00b0\u201337\u00b0 per handbook)",
+        "Flare outside diameter versus sleeve and thread engagement",
+        "Tube protrusion of about one dime thickness through the die before flaring",
+        "Noticeable rise in torque indicating the die was fully seated"
+      ],
+      "required_framing": "One straight-down close-up into the tube bore showing the full flare rim, and one side view of the flare and the 1\u20132 inches of tube behind it under good light on a plain background.",
+      "conflicts": [
+        "Procedure sheet specifies a 47\u00b0 flare; handbook FAA-H-8083-30B p.9-4 states dies are \"ground to produce a flare of 35\u00b0 to 37\u00b0\" and that a 45\u00b0 automotive flare is never permissible \u2014 procedure sheet is operative as taught."
+      ]
+    },
+    "ft.s3": {
+      "kind": "step",
+      "step_id": "ft.s3",
+      "section": "Flare the Tube",
+      "step_text": "Check for a good flare.",
+      "criterion": "- Sleeve is pulled tight against the flare and a thin, continuous ring of blue sleeve is visible around the flared tube end\n- No thick blue band (under-flare) and no absence of blue (over-flare) at any point around the circumference\n- Flare surface free of cracks, splits, nicks, scratches or die scoring\n- Flare is round and concentric with the tube, not crooked or uneven in wall thickness\n- B-nut and sleeve remain captured on the tube behind the flare",
+      "sources": [
+        {
+          "condition": "With the sleeve pulled up against the flare, a thin, continuous ring of the blue sleeve is visible around the flared end.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet's go/no-go check: thin blue ring = correct flare size; thick ring = under-flared, no ring = over-flared.",
+          "assumed": false
+        },
+        {
+          "condition": "The flare and adjacent tubing are free of cracks, splits, dents, nicks, scratches or scoring from the die.",
+          "source": "both",
+          "note": "Handbook: \"The flare and tubing must be free from cracks, dents, nicks, scratches, or any other defects.\" Sheet warns scoring causes failure under pressure.",
+          "assumed": false
+        },
+        {
+          "condition": "The flare is concentric and square to the tube axis, not crooked or lopsided in wall thickness.",
+          "source": "handbook FAA-H-8083-30B p.9-4",
+          "note": "Handbook: \"A crooked flare is the result of the tubing not being cut squarely\"; flare must be \"properly shaped or the connection leaks or fails.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The included flare angle measures 47\u00b0 per the procedure sheet (handbook specifies 35\u00b0 to 37\u00b0).",
+          "source": "procedure sheet",
+          "note": "Angle figure 47\u00b0 is the procedure sheet's alone; handbook states dies \"ground to produce a flare of 35\u00b0 to 37\u00b0.\" Requires gauge, not a photo.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Actual flare included angle (47\u00b0 per sheet; 35\u00b0\u201337\u00b0 per handbook) \u2014 needs a gauge or protractor reading",
+        "Whether the flare seals under pressure \u2014 settled only by the later pressure test",
+        "Whether the tube was held square in the die during flaring \u2014 only visible while the action is performed"
+      ],
+      "required_framing": "Close-up axial shot looking straight down the tube bore with the sleeve slid up hard against the flare, the flared end filling most of the frame and lit evenly so the blue sleeve ring and any cracks or scoring are distinguishable.",
+      "conflicts": [
+        "Procedure sheet specifies a 47\u00b0 flare; handbook FAA-H-8083-30B p.9-4 states aircraft flaring dies produce 35\u00b0 to 37\u00b0 and that automotive 45\u00b0 flares are never permissible. Procedure sheet is operative as taught, but the 47\u00b0 figure is unsupported by the handbook and needs instructor confirmation."
+      ]
+    },
+    "ft.s4": {
+      "kind": "step",
+      "step_id": "ft.s4",
+      "section": "Flare the Tube",
+      "step_text": "Repeat hardware and flare process for the other end.",
+      "criterion": "- Both ends of the tube show a formed flare\n- A B-nut and a sleeve are present on the tube for each flared end\n- B-nut threads and the sleeve's larger opening face their own flare on each end\n- Second flare is round, concentric with the tube, and square to the tube axis\n- No cracks, splits, nicks, scratches or scoring on or behind the second flare\n- Sleeve seats against the second flare showing only a thin ring of blue around the flared end",
+      "sources": [
+        {
+          "condition": "Both tube ends carry a completed flare, with a B-nut and sleeve captured on the tube for each end.",
+          "source": "procedure sheet",
+          "note": "Sheet: slide B-nut with threads toward the end being flared and sleeve with larger opening toward that end, then repeat for other end.",
+          "assumed": false
+        },
+        {
+          "condition": "On each end the B-nut threads and the sleeve's larger opening face their own flare, not each other.",
+          "source": "procedure sheet",
+          "note": "Hardware orientation per Senior Mechanic Note 1; reversed hardware cannot seat on the flare.",
+          "assumed": false
+        },
+        {
+          "condition": "The second flare is concentric and square to the tube axis and free of cracks, nicks, scratches or splits.",
+          "source": "both",
+          "note": "Handbook: \"The flare and tubing must be free from cracks, dents, nicks, scratches, or any other defects\"; \"A crooked flare is the result of the tubing not being cut squarely.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The second flare's included angle matches the specified flare angle for the fitting.",
+          "source": "both",
+          "note": "Sheet specifies a 47\u00b0 flare; handbook states dies \"produce a flare of 35\u00b0 to 37\u00b0\" and forbids 45\u00b0 automotive flares.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Measured flare included angle (47\u00b0 per sheet, 35\u00b0\u201337\u00b0 per handbook)",
+        "The rise in torque felt as the flaring anvil fully seats",
+        "Whether the holder was square to the tube before tightening",
+        "Whether hydraulic fluid was applied to the flare rim",
+        "Leak-free performance of the second flare at test pressure"
+      ],
+      "required_framing": "Two shots: a close axial view down the second flared end with the sleeve pulled up against the flare, and a side view of the whole line showing the B-nut and sleeve orientation on both ends.",
+      "conflicts": [
+        "Procedure sheet specifies a 47\u00b0 flare; handbook FAA-H-8083-30B p.9-4 states flaring dies produce 35\u00b0 to 37\u00b0 and that 45\u00b0 automotive flares are never permissible \u2014 sheet followed as operative"
+      ]
+    },
+    "pt.s1": {
+      "kind": "step",
+      "step_id": "pt.s1",
+      "section": "Pressure Test the Tubing",
+      "step_text": "Use an enclosed pressure test box.",
+      "criterion": "- Entire fabricated line and both end fittings are inside the test box, nothing overhanging the walls\n- Enclosure walls and viewing panel are intact, with no cracks, missing panels or open gaps\n- Test hose enters the box without preventing the lid from seating\n- Line lies supported in the box, not balanced on a bend or fitting",
+      "sources": [
+        {
+          "condition": "The entire fabricated line, including both end fittings, sits inside the test box with nothing protruding past the enclosure walls.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: 'Use an enclosed pressure test box'; safety note warns high-pressure fluid sprayed at the body causes severe injury.",
+          "assumed": false
+        },
+        {
+          "condition": "The box lid or door is fully closed and latched before any pressure is applied to the line.",
+          "source": "procedure sheet",
+          "note": "Containment only exists while closed; a still of a closed box cannot show whether the line was inside or when pressure began.",
+          "assumed": false
+        },
+        {
+          "condition": "The enclosure and its viewing panel are intact, with no cracks, missing panels or open gaps facing the operator.",
+          "source": "procedure sheet",
+          "note": "Enclosure is the sole spray barrier implied by 'enclosed pressure test box' and the high-pressure spray hazard note.",
+          "assumed": false
+        },
+        {
+          "condition": "The box is rated for at least the intended test pressure of 1.5 times system pressure.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet sets test pressure at 1.5x system (e.g. 3000 psi); enclosure rating must be confirmed from shop equipment data.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Lid closed and latched before pressure was applied",
+        "Operator standing clear of the enclosure during pressurization",
+        "Enclosure rated for 1.5x system test pressure"
+      ],
+      "required_framing": "One overhead shot with the lid open showing the whole line and both fittings inside the box, box walls and viewing panel in frame.",
+      "conflicts": []
+    },
+    "pt.s2": {
+      "kind": "step",
+      "step_id": "pt.s2",
+      "section": "Pressure Test the Tubing",
+      "step_text": "Connect the completed rigid line to the pressure tester pump.",
+      "criterion": "- B-nut fully threaded onto the tester port with no visible gap between nut and fitting body\n- Nut and sleeve sit square to the tester fitting, threads not crossed or galled\n- Tube approaches the tester port straight, with no visible kink, twist or wrench marks near the nut\n- Line and tester connection intact with no fluid weeping at the joint",
+      "sources": [
+        {
+          "condition": "The B-nut is fully run down square on the tester port with no visible thread gap or cross-threading.",
+          "source": "procedure sheet",
+          "note": "Step requires the completed line connected to the pump; full square engagement is the inspectable outcome of that connection.",
+          "assumed": false
+        },
+        {
+          "condition": "Two wrenches are used simultaneously, one holding the tester fitting stationary so no twist reaches the tube or flare.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: 'Use two wrenches when connecting the rigid line to the tester.' Only observable while turning.",
+          "assumed": false
+        },
+        {
+          "condition": "The two wrenches are set about 45\u00b0 apart on the hardware and squeezed together like plier handles.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet alone specifies 45\u00b0; handbook pp.9-1..9-7 give no wrench-positioning figure.",
+          "assumed": false
+        },
+        {
+          "condition": "Final tightness is reached at a firm torque rise, not by adding torque in an attempt to seal a poor flare.",
+          "source": "handbook FAA-H-8083-30B p.9-4",
+          "note": "Handbook: 'If a flare is not made properly, flaws cannot be corrected by applying additional torque when tightening the fitting.'",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Use of two wrenches simultaneously with one holding the fitting stationary",
+        "Wrenches positioned 45\u00b0 apart and squeezed together",
+        "Final tightness / torque rise at the connection",
+        "Absence of twist transferred to the flare during tightening"
+      ],
+      "required_framing": "Close-up of the completed line attached to the pressure tester port, framed so the B-nut, sleeve and tester fitting threads are all visible in one still; include a second shot with both wrenches in place on the hardware if wrench technique is to be shown.",
+      "conflicts": []
+    },
+    "pt.s3": {
+      "kind": "step",
+      "step_id": "pt.s3",
+      "section": "Pressure Test the Tubing",
+      "step_text": "Place the rigid line into the enclosed box.",
+      "criterion": "- Whole tube assembly, both fitting ends included, sits inside the test box with nothing protruding\n- Box cover closed and latch/closure visibly engaged, supply hose entering only through its port\n- No kink, flat spot or wrinkle in any bend of the line as placed\n- Box interior free of loose rags, tools or debris around the line",
+      "sources": [
+        {
+          "condition": "The entire tube assembly, including both B-nut/fitting connections, lies wholly inside the enclosure with nothing protruding past the box opening.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet requires an enclosed pressure test box and the line placed into it; cited handbook pages state no enclosure requirement.",
+          "assumed": false
+        },
+        {
+          "condition": "The box cover/closure is fully seated and latched, with only the supply hose passing through its intended port.",
+          "source": "procedure sheet",
+          "note": "Containment of high-pressure fluid; sheet warns 'High pressure fluids can cause severe injuries if sprayed at body.'",
+          "assumed": false
+        },
+        {
+          "condition": "The line shows no new kink, flat spot or wrinkle from being forced or sprung into the box.",
+          "source": "handbook FAA-H-8083-30B p.9-3",
+          "note": "Handbook: 'Tubing with flattened, wrinkled, or irregular bends should not be installed'; flattening limit itself needs measurement.",
+          "assumed": false
+        },
+        {
+          "condition": "The box is closed and all personnel are clear of the spray path before any pumping begins.",
+          "source": "procedure sheet",
+          "note": "Sequencing and personnel position; sheet lists high-pressure spray injury and eye/mouth exposure hazards.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "That the box was closed before pumping started rather than after",
+        "Personnel standing clear of the potential spray path during pressurization",
+        "Whether bend flattening remains within the 75 percent of original OD limit",
+        "Test pressure of 1.5 times system pressure (graded at the pressurizing step)"
+      ],
+      "required_framing": "Shoot the test box straight on from the operator side: one frame with the lid open showing the complete line and both fitting ends inside the box, and one frame with the lid closed showing the latch engaged and the supply hose entering its port.",
+      "conflicts": []
+    },
+    "pt.s4": {
+      "kind": "step",
+      "step_id": "pt.s4",
+      "section": "Pressure Test the Tubing",
+      "step_text": "Pressurize the rigid line.",
+      "criterion": "- The completed line is inside the enclosed test box with the enclosure closed before the pump is worked\n- The test cart gauge face is unobstructed and legible in the same frame as the enclosure\n- No hydraulic fluid is pooled or sprayed outside the enclosure or on the shop surface",
+      "sources": [
+        {
+          "condition": "The test gauge reaches 1.5 times the documented system operating pressure (e.g., 3,000 psi for a 2,000 psi system).",
+          "source": "procedure sheet",
+          "note": "Procedure sheet alone gives the 1.5x figure; handbook only says tubing is \"designed to withstand several times the normal operating pressure.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The system operating pressure used to compute test pressure is traceable to the aircraft manual/TCDS for the installation.",
+          "source": "procedure sheet",
+          "note": "Sheet requires use of all relevant data (TCDS, maintenance/service manuals) to establish system pressure.",
+          "assumed": false
+        },
+        {
+          "condition": "Indicated pressure holds at test value without decay for the observation period.",
+          "source": "procedure sheet",
+          "note": "Pressurization exists to reveal leaks; a falling gauge indicates leakage at b-nut, sleeve or tube.",
+          "assumed": false
+        },
+        {
+          "condition": "Pressure is applied only with the line inside the enclosed test box and personnel clear of the line.",
+          "source": "procedure sheet",
+          "note": "Sheet requires an enclosed pressure test box; safety note: \"High pressure fluids can cause severe injuries if sprayed at body.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Gauge reading equal to 1.5x system operating pressure",
+        "Pressure holding without decay over the observation period",
+        "System operating pressure value taken from the manual/TCDS",
+        "Whether the operator stayed clear while pressure was being applied"
+      ],
+      "required_framing": "One still taken from outside the closed test box showing the enclosure and the connected line, with the pressure gauge face square to the camera and readable; state the target test pressure and the system pressure it was derived from in the caption.",
+      "conflicts": []
+    },
+    "pt.s5": {
+      "kind": "step",
+      "step_id": "pt.s5",
+      "section": "Pressure Test the Tubing",
+      "step_text": "Check tubing for leaks.",
+      "criterion": "- Both end fittings and the full tube length, including the bend, are visible and wiped dry with no pooled or smeared fluid\n- Line is connected to the test cart with two-wrench-tightened B-nuts and lies inside the enclosed test box\n- Pressure gauge of the test cart is legible in the same frame as the line",
+      "sources": [
+        {
+          "condition": "The line holds the specified test pressure with no gauge decay during the leak check.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet alone gives 1.5\u00d7 system pressure (e.g. 3,000 psi for a 2,000 psi system); handbook only says tubing is pressure tested and withstands several times normal pressure.",
+          "assumed": false
+        },
+        {
+          "condition": "No fluid seepage appears at either B-nut or at the base of either sleeve while the line is pressurized.",
+          "source": "both",
+          "note": "Procedure sheet ties leak location to fault; handbook p.9-4: \"the flare on the tubing must be properly shaped or the connection leaks or fails.\"",
+          "assumed": false
+        },
+        {
+          "condition": "No weeping, misting or wetness appears along the tube body or through the bend under pressure.",
+          "source": "both",
+          "note": "Procedure sheet: \"Leak on tubing = possible damage from fabrication\"; handbook p.9-1 requires tubing be pressure tested prior to installation.",
+          "assumed": false
+        },
+        {
+          "condition": "Joints and tube are wiped dry and free of residual fluid before the pressure check begins.",
+          "source": "procedure sheet",
+          "note": "Leak-location diagnosis in the senior mechanic notes is only valid if pre-existing fluid is removed first.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Absence of leaks while the line is actually pressurized",
+        "Test pressure equal to 1.5\u00d7 system pressure and its stability over the hold",
+        "Correct attribution of any observed leak to B-nut tightness, flare failure or tube damage"
+      ],
+      "required_framing": "Single still of the pressurized line inside the open-lidded test box, both B-nut joints and the bend in frame and dry, with the test cart gauge legible in the same shot.",
+      "conflicts": []
+    },
+    "ir.s1": {
+      "kind": "step",
+      "step_id": "ir.s1",
+      "section": "Install Rigid Line on Aircraft",
+      "step_text": "Fit rigid line into position.",
+      "criterion": "- Both tube ends sit square and concentric in their fittings with no visible offset or gap\n- No flattened, wrinkled, kinked or irregular bends visible along the line\n- Flares and tube surface free of visible cracks, dents, nicks or scratches\n- Line clears surrounding structure and components with no contact point",
+      "sources": [
+        {
+          "condition": "Both tube ends align concentrically with their fitting seats, with no visible offset or gap when set in place.",
+          "source": "procedure sheet",
+          "note": "Procedure step 'Fit rigid line into position' before tightening; misalignment forces the flare off its seat.",
+          "assumed": false
+        },
+        {
+          "condition": "The line shows no flattened, wrinkled, kinked or irregular bends anywhere along its length.",
+          "source": "handbook FAA-H-8083-30B p.9-3",
+          "note": "Handbook: \"Tubing with flattened, wrinkled, or irregular bends should not be installed.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Any flattening at a bend measures not less than 75 percent of the original tube outside diameter.",
+          "source": "handbook FAA-H-8083-30B p.9-3",
+          "note": "Handbook: \"the small diameter of the flattened portion must not be less than 75 percent of the original outside diameter.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Flares and tube surfaces are free of cracks, dents, nicks and scratches where fitted.",
+          "source": "handbook FAA-H-8083-30B p.9-4",
+          "note": "Handbook: \"The flare and tubing must be free from cracks, dents, nicks, scratches, or any other defects.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The fitted line clears adjacent structure and components with no contact or chafing point.",
+          "source": "procedure sheet",
+          "note": "Routing was mapped to avoid obstructions; fit must reproduce that clearance.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Flattened bend diameter at least 75 percent of original OD (needs measurement)",
+        "Whether the line seats without strain and the b-nuts start by hand without side load"
+      ],
+      "required_framing": "One frame showing the full installed line end to end, with both fitting connections and all bends visible, plus the gap between the tube and adjacent structure.",
+      "conflicts": []
+    },
+    "ir.s2": {
+      "kind": "step",
+      "step_id": "ir.s2",
+      "section": "Install Rigid Line on Aircraft",
+      "step_text": "Tighten rigid line on fittings.",
+      "criterion": "- Each b-nut is seated square on its fitting with no gap or visible unengaged threads\n- No cocked or cross-threaded nut at either end of the line\n- Tube enters the fitting straight, with no bowing, twist, or spring-in evident at the joint\n- B-nut and fitting hex flats are free of wrench marks, rounding, or galling",
+      "sources": [
+        {
+          "condition": "Each b-nut is run up square and fully engaged on its fitting, with no cocked nut, cross-threading, or unengaged exposed threads.",
+          "source": "procedure sheet",
+          "note": "Handbook speaks only qualitatively of \"proper engagement of the screw thread on the fitting\"; squareness/engagement judgement is the sheet's.",
+          "assumed": false
+        },
+        {
+          "condition": "Final tightening on each b-nut is the point of high torque rise plus one-third turn, no more and no less.",
+          "source": "procedure sheet",
+          "note": "The \u2153-turn figure appears only on the procedure sheet; the handbook gives no turn value for flared b-nut installation.",
+          "assumed": false
+        },
+        {
+          "condition": "A backup wrench holds the fitting while the b-nut is turned, so no torque reaches the tube or the airframe fitting.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: two wrenches, one on b-nut and one on fitting.",
+          "assumed": false
+        },
+        {
+          "condition": "No extra torque beyond the specified tightening is used to stop a weep or to seat an imperfect flare.",
+          "source": "handbook FAA-H-8083-30B p.9-4",
+          "note": "Handbook: \"If a flare is not made properly, flaws cannot be corrected by applying additional torque when tightening the fitting.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Torque-rise-plus-one-third-turn final tightening amount",
+        "Use of a second (backup) wrench on the fitting during tightening",
+        "Absence of extra torque applied to chase a weep or seat a bad flare",
+        "Leak-free condition of the installed joint under pressure"
+      ],
+      "required_framing": "Close, square shot of one installed joint showing the b-nut, the fitting hex, and the first few inches of tube run so thread engagement and tube alignment are both visible; repeat for the second end.",
+      "conflicts": []
+    },
+    "task": {
+      "kind": "task",
+      "step_id": null,
+      "criterion": "- The finished line reproduces the safety-wire template: one formed bend for every marked bend on the wire, in the same order, at the same distances from the reference end, and both ends reach their fitting seats concentrically.\n- Every bend is smooth, with no wrinkle, kink or irregular bend; the small diameter of any flattened portion is not less than 75 percent of the original outside diameter.\n- Both tube ends are cut square to the axis and deburred inside and outside, with no burr, raised lip, remaining chips, or reduced or fractured wall thickness at the end.\n- On each end the B-nut is captive with its threads facing the flare and the sleeve sits between nut and flare with its larger opening toward the flare.\n- Each flare is concentric and square to the tube axis and the flare and tubing are free from cracks, dents, nicks, scratches or die scoring.\n- With the sleeve pulled up to each flare, a thin continuous ring of the sleeve is visible around the flared end \u2014 not a thick ring (under-flared) and not absent (over-flared).\n- The included flare angle of both ends is measured and recorded, and is consistent for both ends and correct for the fitting used.\n- The tubing selected matches the size, wall thickness and material called out in the applicable data, and its printed diameter and wall-thickness markings or alloy colour band are legible on the submitted stock.\n- The line was pressurised only inside a closed enclosure, to 1.5 times the documented system operating pressure, and held that pressure with no gauge decay and no seepage at either B-nut, either sleeve base, or along the tube.\n- The recorded system operating pressure used to compute test pressure is traceable to the aircraft maintenance data or TCDS.\n- Final tightening at each connection was made to a firm torque rise plus one-third turn with a backup wrench on the fitting, and no additional torque was applied to stop a weep or seat a flare.",
+      "sources": [
+        {
+          "condition": "Flattening at a bend \u2265 75% of original OD",
+          "source": "FAA-H-8083-30B p. 9-3",
+          "note": "Verbatim: \"the small diameter of the flattened portion must not be less than 75 percent of the original outside diameter.\""
+        },
+        {
+          "condition": "No wrinkled, flattened or kinked bends installed",
+          "source": "FAA-H-8083-30B p. 9-3",
+          "note": "Verbatim: \"Tubing with flattened, wrinkled, or irregular bends should not be installed.\""
+        },
+        {
+          "condition": "Flare and tubing free of cracks, dents, nicks, scratches",
+          "source": "FAA-H-8083-30B p. 9-4",
+          "note": "Verbatim: \"The flare and tubing must be free from cracks, dents, nicks, scratches, or any other defects.\""
+        },
+        {
+          "condition": "No extra torque to correct a bad flare",
+          "source": "FAA-H-8083-30B p. 9-4",
+          "note": "Verbatim: \"If a flare is not made properly, flaws cannot be corrected by applying additional torque when tightening the fitting.\""
+        },
+        {
+          "condition": "Square, burr-free ends; wall not reduced or fractured",
+          "source": "FAA-H-8083-30B pp. 9-2",
+          "note": "Verbatim: \"use extreme care that the wall thickness of the end of the tubing is not reduced or fractured.\""
+        },
+        {
+          "condition": "Thin blue sleeve ring as flare acceptance check",
+          "source": "AM.I.D.S1 procedure sheet, Flare the Tube note 3",
+          "note": "Campus criterion only; handbook extract gives no sleeve-ring check."
+        },
+        {
+          "condition": "Test at 1.5 \u00d7 system pressure",
+          "source": "AM.I.D.S1 procedure sheet, Pressure Test note 2",
+          "note": "Campus figure. Handbook extract says only \"All tubing is pressure tested prior to initial installation\"; no multiplier given."
+        },
+        {
+          "condition": "Torque rise plus one-third turn at installation",
+          "source": "AM.I.D.S1 procedure sheet, Install note 1",
+          "note": "Campus figure; handbook extract's turn counts (1 to 1-1/6) apply to flareless presetting, not flared B-nuts."
+        },
+        {
+          "condition": "Tubing size/material matched to original",
+          "source": "FAA-H-8083-30B p. 9-1",
+          "note": "Verbatim: \"Replacement tubing should be of the same size and material as the original tubing.\""
+        }
+      ],
+      "not_photo_gradeable": [
+        "Included flare angle \u2014 requires a gauge; a still cannot distinguish 37\u00b0 from 45\u00b0 or 47\u00b0.",
+        "Residual diameter at a flattened bend as a percentage of original OD \u2014 requires caliper readings at the bend and on undeformed stock.",
+        "Wall thinning or fracture at a deburred or sanded end \u2014 not visible on the outside surface.",
+        "Squareness of the cut end to the tube axis beyond gross crookedness.",
+        "Whether the line holds test pressure without decay, and absence of weeping or misting under pressure \u2014 a time-dependent behaviour.",
+        "Final tightening at torque rise plus one-third turn, and use of a backup wrench so no torque reaches the tube.",
+        "Absence of filings, sanding grit or metallic dust inside the bore."
+      ],
+      "required_framing": null,
+      "conflicts": []
+    }
+  }
+}

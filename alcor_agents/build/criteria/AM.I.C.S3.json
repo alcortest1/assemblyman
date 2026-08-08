@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "task_code": "AM.I.C.S3",
+  "generator": "packs/compile_pack.py",
+  "model": "anthropic/claude-opus-5",
+  "drafted_at": "2026-08-04T03:14:11Z",
+  "reviewed_by": null,
+  "sources": [
+    "procedure.md",
+    "steps.json",
+    "tasks.csv",
+    "references/handbook/faa_h_8083_30b_content_search_ballast_weight_shift_required_location.md"
+  ],
+  "entries": {
+    "p.s1": {
+      "kind": "step",
+      "step_id": "p.s1",
+      "section": "Procedure",
+      "step_text": "Identify the aircraft total weight.",
+      "criterion": "- the total aircraft weight is written on the worksheet as a single legible figure\n- the figure carries pound (LB) units\n- the entry is labeled as total/gross aircraft weight rather than left unidentified",
+      "sources": [
+        {
+          "condition": "The weight entered is the aircraft's total (loaded) weight from the given problem data, not the empty weight.",
+          "source": "procedure sheet",
+          "note": "Formula uses 'total acft weight'; note 1 gives it as a supplied value, e.g., 2,500 LBS.",
+          "assumed": false
+        },
+        {
+          "condition": "The total weight figure is legibly recorded on the worksheet with pound units shown.",
+          "source": "procedure sheet",
+          "note": "Step 1 requires the value be identified and carried into the ballast formula; units make it auditable.",
+          "assumed": false
+        },
+        {
+          "condition": "If no value is given, the weight is traced to the Aircraft Specifications or TCDS and that source is cited.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "Handbook: maximum weight 'is indicated in the Aircraft Specifications or TCDS'; reference is uncited/provisional, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The weight used does not exceed the maximum allowable gross weight for the category being computed.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "Handbook: 'variations to the maximum allowable weight depending on the purpose and conditions'; provisional, uncited reference needing SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the recorded figure matches the total weight supplied in the given problem data",
+        "Whether the value is total loaded weight rather than empty weight",
+        "Whether the weight is traceable to the TCDS or Aircraft Specifications when not supplied",
+        "Whether the weight is within maximum allowable gross weight for the category"
+      ],
+      "required_framing": "Overhead still of the worksheet showing both the given data line (aircraft weight) and the student's recorded total weight entry with units, in focus and fully legible.",
+      "conflicts": []
+    },
+    "p.s2": {
+      "kind": "step",
+      "step_id": "p.s2",
+      "section": "Procedure",
+      "step_text": "Identify how far CG is out of range.",
+      "criterion": "- Written solution shows the given CG range and the current CG location as stated in the problem\n- The subtraction is written out on the page rather than only a final answer\n- The result is labeled in inches\n- The required shift direction (forward or aft) is written next to the result",
+      "sources": [
+        {
+          "condition": "The out-of-range distance is computed against the nearest exceeded CG limit, not the opposite limit (e.g., 71.2\" \u2212 70\" = 1.2\").",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note 2: \"When shifting CG, shift it to the closest limit it currently is out of.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The stated direction of required CG shift matches which limit was exceeded (aft-out CG requires forward shift).",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "Handbook: \"Weight being added forward of the datum produces a negative moment\"; sign/direction logic. Assumed reference \u2014 needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The CG limits used match the published/given range for the applicable category rather than an assumed value.",
+          "source": "handbook FAA-H-8083-30B p.6-6",
+          "note": "Handbook: specifications \"furnished by the FAA ... in the TCDS or Aircraft Specifications.\" Assumed reference \u2014 requires SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "Written solution legibly shows the given CG range, current CG, and the subtraction, with inch units labeled.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet gives worked example format \"64\"-70\"; CG @ 71.2\"\" as the expected showing of work.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the limit subtracted is the nearest exceeded limit (arithmetic correctness)",
+        "Whether the numeric out-of-range distance is correct",
+        "Whether the CG limits used match the applicable TCDS/category data",
+        "Whether the stated shift direction is logically consistent with the exceeded limit"
+      ],
+      "required_framing": "One square-on still of the completed worksheet page, filling the frame, glare-free, with all given values, the subtraction, units and stated shift direction legible.",
+      "conflicts": []
+    },
+    "p.s3": {
+      "kind": "step",
+      "step_id": "p.s3",
+      "section": "Procedure",
+      "step_text": "Identify ballast location.",
+      "criterion": "- Worksheet shows one ballast location written as a numeric station/arm in inches with an algebraic sign (e.g., +45\")\n- Worksheet identifies the physical location (baggage compartment or named fuselage station) alongside the number",
+      "sources": [
+        {
+          "condition": "The worksheet records a single ballast location expressed as a fuselage station or arm in inches, not a vague area.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 3: location is 'usually a baggage compartment or a given fuselage station (e.g., ballast location +45\")'.",
+          "assumed": false
+        },
+        {
+          "condition": "The recorded arm carries the correct algebraic sign relative to the aircraft datum used in the problem.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "'Whether the moment is preceded by a positive (+) or negative (\u2212) sign depends on its location in relation to the datum'; handbook not cited, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The chosen ballast station lies on the side of the CG that moves the CG toward the exceeded limit.",
+          "source": "both",
+          "note": "Sheet example places ballast at +45\" to move CG forward from 71.2\"; handbook: 'Weight being added forward of the datum produces a negative moment'. Handbook uncited, provisional.",
+          "assumed": true
+        },
+        {
+          "condition": "The location used is one given or approved for ballast (e.g., baggage compartment), not an arbitrary or inaccessible point.",
+          "source": "procedure sheet",
+          "note": "Note 3 restricts location to a baggage compartment or a given fuselage station.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the chosen station is on the correct side of the CG to move it toward the exceeded limit",
+        "Whether the sign convention matches the datum given in the problem",
+        "Whether the station is an approved/available ballast location for the aircraft in the problem"
+      ],
+      "required_framing": "Single overhead still of the completed worksheet, ballast-location line fully legible with the aircraft datum/CG limits visible in the same frame.",
+      "conflicts": []
+    },
+    "p.s4": {
+      "kind": "step",
+      "step_id": "p.s4",
+      "section": "Procedure",
+      "step_text": "Determine temporary ballast weight.",
+      "criterion": "- Worksheet is legible and shows the formula, the substituted values, and the final ballast weight labeled in pounds\n- Ballast station and CG limit used are written on the worksheet, not implied",
+      "sources": [
+        {
+          "condition": "The denominator is the distance from the ballast station to the desired CG limit (70\u221245=25\"), not to the current CG.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet formula: 'distance between ballast location and desired CG'; worked example uses (70\u221245).",
+          "assumed": false
+        },
+        {
+          "condition": "The computed ballast weight equals total weight \u00d7 shift distance \u00f7 that arm (e.g., 2,500\u00d71.2\u00f725 = 120 lb).",
+          "source": "procedure sheet",
+          "note": "Procedure sheet worked example: '(2,500 x 1.2) / (70-45) = 3,000 / 25 = 120 LBS'; handbook extract gives no ballast formula.",
+          "assumed": false
+        },
+        {
+          "condition": "Ballast station chosen is on the side of the CG that moves it toward the nearest exceeded limit.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 2: 'shift it to the closest limit it currently is out of'; requires correct fore/aft sense.",
+          "assumed": false
+        },
+        {
+          "condition": "Recomputed loaded CG with the ballast installed falls inside the published range and total weight stays within maximum allowable.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "Handbook: 'maximum authorized weight of the aircraft and its contents'; source not cited by procedure sheet, so needs subject-matter confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Arithmetic correctness of the ballast weight result",
+        "Whether the denominator arm was measured to the desired CG limit rather than the current CG",
+        "Whether the recomputed CG with ballast falls within the published range",
+        "Whether total weight with ballast remains within maximum allowable weight"
+      ],
+      "required_framing": "Single overhead still of the completed calculation sheet, full page in frame, text sharp enough to read the formula, substituted numbers, units and station values.",
+      "conflicts": []
+    },
+    "task": {
+      "kind": "task",
+      "step_id": null,
+      "criterion": "- Aircraft total weight is recorded in pounds and is the total (loaded) weight for the problem, not the empty weight, and does not exceed the maximum allowable gross weight for the category being computed.\n- Where the weight or CG range was not supplied, the value is traced to a named source (Aircraft Specifications or TCDS) and that source is submitted with the worksheet.\n- The out-of-range distance is computed against the nearest exceeded CG limit, with the subtraction shown and inch units labeled (worked example: 71.2\" \u2212 70\" = 1.2\").\n- The stated direction of required CG shift is consistent with which limit was exceeded (an aft-out CG requires a forward shift).\n- The ballast location is recorded as a single fuselage station or arm in inches with the correct algebraic sign relative to the datum in use, and lies on the side of the CG that moves the CG toward the exceeded limit.\n- The ballast location used is one given or approved for ballast, such as a baggage compartment, rather than an arbitrary or inaccessible point.\n- The formula denominator is the distance from the ballast station to the desired CG limit, not to the current CG (worked example: 70 \u2212 45 = 25\").\n- The computed ballast weight equals total weight \u00d7 shift distance \u00f7 that distance, arithmetic correct and result labeled in pounds (worked example: 2,500 \u00d7 1.2 \u00f7 25 = 120 lb).\n- A recomputation with the ballast installed shows the resulting loaded CG inside the published range and total weight within the maximum allowable.\n- All four procedure steps are separately identifiable on the submitted work; the answer is not a bare number.",
+      "sources": [
+        {
+          "condition": "Ballast weight formula and worked example (2,500 \u00d7 1.2 \u00f7 25 = 120 lb)",
+          "source": "AM.I.C.S3 procedure sheet, step instructions and Senior Mechanic Note 4",
+          "note": "Formula and all example figures appear verbatim on the campus sheet; not attributed to the handbook."
+        },
+        {
+          "condition": "Shift to the nearest exceeded CG limit; 71.2\" \u2212 70\" = 1.2\"",
+          "source": "AM.I.C.S3 procedure sheet, Senior Mechanic Note 2",
+          "note": "\"When shifting CG, shift it to the closest limit it currently is out of.\" Campus sheet only."
+        },
+        {
+          "condition": "Ballast location is a baggage compartment or given fuselage station",
+          "source": "AM.I.C.S3 procedure sheet, Senior Mechanic Note 3",
+          "note": "\"usually a baggage compartment or a given fuselage station (e.g., ballast location +45\")\"."
+        },
+        {
+          "condition": "Weight traced to Aircraft Specifications or TCDS; maximum allowable gross weight check",
+          "source": "FAA-H-8083-30B p. 6-3 (assumed reference, provisional)",
+          "note": "Rests on \"maximum authorized weight of the aircraft and its contents, and is indicated in the Aircraft Specifications or TCDS.\""
+        },
+        {
+          "condition": "Algebraic sign of the ballast arm relative to datum",
+          "source": "FAA-H-8083-30B p. 6-3 (assumed reference, provisional)",
+          "note": "Rests on \"Weight being added aft of the datum produces a positive moment (+weight, +arm).\" Sheet does not cite this."
+        },
+        {
+          "condition": "Recomputed CG by weight/arm/moment table",
+          "source": "FAA-H-8083-30B pp. 6-5, 6-6 (assumed reference, provisional)",
+          "note": "Rests on \"the CG being equal to the total moment divided by the total weight.\" Verification step not required by campus sheet."
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the nearest-exceeded-limit rule was applied by reasoning or the correct limit was chosen by chance.",
+        "Whether the arithmetic was performed by the student or copied from a classmate or the worked example on the sheet.",
+        "Whether the transcribed givens match the authoritative source \u2014 requires the source document, not the worksheet image.",
+        "Whether the resulting CG actually falls back inside limits \u2014 requires a recomputation, not a still of the formula.",
+        "Whether the student can identify the datum in use and justify the sign of the ballast arm when questioned.",
+        "Anything about physical ballast: securing, placarding, accessibility of the chosen station, or entry in the weight and balance record."
+      ],
+      "required_framing": null,
+      "conflicts": []
+    }
+  }
+}

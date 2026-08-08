@@ -1,0 +1,661 @@
+{
+  "section:identify-the-damage": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "identify_the_damage \u2014 VLM GRADING CRITERIA\nAssess the completed marked-out damage area on the sheet metal part, measured and outlined prior to removal visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The part surface is completely pristine and free of any visible crack, hole, dent, or tear.\n2. The marker line forms an open shape with unjoined ends around the damage.\n3. Visible damage extends past or directly touches the marked boundary line.\n4. A steel scale is in frame laid along the outer edge of the part, away from the damage.\n5. The part has cut, sawn, or drilled openings present within the marked area.\n6. The marker line blends into the surface color and is faint and illegible along its length.\n7. The finished work shows this defect: Material is cut, sawn or drilled away inside the marked outline.\n8. The finished work shows this defect: The marker line runs across or through the visible damage.\n9. The finished work shows this defect: The marked outline is broken, leaving the damage not enclosed.\n10. The finished work shows this defect: Visible damage extends outside the marked outline.\n11. The finished work shows this defect: Marker outline is drawn on an area containing no visible damage.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "damage is visible to surface is pristine",
+          "positive": "Damage such as a crack, hole, dent or tear is visible on the part",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "continuous closed boundary to open shape with unjoined ends",
+          "positive": "A marker line forms a continuous closed boundary around the damage",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "lies inside, none touching to extends past or touches",
+          "positive": "All visible damage lies inside the marked boundary, none touching the line",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "across the damage to along the outer edge, away from the damage",
+          "positive": "A steel scale is in frame laid across the damage for height and length",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "still whole: no cut... to has cut, sawn, or drilled openings",
+          "positive": "The part is still whole: no cut, sawn or drilled openings in the marked area",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "contrasts... legible to blends into surface... faint and illegible",
+          "positive": "Marker line contrasts with the surface and is legible along its full length",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Material is cut, sawn or drilled away inside the marked outline",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The marker line runs across or through the visible damage",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The marked outline is broken, leaving the damage not enclosed",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Visible damage extends outside the marked outline",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Marker outline is drawn on an area containing no visible damage",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "identify_the_damage \u2014 VLM GRADING CRITERIA\n\nAssess the completed marked-out damage area on the sheet metal part, measured and outlined prior to removal visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Damage such as a crack, hole, dent or tear is visible on the part\n2. A marker line forms a continuous closed boundary around the damage\n3. All visible damage lies inside the marked boundary, none touching the line\n4. A steel scale is in frame laid across the damage for height and length\n5. The part is still whole: no cut, sawn or drilled openings in the marked area\n6. Marker line contrasts with the surface and is legible along its full length\n\nCritical defects\n- Material is cut, sawn or drilled away inside the marked outline\n- The marker line runs across or through the visible damage\n- The marked outline is broken, leaving the damage not enclosed\n- Visible damage extends outside the marked outline\n- Marker outline is drawn on an area containing no visible damage\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:46Z",
+      "reviewed_by": null
+    }
+  },
+  "section:remove-the-damage": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "remove_the_damage \u2014 VLM GRADING CRITERIA\nAssess the completed damage removal \u2014 cutout or stop-drilled crack with smoothed, deburred edges visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The damage site consists of an un-drilled, raw crack line with sharp crack tips.\n2. Cut edges appear sharp and jagged, with heavy burrs, torn metal, and deep tool marks along the perimeter.\n3. Any rectangular cutout has sharp 90-degree square corners rather than rounded radius corners.\n4. A repair patch, doubler, filler, or rivets are installed at the opening.\n5. The finished work shows this defect: Crack continues past the drilled hole into surrounding skin.\n6. The finished work shows this defect: Cutout edge shows tears, jagged burrs or torn metal.\n7. The finished work shows this defect: Fresh gouges or scratches from cutting extend into surrounding skin.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "cutout or drilled holes to un-drilled crack line",
+          "positive": "Damage site shows a cut-out opening or drilled holes at the crack ends",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "smooth rounded edges to sharp, jagged edges with burrs and tool marks",
+          "positive": "Cut edges appear smooth and rounded, free of burrs, jagged metal or tool marks",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "rounded corners to sharp 90-degree square corners",
+          "positive": "Any rectangular cutout has rounded corners rather than sharp square corners",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "no patch or rivets installed to patch or rivets installed",
+          "positive": "No patch, doubler, filler or rivets installed at the opening",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Crack continues past the drilled hole into surrounding skin",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cutout edge shows tears, jagged burrs or torn metal",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Fresh gouges or scratches from cutting extend into surrounding skin",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "remove_the_damage \u2014 VLM GRADING CRITERIA\n\nAssess the completed damage removal \u2014 cutout or stop-drilled crack with smoothed, deburred edges visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Damage site shows a cut-out opening or drilled holes at the crack ends\n2. Cut edges appear smooth and rounded, free of burrs, jagged metal or tool marks\n3. Any rectangular cutout has rounded corners rather than sharp square corners\n4. No patch, doubler, filler or rivets installed at the opening\n\nCritical defects\n- Crack continues past the drilled hole into surrounding skin\n- Cutout edge shows tears, jagged burrs or torn metal\n- Fresh gouges or scratches from cutting extend into surrounding skin\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:48Z",
+      "reviewed_by": null
+    }
+  },
+  "section:create-the-patch-filler": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "create_the_patch_filler \u2014 VLM GRADING CRITERIA\nAssess the completed cut and filed patch filler fitted into the skin opening visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A separate filler piece is present, cut to a mismatched shape differing from the skin opening.\n2. The filler sits in the opening with its face tilted and protruding visibly proud of the surrounding skin.\n3. The gap between filler edge and opening edge is wide and uneven along the perimeter.\n4. Filler edges show prominent burrs, ragged cut marks, and unsanded scratches.\n5. The finished work shows this defect: Filler is visibly smaller than the opening, leaving a wide open gap.\n6. The finished work shows this defect: Filler edge is torn, cracked, or gouged from cutting.\n7. The finished work shows this defect: Filler is buckled or bent, standing proud of the skin surface.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "the shape of -> a mismatched shape differing from",
+          "positive": "A separate filler piece is present, cut to the shape of the skin opening.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "level with -> tilted and protruding visibly proud of",
+          "positive": "The filler sits in the opening with its face level with the surrounding skin.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "narrow and even all around -> wide and uneven along the perimeter",
+          "positive": "The gap between filler edge and opening edge is narrow and even all around.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "show no burrs -> show prominent burrs",
+          "positive": "Filler edges show no burrs, ragged cut marks, or unsanded scratches.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Filler is visibly smaller than the opening, leaving a wide open gap.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Filler edge is torn, cracked, or gouged from cutting.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Filler is buckled or bent, standing proud of the skin surface.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "create_the_patch_filler \u2014 VLM GRADING CRITERIA\n\nAssess the completed cut and filed patch filler fitted into the skin opening visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A separate filler piece is present, cut to the shape of the skin opening.\n2. The filler sits in the opening with its face level with the surrounding skin.\n3. The gap between filler edge and opening edge is narrow and even all around.\n4. Filler edges show no burrs, ragged cut marks, or unsanded scratches.\n\nCritical defects\n- Filler is visibly smaller than the opening, leaving a wide open gap.\n- Filler edge is torn, cracked, or gouged from cutting.\n- Filler is buckled or bent, standing proud of the skin surface.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:47Z",
+      "reviewed_by": null
+    }
+  },
+  "section:perform-rivet-layout": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "rivet_layout \u2014 VLM GRADING CRITERIA\nAssess the completed rivet layout marked out on the patch and mating material visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Marker edge-distance line runs perpendicular to and intersects each patch edge\n2. Edge-distance lines are present transversely across the center of the riveted overlap\n3. Rivet dots sit offset from the marked edge-distance lines, outboard past the material edge\n4. Rivet dots appear exclusively on the mating skin well clear of the patch surface\n5. Dots along each line are irregularly spaced by eye, visibly bunched and doubled\n6. Full-size rivet holes are already drilled at every marked dot location\n7. The finished work shows this defect: A marked dot lies on or past the material edge, no margin.\n8. The finished work shows this defect: Marked dots fall within the cut-out opening instead of the overlap.\n9. The finished work shows this defect: The patch in frame carries no layout marks on its surface.\n10. The finished work shows this defect: Rivet dots scattered with no discernible row or line alignment.\n11. The finished work shows this defect: Visible crack, tear or deep gouge in the marked patch material.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "perpendicular to and intersects instead of parallel to and set in from",
+          "positive": "Marker edge-distance line runs parallel to and set in from each patch edge",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "transversely across the center of instead of along every edge of",
+          "positive": "Edge-distance lines are present along every edge of the riveted overlap",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "offset from and outboard past instead of on and inboard of",
+          "positive": "Rivet dots sit on the marked edge-distance lines, inboard of the material edge",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "exclusively on the mating skin well clear of instead of on both",
+          "positive": "Rivet dots appear on both the patch and the mating skin or component",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "irregularly spaced, visibly bunched and doubled",
+          "positive": "Dots along each line are evenly spaced by eye, none bunched or doubled",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "substitution",
+          "changed": "Full-size rivet holes are already drilled instead of No holes are drilled",
+          "positive": "No holes are drilled at any marked dot location",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A marked dot lies on or past the material edge, no margin",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Marked dots fall within the cut-out opening instead of the overlap",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The patch in frame carries no layout marks on its surface",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Rivet dots scattered with no discernible row or line alignment",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Visible crack, tear or deep gouge in the marked patch material",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "rivet_layout \u2014 VLM GRADING CRITERIA\n\nAssess the completed rivet layout marked out on the patch and mating material visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Marker edge-distance line runs parallel to and set in from each patch edge\n2. Edge-distance lines are present along every edge of the riveted overlap\n3. Rivet dots sit on the marked edge-distance lines, inboard of the material edge\n4. Rivet dots appear on both the patch and the mating skin or component\n5. Dots along each line are evenly spaced by eye, none bunched or doubled\n6. No holes are drilled at any marked dot location\n\nCritical defects\n- A marked dot lies on or past the material edge, no margin\n- Marked dots fall within the cut-out opening instead of the overlap\n- The patch in frame carries no layout marks on its surface\n- Rivet dots scattered with no discernible row or line alignment\n- Visible crack, tear or deep gouge in the marked patch material\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:50Z",
+      "reviewed_by": null
+    }
+  },
+  "section:drill-the-holes": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "drill_the_holes \u2014 VLM GRADING CRITERIA\nAssess the completed drilled and deburred rivet holes in the skin, doubler and filler of a patch repair visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Each rivet layout mark on the skin is offset to the side of the drilled hole.\n2. Drilled holes appear elongated, torn, or triangular rather than round and uniform.\n3. Visible hole edges show a raised burr ring or standing metal along the perimeter.\n4. Doubler and filler holes are misaligned with skin holes, shown by cleco pins inserted at a visible tilt.\n5. The finished work shows this defect: A drilled hole breaks out through a part edge or cutout.\n6. The finished work shows this defect: Skin or doubler is cracked or torn between adjacent holes.\n7. The finished work shows this defect: Metal around a hole is dished, gouged or deformed by chuck contact.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "through it to offset to the side of the drilled hole",
+          "positive": "Each rivet layout mark on the skin has a drilled hole through it.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "round and uniform to elongated, torn, or triangular",
+          "positive": "Drilled holes appear round and uniform, not elongated, torn or triangular.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "no burr ring to a raised burr ring or standing metal",
+          "positive": "Visible hole edges show no burr ring or raised metal.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "align to are misaligned",
+          "positive": "Doubler and filler holes align with skin holes, shown by cleco pins in place.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A drilled hole breaks out through a part edge or cutout.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Skin or doubler is cracked or torn between adjacent holes.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Metal around a hole is dished, gouged or deformed by chuck contact.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "drill_the_holes \u2014 VLM GRADING CRITERIA\n\nAssess the completed drilled and deburred rivet holes in the skin, doubler and filler of a patch repair visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Each rivet layout mark on the skin has a drilled hole through it.\n2. Drilled holes appear round and uniform, not elongated, torn or triangular.\n3. Visible hole edges show no burr ring or raised metal.\n4. Doubler and filler holes align with skin holes, shown by cleco pins in place.\n\nCritical defects\n- A drilled hole breaks out through a part edge or cutout.\n- Skin or doubler is cracked or torn between adjacent holes.\n- Metal around a hole is dished, gouged or deformed by chuck contact.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:54Z",
+      "reviewed_by": null
+    }
+  },
+  "section:set-up-rivet-gun": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "set_up_rivet_gun \u2014 VLM GRADING CRITERIA\nAssess the completed rivet gun with its set and retaining spring installed and air supply connected visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A rivet set is installed in the air inlet fitting of the rivet gun.\n2. A retaining spring is threaded onto the gun barrel under the set.\n3. The working tip of the set faces inward, toward the gun.\n4. An air hose is attached to the gun's rivet set tip.\n5. The finished work shows this defect: The gun nose is empty, with no rivet set in it.\n6. The finished work shows this defect: The spring hangs loose off the barrel threads, set free to fall out.\n7. The finished work shows this defect: The set tip is visibly chipped, cracked or mushroomed.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "nose to air inlet fitting",
+          "positive": "A rivet set is installed in the nose of the rivet gun.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "over to under",
+          "positive": "A retaining spring is threaded onto the gun barrel over the set.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "outward, away from to inward, toward",
+          "positive": "The working tip of the set faces outward, away from the gun.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "air inlet fitting to rivet set tip",
+          "positive": "An air hose is attached to the gun's air inlet fitting.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The gun nose is empty, with no rivet set in it.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The spring hangs loose off the barrel threads, set free to fall out.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The set tip is visibly chipped, cracked or mushroomed.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "set_up_rivet_gun \u2014 VLM GRADING CRITERIA\n\nAssess the completed rivet gun with its set and retaining spring installed and air supply connected visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A rivet set is installed in the nose of the rivet gun.\n2. A retaining spring is threaded onto the gun barrel over the set.\n3. The working tip of the set faces outward, away from the gun.\n4. An air hose is attached to the gun's air inlet fitting.\n\nCritical defects\n- The gun nose is empty, with no rivet set in it.\n- The spring hangs loose off the barrel threads, set free to fall out.\n- The set tip is visibly chipped, cracked or mushroomed.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:58Z",
+      "reviewed_by": null
+    }
+  },
+  "section:rivet-the-material": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "rivet_the_material \u2014 VLM GRADING CRITERIA\nAssess the completed driven rivet joining the patch to the skin, with its formed shop head visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. An unupset, straight rivet shank extends from the shank side of the joined sheets.\n2. The manufactured rivet head stands proud of the skin surface.\n3. A scale, dividers, or rule appears in frame against the manufactured head for measurement.\n4. A visible gap separates the joined sheets at the rivet.\n5. The finished work shows this defect: Shop head is bent or clinched sideways off the shank axis.\n6. The finished work shows this defect: Skin around the rivet is dented or gouged by the rivet set.\n7. The finished work shows this defect: Rivet shank is visibly bent or the shank buckled between sheets.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "formed shop head to unupset straight shank",
+          "positive": "A formed shop head is visible on the shank side of the joined sheets.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "sits flush to stands proud",
+          "positive": "The manufactured rivet head sits flush against the skin, not standing proud.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "shop head to manufactured head",
+          "positive": "A scale, dividers, or rule appears in frame against the shop head for measurement.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "drawn tight together to visible gap separates",
+          "positive": "Sheets are drawn tight together at the rivet with no visible gap.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Shop head is bent or clinched sideways off the shank axis.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Skin around the rivet is dented or gouged by the rivet set.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Rivet shank is visibly bent or the shank buckled between sheets.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "rivet_the_material \u2014 VLM GRADING CRITERIA\n\nAssess the completed driven rivet joining the patch to the skin, with its formed shop head visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A formed shop head is visible on the shank side of the joined sheets.\n2. The manufactured rivet head sits flush against the skin, not standing proud.\n3. A scale, dividers, or rule appears in frame against the shop head for measurement.\n4. Sheets are drawn tight together at the rivet with no visible gap.\n\nCritical defects\n- Shop head is bent or clinched sideways off the shank axis.\n- Skin around the rivet is dented or gouged by the rivet set.\n- Rivet shank is visibly bent or the shank buckled between sheets.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:01:57Z",
+      "reviewed_by": null
+    }
+  },
+  "section:remove-the-rivet": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "remove_the_rivet \u2014 VLM GRADING CRITERIA\nAssess the completed riveted patch with one rivet drilled and punched out, leaving a vacated hole visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Two rivet locations in the riveted patch are empty, with no rivets in them\n2. A sheared rivet shank fragment remains lodged inside the vacated hole\n3. Sheet metal immediately around the vacated hole displays drill gouges or scoring\n4. Skin and patch around the vacated hole exhibit dishing or bulging\n5. Remaining rivets in the pattern are installed with heads sheared off\n6. Patch and base sheet separate at the vacated hole, leaving a visible gap\n7. The finished work shows this defect: Crack or tear radiates from the edge of the vacated hole.\n8. The finished work shows this defect: Vacated hole is visibly elongated or irregular in shape.\n9. The finished work shows this defect: Rivet shank remains in the hole with its head sheared off.\n10. The finished work shows this defect: Sheet around the vacated hole is dented or deformed by hammer blows.\n11. The finished work shows this defect: Rivet heads adjacent to the vacated hole are gouged or sheared.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "changed count from 'One' to 'Two'",
+          "positive": "One rivet location in the riveted patch is empty, with no rivet in it",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "reversed clear hole to lodged shank fragment",
+          "positive": "No sheared rivet head or shank fragment remains lodged in the vacated hole",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "reversed free of gouges to displays drill gouges",
+          "positive": "Sheet metal immediately around the vacated hole is free of drill gouges or scoring",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "reversed lies flat to exhibits dishing or bulging",
+          "positive": "Skin and patch around the vacated hole lie flat, without dishing or bulging",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "reversed intact heads to heads sheared off",
+          "positive": "Remaining rivets in the pattern are still installed with heads intact",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "reversed stay in contact to separate leaving a gap",
+          "positive": "Patch and base sheet stay in contact at the vacated hole, with no gap",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Crack or tear radiates from the edge of the vacated hole",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Vacated hole is visibly elongated or irregular in shape",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Rivet shank remains in the hole with its head sheared off",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Sheet around the vacated hole is dented or deformed by hammer blows",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Rivet heads adjacent to the vacated hole are gouged or sheared",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "remove_the_rivet \u2014 VLM GRADING CRITERIA\n\nAssess the completed riveted patch with one rivet drilled and punched out, leaving a vacated hole visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. One rivet location in the riveted patch is empty, with no rivet in it\n2. No sheared rivet head or shank fragment remains lodged in the vacated hole\n3. Sheet metal immediately around the vacated hole is free of drill gouges or scoring\n4. Skin and patch around the vacated hole lie flat, without dishing or bulging\n5. Remaining rivets in the pattern are still installed with heads intact\n6. Patch and base sheet stay in contact at the vacated hole, with no gap\n\nCritical defects\n- Crack or tear radiates from the edge of the vacated hole\n- Vacated hole is visibly elongated or irregular in shape\n- Rivet shank remains in the hole with its head sheared off\n- Sheet around the vacated hole is dented or deformed by hammer blows\n- Rivet heads adjacent to the vacated hole are gouged or sheared\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:02:05Z",
+      "reviewed_by": null
+    }
+  },
+  "section:create-the-patch-doubler": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "create_the_patch_doubler \u2014 VLM GRADING CRITERIA\nAssess the completed cut sheet metal patch doubler for a flush patch repair visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The sheet metal doubler remains attached to the parent stock sheet along an edge.\n2. Doubler is visibly smaller than the prepared skin opening on all sides.\n3. Corners are cut as sharp, 90-degree square points.\n4. Cut edges exhibit visible shear steps, jagged nibs, and torn metal slivers along the cut line.\n5. The finished work shows this defect: Doubler is smaller than the opening it must cover.\n6. The finished work shows this defect: Doubler is buckled, cracked, or torn at a cut edge.\n7. The finished work shows this defect: A corner is cut as a sharp square notch or overcut past the edge.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "cut free and separate to remains attached",
+          "positive": "A single flat sheet metal doubler is cut free and separate from stock.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "larger to smaller",
+          "positive": "Doubler is visibly larger than the prepared skin opening on all sides.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "rounded to sharp, 90-degree square points",
+          "positive": "Corners are rounded, not left as square points.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "continuous and straight to exhibit visible shear steps, jagged nibs, and torn slivers",
+          "positive": "Cut edges are continuous and straight, without shear steps or torn slivers.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Doubler is smaller than the opening it must cover.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Doubler is buckled, cracked, or torn at a cut edge.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A corner is cut as a sharp square notch or overcut past the edge.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "create_the_patch_doubler \u2014 VLM GRADING CRITERIA\n\nAssess the completed cut sheet metal patch doubler for a flush patch repair visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A single flat sheet metal doubler is cut free and separate from stock.\n2. Doubler is visibly larger than the prepared skin opening on all sides.\n3. Corners are rounded, not left as square points.\n4. Cut edges are continuous and straight, without shear steps or torn slivers.\n\nCritical defects\n- Doubler is smaller than the opening it must cover.\n- Doubler is buckled, cracked, or torn at a cut edge.\n- A corner is cut as a sharp square notch or overcut past the edge.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T21:02:01Z",
+      "reviewed_by": null
+    }
+  }
+}

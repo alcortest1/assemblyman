@@ -1,0 +1,242 @@
+{
+  "insert_wire_for_double_wrap_turnbuckle_safety:35": {
+    "criterion": null,
+    "variants": [
+      {
+        "id": "vmsdy9alw",
+        "label": "reworded",
+        "criterion": "- Each wire is inserted through the turnbuckle barrel into two even strands, with the second wire mirroring the first in the opposite direction.\n- Strands lie streamlined along the barrel away from the cable ends.",
+        "expected": "not_pass"
+      }
+    ],
+    "upload": null,
+    "negative": null
+  },
+  "safety_wire_by_hand:task": {
+    "criterion": "Assess the completed hand-installed safety wire on the bolts as one finished assembly. Do not grade point by point.\n\nReturn:\nResult: PASS, FAIL, or INSUFFICIENT IMAGE\nScore: 0\u2013100\nReasoning: 2\u20134 sentences describing the strongest visible evidence.\n\nConsider the installation as a whole:\n\u2022 Functional routing and tightening direction: 40%\n\u2022 Seating, tautness, and security around bolt heads: 25%\n\u2022 Twist consistency and general workmanship: 20%\n\u2022 Safe pigtail termination: 15%\n\nPASS requires 75 or higher and no critical defect.\n\nCritical defects:\n\u2022 Wire clearly tends to loosen a bolt.\n\u2022 Wire clearly misses a required bolt hole.\n\u2022 Obvious slack or a loop rising over a bolt head.\n\u2022 Broken or severely damaged wire.\n\u2022 Exposed sharp termination.\n\nExpected workmanship includes tight, even twists, approximately 6\u20138 twists per inch, and a bent-back pigtail. Without a ruler, estimate twist density; do not fail solely because an exact count cannot be measured. Minor cosmetic unevenness should reduce the score, not automatically fail.\n\nUse INSUFFICIENT IMAGE only when the overall installation cannot reasonably be judged.",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "safety_wire_pliers_1:task": {
+    "criterion": "Assess the completed safety-wire installation on the bolts as one finished assembly. Do not grade individual steps or attempt to prove that safety-wire pliers were used.\n\nReturn:\nResult: PASS, FAIL, or INSUFFICIENT IMAGE\nScore: 0\u2013100\nReasoning: 2\u20134 sentences describing the strongest visible evidence.\n\nScore the overall result:\n\u2022 Functional routing and tightening direction: 40%\n\u2022 Seating, tautness, and security: 25%\n\u2022 Twist consistency and workmanship: 20%\n\u2022 Safe pigtail termination: 15%\n\nPASS requires 75 or higher and no critical defect.\n\nCritical defects:\n\u2022 Wire clearly pulls either bolt toward loosening.\n\u2022 Wire does not visibly engage both required bolt holes.\n\u2022 Obvious slack or wire capable of lifting over a bolt head.\n\u2022 Broken, severely kinked, or damaged wire.\n\u2022 Sharp exposed pigtail.\n\nThe main run should appear tight and evenly twisted, approximately 6\u20138 twists per inch. The pigtail should be compact, defined, and bent back or under. Estimate dimensions when no scale is present. Do not automatically fail minor unevenness, uncertain exact twist count, or absence of visible evidence of the gator-roll technique.\n\nUse INSUFFICIENT IMAGE only when the overall result cannot be judged.",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "insert_wire_for_double_wrap_turnbuckle_safety:task": {
+    "criterion": "Grade one final photo of a turnbuckle safetied by the double-wrap wire method.\n\nReturn:\nResult: PASS or FAIL\nReasoning: 2\u20134 sentences.\nFailed/unverifiable criteria: list.\n\nPASS only if clearly visible:\n\n1. Entire turnbuckle, both terminals, barrel hole, terminal safety holes, all wire runs, all four terminations, exposed threads, and ruler are sharp and unobstructed.\n2. Two separate wires pass through the barrel and extend toward opposite ends on opposite sides.\n3. Wires route in opposite directions through the terminal eyes, forks, or swaged-terminal holes.\n4. Runs lie closely along the barrel and form a streamlined, approximately symmetrical installation.\n5. Wire appears tight without slack, severe kinks, damage, or unnecessary loops.\n6. Every terminal wrapping has at least four tight, uniform turns.\n7. Wraps are closely formed without visible gaps.\n8. Cut ends are bent inward and create no snag or sharp hazard.\n9. No more than three terminal threads are exposed at either end.\n\nFAIL any unmet criterion. Use \u201cFAIL \u2014 insufficient visual evidence\u201d when required areas are hidden or unclear. Do not infer cable tension, wire diameter, adjustment, or wire newness.",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "safety_wire_pliers_2:task": {
+    "criterion": "Assess the completed safety-wire installation on the bolts as one finished assembly. Do not grade individual steps or attempt to prove that safety-wire pliers were used.\n\nReturn:\nResult: PASS, FAIL, or INSUFFICIENT IMAGE\nScore: 0\u2013100\nReasoning: 2\u20134 sentences describing the strongest visible evidence.\n\nScore the overall result:\n\u2022 Functional routing and tightening direction: 40%\n\u2022 Seating, tautness, and security: 25%\n\u2022 Twist consistency and workmanship: 20%\n\u2022 Safe pigtail termination: 15%\n\nPASS requires 75 or higher and no critical defect.\n\nCritical defects:\n\u2022 Wire clearly pulls either bolt toward loosening.\n\u2022 Wire does not visibly engage both required bolt holes.\n\u2022 Obvious slack or wire capable of lifting over a bolt head.\n\u2022 Broken, severely kinked, or damaged wire.\n\u2022 Sharp exposed pigtail.\n\nThe main run should appear tight and evenly twisted, approximately 6\u20138 twists per inch. The pigtail should be compact, defined, and bent back or under. Estimate dimensions when no scale is present. Do not automatically fail minor unevenness, uncertain exact twist count, or absence of visible evidence of the gator-roll technique.\n\nUse INSUFFICIENT IMAGE only when the overall result cannot be judged.",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "safety_wire_pliers_3:task": {
+    "criterion": "Assess the completed safety-wire installation on the bolts as one finished assembly. Do not grade individual steps or attempt to prove that safety-wire pliers were used.\n\nReturn:\nResult: PASS, FAIL, or INSUFFICIENT IMAGE\nScore: 0\u2013100\nReasoning: 2\u20134 sentences describing the strongest visible evidence.\n\nScore the overall result:\n\u2022 Functional routing and tightening direction: 40%\n\u2022 Seating, tautness, and security: 25%\n\u2022 Twist consistency and workmanship: 20%\n\u2022 Safe pigtail termination: 15%\n\nPASS requires 75 or higher and no critical defect.\n\nCritical defects:\n\u2022 Wire clearly pulls either bolt toward loosening.\n\u2022 Wire does not visibly engage both required bolt holes.\n\u2022 Obvious slack or wire capable of lifting over a bolt head.\n\u2022 Broken, severely kinked, or damaged wire.\n\u2022 Sharp exposed pigtail.\n\nThe main run should appear tight and evenly twisted, approximately 6\u20138 twists per inch. The pigtail should be compact, defined, and bent back or under. Estimate dimensions when no scale is present. Do not automatically fail minor unevenness, uncertain exact twist count, or absence of visible evidence of the gator-roll technique.\n\nUse INSUFFICIENT IMAGE only when the overall result cannot be judged.",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "safety_wire_pliers_4:task": {
+    "criterion": "Assess the completed safety-wire installation on the bolts as one finished assembly. Do not grade individual steps or attempt to prove that safety-wire pliers were used.\n\nReturn:\nResult: PASS, FAIL, or INSUFFICIENT IMAGE\nScore: 0\u2013100\nReasoning: 2\u20134 sentences describing the strongest visible evidence.\n\nScore the overall result:\n\u2022 Functional routing and tightening direction: 40%\n\u2022 Seating, tautness, and security: 25%\n\u2022 Twist consistency and workmanship: 20%\n\u2022 Safe pigtail termination: 15%\n\nPASS requires 75 or higher and no critical defect.\n\nCritical defects:\n\u2022 Wire clearly pulls either bolt toward loosening.\n\u2022 Wire does not visibly engage both required bolt holes.\n\u2022 Obvious slack or wire capable of lifting over a bolt head.\n\u2022 Broken, severely kinked, or damaged wire.\n\u2022 Sharp exposed pigtail.\n\nThe main run should appear tight and evenly twisted, approximately 6\u20138 twists per inch. The pigtail should be compact, defined, and bent back or under. Estimate dimensions when no scale is present. Do not automatically fail minor unevenness, uncertain exact twist count, or absence of visible evidence of the gator-roll technique.\n\nUse INSUFFICIENT IMAGE only when the overall result cannot be judged.",
+    "variants": [],
+    "upload": null,
+    "negative": null
+  },
+  "section:bolts-hand": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "wire_safety_on_bolts_by_hand \u2014 VLM GRADING CRITERIA\nAssess the completed hand-twisted safety wire installation joining two bolt heads, with pigtail visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The wire between the bolt heads is untwisted, running as two straight un-braided strands between bolt holes.\n2. Twists between bolts are uneven, showing 1\u20133 wraps per inch measured against a rule in frame.\n3. The wire loop rides up over the top rim of the bolt head.\n4. Pigtail at the end stands straight out away from the bolt head.\n5. The finished work shows this defect: Wire between bolts hangs slack or visibly loose.\n6. The finished work shows this defect: Pigtail end sticks straight out unbent as a snag.\n7. The finished work shows this defect: Wire is kinked, frayed, or broken along its run.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "twisted wire between bolt heads -> untwisted straight strands",
+          "positive": "A single wire connects two bolt holes, with twisted wire between the bolt heads.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "6-8 wraps per inch -> 1\u20133 wraps per inch",
+          "positive": "Twists between bolts are even, with 6-8 wraps per inch measured against a rule in frame.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "lies down against -> rides up over top rim",
+          "positive": "The wire loop lies down against the bolt head, not riding up over it.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "bent back toward bolt head -> stands straight out away",
+          "positive": "Pigtail at the end shows defined twists and is bent back toward the bolt head.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire between bolts hangs slack or visibly loose.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Pigtail end sticks straight out unbent as a snag.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire is kinked, frayed, or broken along its run.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "wire_safety_on_bolts_by_hand \u2014 VLM GRADING CRITERIA\n\nAssess the completed hand-twisted safety wire installation joining two bolt heads, with pigtail visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A single wire connects two bolt holes, with twisted wire between the bolt heads.\n2. Twists between bolts are even, with 6-8 wraps per inch measured against a rule in frame.\n3. The wire loop lies down against the bolt head, not riding up over it.\n4. Pigtail at the end shows defined twists and is bent back toward the bolt head.\n\nCritical defects\n- Wire between bolts hangs slack or visibly loose.\n- Pigtail end sticks straight out unbent as a snag.\n- Wire is kinked, frayed, or broken along its run.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:45:11Z",
+      "reviewed_by": null
+    }
+  },
+  "section:bolts-pliers": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "wire_safety_on_bolts_with_safety_wire_pliers \u2014 VLM GRADING CRITERIA\nAssess the completed safety wire installation joining two bolt heads, twisted with safety wire pliers and finished with a pigtail visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A single continuous untwisted wire pair links two bolt holes.\n2. Twists between the bolts are uneven and discontinuous, leaving a loose untwisted slack span.\n3. Twist density measured against a rule or scale in frame shows 1-3 wraps per inch.\n4. Pigtail end stands straight out away from the bolt head, not bent back.\n5. The finished work shows this defect: The wire loop rides up over the bolt head, leaving a slack loop.\n6. The finished work shows this defect: A wire strand is visibly broken, kinked, or frayed.\n7. The finished work shows this defect: The cut pigtail end stands straight out unbent as a snag hazard.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "twisted -> untwisted",
+          "positive": "A single continuous twisted wire pair links two bolt holes.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "even and continuous -> uneven and discontinuous",
+          "positive": "Twists between the bolts are even and continuous, with no untwisted slack span.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "6-8 wraps per inch -> 1-3 wraps per inch",
+          "positive": "Twist density measured against a rule or scale in frame shows 6-8 wraps per inch.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "bent back toward -> stands straight out away from",
+          "positive": "Pigtail end is bent back toward the bolt head, not left standing out.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The wire loop rides up over the bolt head, leaving a slack loop.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A wire strand is visibly broken, kinked, or frayed.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The cut pigtail end stands straight out unbent as a snag hazard.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "wire_safety_on_bolts_with_safety_wire_pliers \u2014 VLM GRADING CRITERIA\n\nAssess the completed safety wire installation joining two bolt heads, twisted with safety wire pliers and finished with a pigtail visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A single continuous twisted wire pair links two bolt holes.\n2. Twists between the bolts are even and continuous, with no untwisted slack span.\n3. Twist density measured against a rule or scale in frame shows 6-8 wraps per inch.\n4. Pigtail end is bent back toward the bolt head, not left standing out.\n\nCritical defects\n- The wire loop rides up over the bolt head, leaving a slack loop.\n- A wire strand is visibly broken, kinked, or frayed.\n- The cut pigtail end stands straight out unbent as a snag hazard.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:45:15Z",
+      "reviewed_by": null
+    }
+  },
+  "section:turnbuckle-hand": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "wire_safety_on_a_turnbuckle_by_hand \u2014 VLM GRADING CRITERIA\nAssess the completed double-wrap safety wire installed by hand on a turnbuckle barrel and both end terminals visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Two separate safety wires pass through the turnbuckle barrel hole, lying together on the same side.\n2. Wire strands bow away from the barrel, forming slack loops standing off from the surface.\n3. Each wrapped end shows fewer than four coils around the shank, separated by visible gaps.\n4. Cut wire ends project straight outward from the shank, standing out.\n5. The finished work shows this defect: Wire ends are bare, straight and sharp, projecting away from the shank.\n6. The finished work shows this defect: A safety wire is broken, or missing from one end of the turnbuckle.\n7. The finished work shows this defect: Wraps are loose or spread with visible gaps, leaving the wire slack.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "opposite sides to the same side",
+          "positive": "Two separate safety wires pass through the turnbuckle barrel hole, lying on opposite sides.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "lie flat streamlined to bow away forming slack loops",
+          "positive": "Wire strands lie flat along the barrel, streamlined, with no slack loops standing off.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "at least four tight coils to fewer than four coils with visible gaps",
+          "positive": "Each wrapped end shows at least four tight coils around the shank, no gaps.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "curled or bent back against to project straight outward from",
+          "positive": "Cut wire ends are curled or bent back against the shank, not standing out.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire ends are bare, straight and sharp, projecting away from the shank.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A safety wire is broken, or missing from one end of the turnbuckle.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wraps are loose or spread with visible gaps, leaving the wire slack.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "wire_safety_on_a_turnbuckle_by_hand \u2014 VLM GRADING CRITERIA\n\nAssess the completed double-wrap safety wire installed by hand on a turnbuckle barrel and both end terminals visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Two separate safety wires pass through the turnbuckle barrel hole, lying on opposite sides.\n2. Wire strands lie flat along the barrel, streamlined, with no slack loops standing off.\n3. Each wrapped end shows at least four tight coils around the shank, no gaps.\n4. Cut wire ends are curled or bent back against the shank, not standing out.\n\nCritical defects\n- Wire ends are bare, straight and sharp, projecting away from the shank.\n- A safety wire is broken, or missing from one end of the turnbuckle.\n- Wraps are loose or spread with visible gaps, leaving the wire slack.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:45:14Z",
+      "reviewed_by": null
+    }
+  }
+}

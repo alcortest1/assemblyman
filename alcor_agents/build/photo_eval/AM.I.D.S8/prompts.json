@@ -1,0 +1,249 @@
+{
+  "section:cut-the-tubing": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "cut_the_tubing \u2014 VLM GRADING CRITERIA\nAssess the completed cut and deburred length of rigid tubing, before any sleeve or nut is installed visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tubing remains continuous and unsevered from the main stock length at the cut point.\n2. Cut end exhibits a visibly pinched flat or oval cross-section.\n3. Bore at the cut end displays an inward-projecting raised burr ring.\n4. Outside edge of the cut end displays a prominent raised curled lip.\n5. Tube wall adjacent to the cut displays deep score grooves and gouges.\n6. Tube end features a sleeve and B-nut installed over the cut section.\n7. The finished work shows this defect: Cut end is crushed flat or collapsed out of round.\n8. The finished work shows this defect: Tube shows a kink, wrinkle or flattened section along its length.\n9. The finished work shows this defect: Cut end carries a torn, jagged tab of partially severed metal.\n10. The finished work shows this defect: Bore of the tube contains loose metal chips or shavings.\n11. The finished work shows this defect: Deep spiral or circumferential cuts scar the tube wall away from the cut.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "fully severed into a separate piece to continuous and unsevered",
+          "positive": "Tubing is fully severed into a separate piece with the cut end free.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "retains a round cross-section to exhibits a pinched flat or oval cross-section",
+          "positive": "Cut end retains a round cross-section, not pinched flat or oval.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "open and clear of any raised burr ring to displays an inward-projecting raised burr ring",
+          "positive": "Bore at the cut end is open and clear of any raised burr ring.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "smooth, with no raised curled lip to displays a prominent raised curled lip",
+          "positive": "Outside edge of the cut end is smooth, with no raised curled lip.",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "free of gouges or deep score grooves to displays deep score grooves and gouges",
+          "positive": "Tube wall adjacent to the cut is free of gouges or deep score grooves.",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "bare: no sleeve and no B-nut to features a sleeve and B-nut",
+          "positive": "Tube end is bare: no sleeve and no B-nut installed on it yet.",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cut end is crushed flat or collapsed out of round.",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube shows a kink, wrinkle or flattened section along its length.",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cut end carries a torn, jagged tab of partially severed metal.",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Bore of the tube contains loose metal chips or shavings.",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Deep spiral or circumferential cuts scar the tube wall away from the cut.",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "cut_the_tubing \u2014 VLM GRADING CRITERIA\n\nAssess the completed cut and deburred length of rigid tubing, before any sleeve or nut is installed visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tubing is fully severed into a separate piece with the cut end free.\n2. Cut end retains a round cross-section, not pinched flat or oval.\n3. Bore at the cut end is open and clear of any raised burr ring.\n4. Outside edge of the cut end is smooth, with no raised curled lip.\n5. Tube wall adjacent to the cut is free of gouges or deep score grooves.\n6. Tube end is bare: no sleeve and no B-nut installed on it yet.\n\nCritical defects\n- Cut end is crushed flat or collapsed out of round.\n- Tube shows a kink, wrinkle or flattened section along its length.\n- Cut end carries a torn, jagged tab of partially severed metal.\n- Bore of the tube contains loose metal chips or shavings.\n- Deep spiral or circumferential cuts scar the tube wall away from the cut.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:58:03Z",
+      "reviewed_by": null
+    }
+  },
+  "section:preset-the-sleeve": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "preset_the_sleeve \u2014 VLM GRADING CRITERIA\nAssess the completed flareless tube connection with the sleeve preset, tube nut tightened onto the fitting in a vise visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube nut is backed off from the fitting body, leaving visible exposed threads and a gap between nut and fitting body.\n2. Fitting is clamped at an angle in the vise, with the tube visibly canted out of line.\n3. Tube enters the nut at a sharp angle, showing a distinct bend or cocking where it meets the joint.\n4. Tube end is cut diagonally to its axis where visible, with coarse ragged burrs and metal chips clinging to the rim.\n5. The finished work shows this defect: Tube is visibly collapsed, crushed or necked down at the nut.\n6. The finished work shows this defect: Tube end is bare against the fitting with no nut installed.\n7. The finished work shows this defect: Nut is cracked, split, or its threads are visibly stripped.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "drawn up tight against it -> leaving visible exposed threads and a gap",
+          "positive": "Tube nut is threaded onto the fitting body, drawn up tight against it",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "held squarely with the tube in line -> clamped at an angle with tube visibly canted",
+          "positive": "Fitting is clamped in a vise, held squarely with the tube in line",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "straight, with no visible bend or cocking -> at a sharp angle, showing a distinct bend or cocking",
+          "positive": "Tube enters the nut straight, with no visible bend or cocking at the joint",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "square to its axis... with no ragged burr -> cut diagonally... with coarse ragged burrs",
+          "positive": "Tube end is square to its axis where visible, with no ragged burr or chips",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is visibly collapsed, crushed or necked down at the nut",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube end is bare against the fitting with no nut installed",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Nut is cracked, split, or its threads are visibly stripped",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "preset_the_sleeve \u2014 VLM GRADING CRITERIA\n\nAssess the completed flareless tube connection with the sleeve preset, tube nut tightened onto the fitting in a vise visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube nut is threaded onto the fitting body, drawn up tight against it\n2. Fitting is clamped in a vise, held squarely with the tube in line\n3. Tube enters the nut straight, with no visible bend or cocking at the joint\n4. Tube end is square to its axis where visible, with no ragged burr or chips\n\nCritical defects\n- Tube is visibly collapsed, crushed or necked down at the nut\n- Tube end is bare against the fitting with no nut installed\n- Nut is cracked, split, or its threads are visibly stripped\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:58:00Z",
+      "reviewed_by": null
+    }
+  },
+  "section:inspect-the-preset-connection": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "inspect_the_preset_connection \u2014 VLM GRADING CRITERIA\nAssess the completed preset flareless tube end with its sleeve and B-nut, disconnected from the fitting for inspection visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube assembly remains threaded onto the fitting, with the fitting body fully engaged inside the B-nut\n2. Sleeve is installed backward on the tube end with its cutting edge facing toward the B-nut\n3. Tube end is recessed flush with or behind the end face of the sleeve pilot\n4. A rule, scale, or caliper in frame spans across the B-nut hex flats rather than from the sleeve pilot face to tube end\n5. Sleeve cutting edge bite mark forms a longitudinal line along the length of the tube rather than a ring impression\n6. Tube end bore is crushed oval and pinched partially shut\n7. The finished work shows this defect: Tube is split or cracked at the sleeve cutting edge.\n8. The finished work shows this defect: Tube end is flush with or recessed behind the sleeve pilot.\n9. The finished work shows this defect: Tube is crushed flat or closed at the sleeve cut.\n10. The finished work shows this defect: Tube end is bare, with no sleeve between the B-nut and the tube end.\n11. The finished work shows this defect: Tube is sharply kinked or bent immediately behind the sleeve.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "separated from the fitting to threaded onto the fitting",
+          "positive": "Tube assembly is separated from the fitting; no fitting engaged in the B-nut",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "correct sleeve orientation to backward orientation",
+          "positive": "B-nut and sleeve both remain on the tube end",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "protrudes visibly beyond to recessed flush with or behind",
+          "positive": "Tube end protrudes visibly beyond the end face of the sleeve pilot",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "sleeve pilot face to tube end to B-nut hex flats",
+          "positive": "A rule, scale, or caliper in frame spans the sleeve pilot face to the tube end",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "substitution",
+          "changed": "ring impression to longitudinal line",
+          "positive": "Sleeve cutting edge bite mark is visible as a ring impression on the tube",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "remains open and round to crushed oval and pinched partially shut",
+          "positive": "Tube end bore remains open and round, not pinched shut",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is split or cracked at the sleeve cutting edge",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube end is flush with or recessed behind the sleeve pilot",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is crushed flat or closed at the sleeve cut",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube end is bare, with no sleeve between the B-nut and the tube end",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Tube is sharply kinked or bent immediately behind the sleeve",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "inspect_the_preset_connection \u2014 VLM GRADING CRITERIA\n\nAssess the completed preset flareless tube end with its sleeve and B-nut, disconnected from the fitting for inspection visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Tube assembly is separated from the fitting; no fitting engaged in the B-nut\n2. B-nut and sleeve both remain on the tube end\n3. Tube end protrudes visibly beyond the end face of the sleeve pilot\n4. A rule, scale, or caliper in frame spans the sleeve pilot face to the tube end\n5. Sleeve cutting edge bite mark is visible as a ring impression on the tube\n6. Tube end bore remains open and round, not pinched shut\n\nCritical defects\n- Tube is split or cracked at the sleeve cutting edge\n- Tube end is flush with or recessed behind the sleeve pilot\n- Tube is crushed flat or closed at the sleeve cut\n- Tube end is bare, with no sleeve between the B-nut and the tube end\n- Tube is sharply kinked or bent immediately behind the sleeve\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:58:03Z",
+      "reviewed_by": null
+    }
+  }
+}

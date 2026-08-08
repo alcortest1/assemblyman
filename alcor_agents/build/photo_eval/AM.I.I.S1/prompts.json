@@ -1,0 +1,72 @@
+{
+  "section:procedure": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "procedure \u2014 VLM GRADING CRITERIA\nAssess the completed completed FAA Form 337 for a major repair or alteration visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Block 1 shows engine make, model, serial number and registration number entered\n2. Block 2 shows the repair station's name and address entered\n3. Block 4 has both repair and alteration boxes marked simultaneously\n4. Block 8 text names unapproved pilot handbooks as the data used for the work\n5. Block 6 shows a printed company emblem in place of a signature and a completion date\n6. The finished work shows this defect: Block 8 is blank, with no description of work performed.\n7. The finished work shows this defect: Both repair and alteration boxes in Block 4 are marked.\n8. The finished work shows this defect: Block 6 signature line on the form is blank.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "aircraft to engine",
+          "positive": "Block 1 shows aircraft make, model, serial number and registration number entered",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "registered owner's to repair station's",
+          "positive": "Block 2 shows the registered owner's name and address entered",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "one box to both repair and alteration boxes",
+          "positive": "Block 4 has one box marked, either repair or alteration, not both",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "approved data to unapproved pilot handbooks",
+          "positive": "Block 8 text names the approved data used for the work",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "substitution",
+          "changed": "signature to printed company emblem",
+          "positive": "Block 6 shows a signature and a completion date",
+          "id": "c5"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Block 8 is blank, with no description of work performed",
+          "id": "c6"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Both repair and alteration boxes in Block 4 are marked",
+          "id": "c7"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Block 6 signature line on the form is blank",
+          "id": "c8"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "procedure \u2014 VLM GRADING CRITERIA\n\nAssess the completed completed FAA Form 337 for a major repair or alteration visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Block 1 shows aircraft make, model, serial number and registration number entered\n2. Block 2 shows the registered owner's name and address entered\n3. Block 4 has one box marked, either repair or alteration, not both\n4. Block 8 text names the approved data used for the work\n5. Block 6 shows a signature and a completion date\n\nCritical defects\n- Block 8 is blank, with no description of work performed\n- Both repair and alteration boxes in Block 4 are marked\n- Block 6 signature line on the form is blank\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:51:21Z",
+      "reviewed_by": null
+    }
+  }
+}

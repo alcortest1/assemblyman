@@ -1,0 +1,65 @@
+{
+  "section:procedure": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "procedure \u2014 VLM GRADING CRITERIA\nAssess the completed weight-and-balance worksheet computing CG after an equipment change visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Weight, arm, and moment entries are filled in for only a single weighed location.\n2. Summed totals appear at the top of the weight and moment columns.\n3. A CG value in centimeters is recorded on the worksheet.\n4. A written CG range appears with both in-range and out-of-range conclusions marked.\n5. The finished work shows this defect: The arm column carries a summed total at its bottom.\n6. The finished work shows this defect: No moment column or moment values appear on the worksheet.\n7. The finished work shows this defect: CG value lies outside the written range but is marked acceptable.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "each to only a single",
+          "positive": "Weight, arm, and moment entries are filled in for each weighed location.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "bottom to top",
+          "positive": "Summed totals appear at the bottom of the weight and moment columns.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "inches to centimeters",
+          "positive": "A CG value in inches is recorded on the worksheet.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "a marked in-range or out-of-range to both in-range and out-of-range",
+          "positive": "A written CG range appears with a marked in-range or out-of-range conclusion.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The arm column carries a summed total at its bottom.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "No moment column or moment values appear on the worksheet.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "CG value lies outside the written range but is marked acceptable.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "procedure \u2014 VLM GRADING CRITERIA\n\nAssess the completed weight-and-balance worksheet computing CG after an equipment change visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Weight, arm, and moment entries are filled in for each weighed location.\n2. Summed totals appear at the bottom of the weight and moment columns.\n3. A CG value in inches is recorded on the worksheet.\n4. A written CG range appears with a marked in-range or out-of-range conclusion.\n\nCritical defects\n- The arm column carries a summed total at its bottom.\n- No moment column or moment values appear on the worksheet.\n- CG value lies outside the written range but is marked acceptable.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:50:16Z",
+      "reviewed_by": null
+    }
+  }
+}

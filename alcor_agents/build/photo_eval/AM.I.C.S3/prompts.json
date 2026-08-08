@@ -1,0 +1,72 @@
+{
+  "section:procedure": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "procedure \u2014 VLM GRADING CRITERIA\nAssess the completed worksheet showing the ballast weight calculation and required ballast location visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Aircraft total weight is written on the worksheet in kilograms\n2. An out-of-range CG distance in inches is written as an addition of two CG values\n3. A ballast location is written as a station or arm in centimeters\n4. The ballast formula appears with weight divided by CG shift multiplied by distance from ballast location to limit\n5. A final ballast weight answer is written in kilograms\n6. The finished work shows this defect: Division and multiplication are transposed in the written formula.\n7. The finished work shows this defect: The written arithmetic gives a result other than the shown numbers produce.\n8. The finished work shows this defect: The final answer is blank or has no pounds unit.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "pounds to kilograms",
+          "positive": "Aircraft total weight is written on the worksheet in pounds",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "subtraction to addition",
+          "positive": "An out-of-range CG distance in inches is written as a subtraction of two CG values",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "inches to centimeters",
+          "positive": "A ballast location is written as a station or arm in inches",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "times... divided by to divided by... multiplied by",
+          "positive": "The ballast formula appears with weight times CG shift divided by distance from ballast location to limit",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "substitution",
+          "changed": "pounds to kilograms",
+          "positive": "A final ballast weight answer is written in pounds",
+          "id": "c5"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Division and multiplication are transposed in the written formula",
+          "id": "c6"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The written arithmetic gives a result other than the shown numbers produce",
+          "id": "c7"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The final answer is blank or has no pounds unit",
+          "id": "c8"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "procedure \u2014 VLM GRADING CRITERIA\n\nAssess the completed worksheet showing the ballast weight calculation and required ballast location visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Aircraft total weight is written on the worksheet in pounds\n2. An out-of-range CG distance in inches is written as a subtraction of two CG values\n3. A ballast location is written as a station or arm in inches\n4. The ballast formula appears with weight times CG shift divided by distance from ballast location to limit\n5. A final ballast weight answer is written in pounds\n\nCritical defects\n- Division and multiplication are transposed in the written formula\n- The written arithmetic gives a result other than the shown numbers produce\n- The final answer is blank or has no pounds unit\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:49:01Z",
+      "reviewed_by": null
+    }
+  }
+}

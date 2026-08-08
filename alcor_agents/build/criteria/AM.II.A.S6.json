@@ -1,0 +1,1425 @@
+{
+  "schema_version": 1,
+  "task_code": "AM.II.A.S6",
+  "generator": "packs/compile_pack.py",
+  "model": "anthropic/claude-opus-5",
+  "drafted_at": "2026-08-04T03:29:02Z",
+  "reviewed_by": null,
+  "sources": [
+    "procedure.md",
+    "steps.json",
+    "tasks.csv",
+    "references/handbook/faa_h_8083_31b_4_85_4_96.md"
+  ],
+  "entries": {
+    "id.s1": {
+      "kind": "step",
+      "step_id": "id.s1",
+      "section": "Identify the Damage",
+      "step_text": "Inspect the area for damage.",
+      "criterion": "- Damaged area and surrounding skin are clean and bare enough that individual rivet heads are distinguishable\n- No dirt, grease or loose paint obscures the damage or the fasteners around it\n- The full damage feature (crack, hole, dent) is exposed and unobstructed in the frame",
+      "sources": [
+        {
+          "condition": "Dirt, grease and paint are removed from the damaged area and surrounding structure so each rivet and fastener is visible.",
+          "source": "handbook FAA-H-8083-31B p.4-85",
+          "note": "Handbook: \"Remove all dirt, grease, and paint from the damaged and surrounding areas to determine the exact condition of each rivet, bolt, and weld.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Inspection extends into the adjacent area, covering skin wrinkles, dents, loose rivets and abrasions, not just the obvious damage.",
+          "source": "handbook FAA-H-8083-31B p.4-85",
+          "note": "Handbook: \"Inspect skin for wrinkles throughout a large area\" and \"Check all skin, dents, and wrinkles for any cracks or abrasions.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Any movable parts in the inspected area are operated and confirmed to function normally.",
+          "source": "handbook FAA-H-8083-31B p.4-86",
+          "note": "Handbook: \"Check the operation of all movable parts in the area.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Damage type is named and classified, with a stated determination that repair rather than replacement is appropriate.",
+          "source": "handbook FAA-H-8083-31B p.4-86",
+          "note": "Handbook: \"Determine if repair would be the best procedure\"; damage classes given on p.4-90.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "How far beyond the damage the inspection actually swept",
+        "Whether movable parts in the area were operated and checked",
+        "Whether the damage was correctly classified and a repair-vs-replace decision made"
+      ],
+      "required_framing": "One overall shot of the cleaned damage area including several inches of surrounding structure and the nearest rivet rows, taken square to the surface with the damage centered and lit to show surface texture.",
+      "conflicts": []
+    },
+    "id.s2": {
+      "kind": "step",
+      "step_id": "id.s2",
+      "section": "Identify the Damage",
+      "step_text": "Measure the extent of the damage.",
+      "criterion": "- A steel scale lies flat on the workpiece, spanning the damage's greatest dimension\n- The scale's zero end is set at the edge of the damage, not offset\n- The damaged area and its surroundings are clean and free of grease or flaking paint\n- The full damage boundary, including crack ends, is visible within the frame alongside the scale",
+      "sources": [
+        {
+          "condition": "Recorded height and length capture the full extent of the damage, including crack tips and adjacent affected area.",
+          "source": "both",
+          "note": "Handbook: \"the extent of damage must be fully evaluated\" and \"Check all skin, dents, and wrinkles for any cracks or abrasions.\"",
+          "assumed": false
+        },
+        {
+          "condition": "A steel scale rests flat on the surface, spanning the damage's greatest dimension with its zero at the damage edge.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 1: \"Use a steel scale to find the damage's height and length.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The damaged and surrounding area is free of dirt, grease and loose paint so the damage boundary is unambiguous.",
+          "source": "handbook FAA-H-8083-31B p.4-85",
+          "note": "\"Remove all dirt, grease, and paint from the damaged and surrounding areas to determine the exact condition\".",
+          "assumed": false
+        },
+        {
+          "condition": "Measured dimensions are compared against the permissible damage limits for that component before a repair class is chosen.",
+          "source": "handbook FAA-H-8083-31B p.4-90",
+          "note": "\"Permissible limits for negligible damage vary for different components of different aircraft and should be carefully researched on an individual basis.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "The actual numeric height and length values of the damage",
+        "Whether the measurement captured the full extent, including subsurface or hidden crack propagation",
+        "Comparison of measured dimensions to permissible negligible-damage limits in the applicable manual"
+      ],
+      "required_framing": "Shoot perpendicular to the panel, close enough that the scale graduations are legible, with the entire damage outline and both ends of the scale inside the frame.",
+      "conflicts": []
+    },
+    "id.s3": {
+      "kind": "step",
+      "step_id": "id.s3",
+      "section": "Identify the Damage",
+      "step_text": "Mark the repair area with a marker around all of the damage.",
+      "criterion": "- A continuous marker line completely encloses the damaged area with no damage extending past it\n- Outline is circular, oval, or has visibly rounded corners; no square corners\n- Line is drawn in marker on undamaged skin, not scribed or scratched into the metal\n- The damage itself remains visible inside the marked boundary",
+      "sources": [
+        {
+          "condition": "The marker outline fully encircles the damage, with every crack tip, dent edge and abrasion inside the line.",
+          "source": "both",
+          "note": "Procedure sheet: mark \"around all of the damage\"; handbook 4-92 \"Remove all distorted skin and structure in damaged area.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The outline is circular or oval, or if rectangular has visibly rounded rather than square corners.",
+          "source": "handbook FAA-H-8083-31B p.4-86",
+          "note": "Handbook: \"try to make cutouts either circular or oval in shape\"; also p.4-92 \"Round all square corners.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Rectangular marked corners carry a radius of no less than 1/2 inch.",
+          "source": "handbook FAA-H-8083-31B p.4-86",
+          "note": "Handbook: \"make the radius of curvature at each corner no smaller than 1/2-inch\" for rectangular cutouts.",
+          "assumed": false
+        },
+        {
+          "condition": "The marked boundary lies outside the measured damage extent by a clear margin on all sides, in sound metal.",
+          "source": "both",
+          "note": "Compare outline to the height/length taken with the steel scale; handbook 4-92: edges of completed repair match existing structure.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Corner radius of a rectangular outline meeting the 1/2-inch minimum",
+        "Actual clearance between the marked line and the measured extent of the damage",
+        "Agreement of the marked dimensions with the scale measurements taken in the previous step"
+      ],
+      "required_framing": "Shoot square-on (perpendicular) to the panel from directly above the marked area, close enough that the whole marker outline and surrounding undamaged skin are in frame, with a steel scale laid beside the outline for dimension reference and even lighting so the marker line and the damage inside it are both legible.",
+      "conflicts": [
+        "Procedure sheet (Create the Patch Doubler, note 3) calls for 1/8\" corner radii on cut shapes, while the handbook p.4-86 requires rectangular cutout corner radii no smaller than 1/2-inch and p.4-96 requires patch corners rounded to no less than 1/4-inch; the procedure sheet is operative as taught."
+      ]
+    },
+    "rd.s1": {
+      "kind": "step",
+      "step_id": "rd.s1",
+      "section": "Remove the Damage",
+      "step_text": "Cut out or stop the damage from spreading.",
+      "criterion": "- No visible crack, tear or buckled metal remains inside the cut perimeter\n- A stop hole is present at each end of every crack, with the crack tip ending inside the hole\n- Opening is circular/oval or all corners are visibly rounded, no square corners\n- Skin surrounding the opening shows no saw skips, gouges or cuts past the marked line",
+      "sources": [
+        {
+          "condition": "No crack, tear or distorted material remains inside the cut perimeter; the damage is fully excised or arrested.",
+          "source": "both",
+          "note": "Handbook p.4-92 damage removal: \"Remove all distorted skin and structure in damaged area\"; procedure sheet step 1.",
+          "assumed": false
+        },
+        {
+          "condition": "A stop hole 3/32-inch diameter is drilled at each crack end so the hole encloses the crack tip.",
+          "source": "both",
+          "note": "Handbook p.4-96 figure: \"Stop holes\u2014drill 3/32\" diameter holes in each sharp corner\"; p.4-93 \"a small hole must be drilled in each end\".",
+          "assumed": false
+        },
+        {
+          "condition": "The cutout is circular/oval or has rounded corners \u2014 no square corners remain in the opening.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "\"Round all square corners\"; p.4-86 \"try to make cutouts either circular or oval in shape\", rectangular corner radius \"no smaller than 1/2-inch\" (measured separately).",
+          "assumed": false
+        },
+        {
+          "condition": "Surrounding skin outside the marked repair area is free of saw skips, gouges or overcuts.",
+          "source": "both",
+          "note": "Handbook p.4-92: \"Remove damaged material so that the edges of the completed repair match existing structure and aircraft lines.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "3/32-inch stop hole diameter",
+        "Minimum 1/2-inch corner radius for a rectangular cutout",
+        "Confirmation that a hairline crack tip is fully captured (may need magnification or NDI)"
+      ],
+      "required_framing": "Close-up perpendicular to the skin showing the whole cut opening and both crack ends with stop holes, with a steel scale laid alongside the opening for size reference.",
+      "conflicts": []
+    },
+    "rd.s2": {
+      "kind": "step",
+      "step_id": "rd.s2",
+      "section": "Remove the Damage",
+      "step_text": "Smooth and deburr all cut edges.",
+      "criterion": "- All cut edges show no burrs, slivers or nicks along their full length\n- Cutout corners are visibly rounded, none left square\n- No coarse scratch pattern or file marks remain on the edge or adjacent skin\n- Cut perimeter still lies on/inside the marker layout line, not gouged past it",
+      "sources": [
+        {
+          "condition": "All cut edges are free of burrs, feathered slivers, nicks and visible tool/scratch marks.",
+          "source": "both",
+          "note": "Handbook p.4-92: \"Smooth out any abrasions and/or dents\"; procedure sheet note requires removing sharp edges and scratches.",
+          "assumed": false
+        },
+        {
+          "condition": "Every corner of the cutout is rounded, with no square or sharp corner remaining.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "Damage Removal list: \"Round all square corners\"; also figure 4-176 \"cut to a smooth rectangle with corner radii\".",
+          "assumed": false
+        },
+        {
+          "condition": "Corner radius of a rectangular cutout measures no smaller than 1/2 inch.",
+          "source": "handbook FAA-H-8083-31B p.4-86",
+          "note": "\"make the radius of curvature at each corner no smaller than 1\u20442-inch\"; procedure sheet gives no cutout radius figure.",
+          "assumed": false
+        },
+        {
+          "condition": "Sanding progressed from coarse grit through to fine grit rather than a single grit.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 2: start coarse-grit progressing to fine-grit; handbook is qualitative only.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Corner radius of the cutout is at least 1/2 inch (needs a radius gauge or scale reading)",
+        "Grit progression from coarse to fine during sanding (only visible while the action is performed)"
+      ],
+      "required_framing": "Close-up shot square to the skin showing the entire cutout perimeter with the marker layout line visible, plus one low-angle/raking-light shot along the cut edges so burrs and scratches read.",
+      "conflicts": [
+        "Procedure sheet specifies a 1/8\" corner radius (on the doubler) while the handbook p.4-86 requires rectangular cutout corner radii no smaller than 1/2\"; procedure sheet is operative as taught, but the cutout radius standard needs instructor confirmation."
+      ]
+    },
+    "cp.s1": {
+      "kind": "step",
+      "step_id": "cp.s1",
+      "section": "Create the Patch Filler",
+      "step_text": "Transfer the opening\u2019s shape.",
+      "criterion": "- A single continuous traced outline appears on the blank, matching the opening perimeter including corner radii\n- Material remains outside the traced line on all sides of the blank\n- Only one trace attempt is visible; no smeared, doubled or abandoned lines\n- The traced line is thin and crisp, consistent with a fine-tip marker",
+      "sources": [
+        {
+          "condition": "The traced outline on the blank reproduces the opening's full perimeter as one continuous fine line, with no gaps, double lines or corner deviation.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Use a fine-tip marker to trace the shape accurately.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The blank extends past the traced line on every side, leaving margin material outside the line for cutting and filing.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"a piece of sheet metal larger than the opening\"; margin needed for later cut-outside-the-line step.",
+          "assumed": false
+        },
+        {
+          "condition": "The blank chosen for the filler is the same gauge and alloy as the original skin.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Handbook: \"The filler must be of the same gauge and material as the original skin.\" Gauge verified by micrometer, alloy by stock marking.",
+          "assumed": false
+        },
+        {
+          "condition": "The blank is held flat and flush against the underside of the skin throughout tracing, without tilt or lift.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"against the underside, pressing it flush\"; only observable while the trace is made.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Filler blank is the same gauge as the original skin (micrometer reading)",
+        "Filler blank is the same alloy as the original skin (stock marking/spec)",
+        "Blank was pressed flush against the underside of the skin while tracing"
+      ],
+      "required_framing": "One overhead, square-on shot of the marked blank with its whole traced outline and all four edges in frame, taken next to the skin opening so the shapes can be compared.",
+      "conflicts": []
+    },
+    "cp.s2": {
+      "kind": "step",
+      "step_id": "cp.s2",
+      "section": "Create the Patch Filler",
+      "step_text": "Remove and cut out the shape.",
+      "criterion": "- Cut edge is outside the traced outline on all sides and the marker line is still visible on the blank\n- No cut, nick or notch crosses inside the traced outline\n- Cut edges show no tears, cracks, curling or buckling from the cutting tool\n- Blank is a single piece matching the traced shape, corners not cut square into the outline",
+      "sources": [
+        {
+          "condition": "The cut edge lies entirely outside the traced outline, with the marker line still visible on the blank.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: cut close to the marked line, leaving a small amount of material outside the line.",
+          "assumed": false
+        },
+        {
+          "condition": "Excess material left outside the traced line is small and reasonably uniform, filable to fit without reworking the whole edge.",
+          "source": "procedure sheet",
+          "note": "'Small amount of material outside the line' is qualitative; the actual margin must be measured off the blank.",
+          "assumed": false
+        },
+        {
+          "condition": "Cut edges are free of tears, cracks, curl or buckling, and no nick crosses inside the outline.",
+          "source": "both",
+          "note": "Handbook p.4-93: damage 'must be cleaned and smoothed'; p.4-92 'Smooth out any abrasions and/or dents.'",
+          "assumed": false
+        },
+        {
+          "condition": "The blank was cut from stock of the same gauge and alloy as the original skin.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Handbook: 'The filler must be of the same gauge and material as the original skin.' Verified by micrometer/stock marking, not by sight.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Actual dimension of the excess margin left outside the line",
+        "Gauge (thickness) of the filler stock versus the original skin",
+        "Alloy/material identity of the filler stock",
+        "Whether the blank will file down to a flush fit in the opening"
+      ],
+      "required_framing": "Lay the cut blank flat, traced-line side up, with a steel scale in frame alongside the cut edge; include a second shot of the blank held over the skin opening so the outline and cut edge are both visible.",
+      "conflicts": []
+    },
+    "cp.s3": {
+      "kind": "step",
+      "step_id": "cp.s3",
+      "section": "Create the Patch Filler",
+      "step_text": "Size material to fit the shape.",
+      "criterion": "- Filler is seated in the opening and flush with the surrounding skin, no step or bulge\n- Gap around the full perimeter is uniform, with no wedge-shaped or oversized gap\n- Filed edges are straight and square, with no gouges, waviness, or burrs\n- No hammer marks, upset skin, or distortion around the opening edge",
+      "sources": [
+        {
+          "condition": "The filler seats fully in the opening and sits flush with the surrounding skin, with no step, lip, or bulge.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Handbook: \"A flush patch is a filler patch that is flush to the skin when applied\"; p.4-93 requires \"a smooth outside surface\".",
+          "assumed": false
+        },
+        {
+          "condition": "The gap between filler and opening edge is uniform around the full perimeter, with no wedge-shaped or crescent gap.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: file \"until the patch fits the opening\"; handbook speaks only qualitatively of fit and contour.",
+          "assumed": false
+        },
+        {
+          "condition": "Filed edges are straight and square to the surface, free of file gouges, waviness, and burrs.",
+          "source": "both",
+          "note": "Procedure sheet step 4 deburr/smooth; handbook p.4-92 \"Smooth out any abrasions and/or dents\" and \"Round all square corners\".",
+          "assumed": false
+        },
+        {
+          "condition": "The filler material is the same gauge and alloy as the original skin after fitting.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Handbook: \"The filler must be of the same gauge and material as the original skin.\" Verify with micrometer/material marking.",
+          "assumed": false
+        },
+        {
+          "condition": "The filler enters the opening by hand without forcing, hammering, or rocking in place.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: file \"carefully remove material until the patch fits the opening\" \u2014 fit judged during trial fitting.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Filler gauge and alloy match the original skin (micrometer/material marking)",
+        "Filler enters the opening by hand without forcing or rocking (trial fit must be watched)"
+      ],
+      "required_framing": "One shot straight down (lens perpendicular) on the filler seated in the opening with the entire perimeter in frame, plus one low-angle raking shot across the joint line to show flushness; include a scale beside the opening.",
+      "conflicts": []
+    },
+    "cp.s4": {
+      "kind": "step",
+      "step_id": "cp.s4",
+      "section": "Create the Patch Filler",
+      "step_text": "Deburr edges and smooth scratches with sandpaper.",
+      "criterion": "- Filler edges show no burrs, slivers or ragged sections along their full perimeter\n- Edge finish is uniform all the way around, with no localized flats or gouges from filing\n- No coarse file or coarse-grit scratch marks visible on either face or on the edges\n- Corners are smooth and free of sharp points",
+      "sources": [
+        {
+          "condition": "All cut edges and hole edges of the filler are burr-free and uniformly smooth, with no sharp or ragged sections.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet step 4 and safety note 1 (cut/formed metal leaves sharp edges); handbook defines burr as 'a small, thin section of metal extending beyond a regular surface'.",
+          "assumed": false
+        },
+        {
+          "condition": "No coarse file marks or deep scratches remain on the filler faces or edges after final sanding.",
+          "source": "both",
+          "note": "Handbook p.4-89: 'Scratches, which penetrate the pure aluminum surface layer, permit corrosion to take place in the alloy beneath.'",
+          "assumed": false
+        },
+        {
+          "condition": "After sanding, the filler still fits the opening with a uniform gap and no oversize slop from removed material.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet Create the Patch Filler note 3: file 'until the patch fits the opening'; fit gap must be gauged, not eyeballed.",
+          "assumed": false
+        },
+        {
+          "condition": "Filler thickness is unchanged by face sanding and still matches the original skin gauge.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Handbook: 'The filler must be of the same gauge and material as the original skin.' Requires micrometer reading.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Filler thickness still equal to the original skin gauge after sanding",
+        "Actual filler-to-opening gap dimension / snugness of fit",
+        "Grit progression from coarse to fine actually used during sanding"
+      ],
+      "required_framing": "Filler removed from the opening and laid on a clean bench, photographed close-up under raking light so one full face and the entire cut edge are visible; include a scale alongside and a second frame of the reverse face.",
+      "conflicts": []
+    },
+    "pr.s1": {
+      "kind": "step",
+      "step_id": "pr.s1",
+      "section": "Perform Rivet Layout",
+      "step_text": "Choose the rivet for the repair.",
+      "criterion": "- The selected rivet head style matches the head style of the existing rivets in the surrounding skin\n- All rivets set aside for the repair are one consistent diameter and length, with no mixed sizes",
+      "sources": [
+        {
+          "condition": "Selected rivet diameter equals the next standard size above three times the measured skin thickness.",
+          "source": "handbook FAA-H-8083-31B p.4-86",
+          "note": "Handbook: \"multiply the thickness of the skin by three and use the next larger size rivet corresponding to that figure\"; procedure sheet only says \"calculate\".",
+          "assumed": false
+        },
+        {
+          "condition": "Rivet type and material match the original rivets in the part being repaired.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "Handbook: \"the rivet size and material should be the same as the original rivets in the part being repaired.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Rivet length provides grip for the full doubler-plus-skin-plus-filler stack with enough shank left to upset a shop head.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note: \"Calculate the required rivet diameter and length.\" No numeric length rule appears in the handbook extract.",
+          "assumed": false
+        },
+        {
+          "condition": "Selected rivet head style (universal or countersunk) matches the existing rivet heads in the surrounding skin.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "Rests on handbook \"the rivet size and material should be the same as the original rivets\"; head style comparison is visually settleable.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Rivet diameter equals next size above 3 \u00d7 measured skin thickness",
+        "Rivet length sufficient for total stack grip plus shop head material",
+        "Rivet material/type identical to original rivets in the part"
+      ],
+      "required_framing": "Lay the chosen rivet on the work beside a scale or caliper showing its diameter and length, with the written diameter/length calculation and the existing skin rivets in the same frame.",
+      "conflicts": []
+    },
+    "pr.s2": {
+      "kind": "step",
+      "step_id": "pr.s2",
+      "section": "Perform Rivet Layout",
+      "step_text": "Determine and plot the edge distance.",
+      "criterion": "- Edge distance lines are visible on all edges of the doubler, filler, and skin repair area\n- Each line is parallel to its edge and at a visibly constant offset\n- Corner intersections of the edge distance lines are clean and complete\n- Lines are drawn fine and legible, not smeared or doubled",
+      "sources": [
+        {
+          "condition": "Edge distance lines are marked on all four edges of the doubler, the filler, and the skin repair area.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: \"Mark that distance from all edges with a marker\"; handbook is qualitative on layout.",
+          "assumed": false
+        },
+        {
+          "condition": "Each marked edge distance measures the value calculated for the selected rivet diameter, and no less.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "Handbook: \"the proper edge distance for the larger rivet must be maintained\"; the numeric value comes from the student's calculation.",
+          "assumed": false
+        },
+        {
+          "condition": "Marked edge distance meets the handbook minimum for the rivet size used, e.g. 1/4\" for 1/8\" rivets.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Figure 4-175 text: \"Minimum edge distance using 1/8\" rivets is 1/4\" and using 5/32\" rivets is 5/16\"\" (stated for lap/scab patch).",
+          "assumed": false
+        },
+        {
+          "condition": "Each line runs parallel to its edge at a constant offset, and lines meet cleanly at the corners.",
+          "source": "procedure sheet",
+          "note": "Layout must be usable for pitch plotting; handbook only requires patterns \"conform to instructions in the applicable aircraft manual\".",
+          "assumed": false
+        },
+        {
+          "condition": "Rivet diameter used in the edge distance calculation matches the rivet chosen in step 1 of the layout.",
+          "source": "procedure sheet",
+          "note": "Perform Rivet Layout notes 1-2 require the calculated diameter to drive the edge distance figure.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Actual measured edge distance versus the calculated value",
+        "Conformance to the handbook minimum (1/4\" for 1/8\" rivets, 5/16\" for 5/32\" rivets)",
+        "Whether the calculation was based on the rivet diameter selected in the prior step"
+      ],
+      "required_framing": "Lay the doubler, filler, and marked skin flat, shot square from above with a 6\" steel scale placed alongside one marked edge so the offset and the ruler graduations are both readable.",
+      "conflicts": []
+    },
+    "pr.s3": {
+      "kind": "step",
+      "step_id": "pr.s3",
+      "section": "Perform Rivet Layout",
+      "step_text": "Determine the pitch and plot each rivet.",
+      "criterion": "- Dots are plotted along the full length of every rivet row, none omitted\n- Each dot lies on the previously marked edge-distance line\n- Rows are symmetrical about the opening and dots appear evenly spaced\n- Dots are single, small and crisp with no smears or duplicate marks\n- Layout marks appear on each mating piece shown in the frame",
+      "sources": [
+        {
+          "condition": "Adjacent dots along each rivet line are spaced at the calculated pitch, equal to one another within layout tolerance.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Calculate the needed pitch. Mark a dot at that interval on each material\"; requires scale reading between dots.",
+          "assumed": false
+        },
+        {
+          "condition": "The plotted pitch and rivet count match the documented calculation and the applicable manual's rivet pattern.",
+          "source": "both",
+          "note": "Handbook p.4-92: \"The rivet pattern for a repair must conform to instructions in the applicable aircraft manual\"; count from Figure 4-169.",
+          "assumed": false
+        },
+        {
+          "condition": "Every dot sits on the previously plotted edge-distance lines, with rows symmetrical about the opening and none outside the layout.",
+          "source": "procedure sheet",
+          "note": "Sheet step 2 plots edge distance first; dots must fall on those lines for a valid pattern.",
+          "assumed": false
+        },
+        {
+          "condition": "On a lap or scab patch layout, rows are staggered about 1/2 inch apart with spacing about 1 inch.",
+          "source": "handbook FAA-H-8083-31B p.4-96",
+          "note": "Handbook: \"Space rivets aproximately 1\" apart in staggered rows 1/2\" apart\"; applies to lap/scab patch geometry only.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Actual pitch dimension between adjacent dots and its evenness",
+        "Whether the plotted rivet count matches the calculated/manual-required number",
+        "Approximately 1 inch spacing and 1/2 inch stagger for a lap patch",
+        "Correctness of the underlying pitch calculation"
+      ],
+      "required_framing": "Shoot square-on (perpendicular) to the marked surface so the whole layout and its edges are in frame, with a steel scale laid alongside one rivet row and all marked pieces visible.",
+      "conflicts": []
+    },
+    "dh.s1": {
+      "kind": "step",
+      "step_id": "dh.s1",
+      "section": "Drill the Holes",
+      "step_text": "Center punch the holes in the skin.",
+      "criterion": "- One punch indentation is present at every plotted rivet mark on the skin\n- Each indentation sits centered on its layout mark, not beside or straddling it\n- Indentations are round and cleanly formed, not elongated or smeared from a canted punch\n- No stray, doubled or extra indentations appear outside the rivet layout",
+      "sources": [
+        {
+          "condition": "Every plotted rivet mark on the skin carries exactly one punch indentation centered on the mark, with no stray or doubled indentations.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Notes: \"Place the point of the center punch directly on a mark for a rivet\" and \"Repeat for all rivet mark locations on the skin.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Measured punch-center locations match the plotted edge distance and pitch for the repair layout.",
+          "source": "both",
+          "note": "Handbook: \"The rivet pattern for a repair must conform to instructions in the applicable aircraft manual\"; procedure sheet plots ED and pitch marks.",
+          "assumed": false
+        },
+        {
+          "condition": "The skin around each indentation remains flat, with no warping, dishing or backside bulge from an over-heavy blow.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: \"One light blow is enough; too heavy and the metal will warp\"; verify with straightedge/flatness check.",
+          "assumed": false
+        },
+        {
+          "condition": "The punch is held perpendicular and steady against the skin and struck with a single light hammer blow.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Notes: \"Hold the punch steady against the material\" and \"Lightly tap the top of the center punch\".",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Measured edge distance and pitch of the punch centers against the plotted layout",
+        "Flatness of the skin / absence of warping or backside bulge from the punch blow",
+        "Punch held perpendicular and steady with a single light hammer blow"
+      ],
+      "required_framing": "Shoot square-on (perpendicular) close-up of the marked repair area on the skin, with raking light so the indentations read, all layout lines and every punch mark inside frame, and a 6\" scale laid alongside the rivet row.",
+      "conflicts": []
+    },
+    "dh.s2": {
+      "kind": "step",
+      "step_id": "dh.s2",
+      "section": "Drill the Holes",
+      "step_text": "Drill pilot holes through the marks.",
+      "criterion": "- Every pilot hole sits centered on its center-punch mark with layout marks still visible\n- Holes are round, not oval, elongated or torn at the edges\n- Hole pattern follows the marked edge-distance and pitch lines with no hole crowding an edge\n- Skin surface around the holes is free of gouges, chuck marks or breakout petals",
+      "sources": [
+        {
+          "condition": "Each pilot hole is centered on its center-punch mark, with layout dots still visible around the hole rim.",
+          "source": "procedure sheet",
+          "note": "Sheet directs the bit apex be positioned in the punch indentation and holes drilled through the marks, preserving edge distance and pitch.",
+          "assumed": false
+        },
+        {
+          "condition": "Pilot holes are round and clean, with no elongation, ovalling, tearing or crescent gouging at the hole edge.",
+          "source": "handbook FAA-H-8083-31B p.4-85",
+          "note": "Handbook: \"Drill bits that do not cut satisfactorily cause damage to the hole.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Pilot bit diameter is no larger than the rivet diameter, #40 (0.098\") for a 1/8\" rivet.",
+          "source": "procedure sheet",
+          "note": "Sheet: bit \"same size as or slightly smaller than the rivet diameter... #40 drill bits are preferred\"; handbook gives no such figure.",
+          "assumed": false
+        },
+        {
+          "condition": "Drill is held perpendicular with the part clamped or backed while drilling, and exit is controlled at breakout.",
+          "source": "procedure sheet",
+          "note": "Sheet: keep drill perpendicular, anticipate exit; handbook mentions clamping and a wood support only in the titanium hand-drilling context.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Pilot bit diameter (#40 / no larger than rivet diameter) \u2014 requires bit or hole measurement",
+        "Drill held perpendicular to the material through the cut \u2014 only visible while drilling",
+        "Part clamped or supported behind while drilling",
+        "Controlled anticipation of bit exit at the back face"
+      ],
+      "required_framing": "Single shot square-on (lens perpendicular) to the drilled surface, whole hole pattern in frame with the layout lines and a scale alongside; include a second angled shot of the back face if breakout is a concern.",
+      "conflicts": []
+    },
+    "dh.s3": {
+      "kind": "step",
+      "step_id": "dh.s3",
+      "section": "Drill the Holes",
+      "step_text": "Drill the patch doubler.",
+      "criterion": "- Cleco pins installed through the transferred holes with the doubler flat against the skin\n- Doubler holes concentric with skin holes; no crescent-shaped, doubled or torn openings\n- Cleco clamps or pins present at the perimeter of the drilled area in the finished work\n- Doubler edges intact, no hole broken out to an edge or corner",
+      "sources": [
+        {
+          "condition": "Every drilled doubler hole is concentric with its mating skin hole, with cleco pins seated fully and no crescent or double-drilled openings.",
+          "source": "procedure sheet",
+          "note": "Sheet: 'Transfer holes from the skin to the doubler... Drill a hole and hold it aligned with a cleco pin.'",
+          "assumed": false
+        },
+        {
+          "condition": "The doubler is held with cleco clamps or pins so it cannot shift between the first and last hole drilled.",
+          "source": "procedure sheet",
+          "note": "Sheet: 'Secure in place with cleco clamps, if possible'; only observable while drilling progresses.",
+          "assumed": false
+        },
+        {
+          "condition": "Hole centers on the doubler sit at the laid-out edge distance from the doubler edges, with the ED line bisecting the transferred skin holes.",
+          "source": "procedure sheet",
+          "note": "Sheet: 'Bisect the holes in the skin with the edge distance line on the doubler.' Handbook only states edge distance 'must be maintained' qualitatively.",
+          "assumed": false
+        },
+        {
+          "condition": "Pilot holes are drilled with a bit no larger than the rivet diameter (#40 preferred for a 1/8\" rivet).",
+          "source": "procedure sheet",
+          "note": "Sheet note 6: bit 'same size as or slightly smaller than the rivet diameter... #40 drill bits are preferred'; figure is the sheet's alone.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Edge distance dimension from hole center to doubler edge",
+        "Pilot hole diameter / drill bit size used",
+        "Whether the doubler was clamped and stayed aligned throughout drilling",
+        "Drill perpendicularity during the cut"
+      ],
+      "required_framing": "Shoot the skin side square-on with the doubler clecoed in place, close enough that individual holes, cleco pins and the doubler's edge margins are all visible in one frame.",
+      "conflicts": []
+    },
+    "dh.s4": {
+      "kind": "step",
+      "step_id": "dh.s4",
+      "section": "Drill the Holes",
+      "step_text": "Drill the patch filler.",
+      "criterion": "- Each filler hole is round and full-size, with no teardrop, oval or crescent from a wandering bit\n- Filler seats in the opening flush with the surrounding skin, no lip, gap or overlap\n- Cleco pins pass through filler and doubler holes and seat without forcing\n- Filler is flat: no warp, dish or bulge around punch marks and holes",
+      "sources": [
+        {
+          "condition": "Every hole in the filler is round and full-size, with no teardrop, elongation or double-drilled crescent.",
+          "source": "both",
+          "note": "Handbook warns of \"holes that have been elongated\" and \"if the rivet holes show elongation, replace the rivets with the next larger size\" (p.4-91/4-92).",
+          "assumed": false
+        },
+        {
+          "condition": "Filler holes hold the laid-out edge distance and pitch from every filler edge.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet requires plotted ED and pitch; handbook only states \"The rivet pattern for a repair must conform to instructions in the applicable aircraft manual\" (p.4-92).",
+          "assumed": false
+        },
+        {
+          "condition": "Filler sits in the opening flush with the skin and its holes register with the doubler on cleco pins.",
+          "source": "both",
+          "note": "Procedure sheet: fit into opening and transfer holes to doubler; handbook: \"A flush patch is a filler patch that is flush to the skin\" (p.4-96).",
+          "assumed": false
+        },
+        {
+          "condition": "Filler shows no warp, dishing or bulge around the punched and drilled holes.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: \"One light blow is enough; too heavy and the metal will warp\"; handbook lists upsetting as a defect (p.4-90).",
+          "assumed": false
+        },
+        {
+          "condition": "Drill is held perpendicular with the filler clamped or backed while drilling.",
+          "source": "both",
+          "note": "Procedure sheet note 12; handbook: \"When hand drilling thin or flexible parts, put a support (such as a block of wood) behind the part\" (p.4-85).",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Edge distance and pitch dimensions of the filler holes",
+        "Finished hole diameter relative to rivet diameter",
+        "Drill held perpendicular with the part clamped or backed during drilling",
+        "Light single center-punch blow technique"
+      ],
+      "required_framing": "One close, square-on shot of the filler seated in the opening with cleco pins installed, plus one close-up of the filler's hole line with a steel scale laid alongside so edge distance and pitch can be read.",
+      "conflicts": []
+    },
+    "dh.s5": {
+      "kind": "step",
+      "step_id": "dh.s5",
+      "section": "Drill the Holes",
+      "step_text": "Step up to the next drill bit size.",
+      "criterion": "- Every layout hole is enlarged to a single uniform finished size, none left at pilot size\n- Holes are round with no tearing, lobing or elongation at the edges\n- Cleco pins or clamps remain installed through the stack during and after enlargement\n- Skin, doubler and filler holes are concentric with no visible offset between layers\n- Drill bit is chucked with the full flute length exposed clear of the jaws",
+      "sources": [
+        {
+          "condition": "The final hole diameter is at least 0.003 in larger than the rivet diameter (e.g. #30, 0.1285 in, for a -4 rivet).",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 17 gives the ream dimension; handbook pages speak only qualitatively about hole size and rivet fit.",
+          "assumed": false
+        },
+        {
+          "condition": "The step-up sequence is pilot #40 then finish size, with no size skipped past the specified increment.",
+          "source": "procedure sheet",
+          "note": "Notes 6 and 17 fix pilot (#40) and finish (#30) bits; handbook increments (0.0313/0.0625 in) apply only to titanium holes 0.1875 in and larger.",
+          "assumed": false
+        },
+        {
+          "condition": "Finished holes are round and clean, with no elongation, tearing or triangular lobing at the hole edge.",
+          "source": "handbook FAA-H-8083-31B p.4-85",
+          "note": "\"Drill bits that do not cut satisfactorily cause damage to the hole\"; p.4-91 warns of \"holes that have been elongated.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Skin, doubler and filler remain clamped or clecoed together while holes are enlarged, so the stack stays aligned.",
+          "source": "both",
+          "note": "Handbook: \"clamp them together tightly... use temporary bolts, Cleco clamps\" (stated for titanium hand drilling); procedure notes 14-16 require cleco pins.",
+          "assumed": false
+        },
+        {
+          "condition": "The new bit is chucked with the flutes fully exposed clear of the chuck jaws.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 7: \"Install drill bit into pneumatic drill with flutes fully exposed.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Final hole diameter being at least 0.003 in larger than the rivet diameter",
+        "Identification of the actual pilot and finish bit sizes used (#40, #30)",
+        "Chuck tightened with the chuck key",
+        "Drill held perpendicular with moderate pressure during enlargement"
+      ],
+      "required_framing": "Square-on close-up of the clecoed patch assembly filling the frame so all enlarged holes and the cleco pins are visible; include a second frame of the drill with the finish bit chucked next to a drill gauge or scale.",
+      "conflicts": []
+    },
+    "dh.s6": {
+      "kind": "step",
+      "step_id": "dh.s6",
+      "section": "Drill the Holes",
+      "step_text": "Drill all holes up to the finished size.",
+      "criterion": "- Every layout hole in skin, doubler and filler is drilled through at one uniform finished size\n- Holes are round with clean, unturn bore edges \u2014 no elongation, crescents or tear-out\n- Holes line up through all layers with no visible step or offset between sheets\n- No stray or duplicate holes outside the plotted rivet pattern",
+      "sources": [
+        {
+          "condition": "Each finished hole measures at least 0.003\" larger than the rivet diameter (e.g., 0.1285\"/#30 for a -4 rivet).",
+          "source": "procedure sheet",
+          "note": "Procedure sheet Senior Mechanic Note 17 gives the ream dimension; handbook pages supplied state no such figure.",
+          "assumed": false
+        },
+        {
+          "condition": "Finished holes are round and clean-edged, with no elongation, tri-lobing or torn bore walls.",
+          "source": "handbook FAA-H-8083-31B p.4-85",
+          "note": "\"Drill bits that do not cut satisfactorily cause damage to the hole\"; p.4-91 treats elongated holes as defects.",
+          "assumed": false
+        },
+        {
+          "condition": "Holes remain concentric through skin, doubler and filler with no step or crescent between layers.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook treats \"holes in the sheet misaligned\" as a defect condition; procedure sheet requires cleco pinning to hold alignment.",
+          "assumed": false
+        },
+        {
+          "condition": "Edge distance to the plotted layout lines is still met after enlarging holes to finished size.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "\"the proper edge distance for the larger rivet must be maintained\" when a hole is enlarged.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Finished hole diameter being at least 0.003\" over rivet diameter (needs pin gauge or drill/bit reading)",
+        "Edge distance measurement after enlargement",
+        "Drill held perpendicular with moderate pressure during drilling",
+        "Clecos kept installed in adjacent holes while remaining holes were drilled"
+      ],
+      "required_framing": "Perpendicular close-up of the assembled repair, lit so all finished holes are in frame; take one shot with clecos in place and one with the pattern clear so hole roundness and layer alignment are visible.",
+      "conflicts": []
+    },
+    "dh.s7": {
+      "kind": "step",
+      "step_id": "dh.s7",
+      "section": "Drill the Holes",
+      "step_text": "Deburr all drilled holes from both sides.",
+      "criterion": "- Every drilled hole edge is clean and smooth, with no raised metal ring or curl of swarf on either visible face\n- Skin, doubler and filler are shown separated so both faces of the drilled holes are in view\n- Faying surfaces and hole edges are clear of chips, shavings and marker debris\n- Hole edges show only a light break, not a visible countersink or feathered knife edge\n- Surrounding skin shows no gouges or spiral scratches from the deburr tool",
+      "sources": [
+        {
+          "condition": "No raised metal or burr ring remains around any drilled hole on either face of skin, doubler and filler.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Deburr all drilled holes from both sides.\" Handbook only defines a burr as \"a small, thin section of metal extending beyond a regular surface... on the edge of a hole.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Hole diameter after deburring is still at the finished/ream size and not enlarged or knife-edged by the deburr tool.",
+          "source": "procedure sheet",
+          "note": "Sheet: ream \"at least 0.003\" larger than the rivet diameter\" (e.g., #30 = 0.1285\" for a -4 rivet); handbook gives no deburr dimension.",
+          "assumed": false
+        },
+        {
+          "condition": "Parts were separated so the faying (hidden) faces of every hole were deburred, not just the exposed sides.",
+          "source": "procedure sheet",
+          "note": "\"from both sides\" \u2014 the blind face cannot be verified once the assembly is re-clecoed.",
+          "assumed": false
+        },
+        {
+          "condition": "Faying surfaces and hole edges are free of chips, shavings and FOD before reassembly.",
+          "source": "procedure sheet",
+          "note": "Sheet equipment list includes FOD box; trapped swarf prevents parts sitting flush.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Hole diameter/ream size remaining within 0.003\" over rivet diameter after deburring",
+        "That the blind/faying face of each hole was actually deburred rather than assembled untouched",
+        "Absence of burrs on faces already reassembled and clecoed together"
+      ],
+      "required_framing": "Lay the skin, doubler and filler side by side, unclecoed, with the drilled faces up under raking light; take one close-up perpendicular to the surface covering the full hole pattern, then flip all parts and repeat so both faces of every hole are shown, with a scale in frame.",
+      "conflicts": []
+    },
+    "sr.s1": {
+      "kind": "step",
+      "step_id": "sr.s1",
+      "section": "Set up Rivet Gun",
+      "step_text": "Choose the set and spring.",
+      "criterion": "- Set tip style shown matches the rivet head style to be driven (concave recess for universal, flat disk for countersunk)\n- Retaining spring form matches the set: cone-shaped with a universal set, cylindrical with a countersunk set\n- Set working face and spring are clean and undamaged, with no chipping, mushrooming or burrs",
+      "sources": [
+        {
+          "condition": "The selected set's tip style matches the rivet head style to be driven \u2014 concave recess for universal, flat disk for countersunk.",
+          "source": "procedure sheet",
+          "note": "Sheet: universal set has 'concave recess on tip'; countersunk set has 'disk-shaped head'. Handbook extract does not cover rivet gun sets.",
+          "assumed": false
+        },
+        {
+          "condition": "The concave recess diameter equals the rivet head diameter, neither undersized nor oversized.",
+          "source": "procedure sheet",
+          "note": "Sheet requires recess 'the same size as rivet head'; sizing needs a measured or gauged comparison, not appearance.",
+          "assumed": false
+        },
+        {
+          "condition": "The retaining spring form matches the chosen set \u2014 cone-shaped for a universal set, cylindrical for a countersunk set.",
+          "source": "procedure sheet",
+          "note": "Sheet: universal 'uses a cone-shaped retaining spring'; countersunk 'uses a cylinder shaped retaining spring'.",
+          "assumed": false
+        },
+        {
+          "condition": "Set shank and spring are undamaged, clean and free of burrs, mushrooming or chipping on the working face.",
+          "source": "procedure sheet",
+          "note": "Implied by sheet's set selection step; a marred set face transfers defects to rivet heads. Needs SME confirmation of acceptance limit.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Concave recess diameter equals the rivet head diameter (requires measuring or gauging against the actual rivet)",
+        "Correct thread fit of set/spring to the specific rivet gun"
+      ],
+      "required_framing": "Lay the chosen set and its spring on a clean bench beside one of the rivets to be driven, tip of the set facing the camera so the recess or disk face and the spring shape are both visible in the same frame.",
+      "conflicts": []
+    },
+    "sr.s2": {
+      "kind": "step",
+      "step_id": "sr.s2",
+      "section": "Set up Rivet Gun",
+      "step_text": "Install the set and spring on the rivet gun.",
+      "criterion": "- Retaining spring is seated fully down onto the gun barrel threads with no exposed thread or gap\n- Spring shape matches the set type (cone spring with concave universal set; cylinder spring with disk countersunk set)\n- Set is inserted with the driving face (concave recess or disk) pointing outward from the gun\n- Spring tang and coils are undamaged and not cross-threaded or cocked on the barrel",
+      "sources": [
+        {
+          "condition": "The retaining spring is threaded fully onto the gun barrel with no exposed threads or gap at the collar.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Slide the spring over the set down to the threads\" and rotate gun in tightening direction.",
+          "assumed": false
+        },
+        {
+          "condition": "The installed set matches the rivet type: concave recess with cone-shaped spring for universal, disk head with cylindrical spring for countersunk.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note distinguishes universal (concave recess, cone spring) from countersunk (disk head, cylinder spring) setups.",
+          "assumed": false
+        },
+        {
+          "condition": "The concave recess diameter of the set equals the rivet head size being driven.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: recess \"the same size as rivet head\"; requires comparing set recess to rivet head dimension.",
+          "assumed": false
+        },
+        {
+          "condition": "The spring is tightened until a marked rise in torque is felt and the set is captive in the gun.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: rotate \"until you feel a high rise in torque\"; tactile and retention cannot be seen in a still.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Spring tightened until a high rise in torque is felt",
+        "Set is captive and will not eject when the gun is fired or inverted",
+        "Set recess diameter matches the rivet head size (needs measurement/comparison to the rivet)",
+        "Air supply disconnected while the set was being installed"
+      ],
+      "required_framing": "Close side view of the muzzle end of the rivet gun showing the full length of the set, the retaining spring, and the barrel threads, with the rivet to be driven laid beside the set face for size comparison.",
+      "conflicts": []
+    },
+    "sr.s3": {
+      "kind": "step",
+      "step_id": "sr.s3",
+      "section": "Set up Rivet Gun",
+      "step_text": "Set rivet gun pressure.",
+      "criterion": "- Air hose is connected to the rivet gun inlet and the line is clear of the work area\n- Rivet set with its retaining spring is installed on the gun, spring threaded down onto the gun body\n- Set tip is in contact with a scrap wood block, not the workpiece, skin or an installed rivet\n- Brass regulator valve is visible in the frame and is not at the maximum stop\n- Eye and ear protection are worn",
+      "sources": [
+        {
+          "condition": "The rivet gun is connected to a compressed air source with the hose secured at the gun inlet.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Connect the gun to a source of compressed air\"; handbook pages 4-85..4-96 do not address rivet gun pressure setup.",
+          "assumed": false
+        },
+        {
+          "condition": "The set tip is pressed into a scrap wood block, not the workpiece or an installed rivet, while pressure is set.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Moderately press the set head into a block of wood. Keep it there while setting pressure.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The trigger is pulled fully while the regulator is twisted, and the set stays captive in the gun throughout.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Pull the trigger fully while twisting the regulator\"; retaining spring must hold set during firing.",
+          "assumed": false
+        },
+        {
+          "condition": "Regulator is adjusted off maximum to a recoil the student can control without the gun walking off the block.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"twisting the regulator until a manageable recoil is found\"; no psi value given by either source.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the recoil is 'manageable' when the trigger is pulled",
+        "The actual regulator/air pressure delivered to the gun",
+        "Whether the trigger was pulled fully rather than feathered",
+        "Whether the retaining spring was tightened to a felt rise in torque"
+      ],
+      "required_framing": "One still of the whole gun from the side: hose connection, set and retaining spring, brass regulator valve, and the set tip resting on the wood block all in frame.",
+      "conflicts": []
+    },
+    "rm.s1": {
+      "kind": "step",
+      "step_id": "rm.s1",
+      "section": "Rivet the Material",
+      "step_text": "Insert a rivet.",
+      "criterion": "- Rivet is present in the intended hole with its manufactured head fully seated flat against the skin, no gap or tilt\n- Rivet shank is visible protruding on the far side, showing it passes through all layers being joined\n- No visible gap or misalignment between skin, doubler, and filler at the rivet location\n- Only one rivet occupies the hole and adjacent holes remain clecoed or empty as laid out",
+      "sources": [
+        {
+          "condition": "The rivet passes through every layer to be joined (skin, doubler, and filler as applicable), with its shank visible on the far side.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 1: \"Press a rivet through all the sheets of material to be joined.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The manufactured head is fully seated against the skin with no gap or cocking between head and sheet.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet requires the rivet head be kept flush to the skin; a seated head is the inspectable outcome of insertion.",
+          "assumed": false
+        },
+        {
+          "condition": "The rivet installed matches the diameter, length, and material determined in the rivet-layout step for this repair.",
+          "source": "both",
+          "note": "Handbook p.4-92: \"Normally, the rivet size and material should be the same as the original rivets in the part being repaired.\" Procedure sheet: calculate rivet diameter and length.",
+          "assumed": false
+        },
+        {
+          "condition": "Protruding shank length is sufficient to form a shop head of about 0.5D height and 1.5D width.",
+          "source": "procedure sheet",
+          "note": "Shop head 0.5D/1.5D is the procedure sheet's figure alone; handbook extract states no protrusion value. Needs SME confirmation of pre-buck protrusion.",
+          "assumed": true
+        },
+        {
+          "condition": "The sheets are held in contact at the rivet location, with no visible gap or slippage between layers before bucking.",
+          "source": "procedure sheet",
+          "note": "Insertion must not spring the layers apart; procedure sheet directs clecoing/holding parts aligned during fastening.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Protruding shank length adequate to form a 0.5D x 1.5D shop head (measurement)",
+        "Rivet diameter, length, and alloy matching the layout calculation and original rivets (document/measurement)",
+        "Whether the rivet was held in place with a finger while the gun was positioned (video)"
+      ],
+      "required_framing": "Close, near-perpendicular shot of the inserted rivet showing the head seated on the skin, then a second angle from the back side showing the shank emerging through all layers with the sheets in contact.",
+      "conflicts": []
+    },
+    "rm.s2": {
+      "kind": "step",
+      "step_id": "rm.s2",
+      "section": "Rivet the Material",
+      "step_text": "Align the rivet gun.",
+      "criterion": "- Rivet set is centered on the manufactured head, fully covering it with no offset onto the skin\n- Set face is in contact with the rivet head, no visible gap between set and head\n- Skin around the rivet shows no set marks, smiles, gouges or upset metal\n- Manufactured head sits flush to the skin and is not tipped",
+      "sources": [
+        {
+          "condition": "The rivet set is seated squarely on the manufactured head, fully covering it with no offset onto the surrounding skin.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Press the rivet set snug into the rivet head.\" Concentric seating is visible in a still of the held position.",
+          "assumed": false
+        },
+        {
+          "condition": "The gun barrel axis is held perpendicular to the skin and stays perpendicular through the recoil.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Keep the rivet gun perpendicular to the material and stabilize your wrist to control the recoil\"; a still cannot show it was held.",
+          "assumed": false
+        },
+        {
+          "condition": "The skin and manufactured head around the rivet are free of set marks, gouges or deformities from off-axis contact.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook: \"examining both the shop and manufactured heads and the surrounding skin and structural parts for deformities.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The rivet shank remains straight and unjoggled in the hole after the set is aligned and pressure applied.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook: \"Joggles in removed rivet shanks indicate partial shear failure\"; joggling is only evidenced as it occurs, not from a surface still.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Gun barrel held perpendicular to the material throughout the recoil",
+        "Snugness/pressure of the set against the rivet head",
+        "Wrist stabilization and recoil control",
+        "Shank remaining unjoggled inside the joint during alignment and bucking"
+      ],
+      "required_framing": "Side-on still at skin level with the gun held in the riveting position: include the set, rivet head, and a length of surrounding skin so the gun axis can be compared to the skin plane; take it before pulling the trigger.",
+      "conflicts": []
+    },
+    "rm.s3": {
+      "kind": "step",
+      "step_id": "rm.s3",
+      "section": "Rivet the Material",
+      "step_text": "Position the bucking bar.",
+      "criterion": "- Bucking bar face is flat on the rivet shank and centered, with no part of the face on the surrounding skin\n- Bar face and rivet shank are in contact with no visible gap or cocked angle\n- Bar contact face is clean and free of nicks, burrs or built-up debris\n- No dents, gouges or bar marks in the skin adjacent to the rivet",
+      "sources": [
+        {
+          "condition": "The bucking bar's hardened flat face sits squarely and fully centered on the rivet shank, not overhanging onto the surrounding skin.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Place its hardened surface on the rivet shank directly in line with the rivet gun set.\" Handbook extract is silent on bucking bar use.",
+          "assumed": false
+        },
+        {
+          "condition": "The contact face of the bucking bar is smooth and free of nicks, burrs or paint that would mark the shop head.",
+          "source": "procedure sheet",
+          "note": "Implied by requirement to use the bar's \"hardened surface\" against the shank; damaged faces transfer defects to the shop head.",
+          "assumed": false
+        },
+        {
+          "condition": "The bar stays coaxial with the gun set and perpendicular to the sheet for the whole burst, without walking off the shank.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: keep the bucking bar perpendicular \"to avoid joggling the rivet shank\"; only observable while driving.",
+          "assumed": false
+        },
+        {
+          "condition": "The bar is held firmly against the material with pull pressure matching the gun's push, so it does not bounce clear.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Equal the pushing pressure on the rivet gun with the pulling pressure on the bucking bar.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Bar remaining in line with the gun set and perpendicular to the sheet throughout the 1\u20133 second burst",
+        "Equalization of bucking bar pull pressure against rivet gun push pressure",
+        "Whether the bar was held steady without bounce or joggling of the shank"
+      ],
+      "required_framing": "Side-on or oblique close-up showing the rivet gun set on the manufactured head and the bucking bar face on the shank in the same frame, close enough to see the bar/shank contact area and the skin immediately around the rivet.",
+      "conflicts": []
+    },
+    "rm.s4": {
+      "kind": "step",
+      "step_id": "rm.s4",
+      "section": "Rivet the Material",
+      "step_text": "Buck the rivet.",
+      "criterion": "- Manufactured head is flush with the skin, no gap or tipping visible around its perimeter\n- Shop head is centered on the shank, not leaning, clinched, or offset to one side\n- Skin and doubler surrounding the rivet show no crescent 'smiley' marks, set gouges, or bar dents\n- Sheets are drawn tight together with no visible gap at the joint line beside the rivet",
+      "sources": [
+        {
+          "condition": "The manufactured head sits flush against the skin with no gap, tipping, or raised edge around it.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Keep the rivet head flush to the skin.\" Handbook only addresses head slippage on removed/existing rivets.",
+          "assumed": false
+        },
+        {
+          "condition": "The shop head is concentric with the shank and not clinched, cocked, or joggled to one side.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Keep the bucking bar perpendicular to avoid joggling the rivet shank.\" Handbook discusses joggled shanks only for removed rivets.",
+          "assumed": false
+        },
+        {
+          "condition": "Skin and doubler around the rivet are free of bucking bar dents, set 'smileys,' and upset material.",
+          "source": "procedure sheet",
+          "note": "Follows from procedure sheet's flush-head and controlled, equalized pressure requirement; no handbook figure applies to this step.",
+          "assumed": false
+        },
+        {
+          "condition": "Gun and bucking bar are held perpendicular with pushing and pulling pressure equalized for a 1\u20133 second trigger pull.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: \"Pull the trigger all the way for 1 to 3 seconds\" and equal pushing/pulling pressure; only visible while performed.",
+          "assumed": false
+        },
+        {
+          "condition": "Any rivet head cracking stays within limits: depth under 1/8 and width under 1/16 of shank diameter.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "Handbook: \"The depth of the crack is less than 1/8 of the shank diameter\"; \"width of the crack is less than 1/16 of the shank diameter.\"",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Trigger held fully for 1 to 3 seconds during bucking",
+        "Pushing pressure on the gun equalized with pulling pressure on the bucking bar",
+        "Bucking bar and gun kept perpendicular throughout the driving action",
+        "Shop head height 0.5D and width 1.5D (measured, and belongs to the following step)",
+        "Rivet head crack depth/width against 1/8 and 1/16 shank-diameter limits"
+      ],
+      "required_framing": "Two frames: one square-on close-up of the shop head side with a scale beside it showing the head and surrounding skin, and one low-angle oblique of the manufactured head side along the skin surface so flushness and any smileys or gaps at the joint line are visible.",
+      "conflicts": []
+    },
+    "rm.s5": {
+      "kind": "step",
+      "step_id": "rm.s5",
+      "section": "Rivet the Material",
+      "step_text": "Check the shop head dimensions.",
+      "criterion": "- Shop head is round and centered on the shank, not tipped, clinched or sliding off to one side\n- No cracks, splits or chips visible in the shop head\n- Manufactured head sits flush with the skin surface, no raised head or gap\n- Skin around both heads is free of dishing, hammer 'smiles' or bucking bar marks\n- Sheets are drawn tight together with no visible gap at the joint",
+      "sources": [
+        {
+          "condition": "Measured shop head height is approximately 0.5 \u00d7 rivet shank diameter.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note 5: 'preferred height = 0.5D'; the cited handbook pages give no shop head dimensions.",
+          "assumed": false
+        },
+        {
+          "condition": "Measured shop head width (diameter) is approximately 1.5 \u00d7 rivet shank diameter.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note 5: 'preferred width = 1.5D'; handbook extract states no numeric shop head standard.",
+          "assumed": false
+        },
+        {
+          "condition": "Shop head is round and concentric on the shank, not clinched, tipped or joggled to one side.",
+          "source": "both",
+          "note": "Handbook p.4-91: 'examining both the shop and manufactured heads and the surrounding skin and structural parts for deformities'; sheet says keep bar perpendicular 'to avoid joggling'.",
+          "assumed": false
+        },
+        {
+          "condition": "Manufactured head sits flush with the skin and surrounding skin shows no dishing, smiles or gaps between sheets.",
+          "source": "both",
+          "note": "Sheet: 'Keep the rivet head flush to the skin.' Handbook p.4-91 requires inspecting 'the surrounding skin and structural parts for deformities'.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Shop head height equal to 0.5D (requires caliper or rivet gauge reading)",
+        "Shop head width equal to 1.5D (requires caliper or rivet gauge reading)"
+      ],
+      "required_framing": "Two shots: one close, near-perpendicular view of the shop head side showing all set rivets and the surrounding skin, and one of the manufactured head side at a low angle to show flushness; for the dimension checks include a caliper or rivet gauge on a shop head with the reading legible.",
+      "conflicts": []
+    },
+    "rr.s1": {
+      "kind": "step",
+      "step_id": "rr.s1",
+      "section": "Remove the Rivet",
+      "step_text": "Center punch the rivet head.",
+      "criterion": "- One punch indentation, centered in the rivet head\n- Rivet head not flattened, dished or driven below the skin line\n- Skin around the rivet free of dents, stray punch marks or slip scratches\n- Only the intended rivet is marked; adjacent rivet heads untouched",
+      "sources": [
+        {
+          "condition": "A single punch indentation sits at the geometric center of the rivet head, not offset toward its edge.",
+          "source": "procedure sheet",
+          "note": "Sheet note 1: 'Place the point of the center punch in the middle of the rivet head.'",
+          "assumed": false
+        },
+        {
+          "condition": "The rivet head and surrounding skin show no dishing, dent or upset metal from the hammer blow.",
+          "source": "both",
+          "note": "Sheet: 'Lightly tap'; handbook defines 'Dent\u2014indentation in a metal surface produced by an object striking with force... surrounding... slightly upset.'",
+          "assumed": false
+        },
+        {
+          "condition": "No stray punch marks, slip scratches or hammer strikes appear on the skin around the target rivet.",
+          "source": "both",
+          "note": "Handbook: 'Scratch\u2014slight tear or break in metal surface from light, momentary contact'; sheet requires punch held on the rivet head only.",
+          "assumed": false
+        },
+        {
+          "condition": "The indentation is deep enough to seat the drill point so the bit does not walk off the head.",
+          "source": "procedure sheet",
+          "note": "Purpose of the punch mark per sheet sequence; only evidenced by the punch/drill start being performed.",
+          "assumed": false
+        },
+        {
+          "condition": "The punch was struck with one light blow, the punch held steady and perpendicular to the head.",
+          "source": "procedure sheet",
+          "note": "Sheet note 1: 'Lightly tap the punch with a hammer.'",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the indentation is deep enough to keep the drill bit from walking",
+        "That a single light tap was used with the punch held steady and perpendicular"
+      ],
+      "required_framing": "Close-up shot looking straight down on the punched rivet head, rivet filling most of the frame with one or two adjacent rivets visible for comparison; use raking light so the dimple and any surface deformation cast a shadow.",
+      "conflicts": []
+    },
+    "rr.s2": {
+      "kind": "step",
+      "step_id": "rr.s2",
+      "section": "Remove the Rivet",
+      "step_text": "Drill into the rivet head.",
+      "criterion": "- Drilled hole is centered in the rivet head and concentric with it\n- Drilled hole stays within the rivet head footprint, not overlapping the skin\n- Surrounding skin is free of gouges, chatter marks or scoring from the drill\n- Rivet hole edge shows no visible elongation or tearing",
+      "sources": [
+        {
+          "condition": "The drilled hole is centered in the rivet head, concentric with the head and not encroaching on the surrounding skin.",
+          "source": "procedure sheet",
+          "note": "Follows from centering the punch in the middle of the rivet head so the drill stays within the head.",
+          "assumed": false
+        },
+        {
+          "condition": "The drill bit used is smaller in diameter than the rivet shank diameter.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet: 'Use a drill bit smaller than the diameter of the rivet'; handbook gives no bit size here.",
+          "assumed": false
+        },
+        {
+          "condition": "Drilling depth stops at the bottom of the rivet head and does not extend into the shank or underlying structure.",
+          "source": "both",
+          "note": "Procedure sheet: 'only drill down to the bottom of the rivet head'; handbook p.4-91: 'drilling off the head and carefully punching out the shank'.",
+          "assumed": false
+        },
+        {
+          "condition": "The skin around the rivet head shows no drill gouging, chatter marks, or elongation of the rivet hole.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook: 'carefully punching out the shank' and warns 'if the rivet holes show elongation, replace the rivets with the next larger size'.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Drill bit diameter relative to rivet shank diameter",
+        "Depth of the drilled hole relative to the bottom of the rivet head",
+        "Drill held perpendicular with steady pressure while cutting"
+      ],
+      "required_framing": "Close-up shot square-on to the drilled rivet head, head filling much of the frame, with the adjacent skin and neighboring rivets visible; include the drill bit used alongside for size reference.",
+      "conflicts": []
+    },
+    "rr.s3": {
+      "kind": "step",
+      "step_id": "rr.s3",
+      "section": "Remove the Rivet",
+      "step_text": "Remove the rivet head.",
+      "criterion": "- The rivet head is fully detached from the shank, with no attached fragment or partial collar\n- The remaining shank is still seated in the hole, not driven through or joggled out\n- The skin immediately around the rivet is free of punch gouges, crescent scoring, or new dents\n- The detached head is present in frame and shows the drilled recess it was sheared from",
+      "sources": [
+        {
+          "condition": "The rivet head is completely sheared free of the shank, with no partial collar or attached fragment remaining.",
+          "source": "procedure sheet",
+          "note": "Sheet requires rolling the punch to 'shear off the rivet head'; handbook speaks only of 'drilling off the head'.",
+          "assumed": false
+        },
+        {
+          "condition": "The skin around the rivet shows no punch gouges, crescent scoring, or new dents from the shearing action.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook: rivets are removed 'by drilling off the head and carefully punching out the shank'; careless punching marks the sheet.",
+          "assumed": false
+        },
+        {
+          "condition": "The punch used is smaller in diameter than the hole drilled in the rivet head.",
+          "source": "procedure sheet",
+          "note": "Sheet: 'Insert a smaller diameter punch than the drilled hole in the rivet head.'",
+          "assumed": false
+        },
+        {
+          "condition": "The skin hole remains round and to nominal diameter, not elongated or stretched by the punch.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook: 'if the rivet holes show elongation, replace the rivets with the next larger size' \u2014 elongation needs gauging, not sight.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Punch diameter is smaller than the hole drilled in the rivet head",
+        "Skin hole roundness and freedom from elongation after head removal",
+        "That the punch was pressed firmly and rolled in a circle rather than hammered"
+      ],
+      "required_framing": "Close-up taken perpendicular to the skin at the rivet location, showing the sheared shank still in the hole plus the surrounding skin, with the detached rivet head laid beside it; include a scale or drill bit for size reference.",
+      "conflicts": []
+    },
+    "rr.s4": {
+      "kind": "step",
+      "step_id": "rr.s4",
+      "section": "Remove the Rivet",
+      "step_text": "Punch out the rivet shank.",
+      "criterion": "- The hole is empty and unobstructed, with the removed shank visible beside the work\n- No rivet material, burr ring or plug remains in or on either side of the hole\n- Skin around the hole shows no punch marks, dents or dishing\n- Hole edge appears round and undistorted, not visibly drawn out on one side",
+      "sources": [
+        {
+          "condition": "The hole is completely clear of rivet material, with the freed shank present as a separate piece.",
+          "source": "procedure sheet",
+          "note": "Step calls for the shank knocked through the hole; a residual plug or partial shank means the step is unfinished.",
+          "assumed": false
+        },
+        {
+          "condition": "The punch used is equal to, not larger than, the rivet diameter.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 4: 'Use a punch equal to the rivet diameter to knock it through the hole.'",
+          "assumed": false
+        },
+        {
+          "condition": "The vacated hole is still round and to original size, with no elongation from the punch.",
+          "source": "both",
+          "note": "Handbook p.4-91: 'if the rivet holes show elongation, replace the rivets with the next larger size'; gauge hole in two axes.",
+          "assumed": false
+        },
+        {
+          "condition": "The skin around the hole is free of punch strikes, dents or dishing from the removal.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook p.4-91: shank is to be 'carefully punching out'; surrounding skin must show no new distortion.",
+          "assumed": false
+        },
+        {
+          "condition": "The workpiece was backed/supported so the blow drove the shank out rather than deflecting the sheet.",
+          "source": "handbook FAA-H-8083-31B p.4-91",
+          "note": "Handbook p.4-85: 'When hand drilling thin or flexible parts, put a support (such as a block of wood) behind the part' \u2014 same principle applied to punching.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Punch diameter equal to rivet diameter",
+        "Hole diameter/roundness verified against original rivet size (elongation check)",
+        "Backing support used while punching"
+      ],
+      "required_framing": "Close-up shot taken square (perpendicular) to the skin, hole centered and well lit, with the removed rivet shank laid next to it; include a second shot of the reverse side of the hole.",
+      "conflicts": []
+    },
+    "rr.s5": {
+      "kind": "step",
+      "step_id": "rr.s5",
+      "section": "Remove the Rivet",
+      "step_text": "Inspect the hole for damage.",
+      "criterion": "- The vacated hole appears circular, with no elongation, oval shape or crescent bite on one side\n- No cracks or tearouts radiate from the hole edge into the surrounding skin\n- Hole edges on both faces are clean and burr-free, with no swarf or debris obscuring the hole\n- Skin around the hole shows no drill gouges, punch dents or scored rings from the removal",
+      "sources": [
+        {
+          "condition": "The vacated hole is round and free of elongation, tearout or cracks running from its edge.",
+          "source": "both",
+          "note": "Procedure: \"Look for irregular hole shapes.\" Handbook: \"if the rivet holes show elongation, replace the rivets with the next larger size\"; \"Sheet failures, such as tearouts, cracks between rivets.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Hole diameter matches the original nominal rivet hole size, with no enlargement beyond it.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "\"If a rivet hole has been enlarged or deformed, the next larger size rivet must be used after reworking the hole.\" Enlargement is only settled by gauging.",
+          "assumed": false
+        },
+        {
+          "condition": "Skin around the hole is free of drill or punch gouges, scoring and raised burrs on both faces.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "Damage Removal: \"Smooth out any abrasions and/or dents\"; burr defined p.4-90 as metal \"on the edge of a hole.\"",
+          "assumed": false
+        },
+        {
+          "condition": "If the hole is enlarged or deformed, edge distance still meets minimum for the next larger rivet.",
+          "source": "handbook FAA-H-8083-31B p.4-92",
+          "note": "\"the proper edge distance for the larger rivet must be maintained\" \u2014 requires a dimension from hole centre to edge.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Hole diameter compared to the original nominal rivet hole size (enlargement)",
+        "Edge distance available if the next larger rivet size must be used",
+        "Subsurface or hidden cracking around the hole not visible on the surface"
+      ],
+      "required_framing": "Close-up, lens perpendicular to the skin, hole filling much of the frame with a scale or drill bit laid beside it for size reference; repeat from the opposite face if accessible.",
+      "conflicts": []
+    },
+    "task": {
+      "kind": "task",
+      "step_id": null,
+      "criterion": "- The marked repair boundary encloses every crack tip, dent edge and abrasion, and lies in sound metal outside the measured damage extent on all sides.\n- The cutout has no square corners; a rectangular cutout carries a corner radius no smaller than 1/2 inch, and cracks that are stop-drilled use 3/32-inch holes at each crack end.\n- All cut edges of skin, doubler and filler are burr-free and smoothed, with no feathered slivers, nicks or coarse tool marks remaining.\n- The filler is the same gauge and material as the original skin; the doubler is one gauge heavier than the skin.\n- Rivet diameter is the next larger standard size above three times the skin thickness, and rivet type, material and head style match the existing rivets in the part.\n- Edge-distance lines are marked on every edge of doubler, filler and skin repair area at a constant offset, and the marked distance is not less than the minimum for the rivet size used (1/4 inch for 1/8-inch rivets, 5/16 inch for 5/32-inch rivets).\n- Plotted rivet dots sit on the edge-distance lines at a uniform pitch, symmetrical about the opening, and match the documented rivet-count calculation.\n- Every finished hole is round, concentric through skin, doubler and filler, and at least 0.003 inch larger than the rivet diameter; all holes are deburred on both faces.\n- The filler seats flush with the surrounding skin with a uniform perimeter gap, no step, lip, bulge or wedge-shaped gap.\n- All manufactured heads are flush and seated with no gap or tipping; surrounding skin is free of bucking-bar dents, set 'smileys' and dishing.\n- Each shop head measures approximately 0.5 x shank diameter in height and 1.5 x shank diameter in width, is concentric with the shank, and is not clinched, cocked or joggled.\n- Any rivet head cracking is within limits: depth less than 1/8 of the shank diameter and width less than 1/16 of the shank diameter, with no intersecting cracks.\n- Where a rivet was removed, the vacated hole is round at nominal size with no elongation, tearout or crack, and the skin shows no drill or punch gouging.\n- A written record identifies the damage type and class, states why patching rather than replacement was chosen, and records the material and rivet selections used.",
+      "sources": [
+        {
+          "condition": "Rectangular cutout corner radius no smaller than 1/2 inch",
+          "source": "FAA-H-8083-31B p. 4-86 (cited by procedure sheet)",
+          "note": "Verbatim: \"make the radius of curvature at each corner no smaller than 1\u20442-inch\"."
+        },
+        {
+          "condition": "3/32-inch stop holes at crack ends",
+          "source": "FAA-H-8083-31B p. 4-96, Figure 4-174 (cited)",
+          "note": "Verbatim: \"Stop holes\u2014drill 3/32\" diameter holes in each sharp corner\"; figure text is machine-extracted, PDF is authority."
+        },
+        {
+          "condition": "Filler same gauge/material as skin; doubler one gauge heavier",
+          "source": "FAA-H-8083-31B p. 4-96 (cited)",
+          "note": "Verbatim: \"The filler must be of the same gauge and material as the original skin. The doubler should be of material one gauge heavier than the skin.\""
+        },
+        {
+          "condition": "Rivet diameter = next larger size above 3 x skin thickness",
+          "source": "FAA-H-8083-31B p. 4-86 (cited)",
+          "note": "Verbatim: \"multiply the thickness of the skin by three and use the next larger size rivet corresponding to that figure\"."
+        },
+        {
+          "condition": "Minimum edge distance 1/4\" for 1/8\" rivets, 5/16\" for 5/32\"",
+          "source": "FAA-H-8083-31B p. 4-96 (cited)",
+          "note": "Verbatim: \"Minimum edge distance using 1/8\" rivets is 1/4\" and using 5/32\" rivets is 5/16\".\" Stated for lap patch."
+        },
+        {
+          "condition": "Rivet head crack limits (depth <1/8 D, width <1/16 D, no intersecting)",
+          "source": "FAA-H-8083-31B p. 4-92 (cited)",
+          "note": "Verbatim: depth \"less than 1\u20448 of the shank diameter\", width \"less than 1\u204416 of the shank diameter\"."
+        },
+        {
+          "condition": "Shop head approx. 0.5D height, 1.5D width",
+          "source": "AM.II.A.S6 procedure sheet, Rivet the Material, Senior Mechanic Note 5",
+          "note": "Campus figure: \"preferred height = 0.5D, preferred width = 1.5D\". Not found in the handbook pages supplied."
+        },
+        {
+          "condition": "Finished hole at least 0.003\" over rivet diameter; #40 pilot",
+          "source": "AM.II.A.S6 procedure sheet, Drill the Holes, Senior Mechanic Notes 6 and 17",
+          "note": "Campus figures, including #30 (0.1285\") for a -4 rivet. Not in the handbook extract given."
+        },
+        {
+          "condition": "Damage classification and repair-vs-replace decision recorded",
+          "source": "FAA-H-8083-31B pp. 4-85, 4-90 (cited)",
+          "note": "Handbook directs \"Determine if repair would be the best procedure\" and defines damage repairable by patching."
+        },
+        {
+          "condition": "Deburr all holes both faces; edges smoothed",
+          "source": "AM.II.A.S6 procedure sheet, Drill the Holes step 7; handbook p. 4-92 \"Smooth out any abrasions and/or dents\"",
+          "note": "Handbook damage-removal list supports smoothing; the both-faces hole deburr requirement is the campus sheet's."
+        }
+      ],
+      "not_photo_gradeable": [
+        "Shop head height and width against the 0.5D/1.5D targets \u2014 requires a rivet gauge or caliper reading, not a still.",
+        "Finished hole diameter being at least 0.003 inch over rivet diameter \u2014 needs pin gauge or caliper.",
+        "Gauge and alloy of doubler and filler stock (same gauge as skin / one gauge heavier) \u2014 needs a micrometer reading or stock certification.",
+        "Whether the filler is truly flush rather than within a few thousandths of a step \u2014 light and shadow suggest it but do not measure it.",
+        "Deburring of the faying (hidden) faces of every hole, since those surfaces are enclosed once the stack is assembled.",
+        "Drill and punch perpendicularity, single light punch blow, backing of thin parts, and equalised gun/bucking-bar pressure \u2014 process conditions visible only in video.",
+        "Progression from coarse to fine grit during edge smoothing.",
+        "Rivet gun regulator set to a controllable recoil, and set tightened to a felt torque rise.",
+        "Whether cracks were stop-drilled before cutting or after, and whether NDI was used where a visual check is inconclusive."
+      ],
+      "required_framing": null,
+      "conflicts": []
+    }
+  }
+}

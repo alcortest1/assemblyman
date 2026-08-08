@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "task_code": "AM.I.C.S5",
+  "generator": "packs/compile_pack.py",
+  "model": "anthropic/claude-opus-5",
+  "drafted_at": "2026-08-04T03:16:10Z",
+  "reviewed_by": null,
+  "sources": [
+    "procedure.md",
+    "steps.json",
+    "tasks.csv",
+    "references/handbook/faa_h_8083_30b_content_search_weight_balance_after_equipment_change.md"
+  ],
+  "entries": {
+    "p.s1": {
+      "kind": "step",
+      "step_id": "p.s1",
+      "section": "Procedure",
+      "step_text": "Identify the weight at the landing gear locations.",
+      "criterion": "- Worksheet shows three separate weight entries, not one total\n- Each entry is labeled to a gear position (RMLG, LMLG, NG)\n- Each entry carries a weight unit (lb) and is legible\n- No blank or overwritten weight fields in the recorded set",
+      "sources": [
+        {
+          "condition": "Three individual weights are recorded separately, each labeled to its gear position (RMLG, LMLG, NG).",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 1: read each scale for its individual weight; tricycle gear identified as RMLG, LMLG, NG.",
+          "assumed": false
+        },
+        {
+          "condition": "Each recorded value in pounds matches the indication on its corresponding scale or load cell.",
+          "source": "procedure sheet",
+          "note": "Step requires reading actual scale/load-cell indications, not estimated or carried-over figures.",
+          "assumed": false
+        },
+        {
+          "condition": "Tare weight (chocks, jacks, ground locks) is subtracted from each scale reading before it is recorded.",
+          "source": "handbook FAA-H-8083-30B p.6-5",
+          "note": "\"This extra weight is known as tare weight and must be subtracted from the scale reading.\" Handbook not cited by sheet; needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether each recorded value matches the actual scale or load cell indication",
+        "Whether tare weight was subtracted from each scale reading before recording"
+      ],
+      "required_framing": "Straight-on shot of the completed worksheet with all three gear-position weight entries and their labels legible; if possible include a second frame of the scale/load-cell displays alongside the sheet.",
+      "conflicts": []
+    },
+    "p.s2": {
+      "kind": "step",
+      "step_id": "p.s2",
+      "section": "Procedure",
+      "step_text": "Identify the arms of each weight.",
+      "criterion": "- Worksheet arm column contains one legible entry for each of the three scale locations\n- Each arm entry is labeled with its location (RMLG, LMLG, NG) and shown in inches\n- Forward-of-datum entry is written with a visible minus sign\n- Datum reference source (TCDS/specification) is identified on the worksheet",
+      "sources": [
+        {
+          "condition": "An arm is recorded for all three scale locations (RMLG, LMLG, NG), each expressed in inches.",
+          "source": "procedure sheet",
+          "note": "Note 2: 'The arm of each weight is its distance from the datum in inches'; example lists all three locations.",
+          "assumed": false
+        },
+        {
+          "condition": "Any location forward of the datum carries a negative arm value.",
+          "source": "both",
+          "note": "Procedure note 2 gives '-45\" NG'; handbook: 'Weight being added forward of the datum produces a negative moment (+weight, \u2212arm).' Handbook is an uncited, provisional reference.",
+          "assumed": true
+        },
+        {
+          "condition": "The datum used is the one published for the aircraft, taken from the TCDS or Aircraft Specifications.",
+          "source": "handbook FAA-H-8083-30B p.6-6",
+          "note": "'This information is furnished by the FAA ... in the TCDS or Aircraft Specifications.' Uncited reference; needs subject-matter confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "Each recorded arm matches the actual distance from the datum to that gear/scale reaction point.",
+          "source": "procedure sheet",
+          "note": "Note 2 defines arm as distance from datum in inches, so the figure must be verified against a measured or published distance.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the recorded arm equals the true distance from the datum to each gear reaction point",
+        "Whether the datum used is the one published in the TCDS/Aircraft Specifications for this aircraft",
+        "Correctness of the sign convention relative to actual aircraft geometry"
+      ],
+      "required_framing": "Straight-on still of the completed weight and balance worksheet, close enough that the arm column entries, location labels, signs, and the cited datum source are all legible.",
+      "conflicts": []
+    },
+    "p.s3": {
+      "kind": "step",
+      "step_id": "p.s3",
+      "section": "Procedure",
+      "step_text": "Multiply the weight by the arm.",
+      "criterion": "- A moment value is entered on every weighed-station row of the worksheet, none left blank\n- Each row shows the weight, the arm and the resulting moment as three separate legible entries\n- The nose gear row shows a minus sign on both its arm and its moment",
+      "sources": [
+        {
+          "condition": "Every weighed station row shows a moment equal to that row's own weight multiplied by that row's own arm.",
+          "source": "procedure sheet",
+          "note": "Sheet note 3: 'Multiply each weight by its own arm (e.g., 1,250 x 120 = 150,000... 1,125 x -45 = -50,625).'",
+          "assumed": false
+        },
+        {
+          "condition": "The nose gear moment is negative, reflecting its arm forward of the datum.",
+          "source": "both",
+          "note": "Sheet shows -50,625; handbook: '+weight, \u2212arm' gives 'a negative moment'. Handbook extract is uncited, so needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "Each weight is paired with its own station's arm, with no arms swapped or reused between stations.",
+          "source": "procedure sheet",
+          "note": "Note 3 requires each weight be multiplied by 'its own arm'; three distinct station products expected.",
+          "assumed": false
+        },
+        {
+          "condition": "Moment values are labeled in inch-pounds (in-lb) on the worksheet.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "Handbook: 'Moment = Weight (arm) = 5 lb (80\") = 400 in-lb'. Reference is uncited/assumed; requires SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "A moment entry is present for every station read on the scales, with no blank rows.",
+          "source": "procedure sheet",
+          "note": "Note 1 identifies three weighing locations; note 3 requires a product for each.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Arithmetic correctness of each weight \u00d7 arm product",
+        "Correct pairing of each weight with its own station's arm",
+        "Algebraic sign correctness derived from datum position",
+        "Use of in-lb units and consistent rounding"
+      ],
+      "required_framing": "Single overhead still of the completed weight and balance worksheet, squared to the page, with the station, weight, arm and moment columns all legible in one frame.",
+      "conflicts": []
+    },
+    "p.s4": {
+      "kind": "step",
+      "step_id": "p.s4",
+      "section": "Procedure",
+      "step_text": "Find the total weight.",
+      "criterion": "- All three scale weights (RMLG, LMLG, NG) are legibly listed on the worksheet\n- A single total-weight entry is present on the weight column\n- The total is labeled in pounds (LBS)\n- No negative sign appears in the weight column",
+      "sources": [
+        {
+          "condition": "The worksheet shows all three individual scale weights listed and a single total-weight entry labeled in pounds.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 4 sums the three readings to one value expressed in LBS (e.g., 3,575 LBS).",
+          "assumed": false
+        },
+        {
+          "condition": "The recorded total equals the arithmetic sum of the left main, right main, and nose gear readings.",
+          "source": "both",
+          "note": "Handbook: \"the weights need to be summed\" and \"the weight and moment columns are summed\"; procedure note 4 gives the same addition.",
+          "assumed": false
+        },
+        {
+          "condition": "Any tare weight is subtracted from the scale readings before they are totaled.",
+          "source": "handbook FAA-H-8083-30B p.6-5",
+          "note": "\"This extra weight is known as tare weight and must be subtracted from the scale reading.\" Provisional: handbook not cited by procedure sheet; needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The total weight is checked against the maximum allowable gross weight from the TCDS or Aircraft Specifications.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "\"maximum authorized weight of the aircraft and its contents, and is indicated in the Aircraft Specifications or TCDS.\" Provisional: uncited handbook, needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Arithmetic accuracy of the summed total against the actual scale readings",
+        "Whether tare weight was identified and subtracted before totaling",
+        "Comparison of the total against maximum allowable gross weight in the TCDS"
+      ],
+      "required_framing": "Single overhead still of the completed weight and balance worksheet, square to the page, showing the weight column entries and the total line legibly.",
+      "conflicts": []
+    },
+    "p.s5": {
+      "kind": "step",
+      "step_id": "p.s5",
+      "section": "Procedure",
+      "step_text": "Find the total moment.",
+      "criterion": "- The worksheet shows all three individual moments and a single total-moment entry in the moment column\n- The forward-of-datum (nose gear) moment is written with a visible negative sign\n- The arm column has no total entered at its foot\n- All figures in the moment column are legible and unaltered",
+      "sources": [
+        {
+          "condition": "The total moment equals the algebraic sum of the individual moments, with forward-of-datum moments subtracted (e.g., 243,375 in-lb).",
+          "source": "both",
+          "note": "Handbook: \"The weight and moment columns are summed\"; signs per \"Weight being added forward of the datum produces a negative moment\". Assumed reference needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "Only the weight and moment columns are totaled; the arm column carries no sum.",
+          "source": "handbook FAA-H-8083-30B p.6-6",
+          "note": "Handbook: \"The arm column is not summed.\" Uncited reference located at compilation; requires subject-matter confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The total moment is recorded with its sign and in inch-pounds, matching the moments carried from step 3.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "Handbook shows \"Moment = 400 in-lb\" and moment sign table (Figure 6-3). Provisional: handbook not cited by the procedure sheet.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Arithmetic correctness of the moment summation, including proper subtraction of negative moments",
+        "Agreement of the total with the weights and arms actually read at the scales",
+        "Correct in-lb unit designation traced back to the step 3 products"
+      ],
+      "required_framing": "Straight-on, glare-free shot of the entire weight and balance worksheet with the moment column and the total row fully legible.",
+      "conflicts": []
+    },
+    "p.s6": {
+      "kind": "step",
+      "step_id": "p.s6",
+      "section": "Procedure",
+      "step_text": "Divide the total moment by the total weight.",
+      "criterion": "- Worksheet shows a single CG value entered at the bottom of the arm column, not a sum of arms\n- CG value is labeled in inches (e.g., 68.07\") and legible\n- Total weight and total moment rows are both present and legible above the division",
+      "sources": [
+        {
+          "condition": "The quotient equals total moment divided by total weight and matches an independent recomputation of the recorded figures.",
+          "source": "both",
+          "note": "Procedure step 6 (243,375 / 3,575 = 68.07\"); handbook: \"the CG being equal to the total moment divided by the total weight\".",
+          "assumed": false
+        },
+        {
+          "condition": "The result is recorded as a CG station in inches referenced to the datum, with correct sign if forward of datum.",
+          "source": "procedure sheet",
+          "note": "Note 6 records the answer as 68.07\" CG; note 2 establishes negative arms forward of datum.",
+          "assumed": false
+        },
+        {
+          "condition": "No total is entered for the arm column; the CG value alone occupies the bottom of that column.",
+          "source": "handbook FAA-H-8083-30B p.6-6",
+          "note": "\"The arm column is not summed. The number appearing at the bottom of that column is the CG.\" Uncited extract; needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The CG figure is rounded to tenths of an inch on the worksheet.",
+          "source": "handbook FAA-H-8083-30B p.6-6",
+          "note": "\"106.9\" (106.87 rounded to tenths)\". Uncited extract, provisional; procedure sheet uses hundredths, so SME must confirm.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Arithmetic correctness of the moment \u00f7 weight division",
+        "Whether the denominator used is the complete total weight of all three scale readings",
+        "Rounding of the CG value to the required number of decimal places"
+      ],
+      "required_framing": "Square-on, glare-free shot of the completed weight and balance worksheet, close enough to read the weight, arm and moment columns, both totals, and the CG result line.",
+      "conflicts": [
+        "Procedure sheet reports CG to hundredths of an inch (68.07\"); handbook p.6-6 rounds CG to tenths (\"106.9\"\") \u2014 procedure sheet is operative."
+      ]
+    },
+    "p.s7": {
+      "kind": "step",
+      "step_id": "p.s7",
+      "section": "Procedure",
+      "step_text": "Determine if the CG is in range.",
+      "criterion": "- Worksheet shows the CG limits written out with their source identified (TCDS or given value)\n- Worksheet shows an explicit written conclusion that the CG is in range or out of range\n- Computed CG value is legible and labeled in inches from the datum",
+      "sources": [
+        {
+          "condition": "The CG limits used are recorded with their source (TCDS entry or instructor-given value) for this specific aircraft model/serial.",
+          "source": "both",
+          "note": "Procedure sheet: \"CG range is found on the TCDS or a given value\"; handbook: data \"furnished by the FAA ... in the TCDS or Aircraft Specifications\".",
+          "assumed": false
+        },
+        {
+          "condition": "The computed CG in inches from datum falls within the stated forward and aft limits (e.g., 68.07\" within 64\"\u201370\").",
+          "source": "procedure sheet",
+          "note": "Procedure sheet Note 7 example: \"If the CG range is 64\"-70\" ... then the CG is within range\"; handbook gives no numeric limits.",
+          "assumed": false
+        },
+        {
+          "condition": "The worksheet records an explicit in-range or out-of-range determination, not just a bare CG number.",
+          "source": "procedure sheet",
+          "note": "Step 7 requires a determination as the deliverable of the calculation.",
+          "assumed": false
+        },
+        {
+          "condition": "Total weight from step 4 is also compared against the maximum allowable gross weight from the TCDS.",
+          "source": "handbook FAA-H-8083-30B p.6-3",
+          "note": "\"maximum authorized weight of the aircraft and its contents, and is indicated in the Aircraft Specifications or TCDS\"; assumed reference, needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the CG limits used actually match the TCDS for that aircraft model and serial",
+        "Arithmetic correctness of the CG value being compared to the limits",
+        "Comparison of total weight against maximum allowable gross weight",
+        "Whether tare weight was excluded from the scale readings feeding this determination"
+      ],
+      "required_framing": "Single overhead still of the completed weight and balance worksheet with the total weight, total moment, computed CG, the cited CG range with its source, and the in-range conclusion all legible in frame.",
+      "conflicts": []
+    },
+    "task": {
+      "kind": "task",
+      "step_id": null,
+      "criterion": "- Three individual station weights are recorded separately and each is labeled to its gear position (RMLG, LMLG, NG), and each recorded value matches the indication visible on that station's scale or load cell photograph.\n- Any tare weight (chocks, jack, ground locks) is identified and subtracted from each raw scale reading before that reading is entered on the worksheet, with the raw reading and the tare value both traceable in the record.\n- An arm in inches is recorded for every weighed station, referenced to the datum published for that aircraft in the TCDS or Aircraft Specifications, and any station forward of the datum carries a negative arm.\n- Every station row shows a moment equal to that row's own weight multiplied by that row's own arm, in inch-pounds, with no arms swapped or reused between stations and no blank rows.\n- The nose gear moment is negative where its arm is forward of the datum.\n- Total weight equals the arithmetic sum of the three tare-corrected station weights and is labeled in pounds.\n- Total moment equals the algebraic sum of the station moments, with forward-of-datum moments subtracted, and is recorded with its sign in inch-pounds.\n- The weight and moment columns are totaled and the arm column is not; the bottom of the arm column carries only the computed CG value.\n- The CG equals total moment divided by total weight, matches an independent recomputation of the figures as recorded, and is expressed as a station in inches from the datum rounded to tenths.\n- The CG limits used are written down with their source (TCDS entry or instructor-given value) for the specific aircraft model, and the worksheet states an explicit in-range or out-of-range conclusion rather than a bare CG number.\n- Total weight is compared on the worksheet against the maximum allowable gross weight for the category in which the aircraft is being considered.",
+      "sources": [
+        {
+          "condition": "Weight x Arm = Moment; sum weights and moments; CG = total moment / total weight",
+          "source": "AM.I.C.S5 procedure sheet, step instructions and Senior Mechanic Notes 3-6",
+          "note": "Sheet states 'Weight x Arm = Moment' and Note 6 divides total moment by total weight."
+        },
+        {
+          "condition": "Three station readings labeled RMLG, LMLG, NG",
+          "source": "AM.I.C.S5 procedure sheet, Senior Mechanic Note 1",
+          "note": "Note 1: scales 'at 3 locations'; tricycle gear identified as right-hand and left-hand main and nose gear."
+        },
+        {
+          "condition": "Forward-of-datum arm is negative",
+          "source": "AM.I.C.S5 procedure sheet, Senior Mechanic Note 2",
+          "note": "Note 2: 'If a location is in front of the datum, this value will be a negative number.'"
+        },
+        {
+          "condition": "Example figures 3,575 lb / 243,375 / 68.07\" within 64\"-70\"",
+          "source": "AM.I.C.S5 procedure sheet, Senior Mechanic Notes 4-7",
+          "note": "Sheet's own worked example, not a limit for any real aircraft; illustrative only."
+        },
+        {
+          "condition": "CG range taken from TCDS or given value",
+          "source": "AM.I.C.S5 procedure sheet, Senior Mechanic Note 7",
+          "note": "Note 7: 'The aircraft CG range is found on the TCDS or a given value.'"
+        },
+        {
+          "condition": "Tare subtracted from scale reading",
+          "source": "FAA-H-8083-30B p.6-5 (ASSUMED reference, not cited by procedure sheet \u2014 provisional)",
+          "note": "'This extra weight is known as tare weight and must be subtracted from the scale reading.' Handbook not cited by sheet."
+        },
+        {
+          "condition": "Arm column not summed; CG sits at bottom of that column",
+          "source": "FAA-H-8083-30B p.6-6 (ASSUMED reference \u2014 provisional)",
+          "note": "'The arm column is not summed. The number appearing at the bottom of that column is the CG.'"
+        },
+        {
+          "condition": "CG rounded to tenths of an inch",
+          "source": "FAA-H-8083-30B p.6-6 (ASSUMED reference \u2014 provisional)",
+          "note": "Handbook shows '106.9\" (106.87 rounded to tenths)'; a worked example, not stated as a required precision."
+        },
+        {
+          "condition": "Maximum allowable weight from TCDS or Aircraft Specifications",
+          "source": "FAA-H-8083-30B p.6-3 (ASSUMED reference \u2014 provisional)",
+          "note": "'maximum authorized weight ... is indicated in the Aircraft Specifications or TCDS.' Provisional pending SME confirmation."
+        },
+        {
+          "condition": "Datum position governs sign of moment",
+          "source": "FAA-H-8083-30B p.6-3 and Figure 6-3, p.6-4 (ASSUMED reference \u2014 provisional)",
+          "note": "'Weight being added forward of the datum produces a negative moment (+weight, -arm).'"
+        }
+      ],
+      "not_photo_gradeable": [
+        "That each recorded weight is the indication this aircraft's scale actually gave during this weighing session, rather than a number copied from the sheet's example.",
+        "That tare weight was determined and subtracted before the values were written down \u2014 a photo of the finished worksheet shows only the post-subtraction figure.",
+        "That the recorded arms are the true measured distances from the published datum to each gear reaction point.",
+        "That the aircraft was level and the scales zeroed when the readings were taken.",
+        "That the CG limits and datum used correspond to the current TCDS revision for that airframe.",
+        "That the arithmetic was performed by the student rather than transcribed."
+      ],
+      "required_framing": null,
+      "conflicts": []
+    }
+  }
+}

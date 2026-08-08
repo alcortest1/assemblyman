@@ -1,0 +1,496 @@
+{
+  "schema_version": 1,
+  "task_code": "AM.I.I.S1",
+  "generator": "packs/compile_pack.py",
+  "model": "anthropic/claude-opus-5",
+  "drafted_at": "2026-08-04T03:18:32Z",
+  "reviewed_by": null,
+  "sources": [
+    "procedure.md",
+    "steps.json",
+    "tasks.csv",
+    "references/handbook/faa_h_8083_30b_content_search_complete_faa_form_major_repair_alteration.md"
+  ],
+  "entries": {
+    "p.s1": {
+      "kind": "step",
+      "step_id": "p.s1",
+      "section": "Procedure",
+      "step_text": "Confirm form 337 requirement.",
+      "criterion": "- A legible written determination sheet is in frame naming the specific work performed\n- The words identifying the work as 'repair' or 'alteration' and 'major' or 'minor' are readable\n- A written citation to 14 CFR part 43 appendix A (with paragraph/example) is visible on the determination",
+      "sources": [
+        {
+          "condition": "A written determination classifies the work as repair or alteration and as major or minor before the form is started.",
+          "source": "both",
+          "note": "Handbook: \"First consider whether this a repair or an alteration\" and whether work \"constitutes a major or a minor maintenance action\"; assumed reference needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The determination cites 14 CFR part 43 appendix A (paragraph/example) as the basis for the 'major' classification.",
+          "source": "procedure sheet",
+          "note": "Procedure note 1: required when work meets the \"major\" requirement \"outlined in 14 CFR part 43 appendix A\".",
+          "assumed": false
+        },
+        {
+          "condition": "The classification reached matches the actual work scope and correctly concludes Form 337 is required.",
+          "source": "both",
+          "note": "Handbook: \"If the maintenance accomplished was a major repair or alteration, the work must be documented on FAA Form 337\"; provisional, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "If a certificated repair station did the major repair, the work order plus signed maintenance release alternative is addressed.",
+          "source": "handbook FAA-H-8083-30B p.2-16",
+          "note": "Handbook: signed work order \"accompanied by a signed maintenance release may be used in lieu of the FAA Form 337\"; uncited extract, SME confirmation needed.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the major/minor classification is technically correct for the actual work scope",
+        "Whether the appendix A paragraph cited actually covers this work",
+        "Whether the repair-station work-order-in-lieu-of-337 option was properly considered"
+      ],
+      "required_framing": "Single overhead still of the completed determination sheet, filling the frame, text sharp and readable, with the appendix A citation and the repair/alteration and major/minor wording visible.",
+      "conflicts": []
+    },
+    "p.s2": {
+      "kind": "step",
+      "step_id": "p.s2",
+      "section": "Procedure",
+      "step_text": "Collect approved data.",
+      "criterion": "- Photo shows the assembled data package with each document's title/cover page visible\n- Document number, revision level and revision date are legible in the frame\n- The applicability or effectivity statement naming the aircraft make/model/serial is legible\n- Data type is identifiable as approved (STC certificate, AD, TCDS, FAA-approved SB) rather than a generic manual page",
+      "sources": [
+        {
+          "condition": "The assembled data package qualifies as approved data (e.g., STC, TCDS, AD, DER-approved data, FAA-approved SB), not merely acceptable data.",
+          "source": "handbook FAA-H-8083-30B p.2-15",
+          "note": "Handbook: \"Major repairs and alterations require 'approved data.' Some examples of approved data are AD notes, STCs, TCDS, DER-specific delegations, and FAA-approved manufacturer Service Bulletins\"; assumed reference needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "Each data item shows applicability/effectivity covering the specific aircraft make, model and serial number being worked.",
+          "source": "procedure sheet",
+          "note": "Sheet note 2 requires \"applicable reference data to complete the work\"; applicability is what makes data usable on this product.",
+          "assumed": false
+        },
+        {
+          "condition": "The document number, revision level and date of each data item are identified and current at time of use.",
+          "source": "procedure sheet",
+          "note": "Sheet note 8 requires stating \"what approved data was used\" in block 8, which requires unique identification of the data.",
+          "assumed": false
+        },
+        {
+          "condition": "If no previously approved data exists, a field approval package is initiated instead of proceeding on unapproved data.",
+          "source": "handbook FAA-H-8083-30B p.2-15",
+          "note": "Handbook: \"the technician may request that the FAA accomplish a 'Field Approval'\"; provisional \u2014 handbook not cited by the sheet, needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the cited data is the current, unsuperseded revision",
+        "Whether the data is genuinely FAA-approved rather than merely acceptable for this classification of work",
+        "Whether the aircraft's actual configuration falls within the data's effectivity",
+        "Whether a field approval was required and initiated"
+      ],
+      "required_framing": "Lay the collected data face-up and photograph straight-on so each cover page or title block is legible, including document number, revision, date, and the applicability/effectivity statement.",
+      "conflicts": [
+        "Procedure sheet lists \"a technical drawing, or a process specific manual\" as reference data for this step; handbook p.2-15 classes \"manufacturers' maintenance manuals or AC 43.13-1\" as acceptable (not approved) data sufficient only for minor work \u2014 sheet is operative as taught."
+      ]
+    },
+    "p.s3": {
+      "kind": "step",
+      "step_id": "p.s3",
+      "section": "Procedure",
+      "step_text": "Fill out block 1.",
+      "criterion": "- Block 1 shows entries in all of: make, model, serial number, nationality and registration mark\n- No field in Block 1 is blank, struck through, or overwritten\n- Entries are in permanent ink and legible at full frame\n- Each entry sits within its printed field boundary, not spilling into adjacent blocks",
+      "sources": [
+        {
+          "condition": "All Block 1 fields \u2014 make, model, serial number, and nationality/registration mark \u2014 are filled with no blanks.",
+          "source": "procedure sheet",
+          "note": "Step note requires make, model, serial number and registration number to be entered in block 1.",
+          "assumed": false
+        },
+        {
+          "condition": "Make, model and serial number entered match the aircraft data plate exactly, character for character.",
+          "source": "procedure sheet",
+          "note": "Step note: 'Use the information from the aircraft's data plate'; verification requires comparing form to the data plate.",
+          "assumed": false
+        },
+        {
+          "condition": "Nationality and registration mark agree with the aircraft's registration records.",
+          "source": "procedure sheet",
+          "note": "Registration number must trace to registration records, not to memory or the tail marking alone.",
+          "assumed": false
+        },
+        {
+          "condition": "Entries are legible, in permanent ink, inside field boundaries, with no erasures or uninitialed corrections.",
+          "source": "procedure sheet",
+          "note": "Form 337 is a permanent aircraft record; workmanship standard for an official document entry.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the make, model and serial number match the aircraft's data plate",
+        "Whether the nationality and registration mark match the aircraft registration records"
+      ],
+      "required_framing": "Straight-on, glare-free shot of the top of the Form 337 with all of Block 1 legible; include the aircraft data plate (or a legible photo of it) in the same frame or as a second image so entries can be verified.",
+      "conflicts": []
+    },
+    "p.s4": {
+      "kind": "step",
+      "step_id": "p.s4",
+      "section": "Procedure",
+      "step_text": "Fill out block 2.",
+      "criterion": "- Block 2 of the Form 337 is filled in, with both an owner name and a full mailing address\n- Address includes street, city, state and ZIP with no blank lines\n- Entry is legible, within the block boundaries, and free of cross-outs or overwriting\n- Block 2 contains a person/company name distinct from the mechanic entered in block 7A",
+      "sources": [
+        {
+          "condition": "Block 2 shows a complete owner entry \u2014 name plus street, city, state and ZIP \u2014 with no blank lines.",
+          "source": "procedure sheet",
+          "note": "Note 4 directs the owner's name and address be entered in block 2; completeness is visible on the finished form.",
+          "assumed": false
+        },
+        {
+          "condition": "The name and address in block 2 match the aircraft's current registration record exactly.",
+          "source": "procedure sheet",
+          "note": "Note 4: 'Find the aircraft's registration records for the owner's name and address' \u2014 verification requires the registration document.",
+          "assumed": false
+        },
+        {
+          "condition": "Block 2 names the registered owner, not the mechanic, repair facility or requesting customer.",
+          "source": "procedure sheet",
+          "note": "Note 7 assigns the performing person's information to block 7A/B, keeping block 2 for the owner alone.",
+          "assumed": false
+        },
+        {
+          "condition": "Block 2 is filled in as part of the front-side entries completed through block 6 before submission.",
+          "source": "handbook FAA-H-8083-30B p.2-15",
+          "note": "Handbook: 'the technician completes the front side of Form 337 through block 6'. Assumed reference; needs subject-matter confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Agreement of the block 2 name and address with the aircraft's current registration record",
+        "Confirmation that the named party is the registered owner rather than an operator or customer",
+        "Whether front-side blocks through block 6 were completed before submission"
+      ],
+      "required_framing": "Flat, straight-on shot of the top of the Form 337 filling the frame so blocks 1 and 2 are fully legible with no glare; include the registration record beside the form if available.",
+      "conflicts": []
+    },
+    "p.s5": {
+      "kind": "step",
+      "step_id": "p.s5",
+      "section": "Procedure",
+      "step_text": "Fill out block 4.",
+      "criterion": "- Exactly one box in block 4 is marked: either Repair or Alteration, not both and not blank\n- The mark falls clearly inside the intended box and is legible\n- No erasures, overwriting or correction fluid in or around block 4\n- Block 4 is filled in ink and the surrounding block numbering is readable in the frame",
+      "sources": [
+        {
+          "condition": "Exactly one of the two options in block 4 \u2014 Repair or Alteration \u2014 is marked, never both and never left blank.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 5: \"Select the correct action performed, either repair or alteration.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The option marked matches the classification of the work: alteration if the aircraft was changed from its previous state, repair if returned to it.",
+          "source": "both",
+          "note": "Handbook: \"a repair basically returns the aircraft to its previous or unaltered condition\"; \"An alteration... always changes or modifies the aircraft.\" Handbook uncited \u2014 needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The block 4 selection is consistent with the approved data cited and the block 8 description of work (e.g., STC install marked as alteration).",
+          "source": "procedure sheet",
+          "note": "Notes 2 and 8 require approved data and a clear description; the classification must agree with them.",
+          "assumed": false
+        },
+        {
+          "condition": "The mark is legible and unambiguous, placed inside the intended box, with no erasure, overwriting or correction fluid.",
+          "source": "procedure sheet",
+          "note": "Form must read unambiguously as a permanent aircraft record; workmanship expectation of the sheet.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the marked classification (repair vs alteration) is correct for the work actually performed",
+        "Whether the block 4 selection agrees with the approved data and the block 8 description of work"
+      ],
+      "required_framing": "Straight-on, glare-free shot of the front side of the completed Form 337 with block 4 and its Repair/Alteration selection fully legible, and adjacent block numbers visible for context.",
+      "conflicts": []
+    },
+    "p.s6": {
+      "kind": "step",
+      "step_id": "p.s6",
+      "section": "Procedure",
+      "step_text": "Fill out block 5.",
+      "criterion": "- Block 5 contains make, model and serial number on the row matching the unit worked on\n- Rows for units not worked on are blank or marked N/A\n- Entries are handwritten or typed legibly in permanent ink with no erasures or overwrites\n- Block numbers and headings are readable in the frame so Block 5 can be identified",
+      "sources": [
+        {
+          "condition": "Block 5 shows make, model and serial number only on the row for the unit actually repaired or altered, other rows blank or N/A.",
+          "source": "procedure sheet",
+          "note": "Sheet note 6: \"Fill in the product's information such as make, model, and serial number.\"",
+          "assumed": false
+        },
+        {
+          "condition": "The make, model and serial number entered match the product's data plate and registration/maintenance records exactly.",
+          "source": "procedure sheet",
+          "note": "Sheet notes 3 and 6 require unit identity taken from the product's own data plate/records, not from memory.",
+          "assumed": false
+        },
+        {
+          "condition": "Block 5 entries are legible, in permanent ink, with no erasures, overwrites or correction fluid.",
+          "source": "procedure sheet",
+          "note": "Documentation convention supporting the sheet's configuration-history purpose; not stated verbatim in either source \u2014 needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "If the form is being submitted for field approval, Block 5 is complete along with the rest of the front side through Block 6, Block 3 left open.",
+          "source": "handbook FAA-H-8083-30B p.2-15",
+          "note": "Handbook: \"completes the front side of Form 337 through block 6 (leaving block 3 open for later FAA approval)\"; extract not cited by sheet, confirm with SME.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Agreement of the make, model and serial number with the product's data plate and registration records",
+        "Whether the front side through Block 6 is complete with Block 3 left open for a field approval submission"
+      ],
+      "required_framing": "Square-on, glare-free photo of the full front side of the completed Form 337 with Block 5 fully in frame and its text readable; include a second close-up of Block 5 if the full-page shot is not legible.",
+      "conflicts": []
+    },
+    "p.s7": {
+      "kind": "step",
+      "step_id": "p.s7",
+      "section": "Procedure",
+      "step_text": "Fill out block 6.",
+      "criterion": "- Block 6A shows the performing person's/agency's full name and address\n- The correct kind-of-agency box in 6B is marked, and only one\n- A certificate number is entered in 6C\n- Block 6D contains a handwritten signature plus a date\n- The pre-printed conformity statement text is intact and unaltered\n- Block 3 is left blank if the job is submitted as a field approval",
+      "sources": [
+        {
+          "condition": "Block 6 A, B, C and D are all completed: name/address, kind-of-agency box marked, certificate number, and dated signature.",
+          "source": "procedure sheet",
+          "note": "Note 7: \"Fill in A and B with the person's information who performed the work\"; signature block must be dated and signed.",
+          "assumed": false
+        },
+        {
+          "condition": "The pre-printed conformity statement is intact, unaltered and not struck through or overwritten.",
+          "source": "procedure sheet",
+          "note": "Note 7 requires the student to \"Verify the conformity statement\" before signing.",
+          "assumed": false
+        },
+        {
+          "condition": "The kind of agency marked and the certificate number entered match the credential actually held by the signer.",
+          "source": "both",
+          "note": "Handbook 2-16: a certificated repairman is \"not authorized to approve that product for RTS\"; requires checking the certificate itself.",
+          "assumed": true
+        },
+        {
+          "condition": "The signature date is on or after the date the described work was actually completed.",
+          "source": "procedure sheet",
+          "note": "Note 7: \"Sign only when work has been completed\" \u2014 settled only against work records/logbook dates.",
+          "assumed": false
+        },
+        {
+          "condition": "If the job is a field approval, block 6 is completed but block 3 is left blank for FAA entry.",
+          "source": "handbook FAA-H-8083-30B p.2-15",
+          "note": "Handbook: \"completes the front side of Form 337 through block 6 (leaving block 3 open for later FAA approval)\"; assumed reference, needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the signature date is on or after actual completion of the work",
+        "Whether the certificate number and kind of agency match the credential the signer actually holds",
+        "Whether the signer is a person authorized to make the conformity statement"
+      ],
+      "required_framing": "Straight-on, glare-free photo of the front of the completed Form 337 with block 6 (A through D) fully legible, and block 3 visible in the same frame.",
+      "conflicts": []
+    },
+    "p.s8": {
+      "kind": "step",
+      "step_id": "p.s8",
+      "section": "Procedure",
+      "step_text": "Fill out block 8.",
+      "criterion": "- Block 8 is filled with a legible narrative describing the work performed and the method used\n- An airworthiness statement appears within the block 8 entry\n- A specific data reference (title/number/revision) is written in block 8, not left blank\n- If block 8 space is exceeded, a note in block 8 points to attached continuation sheets",
+      "sources": [
+        {
+          "condition": "Block 8 contains a legible narrative stating what work was done and how it was accomplished, not just a part number or bare reference.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note 8: \"Explain clearly what was done, how it was done.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Block 8 includes an airworthiness statement for the repair or alteration performed.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note 8 requires \"an airworthiness statement\" within the block 8 description.",
+          "assumed": false
+        },
+        {
+          "condition": "The data cited in block 8 is approved data identified by title, number and revision, and it actually covers the work described.",
+          "source": "both",
+          "note": "Handbook p.2-16: \"the work must be documented on FAA Form 337 and requires supporting approved data\"; assumed reference, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "If continuation sheets are used, block 8 states where they are and each attached sheet is identifiable to this aircraft and date.",
+          "source": "procedure sheet",
+          "note": "Procedure sheet note 8: \"If more space is needed, note where those pages are.\" Verification requires the attached pages.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the cited data is FAA-approved data and actually covers the work performed",
+        "Whether the narrative detail matches the work actually accomplished",
+        "Whether attached continuation sheets exist and are identified to this aircraft and date"
+      ],
+      "required_framing": "Straight-on shot of the reverse side of Form 337 with the entire block 8 in frame and the handwriting/print legible; include any continuation sheets in a second frame.",
+      "conflicts": [
+        "Procedure sheet requires block 8 to describe work already completed plus an airworthiness statement; handbook p.2-15 describes block 8 in the field-approval case stating \"what work is to be done\" \u2014 procedure sheet is operative."
+      ]
+    },
+    "p.s9": {
+      "kind": "step",
+      "step_id": "p.s9",
+      "section": "Procedure",
+      "step_text": "Determine who receives the document.",
+      "criterion": "- Three complete collated sets of the completed form are visible in one frame\n- Each set includes every block 8 continuation page referenced on the form\n- One set bears an original wet-ink signature rather than a reproduction",
+      "sources": [
+        {
+          "condition": "Three complete collated sets of the form \u2014 original plus two copies, including any block 8 continuation pages \u2014 are present.",
+          "source": "procedure sheet",
+          "note": "Sheet requires original for aircraft records, copy to owner, copy to FAA; all three must be complete sets.",
+          "assumed": false
+        },
+        {
+          "condition": "The wet-signed original is the copy filed with the aircraft records, not a photocopy.",
+          "source": "procedure sheet",
+          "note": "\"Keep the original form 337 with the aircraft records\" \u2014 which copy went where is only settled from the records file.",
+          "assumed": false
+        },
+        {
+          "condition": "The FAA copy is transmitted within 48 hours of work completion, evidenced by dated transmittal against the completion date.",
+          "source": "procedure sheet",
+          "note": "48-hour limit stated by the procedure sheet only; handbook extract gives no distribution timing.",
+          "assumed": false
+        },
+        {
+          "condition": "Student identifies that a repair station major repair may use a signed work order plus maintenance release in lieu of Form 337.",
+          "source": "handbook FAA-H-8083-30B p.2-16",
+          "note": "\"a signed copy of the completed customer work order accompanied by a signed maintenance release may be used in lieu of the FAA Form 337\"; uncited reference, needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "FAA copy transmitted within 48 hours of work completion",
+        "Which physical copy was filed with the aircraft records versus mailed",
+        "Owner actually received a copy",
+        "Repair station work-order/maintenance-release substitution for Form 337"
+      ],
+      "required_framing": "Lay the three sets side by side on a clean surface, original on the left with its signature legible, the FAA-bound set beside its dated transmittal or cover sheet, continuation pages fanned so they are countable.",
+      "conflicts": []
+    },
+    "p.s10": {
+      "kind": "step",
+      "step_id": "p.s10",
+      "section": "Procedure",
+      "step_text": "Write a logbook entry.",
+      "criterion": "- A logbook entry for this work is present in the maintenance record, separate from the Form 337\n- The entry text names the repair or alteration performed\n- The entry cites the associated FAA Form 337\n- The entry carries a return-to-service statement as taught on the procedure sheet\n- The entry shows a completion date, signature, certificate number and certificate type\n- The entry is legible, in ink, with no erasures or overwriting",
+      "sources": [
+        {
+          "condition": "A separate logbook entry exists for the work in addition to the completed Form 337.",
+          "source": "both",
+          "note": "Procedure sheet: \"does not replace a logbook entry\"; handbook p.2-16: \"the work must be documented on FAA Form 337\" alongside the 43.9 record entry.",
+          "assumed": true
+        },
+        {
+          "condition": "The entry explicitly cross-references the Form 337 for the major repair or alteration.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 10 requires a write-up \"with reference to the form 337\"; handbook does not state this.",
+          "assumed": false
+        },
+        {
+          "condition": "The entry shows a description of the work, the completion date, and a signature with certificate number and type.",
+          "source": "handbook FAA-H-8083-30B p.2-16",
+          "note": "Handbook: \"What\u2014a description of the work performed... When\u2014the date the work was completed... the signature, certificate number, and type of certificate\"; uncited source, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The work and approved data described in the entry agree with Form 337 block 8 and the aircraft records.",
+          "source": "procedure sheet",
+          "note": "Requires comparing the entry against the completed 337 and approved data; cannot be judged from the entry alone.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Agreement between the entry description and Form 337 block 8 / the approved data used",
+        "Whether the recorded date is the actual date the work was completed",
+        "Validity of the certificate number and rating of the signer",
+        "Whether the work performed actually met the 'major' threshold requiring the 337 reference"
+      ],
+      "required_framing": "Straight-on, glare-free photo of the full logbook page with the entire new entry legible end to end, including the date, the Form 337 reference, the return-to-service wording, and the signature block with certificate number; include the completed 337 in the same frame or a second shot for cross-checking.",
+      "conflicts": [
+        "Procedure sheet requires an explicit 'statement for return to service' in the entry; handbook p.2-15/2-16 states that wording \"is not required\" because \"the signature constitutes the approval for return to service only for the work performed\" \u2014 follow the procedure sheet, and note the handbook is an uncited provisional reference."
+      ]
+    },
+    "task": {
+      "kind": "task",
+      "step_id": null,
+      "criterion": "- Front side of the Form 337 is complete with no blank fields in blocks 1, 2, 4, 5 and 6, entries legible and in permanent ink, inside field boundaries, with no erasures, overwrites, correction fluid, or uninitialed corrections.\n- Exactly one of Repair or Alteration is marked in block 4, and that selection is consistent with the block 8 description of work and the data cited.\n- Block 5 identifies make, model and serial number only on the row for the unit actually worked; other rows are blank or marked N/A.\n- Block 6 A, B, C and D are all completed (name/address, kind-of-agency box marked, certificate number, dated signature) and the pre-printed conformity statement is intact and unaltered.\n- If the submission is a field approval, the front side is completed through block 6 and block 3 is left blank for FAA entry.\n- Block 8 gives a narrative of what was done and how, names the approved data by title/number/revision, and includes an airworthiness statement; where continuation sheets are used, block 8 states where they are and each sheet is identifiable to this aircraft and date.\n- Make, model, serial number and registration mark in blocks 1 and 5 match the submitted data plate and registration record character for character; block 2 names the registered owner with full address as it appears in the registration record.\n- A written classification decision accompanies the pack, concluding the work is a major repair or major alteration and citing 14 CFR part 43 appendix A as the basis, and it matches the actual work scope.\n- The submitted data package is approved data rather than acceptable data, current at revision, and its applicability/effectivity covers the specific aircraft serial number.\n- Three complete collated sets exist, the wet-signed original is the set filed with the aircraft records, and dated transmittal evidence shows the FAA copy sent within 48 hours of work completion.\n- A separate maintenance record entry exists in addition to the form, cross-references the Form 337, and shows work description, completion date, signature, certificate number and certificate type; its description of work and data agrees with block 8.\n- The student states that a major repair performed by a certificated repair station may be documented by a signed work order plus signed maintenance release in lieu of Form 337.",
+      "sources": [
+        {
+          "condition": "Form 337 required for major repair/alteration; appendix A is the basis",
+          "source": "Campus procedure sheet, Senior Mechanic Note 1",
+          "note": "Sheet: required when work meets the 'major' requirement outlined in 14 CFR part 43 appendix A."
+        },
+        {
+          "condition": "Approved data, not acceptable data, is required",
+          "source": "FAA-H-8083-30B p. 2-15 (assumed reference \u2014 provisional)",
+          "note": "Quotes: \"Major repairs and alterations require \u201capproved data.\u201d\" Handbook not cited by the sheet; confirm before use."
+        },
+        {
+          "condition": "Field approval: complete front side through block 6, leave block 3 open",
+          "source": "FAA-H-8083-30B p. 2-15 (assumed reference \u2014 provisional)",
+          "note": "Quotes: \"completes the front side of Form 337 through block 6 (leaving block 3 open for later FAA approval)\"."
+        },
+        {
+          "condition": "Logbook entry content: what, when, who with signature and certificate number",
+          "source": "FAA-H-8083-30B p. 2-16 (assumed reference \u2014 provisional)",
+          "note": "Quotes: \"What\u2014a description of the work performed\", \"the signature, certificate number, and type of certificate\"."
+        },
+        {
+          "condition": "Repair station work order plus maintenance release in lieu of Form 337",
+          "source": "FAA-H-8083-30B p. 2-16 (assumed reference \u2014 provisional)",
+          "note": "Quotes: \"a signed copy of the completed customer work order accompanied by a signed maintenance release may be used in lieu of the FAA Form 337\"."
+        },
+        {
+          "condition": "Original with aircraft records, copy to owner, copy to FAA within 48 hours",
+          "source": "Campus procedure sheet, Senior Mechanic Note 9",
+          "note": "48-hour figure is the campus sheet's, not verbatim in the supplied handbook extract."
+        },
+        {
+          "condition": "Blocks 1 and 2 sourced from data plate and registration records",
+          "source": "Campus procedure sheet, Senior Mechanic Notes 3 and 4",
+          "note": "Sheet directs use of the data plate for make/model/serial and registration records for owner name and address."
+        },
+        {
+          "condition": "Block 8 content: what, how, data used, airworthiness statement, continuation location",
+          "source": "Campus procedure sheet, Senior Mechanic Note 8",
+          "note": "Sheet also requires noting where additional pages are if more space is needed."
+        },
+        {
+          "condition": "Sign only when work is complete; verify conformity statement",
+          "source": "Campus procedure sheet, Senior Mechanic Note 7",
+          "note": "Sheet: fill 6A and 6B with the performer's information; sign only when work has been completed."
+        },
+        {
+          "condition": "Detailed field-by-field completion standard",
+          "source": "AC 43.9-1G (named by the procedure sheet, extract not supplied)",
+          "note": "Sheet says AC 43.9-1G gives thorough instructions; text was not provided for this pack."
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether make, model, serial number and registration mark match the actual data plate and registration record \u2014 requires the source documents alongside the form.",
+        "Whether the reference cited in block 8 is genuinely approved data, at current revision, and effective for that specific serial number.",
+        "Whether the kind of agency marked and certificate number in block 6 correspond to a credential the signer actually holds.",
+        "Whether the FAA copy was transmitted within 48 hours of work completion \u2014 depends on a dated transmittal record, not the form's appearance.",
+        "Whether the set photographed as the 'original' carries a wet signature rather than a reproduced one.",
+        "Whether the underlying work was correctly classified as major rather than minor, and as alteration rather than repair.",
+        "Whether the described work was in fact performed and completed before the signature date."
+      ],
+      "required_framing": null,
+      "conflicts": []
+    }
+  }
+}

@@ -1,0 +1,458 @@
+{
+  "schema_version": 1,
+  "task_code": "AM.III.M.S5",
+  "generator": "packs/compile_pack.py",
+  "model": "anthropic/claude-opus-5",
+  "drafted_at": "2026-08-04T03:31:14Z",
+  "reviewed_by": null,
+  "sources": [
+    "procedure.md",
+    "steps.json",
+    "tasks.csv",
+    "references/handbook/faa_h_8083_32b_content_search_perform_minor_repair_metal_blade_damaged.md"
+  ],
+  "entries": {
+    "pd.s1": {
+      "kind": "step",
+      "step_id": "pd.s1",
+      "section": "Prepare the Damaged Area",
+      "step_text": "Clean the portion of the blade to be repaired.",
+      "criterion": "- Damaged area and surrounding blade surface show clean bare metal, free of oil, dirt and debris\n- Damage outline is clearly visible and not obscured by residue, smears or streaking\n- No standing solvent, wet film or drip runs on the blade surface\n- No new scratch or scuff pattern from abrasive cleaning in the cleaned area",
+      "sources": [
+        {
+          "condition": "The area around the damage is free of oil, grease, dirt and debris, with clean bare metal exposed.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 1: wipe 'to remove oils, dirt, and debris' before damage assessment.",
+          "assumed": false
+        },
+        {
+          "condition": "The damage boundary is clearly discernible, not obscured by smeared solvent, residue or streaking.",
+          "source": "procedure sheet",
+          "note": "Cleaning must let the next step verify extent of damage with scale and depth gauge.",
+          "assumed": false
+        },
+        {
+          "condition": "Wiping is performed with a rag dampened \u2014 not saturated \u2014 with solvent, not a dry or abrasive wipe.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note 1 specifies 'a rag dampened with solvent'; only observable while the action is performed.",
+          "assumed": false
+        },
+        {
+          "condition": "The solvent used is approved for the blade alloy and its SDS handling requirements are met.",
+          "source": "procedure sheet",
+          "note": "'Use all relevant data... to include the Type Certificate Data Sheet (TCDS), Safety Data Sheet' and service manuals.",
+          "assumed": false
+        },
+        {
+          "condition": "The cleaned surface is left dry, with no solvent pooling or wet film remaining on the blade.",
+          "source": "handbook FAA-H-8083-32B p.10-47",
+          "note": "Handbook: 'Cleaning parts by the chlorinated solvent method leaves the parts absolutely dry.' Assumed reference (turbine parts); needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Use of a rag dampened rather than dry or saturated with solvent",
+        "Approval/compatibility of the solvent with the blade material per SDS and service manual"
+      ],
+      "required_framing": "Close-up of the damaged area filling most of the frame, shot at a slight angle with light raking across the surface so residue or a wet film would show; include a few inches of adjacent undamaged blade for contrast.",
+      "conflicts": []
+    },
+    "pd.s2": {
+      "kind": "step",
+      "step_id": "pd.s2",
+      "section": "Prepare the Damaged Area",
+      "step_text": "Verify the extent of the damage.",
+      "criterion": "- Depth gauge base is seated flat on the blade with the plunger positioned over the damage\n- Dial face is legible and unobstructed in the frame\n- Steel scale is laid along the damage spanning its full length/width\n- Damaged area is clean and unaltered (no filing or sanding evident yet)",
+      "sources": [
+        {
+          "condition": "With the plunger on an undamaged flat area of the blade, the depth gauge reads zero before any damage measurement is taken.",
+          "source": "procedure sheet",
+          "note": "Sheet: place gauge on a flat surface, loosen dial clamping screw and rotate needle to zero before reading.",
+          "assumed": false
+        },
+        {
+          "condition": "Recorded damage depth is taken with the gauge centered on the deepest point and read to 0.001\" resolution.",
+          "source": "procedure sheet",
+          "note": "Sheet specifies centering over the deepest part; dial ring lines are 0.001\", small dial 0.1\".",
+          "assumed": false
+        },
+        {
+          "condition": "Length, width and depth of the damage are all recorded in writing before any material is removed.",
+          "source": "procedure sheet",
+          "note": "Sheet requires steel scale for length and width, depth gauge for depth; pen and paper listed as equipment.",
+          "assumed": false
+        },
+        {
+          "condition": "The recorded dimensions are compared against the manufacturer's allowable repair limits and shown to be within them.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "Handbook: \"may be repaired if the damage can be removed without exceeding the allowable limits established by the manufacturer\"; extract is uncited and addresses compressor blades \u2014 needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Zero setting of the depth gauge before measurement",
+        "Numeric depth reading in thousandths of an inch",
+        "Recorded length, width and depth values",
+        "Comparison of measured damage to manufacturer allowable repair limits"
+      ],
+      "required_framing": "One frame square to the blade face showing the depth gauge seated over the deepest point with the dial legible, plus a second frame with the steel scale laid across the damage; include the written measurement record.",
+      "conflicts": []
+    },
+    "pd.s3": {
+      "kind": "step",
+      "step_id": "pd.s3",
+      "section": "Prepare the Damaged Area",
+      "step_text": "Mark the repair area.",
+      "criterion": "- A closed dye/marker outline is present and surrounds all visible damage\n- Outline is smoothly contoured with rounded corners; no sharp points or V-notches\n- Outline is drawn clear of the damage edge, not traced on it\n- No scribe, punch or scratch marks on the blade; marking is ink/dye only\n- Marking line is crisp and does not obscure the damage itself",
+      "sources": [
+        {
+          "condition": "A closed dye or marker outline is visible on the blade and fully encircles all of the identified damage.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Outline the repair area with dye or a marker.\" Outline must contain the damage found in step 2.",
+          "assumed": false
+        },
+        {
+          "condition": "The outline is a smooth contoured shape with rounded corners \u2014 no sharp points, V-notches or straight-cut corners.",
+          "source": "both",
+          "note": "Sheet: \"Draw a contoured shape that tapers into the damage.\" Handbook (provisional): damage \"of a rounded or gradual contour type and not a sharp or V-type.\"",
+          "assumed": true
+        },
+        {
+          "condition": "The outline extends beyond the recorded damage length and width, leaving margin for a taper on all sides.",
+          "source": "procedure sheet",
+          "note": "Requires comparing outline dimensions to the length/width/depth recorded with steel scale and depth gauge in step 2.",
+          "assumed": false
+        },
+        {
+          "condition": "The marked repair area falls within the manufacturer's allowable repair/blend limits for that blade station.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "\"may be repaired if the damage can be removed without exceeding the allowable limits established by the manufacturer\" \u2014 uncited extract, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The blade surface shows no scribe, punch or scratch marks used as marking, only dye or ink.",
+          "source": "procedure sheet",
+          "note": "Sheet permits only \"dye or a marker\"; mechanical marking would add a stress riser to the repair area.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the outline dimensions exceed the recorded damage length, width and depth by an adequate taper margin",
+        "Whether the marked repair area is within the manufacturer's allowable repair limits for that blade and station",
+        "The depth-gauge reading that established the extent of damage"
+      ],
+      "required_framing": "Shoot square-on to the marked blade face from about 12 in, close enough to read the outline, with a steel scale laid alongside the outline and the blade leading/trailing edge and tip direction in frame.",
+      "conflicts": []
+    },
+    "bd.s1": {
+      "kind": "step",
+      "step_id": "bd.s1",
+      "section": "Blend the Damage Out",
+      "step_text": "File the rough edges of the damage down.",
+      "criterion": "- Perimeter of the damaged area shows no visible burrs, raised lips or torn metal\n- File marks and material removal stay inside the marked repair outline\n- No scoring, gouges or scratches on undamaged blade surface adjacent to the repair\n- Repair perimeter shows uniform hand-file texture, no rotary/power-tool swirl marks",
+      "sources": [
+        {
+          "condition": "The perimeter of the damage shows no visible burrs, raised lips or torn metal after filing.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Edges should feel flush with no burrs or raised points\"; visible raised metal is disqualifying.",
+          "assumed": false
+        },
+        {
+          "condition": "Filed edges feel flush to the fingertip with no catch or raised point when checked by hand.",
+          "source": "procedure sheet",
+          "note": "Tactile flushness cannot be settled from a still; must be watched being verified.",
+          "assumed": false
+        },
+        {
+          "condition": "Filing is confined inside the marked repair outline, with no file marks or scoring on undamaged blade surface.",
+          "source": "procedure sheet",
+          "note": "Sheet has student outline the repair area and taper into damage; work stays within that outline.",
+          "assumed": false
+        },
+        {
+          "condition": "Metal is removed only by hand with riffler/jeweler files, in forward strokes, with no power tool used.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "Handbook: \"Re-work must be accomplished by hand, using stones, files, or emery cloth. Do not use a power tool\" \u2014 compressor-blade text, needs SME confirmation.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Tactile verification that edges feel flush with no raised points",
+        "Forward-only filing motion and use of riffler/jeweler files rather than a power tool",
+        "Depth of material removed relative to allowable damage limits"
+      ],
+      "required_framing": "Single close-up of the filed area, blade oriented so the marked outline and the full perimeter of the damage are in frame, with light raking across the surface to reveal any raised edges or file marks.",
+      "conflicts": [
+        "Procedure sheet directs filing 'running the length of the file across it' around the damage perimeter; handbook p.10-45 states re-work 'should be performed parallel to the length of the blade' \u2014 procedure sheet is operative; handbook extract addresses turbine compressor blades, not metal propeller blades, so applicability is unconfirmed."
+      ]
+    },
+    "bd.s2": {
+      "kind": "step",
+      "step_id": "bd.s2",
+      "section": "Blend the Damage Out",
+      "step_text": "Contour the repair.",
+      "criterion": "- Blended area shows a rounded, dish-like contour in all directions with no sharp corners or ridges\n- No V-shaped or angular depression visible in the repair\n- Filing confined within the marked repair outline; surrounding blade surface unmarked\n- No visible gouges, chatter marks or cross-blade scoring in the contoured area",
+      "sources": [
+        {
+          "condition": "The blended area is rounded in all directions, with no sharp corners, ridges or V-shaped depression.",
+          "source": "both",
+          "note": "Sheet: \"round the repair in all directions\"; handbook: damage \"of a rounded or gradual contour type and not a sharp or V-type\" \u2014 assumed reference, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "Contouring is confined to the previously marked repair outline, with no filing marks outside it.",
+          "source": "procedure sheet",
+          "note": "Prep step required an outlined, tapered repair area; contouring must stay inside that dye/marker boundary.",
+          "assumed": false
+        },
+        {
+          "condition": "Depth of metal removed by contouring does not exceed the manufacturer's allowable blade repair limit.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "\"may be repaired if the damage can be removed without exceeding the allowable limits established by the manufacturer\"; extract covers compressor blades \u2014 provisional, SME confirmation needed.",
+          "assumed": true
+        },
+        {
+          "condition": "Contouring is done by hand with a riffler or jeweler file only; no power tool is used on the blade.",
+          "source": "both",
+          "note": "Sheet specifies riffler/jeweler file; handbook: \"Re-work must be accomplished by hand... Do not use a power tool\" \u2014 assumed reference, provisional.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Depth of material removed versus the manufacturer's allowable repair limit (depth gauge reading)",
+        "Use of hand files only and forward-motion filing technique (must be observed)",
+        "Tactile absence of raised texture or burrs in the contour"
+      ],
+      "required_framing": "Close, oblique shot of the repair area with raking light across the blade so the contour and its blend into the surrounding surface are visible, including the full marked outline.",
+      "conflicts": [
+        "Procedure sheet governs metal propeller blade repair; the located handbook pages give limits for turbine compressor blades/vanes, so those figures are not propeller limits \u2014 applicability unconfirmed."
+      ]
+    },
+    "bd.s3": {
+      "kind": "step",
+      "step_id": "bd.s3",
+      "section": "Blend the Damage Out",
+      "step_text": "Taper the repair into the blade shape.",
+      "criterion": "- Blend boundary is a gradual rounded contour, no sharp corners or V-shaped notches visible\n- Repair area fairs smoothly into the surrounding blade profile with no visible abrupt edge line\n- No gouges, sharp facets or cross-blade file scoring inside the blended area",
+      "sources": [
+        {
+          "condition": "The blend boundary is a gradual rounded contour with no sharp corners, V-notches or abrupt outline changes.",
+          "source": "both",
+          "note": "Procedure sheet: \"No sharp shapes.\" Handbook (assumed): \"rounded or gradual contour type and not a sharp or V-type\" \u2014 needs SME confirmation for propellers.",
+          "assumed": true
+        },
+        {
+          "condition": "Repair edges are flush with the undamaged blade, with no detectable step, ridge or raised lip when a fingertip is drawn across.",
+          "source": "procedure sheet",
+          "note": "Sheet requires \"a smooth transition to the undamaged portions of the blade\"; flushness is tactile, not visible in a still.",
+          "assumed": false
+        },
+        {
+          "condition": "Tapering is done by hand with riffler/jeweler files worked along the blade length, with no power tools used.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "\"Re-work must be accomplished by hand, using stones, files, or emery cloth. Do not use a power tool\" \u2014 provisional, extract covers compressor blades.",
+          "assumed": true
+        },
+        {
+          "condition": "Depth of material removed by the taper stays within the manufacturer's allowable repair limits for the blade.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "\"if the damage can be removed without exceeding the allowable limits established by the manufacturer\" \u2014 provisional; limits come from propeller manual/TCDS.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Flushness of the transition felt by fingertip (no detectable step or raised lip)",
+        "Hand-filing technique and file direction along the blade length",
+        "Depth of material removed versus manufacturer allowable repair limits"
+      ],
+      "required_framing": "Single close-up of the blended repair with the blade length running across the frame, taken at a low oblique angle with raking light so any step or ridge at the blend boundary casts a shadow; include an inch of undamaged blade on both sides.",
+      "conflicts": [
+        "Scope mismatch, not a numeric conflict: procedure sheet governs a metal propeller blade, while the handbook extract addresses turbine compressor blade/vane blending; handbook standards used here are provisional pending SME review."
+      ]
+    },
+    "bd.s4": {
+      "kind": "step",
+      "step_id": "bd.s4",
+      "section": "Blend the Damage Out",
+      "step_text": "Fine sand the repair.",
+      "criterion": "- Repair area shows a uniform extra-fine finish with no file marks or coarse scratch lines\n- No visible ridge, step or outline where the repair meets undamaged blade surface\n- Scratch pattern in the repaired area runs lengthwise along the blade, not across it\n- Repair area free of remaining dents, pits or dark damage traces",
+      "sources": [
+        {
+          "condition": "The sanded repair area shows a uniform fine finish with no remaining file marks, coarse scratches or discoloration.",
+          "source": "both",
+          "note": "Sheet: \"leveling the repair\"; handbook (assumed page range): \"surface finish in the repaired area must be comparable to that of a new blade.\"",
+          "assumed": true
+        },
+        {
+          "condition": "A hand passed over the repair detects no raised textures, ridges or edges at the transition to undamaged blade.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Feel for raised textures\" \u2014 tactile flushness judgement, not settleable from a still image.",
+          "assumed": false
+        },
+        {
+          "condition": "Sanding is done by hand with abrasive worked parallel to blade length; no power tool or buffer is used.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "\"performed parallel to the length of the blade... Do not use a power tool\" \u2014 assumed reference, needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "The final abrasive used is #00 (extra fine) grit as specified for this task.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Progress to a #00 grit sandpaper\"; grit grade is established from the abrasive spec/label, not the surface.",
+          "assumed": false
+        }
+      ],
+      "not_photo_gradeable": [
+        "Tactile absence of raised textures when a hand is passed over the repair",
+        "That sanding was done by hand and not with a power tool",
+        "That the final abrasive was #00 grit",
+        "Remaining blade thickness/depth of material removed"
+      ],
+      "required_framing": "Close-up filling the frame with the repair area plus surrounding undamaged blade, taken with light raking along the blade so scratch direction and any ridge shows; include enough of the blade to show span direction.",
+      "conflicts": []
+    },
+    "cr.s1": {
+      "kind": "step",
+      "step_id": "cr.s1",
+      "section": "Clean the Repair",
+      "step_text": "Wipe the repair area clean.",
+      "criterion": "- Repair area and surrounding blade free of visible metallic dust, filings or swarf\n- Blade surface left dry with no solvent pooling, streaks or lint\n- Blended repair appears smooth and continuous with the undamaged blade surface\n- Loose metal debris collected in the FOD box, not left on the bench or blade",
+      "sources": [
+        {
+          "condition": "The repair area and adjacent blade surface show no visible metallic dust, filings or swarf.",
+          "source": "procedure sheet",
+          "note": "Senior Mechanic Note: 'Clear all fine metallic dust from the blade surface with a rag dampened with solvent.'",
+          "assumed": false
+        },
+        {
+          "condition": "Wiping is done with a rag dampened with cleaning solvent, not a dry or contaminated rag.",
+          "source": "procedure sheet",
+          "note": "Note specifies a solvent-dampened rag; dampening cannot be judged from a still of the finished blade.",
+          "assumed": false
+        },
+        {
+          "condition": "No solvent pooling, streaks or lint remain on the blade and the surface is left dry.",
+          "source": "handbook FAA-H-8083-32B p.10-47",
+          "note": "Handbook: 'Cleaning parts by the chlorinated solvent method leaves the parts absolutely dry.' Uncited page range; needs SME confirmation.",
+          "assumed": true
+        },
+        {
+          "condition": "With dust removed, the blended repair reads as a smooth finish comparable to the surrounding undamaged blade.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "Handbook: 'The surface finish in the repaired area must be comparable to that of a new blade.' Provisional, uncited reference; confirm with SME.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Rag actually dampened with the approved cleaning solvent",
+        "Absence of fine residual dust detectable only by touch or wipe test",
+        "Depth/length/width dimensions of the cleaned repair"
+      ],
+      "required_framing": "One close, obliquely lit shot of the cleaned repair area filling the frame, plus a wider shot showing the whole blade section with the used rag and FOD box visible.",
+      "conflicts": []
+    },
+    "cr.s2": {
+      "kind": "step",
+      "step_id": "cr.s2",
+      "section": "Clean the Repair",
+      "step_text": "Measure the dimensions of the repair.",
+      "criterion": "- Steel scale is laid across the repair spanning its full length/width with graduations against the blended edges\n- Depth gauge base rests flat and fully contacting the blade, plunger over the deepest part of the repair\n- Repair area is free of metallic dust and solvent residue where the tools contact it",
+      "sources": [
+        {
+          "condition": "Length, width and depth of the finished repair are each measured and recorded as numeric values.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Use a steel scale to measure the length and width of the repair. Use a depth gauge to measure the depth of the repair.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Depth gauge is zeroed on a flat area of the blade and its plunger centered over the deepest point of the repair.",
+          "source": "procedure sheet",
+          "note": "Sheet gauge procedure: zero the needle on a flat surface, \"Center the gauge over the deepest part of the damage.\"",
+          "assumed": false
+        },
+        {
+          "condition": "Depth gauge base sits flat and fully seated on the blade surface, not tilted or bridging the blend.",
+          "source": "procedure sheet",
+          "note": "Sheet: \"Place the depth gauge on a flat surface of the blade\"; tilted seating invalidates the reading.",
+          "assumed": false
+        },
+        {
+          "condition": "Recorded repair dimensions are compared against the manufacturer's allowable repair limits and shown to be within them.",
+          "source": "handbook FAA-H-8083-32B p.10-45",
+          "note": "Handbook: repair permitted \"without exceeding the allowable limits established by the manufacturer\"; extract covers compressor blades \u2014 needs SME confirmation for propellers.",
+          "assumed": true
+        }
+      ],
+      "not_photo_gradeable": [
+        "Numeric length, width and depth values of the finished repair",
+        "Zeroing of the depth gauge on a flat blade surface before the reading",
+        "Comparison of measured dimensions to manufacturer allowable repair limits"
+      ],
+      "required_framing": "Two shots: one square-on of the steel scale laid along the repair with graduations legible, one close shot of the depth gauge seated on the blade with the dial face readable in the same frame as the repair.",
+      "conflicts": []
+    },
+    "task": {
+      "kind": "task",
+      "step_id": null,
+      "criterion": "- A dye or marker outline is applied before any metal is removed, forms a closed shape around all identified damage, has rounded corners with no sharp points or V-notches, and extends beyond the recorded damage length and width to leave taper margin on all sides.\n- No scribe, punch or scratch marking appears anywhere on the blade; marking is dye or ink only.\n- Damage length, width and depth are measured and recorded in writing before material removal, with the depth gauge zeroed on an undamaged flat area of the blade and centered on the deepest point, read at 0.001\" resolution.\n- All material removal is confined inside the marked outline; no file, abrasive or tool marks appear on undamaged blade surface.\n- Metal is removed by hand with riffler or jeweler files and abrasive worked along the blade length; no power tool is used on the blade at any point.\n- The finished blend is rounded in all directions and tapers into the undamaged blade with no sharp corner, ridge, V-shaped depression, burr or raised lip; a fingertip drawn across the perimeter detects no step or catch.\n- Final finish is produced with #00 (extra fine) grit and shows a uniform fine texture with no residual file marks, coarse scratches or discoloration.\n- Repair area and adjacent blade are wiped clean with a solvent-dampened rag, leaving no metallic dust, filings, swarf, lint, streaks or solvent pooling, and the surface is left dry.\n- Finished repair length, width and depth are each measured and recorded as numeric values, with the gauge base fully seated flat on the blade and not bridging the blend.\n- Both the pre-repair damage dimensions and the finished repair dimensions are compared in writing against the manufacturer's allowable repair limits for that blade and station, and shown to be within them.\n- The solvent used is approved for the blade alloy and its SDS handling requirements are documented as met.",
+      "sources": [
+        {
+          "condition": "Depth read at 0.001\" resolution; small dial in 0.1\" increments",
+          "source": "AM.III.M.S5 procedure sheet, Prepare the Damaged Area, Senior Mechanic Note 2",
+          "note": "Verbatim: \"Each line on the ring of the dial is in increments of 0.001\u201d. The small dial is in increments of 0.1\u201d\"."
+        },
+        {
+          "condition": "Gauge zeroed on a flat blade surface, centered on deepest point",
+          "source": "AM.III.M.S5 procedure sheet, Senior Mechanic Note 2",
+          "note": "\"Place the depth gauge on a flat surface of the blade... Center the gauge over the deepest part of the damage\"."
+        },
+        {
+          "condition": "Contoured marker outline tapering into damage; no sharp shapes",
+          "source": "AM.III.M.S5 procedure sheet, Notes 3 (prepare) and 3 (blend)",
+          "note": "\"Outline the repair area with dye or a marker. Draw a contoured shape that tapers into the damage\"; \"No sharp shapes\"."
+        },
+        {
+          "condition": "#00 grit final abrasive; feel for raised textures",
+          "source": "AM.III.M.S5 procedure sheet, Blend the Damage Out, Note 4",
+          "note": "\"Progress to a #00 grit sandpaper, leveling the repair. Feel for raised textures.\""
+        },
+        {
+          "condition": "Edges flush, no burrs or raised points; hand filing forward strokes",
+          "source": "AM.III.M.S5 procedure sheet, Blend the Damage Out, Note 1",
+          "note": "\"File the metal in the forward motion... Edges should feel flush with no burrs or raised points.\""
+        },
+        {
+          "condition": "Solvent-dampened rag; remove all fine metallic dust",
+          "source": "AM.III.M.S5 procedure sheet, Notes 1 (prepare) and 1 (clean)",
+          "note": "\"Wipe the damaged area... with a rag dampened with solvent\"; \"Clear all fine metallic dust from the blade surface\"."
+        },
+        {
+          "condition": "No power tool; hand tools only; well-blended smooth surfaces",
+          "source": "FAA-H-8083-32B p. 10-45 (assumed reference, NOT cited by procedure sheet)",
+          "note": "PROVISIONAL: \"Re-work must be accomplished by hand, using stones, files, or emery cloth. Do not use a power tool\"; \"All repairs must be well blended\"."
+        },
+        {
+          "condition": "Finish comparable to surrounding undamaged blade",
+          "source": "FAA-H-8083-32B p. 10-45 (assumed reference, NOT cited)",
+          "note": "PROVISIONAL: \"The surface finish in the repaired area must be comparable to that of a new blade\" \u2014 stated there for compressor blades, not propellers."
+        },
+        {
+          "condition": "Allowable repair limits for damage depth and blend",
+          "source": "Manufacturer service/overhaul manual and TCDS, per procedure sheet \"Before You Begin\"",
+          "note": "No numeric propeller blend limit appears in any text supplied; AC 43.13-1B pp. 8-29 to 8-31 cited but not provided."
+        }
+      ],
+      "not_photo_gradeable": [
+        "Whether the blend and its perimeter feel flush with no burr, raised lip, step or catch to a fingertip \u2014 tactile only.",
+        "Depth of material removed, and whether it stays within the manufacturer's allowable repair limit \u2014 requires a zeroed depth gauge reading, not a still.",
+        "Whether the depth gauge was actually zeroed on an undamaged flat area before each reading.",
+        "Whether only hand files and abrasive touched the blade, with no power tool at any point \u2014 requires continuous observation.",
+        "Whether the rag was dampened rather than saturated, and whether the solvent is approved for the blade alloy.",
+        "Whether damage dimensions were recorded before, not after, material removal.",
+        "Whether the outline location falls inside the allowable repair zone for that blade station."
+      ],
+      "required_framing": null,
+      "conflicts": []
+    }
+  }
+}

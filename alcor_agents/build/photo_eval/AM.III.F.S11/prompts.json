@@ -1,0 +1,278 @@
+{
+  "section:determine-the-distance-of-lacing": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "determine_the_distance_of_lacing \u2014 VLM GRADING CRITERIA\nAssess the completed gathered wire bundle with its measuring tape and the cut length of lacing cord visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Loose wires lie separately and splayed across the work surface rather than gathered into one parallel bundle\n2. A tape measure lies alongside the bundle with its blank reverse side facing up\n3. The lacing cord extends directly from a spool in the frame rather than being cut free\n4. The cut cord, laid or coiled beside the bundle, is visibly shorter than the bundle run\n5. The cord consists of several separate severed fragments rather than one continuous piece\n6. Knots, hitches, or cord wraps are tied around the wire bundle\n7. The finished work shows this defect: Wire insulation is cut, nicked or stripped bare on the bundle.\n8. The finished work shows this defect: The cut cord is visibly shorter than the bundle it will lace.\n9. The finished work shows this defect: Wires splay and cross in random directions, forming no bundle.\n10. The finished work shows this defect: Cord is severed into multiple short unusable pieces.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "gathered parallel bundle to wires lying separately and splayed",
+          "positive": "Loose wires are gathered into one parallel bundle rather than lying separately",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "graduated scale visible to blank reverse side facing up",
+          "positive": "A tape measure lies alongside the bundle with its graduated scale visible",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "free of any spool to extending directly from a spool",
+          "positive": "A cut length of lacing cord is present in the frame, free of any spool",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "visibly longer to visibly shorter",
+          "positive": "The cut cord, laid or coiled beside the bundle, is visibly longer than the bundle run",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "one continuous piece to several separate severed fragments",
+          "positive": "The cord is one continuous piece with two cut ends, not several fragments",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "no knot present to knots tied around bundle",
+          "positive": "No knot, hitch or cord wrap is present on the bundle",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire insulation is cut, nicked or stripped bare on the bundle",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The cut cord is visibly shorter than the bundle it will lace",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wires splay and cross in random directions, forming no bundle",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cord is severed into multiple short unusable pieces",
+          "id": "c10"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "determine_the_distance_of_lacing \u2014 VLM GRADING CRITERIA\n\nAssess the completed gathered wire bundle with its measuring tape and the cut length of lacing cord visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Loose wires are gathered into one parallel bundle rather than lying separately\n2. A tape measure lies alongside the bundle with its graduated scale visible\n3. A cut length of lacing cord is present in the frame, free of any spool\n4. The cut cord, laid or coiled beside the bundle, is visibly longer than the bundle run\n5. The cord is one continuous piece with two cut ends, not several fragments\n6. No knot, hitch or cord wrap is present on the bundle\n\nCritical defects\n- Wire insulation is cut, nicked or stripped bare on the bundle\n- The cut cord is visibly shorter than the bundle it will lace\n- Wires splay and cross in random directions, forming no bundle\n- Cord is severed into multiple short unusable pieces\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:03:25Z",
+      "reviewed_by": null
+    }
+  },
+  "section:tie-a-starting-knot-using-the-single-cord-lacing-method": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "tie_a_starting_knot_using_the_single_cord_lacing_method \u2014 VLM GRADING CRITERIA\nAssess the completed starting knot on the wire bundle: clove hitch secured by a double-looped overhand knot visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. The cord hitch hangs slack around the wire bundle, with visible clearance between the cord and bundle insulation.\n2. The knot lies directly over a clamp body or connector backshell.\n3. The second knot of crossed loops is spaced away from the hitch, leaving a distinct length of cord visible between knots.\n4. Cord tails extend beyond the knot as long, loose trailing lengths.\n5. The finished work shows this defect: Cord lies loose around the bundle, standing away from the wires.\n6. The finished work shows this defect: Only one knot is present, with no locking knot against the hitch.\n7. The finished work shows this defect: Wire insulation is cut, nicked, or gouged near the knot.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "drawn tight to hangs slack with visible clearance",
+          "positive": "A cord hitch is drawn tight around the wire bundle at one clear location.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "clear of clamps or connectors to directly over a clamp body or connector",
+          "positive": "The knot lies on a clear section of bundle, clear of clamps or connectors.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "sits against the hitch to spaced away from the hitch with cord visible",
+          "positive": "A second knot of crossed loops sits against the hitch, not spaced away from it.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "cut off short to extend as long loose trailing lengths",
+          "positive": "Cord tails are cut off short rather than left as long loose lengths.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cord lies loose around the bundle, standing away from the wires.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Only one knot is present, with no locking knot against the hitch.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire insulation is cut, nicked, or gouged near the knot.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "tie_a_starting_knot_using_the_single_cord_lacing_method \u2014 VLM GRADING CRITERIA\n\nAssess the completed starting knot on the wire bundle: clove hitch secured by a double-looped overhand knot visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A cord hitch is drawn tight around the wire bundle at one clear location.\n2. The knot lies on a clear section of bundle, clear of clamps or connectors.\n3. A second knot of crossed loops sits against the hitch, not spaced away from it.\n4. Cord tails are cut off short rather than left as long loose lengths.\n\nCritical defects\n- Cord lies loose around the bundle, standing away from the wires.\n- Only one knot is present, with no locking knot against the hitch.\n- Wire insulation is cut, nicked, or gouged near the knot.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:03:22Z",
+      "reviewed_by": null
+    }
+  },
+  "section:tie-a-hitch-along-the-bundle": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "tie_a_hitch_along_the_bundle \u2014 VLM GRADING CRITERIA\nAssess the completed wire bundle with one or more intermediate half hitches tied along it after the starting knot visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. At least one hitch is tied around a single isolated wire beyond the starting knot\n2. Each hitch cord passes over only one side of the wire bundle without encircling it\n3. Hitch crossings are staggered on opposite sides of the bundle, out of alignment with the starting knot\n4. Two separate, knotted pieces of lacing cord connect the starting knot to the hitch\n5. The finished work shows this defect: Hitch is open or unlooped, cord simply laid across the bundle.\n6. The finished work shows this defect: Wire insulation is cut, pinched or broken where the cord bears.\n7. The finished work shows this defect: Individual wires escape the hitch and lie outside the bundle.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "on the bundle to around a single isolated wire",
+          "positive": "At least one hitch is tied on the bundle beyond the starting knot",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "fully encircles to passes over only one side without encircling",
+          "positive": "Each hitch cord fully encircles the wire bundle",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "aligned in a row to staggered on opposite sides out of alignment",
+          "positive": "Hitch crossings lie on one side, aligned in a row with the starting knot",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "substitution",
+          "changed": "A continuous run of to Two separate, knotted pieces of",
+          "positive": "A continuous run of lacing cord connects the starting knot to the hitch",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Hitch is open or unlooped, cord simply laid across the bundle",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire insulation is cut, pinched or broken where the cord bears",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Individual wires escape the hitch and lie outside the bundle",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "tie_a_hitch_along_the_bundle \u2014 VLM GRADING CRITERIA\n\nAssess the completed wire bundle with one or more intermediate half hitches tied along it after the starting knot visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. At least one hitch is tied on the bundle beyond the starting knot\n2. Each hitch cord fully encircles the wire bundle\n3. Hitch crossings lie on one side, aligned in a row with the starting knot\n4. A continuous run of lacing cord connects the starting knot to the hitch\n\nCritical defects\n- Hitch is open or unlooped, cord simply laid across the bundle\n- Wire insulation is cut, pinched or broken where the cord bears\n- Individual wires escape the hitch and lie outside the bundle\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:03:26Z",
+      "reviewed_by": null
+    }
+  },
+  "section:tie-a-finishing-knnot-on-a-bundle": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "tie_a_finishing_knot_on_a_bundle \u2014 VLM GRADING CRITERIA\nAssess the completed finishing knot terminating a laced wire bundle visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A finishing knot is present at the start of the lacing run, initiating the bundle.\n2. The finishing knot encircles the full bundle, with cord passing once around it.\n3. Multiple over-and-under locking wraps are visible on the loose cord tail past the finishing knot.\n4. The cord tail extends as a long loose strand hanging far past the knot.\n5. The finished work shows this defect: The finishing knot is open or unravelled, with cord hanging free of the bundle.\n6. The finished work shows this defect: Cord passes around only part of the bundle, leaving wires outside the lacing.\n7. The finished work shows this defect: Wire insulation is cut, nicked or gouged adjacent to the finishing knot.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "end to start",
+          "positive": "A finishing knot is present at the end of the lacing run, terminating the bundle.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "twice to once",
+          "positive": "The finishing knot encircles the full bundle, with cord passing twice around it.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "taut lacing to loose cord tail",
+          "positive": "Multiple over-and-under locking wraps are visible on the taut lacing past the finishing knot.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "trimmed short to extends as a long loose strand",
+          "positive": "The cord tail is trimmed short, with no long loose strand hanging from the knot.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The finishing knot is open or unravelled, with cord hanging free of the bundle.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cord passes around only part of the bundle, leaving wires outside the lacing.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire insulation is cut, nicked or gouged adjacent to the finishing knot.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "tie_a_finishing_knot_on_a_bundle \u2014 VLM GRADING CRITERIA\n\nAssess the completed finishing knot terminating a laced wire bundle visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. A finishing knot is present at the end of the lacing run, terminating the bundle.\n2. The finishing knot encircles the full bundle, with cord passing twice around it.\n3. Multiple over-and-under locking wraps are visible on the taut lacing past the finishing knot.\n4. The cord tail is trimmed short, with no long loose strand hanging from the knot.\n\nCritical defects\n- The finishing knot is open or unravelled, with cord hanging free of the bundle.\n- Cord passes around only part of the bundle, leaving wires outside the lacing.\n- Wire insulation is cut, nicked or gouged adjacent to the finishing knot.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T22:03:22Z",
+      "reviewed_by": null
+    }
+  }
+}

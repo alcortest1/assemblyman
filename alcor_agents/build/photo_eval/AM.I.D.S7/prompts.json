@@ -1,0 +1,320 @@
+{
+  "section:determine-the-distance-and-hose": {
+    "criterion": null,
+    "variants": [
+      {
+        "id": "vmsghdgf5",
+        "label": "reworded",
+        "criterion": "determine_the_distance_and_hose \u2014 VLM GRADING CRITERIA\n\nAssess the completed flexible hose marked with masking tape for length, with its matching MS fitting assembly visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Masking tape band is wrapped around the hose, encircling it fully\n2. Tape band edges are square to the hose axis, not spiralling\n3. A tape measure or rule appears in frame with the hose\n4. Hose lay line dash number and a fitting dash number are both legible\n\nCritical defects\n- Hose is already cut or slit at the tape mark\n- Hose shows a kink, crushed section, or cover cut through to braid\n- Fitting dash number visibly differs from the hose lay line dash number\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+        "expected": null
+      }
+    ],
+    "upload": null,
+    "negative": {
+      "criterion": "determine_the_distance_and_hose \u2014 VLM GRADING CRITERIA\nAssess the completed flexible hose marked with masking tape for length, with its matching MS fitting assembly visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Masking tape band covers only a partial arc of the hose circumference, leaving hose material exposed between the ends\n2. Tape band edges spiral along the hose length, running diagonally to the hose axis\n3. A tape measure or rule is positioned underneath the fitting assembly rather than alongside the hose\n4. Hose lay line dash number and fitting dash number are smudged and illegible\n5. The finished work shows this defect: Hose is already cut or slit at the tape mark.\n6. The finished work shows this defect: Hose shows a kink, crushed section, or cover cut through to braid.\n7. The finished work shows this defect: Fitting dash number visibly differs from the hose lay line dash number.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "encircling fully to leaving exposed hose material gap",
+          "positive": "Masking tape band is wrapped around the hose, encircling it fully",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "square to hose axis to spiralling diagonally",
+          "positive": "Tape band edges are square to the hose axis, not spiralling",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "with the hose to underneath the fitting assembly",
+          "positive": "A tape measure or rule appears in frame with the hose",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "both legible to smudged and illegible",
+          "positive": "Hose lay line dash number and a fitting dash number are both legible",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Hose is already cut or slit at the tape mark",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Hose shows a kink, crushed section, or cover cut through to braid",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Fitting dash number visibly differs from the hose lay line dash number",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "determine_the_distance_and_hose \u2014 VLM GRADING CRITERIA\n\nAssess the completed flexible hose marked with masking tape for length, with its matching MS fitting assembly visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Masking tape band is wrapped around the hose, encircling it fully\n2. Tape band edges are square to the hose axis, not spiralling\n3. A tape measure or rule appears in frame with the hose\n4. Hose lay line dash number and a fitting dash number are both legible\n\nCritical defects\n- Hose is already cut or slit at the tape mark\n- Hose shows a kink, crushed section, or cover cut through to braid\n- Fitting dash number visibly differs from the hose lay line dash number\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:52:27Z",
+      "reviewed_by": null
+    }
+  },
+  "section:cut-the-hose": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "cut_the_hose \u2014 VLM GRADING CRITERIA\nAssess the completed flexible hose cut to length with the cut end exposed and tape removed visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Hose remains partially joined at the cut location by uncut cover or core material.\n2. Cut face is visibly sloped or angled across the hose cross-section.\n3. Cut end exhibits ragged, torn, or uneven cover material along the edge.\n4. Masking tape remains wrapped around the hose surface at the cut end.\n5. The finished work shows this defect: Wire braid is frayed and splayed outward from the cut face.\n6. The finished work shows this defect: Cut face is visibly crushed or flattened out of round.\n7. The finished work shows this defect: Cut is partial, with the hose still joined at the cut line.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "severed completely -> remains partially joined",
+          "positive": "Hose is severed completely into separate pieces at the cut location.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "square across the hose -> visibly sloped or angled",
+          "positive": "Cut face is square across the hose, not sloped or angled.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "inversion",
+          "changed": "flat, without ragged or torn cover -> exhibits ragged, torn, or uneven cover",
+          "positive": "Cut end is flat, without ragged or torn cover material.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "tape is removed -> tape remains wrapped",
+          "positive": "Masking tape is removed from the cut end, leaving the hose surface bare.",
+          "id": "c4"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire braid is frayed and splayed outward from the cut face.",
+          "id": "c5"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cut face is visibly crushed or flattened out of round.",
+          "id": "c6"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Cut is partial, with the hose still joined at the cut line.",
+          "id": "c7"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "cut_the_hose \u2014 VLM GRADING CRITERIA\n\nAssess the completed flexible hose cut to length with the cut end exposed and tape removed visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Hose is severed completely into separate pieces at the cut location.\n2. Cut face is square across the hose, not sloped or angled.\n3. Cut end is flat, without ragged or torn cover material.\n4. Masking tape is removed from the cut end, leaving the hose surface bare.\n\nCritical defects\n- Wire braid is frayed and splayed outward from the cut face.\n- Cut face is visibly crushed or flattened out of round.\n- Cut is partial, with the hose still joined at the cut line.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:52:24Z",
+      "reviewed_by": null
+    }
+  },
+  "section:assemble-the-end-fitting": {
+    "criterion": null,
+    "variants": [],
+    "upload": null,
+    "negative": {
+      "criterion": "assemble_the_end_fitting \u2014 VLM GRADING CRITERIA\nAssess the completed hose end with its socket and nipple assembled as an MS end fitting visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Socket is partially threaded onto the hose end, exposing bare wire braid between the socket end and the hose cover.\n2. Nipple hex is bottomed tight against the socket face in flush metal-to-metal contact.\n3. Nipple is driven into the socket body until its hex is recessed inside the socket mouth.\n4. Hose cover extends unstripped to the cut hose end, overlapping into the socket threads.\n5. Hose cover beyond the stripped band is gouged and split open to the braid.\n6. Hose enters the socket mouth at an angle, crushed flat and kinked at the fitting entry.\n7. The finished work shows this defect: Wire braid strands are cut, splayed or unwound in the stripped band.\n8. The finished work shows this defect: Socket is on the hose with an open bore and no nipple installed.\n9. The finished work shows this defect: Nipple hex is bottomed flush against the socket with no gap.\n10. The finished work shows this defect: Inner tube is split, torn or extruded out of the fitting.\n11. The finished work shows this defect: Hose is kinked or collapsed where it enters the socket.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "substitution",
+          "changed": "full socket length engagement to partial threading exposing bare braid",
+          "positive": "Socket is threaded onto the hose end, gripping the hose over its full socket length",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "substitution",
+          "changed": "visible gap separating hex from socket to flush metal-to-metal contact",
+          "positive": "A visible gap separates the nipple hex from the socket face, not metal-to-metal contact",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "hex remains exposed for wrench access to hex recessed inside socket mouth",
+          "positive": "Nipple is installed into the socket and its hex remains exposed for wrench access",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "cover removed in band exposing braid to cover extending unstripped into threads",
+          "positive": "Cover is removed only in a band at the fitting end, exposing wire braid beneath",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "remains intact and undamaged to gouged and split open to braid",
+          "positive": "Hose cover remains intact and undamaged beyond the stripped band",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "straight with no kink or flattening to angled, crushed flat and kinked",
+          "positive": "Hose enters the fitting straight, with no kink or flattening at the socket mouth",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Wire braid strands are cut, splayed or unwound in the stripped band",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Socket is on the hose with an open bore and no nipple installed",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Nipple hex is bottomed flush against the socket with no gap",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Inner tube is split, torn or extruded out of the fitting",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Hose is kinked or collapsed where it enters the socket",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "assemble_the_end_fitting \u2014 VLM GRADING CRITERIA\n\nAssess the completed hose end with its socket and nipple assembled as an MS end fitting visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. Socket is threaded onto the hose end, gripping the hose over its full socket length\n2. A visible gap separates the nipple hex from the socket face, not metal-to-metal contact\n3. Nipple is installed into the socket and its hex remains exposed for wrench access\n4. Cover is removed only in a band at the fitting end, exposing wire braid beneath\n5. Hose cover remains intact and undamaged beyond the stripped band\n6. Hose enters the fitting straight, with no kink or flattening at the socket mouth\n\nCritical defects\n- Wire braid strands are cut, splayed or unwound in the stripped band\n- Socket is on the hose with an open bore and no nipple installed\n- Nipple hex is bottomed flush against the socket with no gap\n- Inner tube is split, torn or extruded out of the fitting\n- Hose is kinked or collapsed where it enters the socket\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:52:34Z",
+      "reviewed_by": null
+    }
+  },
+  "section:proof-test-the-hose-assembly": {
+    "criterion": null,
+    "variants": [],
+    "negative": {
+      "criterion": "proof_test_the_hose_assembly \u2014 VLM GRADING CRITERIA\nAssess the completed flexible hose assembly capped and pressurized on the hydraulic hose test stand visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. One end fitting of the hose assembly hangs disconnected away from the test stand port.\n2. The opposite end fitting presents an open, unsealed port with exposed threads.\n3. A test stand temperature gauge is visible in frame with the assembly.\n4. The gauge pointer rests directly on zero, showing zero pressure.\n5. Hose cover, socket-to-hose junctions, and fittings show visible fluid weeping and wet droplets.\n6. The pressurized hose contains a severe kink and sharp bend along its run.\n7. The finished work shows this defect: Fluid is spraying or dripping from a fitting or the hose cover.\n8. The finished work shows this defect: The hose end opposite the stand is open, with no cap or plug fitted.\n9. The finished work shows this defect: The hose cover is burst, blistered, or wire braid is protruding.\n10. The finished work shows this defect: A socket has pulled away from the hose, leaving a gap.\n11. The finished work shows this defect: The pressurized hose is kinked or collapsed at a sharp bend.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "points": [
+        {
+          "of": "c1",
+          "kind": "inversion",
+          "changed": "coupled to -> hangs disconnected away from",
+          "positive": "One end fitting of the hose assembly is coupled to the test stand port.",
+          "id": "c1"
+        },
+        {
+          "of": "c2",
+          "kind": "inversion",
+          "changed": "carries a cap or plug -> presents an open, unsealed port",
+          "positive": "The opposite end fitting carries a cap or plug, with no open port.",
+          "id": "c2"
+        },
+        {
+          "of": "c3",
+          "kind": "substitution",
+          "changed": "pressure gauge -> temperature gauge",
+          "positive": "A test stand pressure gauge is visible in frame with the assembly.",
+          "id": "c3"
+        },
+        {
+          "of": "c4",
+          "kind": "inversion",
+          "changed": "off zero -> rests directly on zero",
+          "positive": "The gauge pointer is off zero, showing the assembly under pressure.",
+          "id": "c4"
+        },
+        {
+          "of": "c5",
+          "kind": "inversion",
+          "changed": "appear dry -> show visible fluid weeping and wet droplets",
+          "positive": "Hose cover, socket-to-hose junctions and both fittings appear dry, with no fluid weeping.",
+          "id": "c5"
+        },
+        {
+          "of": "c6",
+          "kind": "inversion",
+          "changed": "free of kinks -> contains a severe kink and sharp bend",
+          "positive": "The pressurized hose lies in a smooth run, free of kinks or sharp bends.",
+          "id": "c6"
+        },
+        {
+          "of": "d1",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "Fluid is spraying or dripping from a fitting or the hose cover.",
+          "id": "c7"
+        },
+        {
+          "of": "d2",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The hose end opposite the stand is open, with no cap or plug fitted.",
+          "id": "c8"
+        },
+        {
+          "of": "d3",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The hose cover is burst, blistered, or wire braid is protruding.",
+          "id": "c9"
+        },
+        {
+          "of": "d4",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "A socket has pulled away from the hose, leaving a gap.",
+          "id": "c10"
+        },
+        {
+          "of": "d5",
+          "kind": "presence",
+          "changed": "stated as present rather than absent",
+          "positive": "The pressurized hose is kinked or collapsed at a sharp bend.",
+          "id": "c11"
+        }
+      ],
+      "skipped": [],
+      "of_criterion": "proof_test_the_hose_assembly \u2014 VLM GRADING CRITERIA\n\nAssess the completed flexible hose assembly capped and pressurized on the hydraulic hose test stand visible in the image. Evaluate each criterion independently as PASS or FAIL.\n\nCriteria\n1. One end fitting of the hose assembly is coupled to the test stand port.\n2. The opposite end fitting carries a cap or plug, with no open port.\n3. A test stand pressure gauge is visible in frame with the assembly.\n4. The gauge pointer is off zero, showing the assembly under pressure.\n5. Hose cover, socket-to-hose junctions and both fittings appear dry, with no fluid weeping.\n6. The pressurized hose lies in a smooth run, free of kinks or sharp bends.\n\nCritical defects\n- Fluid is spraying or dripping from a fitting or the hose cover.\n- The hose end opposite the stand is open, with no cap or plug fitted.\n- The hose cover is burst, blistered, or wire braid is protruding.\n- A socket has pulled away from the hose, leaving a gap.\n- The pressurized hose is kinked or collapsed at a sharp bend.\n\nOverall decision\nOverall PASS requires every required criterion to pass and no critical defect. Mark an unobservable required criterion \u201cFAIL \u2014 not demonstrated in image.\u201d Evaluate only visible evidence and do not infer hidden measurements, internal damage, torque, pressure, or test results.",
+      "model": "google/gemini-3.6-flash",
+      "drafted_at": "2026-08-05T20:52:29Z",
+      "reviewed_by": null
+    }
+  }
+}
